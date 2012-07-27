@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<install type="package" version="2.5">
+<extension type="package" version="2.5">
 	<name>Fabrik Package</name>
 	<packagename>fabrik</packagename>
 	<version>3.0.6</version>
@@ -54,6 +54,7 @@
 		<file group="fabrik_validationrule" id="validationrule_notempty" type="plugin">plg_fabrik_validationrule_notempty_{version}.zip</file>
 		<file group="fabrik_validationrule" id="validationrule_php" type="plugin">plg_fabrik_validationrule_php_{version}.zip</file>
 		<file group="fabrik_validationrule" id="validationrule_regex" type="plugin">plg_fabrik_validationrule_regex_{version}.zip</file>
+		<file group="fabrik_validationrule" id="validationrule_isemail" type="plugin">plg_fabrik_validationrule_isemail_{version}.zip</file>
 		
 		<file group="fabrik_visualization" id="visualization_calendar" type="plugin">plg_fabrik_visualization_calendar_{version}.zip</file>
 		<file group="fabrik_visualization" id="visualization_chart" type="plugin">plg_fabrik_visualization_chart_{version}.zip</file>
@@ -63,4 +64,4 @@
 		
 		<file id="com_fabrik" type="component">com_fabrik_{version}.zip</file>
 	</files>
-</install>
+</extension>

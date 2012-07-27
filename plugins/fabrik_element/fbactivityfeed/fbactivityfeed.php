@@ -1,10 +1,9 @@
 <?php
 /**
- * Plugin element to render facebook open graph activity feed widget
- * @package fabrikar
- * @author Rob Clayburn
- * @copyright (C) Rob Clayburn
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.element.facebookactivityfeed
+ * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Check to ensure this file is included in Joomla!
@@ -12,27 +11,42 @@ defined('_JEXEC') or die();
 
 jimport('joomla.application.component.model');
 
-require_once(JPATH_SITE . '/components/com_fabrik/models/element.php');
+require_once JPATH_SITE . '/components/com_fabrik/models/element.php';
 
-class plgFabrik_ElementFbactivityfeed extends plgFabrik_Element {
+/**
+ * Plugin element to render facebook open graph activity feed widget
+ *
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.element.facebookactivityfeed
+ * @since       3.0
+ */
 
-	var $hasLabel = false;
+class plgFabrik_ElementFbactivityfeed extends plgFabrik_Element
+{
+
+	/**
+	 * Does the element have a label
+	 * @var bool
+	 */
+	protected $hasLabel = false;
 
 	protected $fieldDesc = 'INT(%s)';
 
 	protected $fieldSize = '1';
 
 	/**
-	 * draws the form element
-	 * @param array data to pre-populate element with
-	 * @param int repeat group counter
-	 * @return string returns element html
+	 * Draws the form element
+	 *
+	 * @param   array  $data           to pre-populate element with
+	 * @param   int    $repeatCounter  repeat group counter
+	 *
+	 * @return  string  returns element html
 	 */
 
-	function render($data, $repeatCounter = 0)
+	public function render($data, $repeatCounter = 0)
 	{
 		$params = $this->getParams();
-		$str = FabrikHelperHTML::facebookGraphAPI( $params->get('opengraph_applicationid'));
+		$str = FabrikHelperHTML::facebookGraphAPI($params->get('opengraph_applicationid'));
 		$domain = $params->get('fbactivityfeed_domain');
 		$width = $params->get('fbactivityfeed_width', 300);
 		$height = $params->get('fbactivityfeed_height', 300);
@@ -45,11 +59,14 @@ class plgFabrik_ElementFbactivityfeed extends plgFabrik_Element {
 	}
 
 	/**
-	 * return the javascript to create an instance of the class defined in formJavascriptClass
-	 * @return string javascript to create instance. Instance name must be 'el'
+	 * Returns javascript which creates an instance of the class defined in formJavascriptClass()
+	 *
+	 * @param   int  $repeatCounter  repeat group counter
+	 *
+	 * @return  string
 	 */
 
-	function elementJavascript($repeatCounter)
+	public function elementJavascript($repeatCounter)
 	{
 		$id = $this->getHTMLId($repeatCounter);
 		$opts = $this->getElementJSOptions($repeatCounter);
@@ -58,4 +75,3 @@ class plgFabrik_ElementFbactivityfeed extends plgFabrik_Element {
 	}
 
 }
-?>

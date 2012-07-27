@@ -15,7 +15,7 @@ jimport('joomla.application.component.view');
  * View to edit a list.
  *
  * @package		Joomla.Administrator
- * @subpackage	com_fabrik
+ * @subpackage	Fabrik
  * @since		1.5
  */
 class FabrikViewList extends JView
@@ -43,7 +43,7 @@ class FabrikViewList extends JView
 		$c = 0;
 		foreach ($data as $groupk => $group) {
 			foreach ($group as $i => $x) {
-				$o = new stdClass();
+				$o = new stdClass;
 				if (is_object($data[$groupk])) {
 					$o->data = JArrayHelper::fromObject($data[$groupk]);
 				} else {

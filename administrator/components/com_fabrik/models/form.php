@@ -157,7 +157,7 @@ class FabrikModelForm extends FabModelAdmin
 		$js .= "controller = new fabrikAdminForm(aPlugins);\n";
 		foreach ($plugins as $plugin)
 		{
-			$opts = array_key_exists('opts', $plugin) ? $plugin['opts'] : new stdClass();
+			$opts = array_key_exists('opts', $plugin) ? $plugin['opts'] : new stdClass;
 			$opts->location = @$plugin['location'];
 			$opts->event = @$plugin['event'];
 			$opts = json_encode($opts);
@@ -209,6 +209,7 @@ class FabrikModelForm extends FabModelAdmin
 			$data['db_table_name'] = $tmpName;
 			$this->saveFormGroups($data);
 		}
+		parent::cleanCache('com_fabrik');
 		return $return;
 	}
 
@@ -400,7 +401,34 @@ class FabrikModelForm extends FabModelAdmin
 			$dbExisits = $listModel->databaseTableExists();
 			if (!$dbExisits)
 			{
-				$listModel->createDBTable();
+				// $$$ hugh - if we're recreating a table for an existing form, we need to pass the field
+				// list to createDBTable(), otherwise all we get is id and date_time.  Not sure if this
+				// code really belongs here, or if we should handle it in createDBTable(), but I didn't want
+				// to mess with createDBTable(), although I did have to make one small change in it (see comments
+				// therein).
+				// NOTE 1 - this code ignores joined groups, so only recreates the original table
+				// NOTE 2 - this code ignores any 'alter existing fields' settings.
+				$db = FabrikWorker::getDbo(true);
+				$query = $db->getQuery(true);
+				$query->select('group_id')->from('#__{package}_formgroup AS fg')->join('LEFT', '#__{package}_groups AS g ON g.id = fg.group_id')->where('fg.form_id = ' . $formId . ' AND g.is_join != 1');
+				$db->setQuery($query);
+				$groupIds = $db->loadResultArray();
+				if (!empty($groupIds))
+				{
+					$fields = array();
+					$query = $db->getQuery(true);
+					$query->select('plugin, name')->from('#__fabrik_elements')->where('group_id IN ('.implode(',', $groupIds).')');
+					$db->setQuery($query);
+					$rows = $db->loadObjectList();
+					foreach ($rows as $row)
+					{
+						$fields[$row->name] = $row->plugin;
+					}
+					if (!empty($fields))
+					{
+						$listModel->createDBTable($listModel->getTable()->db_table_name, $fields);
+					}
+				}
 			}
 			else
 			{
@@ -418,7 +446,7 @@ class FabrikModelForm extends FabModelAdmin
 	 * @return	mixed	Array of filtered data if valid, false otherwise.
 	 * @since	1.1
 	 */
-	
+
 	function validate($form, $data, $group = null)
 	{
 		$params = $data['params'];
@@ -439,7 +467,7 @@ class FabrikModelForm extends FabModelAdmin
 	 *  delete form and form groups
 	 * @param	array	$cids to delete
 	 */
-	
+
 	public function delete(&$cids)
 	{
 		$res = parent::delete($cids);

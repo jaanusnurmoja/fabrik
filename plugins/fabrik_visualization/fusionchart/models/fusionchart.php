@@ -1,9 +1,9 @@
 <?php
 /**
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.visualization.fusionchart
- * @copyright	Copyright (C) 2005 Fabrik. All rights reserved.
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.visualization.fusionchart
+ * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Check to ensure this file is included in Joomla!
@@ -16,8 +16,8 @@ require_once JPATH_SITE . '/components/com_fabrik/models/visualization.php';
 /**
  * Fabrik Fusion Chart Plug-in Model
  *
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.visualization.fusionchart
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.visualization.fusionchart
  */
 
 class fabrikModelFusionchart extends FabrikFEModelVisualization
@@ -31,7 +31,7 @@ class fabrikModelFusionchart extends FabrikFEModelVisualization
 	protected function getChartParams()
 	{
 		$params = $this->getParams();
-		$w = new FabrikWorker();
+		$w = new FabrikWorker;
 		$caption = $w->parseMessageForPlaceHolder($params->get('fusionchart_caption', ''));
 		$strParam = 'caption=' . $caption;
 
@@ -340,7 +340,7 @@ class fabrikModelFusionchart extends FabrikFEModelVisualization
 
 	protected function setAxisLabels()
 	{
-		$worker = new FabrikWorker();
+		$worker = new FabrikWorker;
 		$params = $this->getParams();
 		$this->axisLabels = (array) $params->get('fusionchart_axis_labels');
 		foreach ($this->axisLabels as $axis_key => $axis_val)
@@ -354,7 +354,7 @@ class fabrikModelFusionchart extends FabrikFEModelVisualization
 		$this->cantTrendLine = array();
 		$document = JFactory::getDocument();
 		$params = $this->getParams();
-		$worker = new FabrikWorker();
+		$worker = new FabrikWorker;
 		$fc_version = $params->get('fusionchart_version', 'free_old');
 		$free22 = $this->pathBase . 'fusionchart/lib/FusionChartsFree/Code/PHPClass/Includes/FusionCharts_Gen.php';
 		$pro30 = $this->pathBase . 'fusionchart/lib/FusionCharts/Code/PHPClass/Includes/FusionCharts_Gen.php';
@@ -364,7 +364,7 @@ class fabrikModelFusionchart extends FabrikFEModelVisualization
 			$document->addScript($this->srcBase . "fusionchart/lib/FusionChartsFree/JSClass/FusionCharts.js");
 			$fc_swf_path = COM_FABRIK_LIVESITE . $this->srcBase . "fusionchart/lib/FusionChartsFree/Charts/";
 		}
-		else if ($fc_version == 'pro_30' && JFile::exists($pro30))
+		elseif ($fc_version == 'pro_30' && JFile::exists($pro30))
 		{
 			require_once($pro30);
 			$document->addScript($this->srcBase . "fusionchart/lib/FusionCharts/Charts/FusionCharts.js");
@@ -754,13 +754,9 @@ class fabrikModelFusionchart extends FabrikFEModelVisualization
 								$data_count++;
 								if ($value == '-1')
 								{
-									$data_count ++;
-									if ($value == '-1')
-									{
-										$value = null;
-									}
-									$this->FC->addChartData($value);
+									$value = null;
 								}
+								$this->FC->addChartData($value);
 							}
 						}
 					}
@@ -830,7 +826,7 @@ class fabrikModelFusionchart extends FabrikFEModelVisualization
 					$startval = $trendstart;
 					$endval = $trendend;
 				}
-				else if ($eltype[$nbe] == 'trendline')
+				elseif ($eltype[$nbe] == 'trendline')
 				{
 					$found = true;
 					$min = $this->min[$nbe];
@@ -903,7 +899,7 @@ class fabrikModelFusionchart extends FabrikFEModelVisualization
 		$this->FC->addTrendLine($strAddTrend);
 	}
 
-	function setListIds()
+	protected function setListIds()
 	{
 		if (!isset($this->listids))
 		{

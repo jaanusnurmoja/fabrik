@@ -65,7 +65,7 @@ var PluginManager = new Class({
 		*/
 		if (e.target.findClassUp('adminform').id.test(/_\d+$/)) {
 			var x = e.target.findClassUp('adminform').id.match(/_(\d+)$/)[1].toInt();
-			$('plugins').getElements('input, select, textarea').each(function (i) {
+			document.id('plugins').getElements('input, select, textarea').each(function (i) {
 				var s = i.name.match(/\[[0-9]+\]/);
 				if (s) {
 					var c = s[0].replace('[', '').replace(']', '').toInt();
@@ -86,19 +86,19 @@ var PluginManager = new Class({
 			});
 		}
 		e.stop();
-		$(e.target).up(3).dispose();
+		document.id(e.target).up(3).dispose();
 		this.counter --;
 	},
 	
 	watchAdd: function () {
-		$('addPlugin').addEvent('click', function (e) {
+		document.id('addPlugin').addEvent('click', function (e) {
 			e.stop();
 			this.addAction('', '', {});
 		}.bind(this));
 	},
 	
 	watchDelete: function () {
-		$('plugins').getElements('.delete').each(function (c) {
+		document.id('plugins').getElements('.delete').each(function (c) {
 			c.removeEvents('click');
 			c.addEvent('click', this.deletePluginClick);
 		}.bind(this));
@@ -109,6 +109,7 @@ var PluginManager = new Class({
 	},
 	
 	addAction: function (pluginHTML, plugin, opts, cloneJs) {
+		var tmp, radios;
 		cloneJs = cloneJs === false ? false : true;
 		var td = new Element('td');
 		var str  = '';
@@ -120,12 +121,38 @@ var PluginManager = new Class({
 			}
 			
 		}.bind(this));
-		//test for settting radio buttons ids - seems to work
-		// @TODO - Son of a whore!  i think this may be the line of code
-		// which has been destroying $foo[0] usage in PHP fragments!
-		str = str.replace(/\[0\]/gi, '[' + this.counter + ']');
-		//end test
-		td.innerHTML = str;
+		
+		// $$$ hugh - attempt to fix booboo in this commit:
+		// https://github.com/Fabrik/fabrik/commit/3817541d15f15c7f370c570bf8a4c6a0baf13f74
+		// New code didn't rename non-radio, and also we ended up with multiple names the same, blowing away params for
+		// first instances of repeated plugins.
+		// So instead of just radios, am fixing by applying this code to all inputs, selects and textareas
+		// ROB - PLEASE SANITY CHECK!!!
+		// Also check "update params id's" down a few lines, I think it's surplus to requirements?
+		
+		// Set form input ids, names and labels
+		tmp = new Element('div').set('html', str);
+		inputs = tmp.getElements('input, select, textarea');
+		inputs.each(function (input) {
+			var label, radid;
+			input.name = input.name.replace(/\[0\]/gi, '[' + this.counter + ']');
+			label = tmp.getElement('label[for=' + input.id + ']');
+			radid = input.id.split('-');
+			
+			// ids should be set as name-{repeatCounter} for things like fields
+			// for radio buttons they are name-{repeatCoutner}-{int:radiobutton order}
+			// hence grab the 
+			
+			// Additonal '-' added to radios in admnistrator/components/com_fabrik/classes/formfield.php getId()
+			radid[1] = this.counter; 
+			input.id = radid.join('-');
+			
+			if (label) {
+				label.setAttribute('for', input.id);
+			}
+		}.bind(this));
+
+		td.set('html', tmp.get('html'));
 		var display = 'block';
 		opts.counter = this.counter;
 		var c = new Element('div', {'class': 'actionContainer'}).adopt(
@@ -142,16 +169,23 @@ var PluginManager = new Class({
 		)
 	);
 		
-		c.inject($('plugins'));
-		//update params ids
+		c.inject(document.id('plugins'));
+		
+		// Update params ids
 		if (this.counter !== 0) {
-			c.getElements('input[name^=params]', 'select[name^=params]').each(function (i) {
+			// $$$ hugh - don't think this is working, 'cos syntax is wrong.
+			// I added the right syntax, but commented it out 'cos I think we now handle this above,
+			// in the 
+			//c.getElements('input[name^=params], select[name^=params]').each(function (i) {
+			/*c.getElements('input[name^=jform\[params\]], select[name^=jform\[params\]], textarea[name^=jform\[params\]').each(function (i) {
 				if (i.id !== '') {
+					debugger;
 					var a = i.id.split('-');
 					a.pop();
 					i.id = a.join('-') + '-' + this.counter;
+					console.log(i.id);
 				}
-			}.bind(this));
+			}.bind(this));*/
 			
 			c.getElements('img[src=components/com_fabrik/images/ajax-loader.gif]').each(function (i) {
 				i.id = i.id.replace('-0_loader', '-' + this.counter + '_loader');
@@ -165,27 +199,27 @@ var PluginManager = new Class({
 			}
 		}
 
-		// show the active plugin 
-		var formaction = $('formAction_' + this.counter);
+		// Show the active plugin 
+		var formaction = document.id('formAction_' + this.counter);
 		formaction.getElements('.' + this.opts.type + 'Settings').hide();
 		var activePlugin = formaction.getElement(' .page-' + plugin);
 		if (activePlugin) {
 			activePlugin.show();
 		}
 		
-		//watch the drop down
+		// Watch the drop down
 		formaction.getElement('.elementtype').addEvent('change', function (e) {
 			e.stop();
 			var id = e.target.getParent('.adminform').id.replace('formAction_', '');
-			$('formAction_' + id).getElements('.' + this.opts.type + 'Settings').hide();
+			document.id('formAction_' + id).getElements('.' + this.opts.type + 'Settings').hide();
 			var s = e.target.get('value');
 			if (s !== Joomla.JText._('COM_FABRIK_PLEASE_SELECT') && s !== '') {
-				$('formAction_' + id).getElement('.page-' + s).show();
+				document.id('formAction_' + id).getElement('.page-' + s).show();
 			}
 		}.bind(this));
 		this.watchDelete();
 		
-		//show any tips (only running code over newly added html)
+		// Show any tips (only running code over newly added html)
 		var myTips = new Tips($$('#formAction_' + this.counter + ' .hasTip'), {});
 		this.counter ++;
 	},

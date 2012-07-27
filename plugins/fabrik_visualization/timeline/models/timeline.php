@@ -1,9 +1,9 @@
 <?php
 /**
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.visualization.timeline
- * @copyright	Copyright (C) 2005 Fabrik. All rights reserved.
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.visualization.timeline
+ * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Check to ensure this file is included in Joomla!
@@ -16,10 +16,11 @@ require_once JPATH_SITE . '/components/com_fabrik/models/visualization.php';
 /**
  * Renders timeline visualization
  *
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.visualization.timeline
- *
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.visualization.timeline
+ * @since       3.0
  */
+
 class fabrikModelTimeline extends FabrikFEModelVisualization
 {
 
@@ -36,7 +37,7 @@ class fabrikModelTimeline extends FabrikFEModelVisualization
 		$params = $this->getParams();
 		$document = JFactory::getDocument();
 		$w = new FabrikWorker;
-
+		jimport('string.normalise');
 		$document->addScript('http://static.simile.mit.edu/timeline/api-2.3.0/timeline-api.js?bundle=true');
 		$c = 0;
 		$templates = (array) $params->get('timeline_detailtemplate', array());
@@ -90,9 +91,6 @@ class fabrikModelTimeline extends FabrikFEModelVisualization
 				$endParams = $endElement->getParams();
 				$startParams = $startElement->getParams();
 
-				$action = $app->isAdmin() ? "task" : "view";
-				//$nextview = $listModel->canEdit() ? "form" : "details";
-
 				foreach ($data as $group)
 				{
 					if (is_array($group))
@@ -130,12 +128,13 @@ class fabrikModelTimeline extends FabrikFEModelVisualization
 								. '&listid=' . $listid;
 							} */
 							$url = $this->getLinkURL($listModel, $row, $c);
-							$event->link = ($listModel->getOutPutFormat() == 'json') ? '#' : $url;//JRoute::_($url);
+							$event->link = ($listModel->getOutPutFormat() == 'json') ? '#' : $url;
 							$event->image = '';
 							$event->color = $colour;
 							$event->textColor = $textColour;
 							$event->classname = isset($row->$className) ? $row->$className : '';
 							$event->classname = strip_tags($event->classname);
+							$event->classname = $this->toVariable($event->classname);
 							if ($event->start !== '' && !is_null($event->start))
 							{
 								if ($event->end == $event->start)
@@ -168,11 +167,42 @@ class fabrikModelTimeline extends FabrikFEModelVisualization
 	}
 
 	/**
+	 * Convert string into css class name
+	 *
+	 * @param   string  $input  string
+	 *
+	 * @return  string
+	 */
+
+	protected function toVariable($input)
+	{
+		// Should simply be (except theres a bug in J)
+		// JStringNormalise::toVariable($event->className);
+
+		$input = trim($input);
+
+		// Remove dashes and underscores, then convert to camel case.
+		$input = JStringNormalise::toSpaceSeparated($input);
+		$input = JStringNormalise::toCamelCase($input);
+
+		// Remove leading digits.
+		$input = preg_replace('#^[\d\.]*#', '', $input);
+
+		// Lowercase the first character.
+		$first = JString::substr($input, 0, 1);
+		$first = JString::strtolower($first);
+
+		// Replace the first character with the lowercase character.
+		$input = JString::substr_replace($input, $first, 0, 1);
+		return $input;
+	}
+
+	/**
 	 * Build the item link
 	 *
-	 * @param   object  $listModel list model
-	 * @param   object  $row       current row
-	 * @param   int     $c         which data set are we in (needed for getting correct params data)
+	 * @param   object  $listModel  list model
+	 * @param   object  $row        current row
+	 * @param   int     $c          which data set are we in (needed for getting correct params data)
 	 *
 	 *  @return  string  url
 	 */
@@ -200,7 +230,7 @@ class fabrikModelTimeline extends FabrikFEModelVisualization
 			else
 			{
 				$url = 'index.php?option=com_fabrik&view=' . $nextview . '&formid=' . $table->form_id . '&rowid=' . $row->__pk_val
-				. '&listid=' . $listid;
+				. '&listid=' . $listModel->getId();
 			}
 		}
 		return $url;

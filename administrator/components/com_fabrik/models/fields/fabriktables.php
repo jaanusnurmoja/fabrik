@@ -3,7 +3,7 @@
  * @package     Joomla
  * @subpackage  Form
  * @copyright   Copyright (C) 2005 Rob Clayburn. All rights reserved.
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Check to ensure this file is within the rest of the framework
@@ -89,7 +89,7 @@ class JFormFieldFabrikTables extends JFormFieldList
 			{
 				$connectionDd = ($c === false || $this->element['connection_in_repeat'] == 'false') ?  $connectionDd :  $connectionDd . '-' . $c;
 			}
-			$opts = new stdClass();
+			$opts = new stdClass;
 			$opts->livesite = COM_FABRIK_LIVESITE;
 			$opts->conn = 'jform_' . $connectionDd;
 			$opts->value = $this->value;

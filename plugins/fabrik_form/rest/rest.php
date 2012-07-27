@@ -1,9 +1,9 @@
 <?php
 /**
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.form.rest
- * @copyright	Copyright (C) 2005 Fabrik. All rights reserved.
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.form.rest
+ * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Check to ensure this file is included in Joomla!
@@ -15,16 +15,27 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
 /**
  * Submit or update data to a REST service
  *
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.form.rest
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.form.rest
+ * @since       3.0
  */
 
 class plgFabrik_FormRest extends plgFabrik_Form
 {
 
+	/**
+	 * Run right at the end of the form processing
+	 * form needs to be set to record in database for this to hook to be called
+	 *
+	 * @param   object  $params      plugin params
+	 * @param   object  &$formModel  form model
+	 *
+	 * @return	bool
+	 */
+
 	public function onAfterProcess($params, &$formModel)
 	{
-		$w = new FabrikWorker();
+		$w = new FabrikWorker;
 		$config_userpass = $params->get('username') . ':' . $params->get('password');
 		$endpoint = $params->get('endpoint');
 
@@ -52,12 +63,12 @@ class plgFabrik_FormRest extends plgFabrik_Form
 		 */
 		/*
 		 * $ticket = new SimpleXMLElement("<ticket></ticket>");
-		//$ticket->addChild('assignee-id',  $this->config['default_assignee']);
-		//$ticket->addChild('component-id', $data['component']);
-		//$ticket->addChild('description',  $data['description']);
+		 * $ticket->addChild('assignee-id',  $this->config['default_assignee']);
+		 * $ticket->addChild('component-id', $data['component']);
+		 * $ticket->addChild('description',  $data['description']);
 		$ticket->addChild('milestone-id', 47420);
-		//$ticket->addChild('priority',     $data['priority']);
-		//$ticket->addChild('severity-id',  $data['severity']);
+		 * $ticket->addChild('priority',     $data['priority']);
+		 * $ticket->addChild('severity-id',  $data['severity']);
 		$ticket->addChild('status',       'new');
 		$ticket->addChild('summary',      'test REST API from fabrik');
 		 */
@@ -116,4 +127,3 @@ class plgFabrik_FormRest extends plgFabrik_Form
 	}
 
 }
-?>

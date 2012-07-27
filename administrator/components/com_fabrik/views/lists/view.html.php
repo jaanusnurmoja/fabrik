@@ -15,7 +15,7 @@ jimport('joomla.application.component.view');
  * View class for a list of lists.
  *
  * @package		Joomla.Administrator
- * @subpackage	com_fabrik
+ * @subpackage	Fabrik
  * @since		1.6
  */
 class FabrikViewLists extends JView
@@ -90,7 +90,7 @@ class FabrikViewLists extends JView
 
 		if ($this->state->get('filter.published') == -2 && $canDo->get('core.delete')) {
 			JToolBarHelper::deleteList('', 'lists.delete','JTOOLBAR_EMPTY_TRASH');
-		} else if ($canDo->get('core.edit.state')) {
+		} elseif ($canDo->get('core.edit.state')) {
 			JToolBarHelper::trash('lists.trash','JTOOLBAR_TRASH');
 		}
 		if ($canDo->get('core.admin')) {

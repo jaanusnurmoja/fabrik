@@ -1,9 +1,9 @@
 <?php
 /**
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.visualization.coverflow
- * @copyright	Copyright (C) 2005 Fabrik. All rights reserved.
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.visualization.coverflow
+ * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Check to ensure this file is included in Joomla!
@@ -16,8 +16,8 @@ require_once JPATH_SITE . '/components/com_fabrik/models/visualization.php';
 /**
  * Fabrik Coverflow Plug-in Model
  *
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.visualization.coverflow
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.visualization.coverflow
  */
 
 class fabrikModelCoverflow extends FabrikFEModelVisualization
@@ -35,7 +35,7 @@ class fabrikModelCoverflow extends FabrikFEModelVisualization
 		$params = $this->getParams();
 		$config = JFactory::getConfig();
 		$document = JFactory::getDocument();
-		$w = new FabrikWorker();
+		$w = new FabrikWorker;
 
 		$document->addScript("http://api.simile-widgets.org/runway/1.0/runway-api.js");
 		$c = 0;
@@ -70,7 +70,7 @@ class fabrikModelCoverflow extends FabrikFEModelVisualization
 					{
 						foreach ($group as $row)
 						{
-							$event = new stdClass();
+							$event = new stdClass;
 							if (!method_exists($imageElement, 'getStorage'))
 							{
 								//JError::raiseError(500, 'Looks like you selected a element other than a fileupload element for the coverflows image element');
@@ -107,7 +107,7 @@ class fabrikModelCoverflow extends FabrikFEModelVisualization
 		FabrikHelperHTML::script($srcs, $str);
 	}
 
-	function setListIds()
+	protected function setListIds()
 	{
 		if (!isset($this->listids))
 		{

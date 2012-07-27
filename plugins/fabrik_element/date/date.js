@@ -112,6 +112,7 @@ var FbDateTime = new Class({
 			this.cal.callCloseHandler();
 		}
 		window.fireEvent('fabrik.date.select', this);
+		Fabrik.fireEvent('fabrik.date.select', this);
 	},
 	
 	calClose: function (calendar) {
@@ -259,7 +260,7 @@ var FbDateTime = new Class({
 			}
 			v = this.cal.date;
 		} else {
-			if (this.options.value === '') {
+			if (this.options.value === '' || this.options.value === null) {
 				return '';
 			}
 			v = new Date.parse(this.options.value);
@@ -623,6 +624,7 @@ var FbDateTime = new Class({
 		}
 		Fabrik.fireEvent('fabrik.date.hidetime', this);
 		Fabrik.fireEvent('fabrik.date.select', this);
+		window.fireEvent('fabrik.date.select', this);
 	},
 
 	formatMinute: function (m) {

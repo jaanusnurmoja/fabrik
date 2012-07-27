@@ -102,7 +102,7 @@ if (!function_exists('_recaptcha_qsencode')) {
 	
 	 * @return string - The HTML to be embedded in the user's form.
 	 */
-	function recaptcha_get_html ($id, $pubkey, $error = null, $use_ssl = false)
+	function recaptcha_get_html ($id, $pubkey, $theme, $lang, $error = null, $use_ssl = false)
 	{
 		
 		if ($pubkey == null || $pubkey == '') {
@@ -130,7 +130,8 @@ if (!function_exists('_recaptcha_qsencode')) {
 	        'window.addEvent("load", function() {
 	        Recaptcha.create("'.$pubkey.'",
 	        "'.$id.'", {
-	         theme: "red"
+	         theme: "'.$theme.'",
+			 lang : "'.$lang.'"
 	        });
 	        }); '
 	      );
@@ -257,7 +258,7 @@ if (!function_exists('_recaptcha_qsencode')) {
 	
 		if (strlen ($arr[0]) <= 4) {
 			$arr[0] = substr ($arr[0], 0, 1);
-		} else if (strlen ($arr[0]) <= 6) {
+		} elseif (strlen ($arr[0]) <= 6) {
 			$arr[0] = substr ($arr[0], 0, 3);
 		} else {
 			$arr[0] = substr ($arr[0], 0, 4);

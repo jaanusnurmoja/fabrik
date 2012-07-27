@@ -1,6 +1,6 @@
 <?php
 /**
- * @package		Joomla.Plugin
+ * @package     Joomla.Plugin
  * @subpackage	Content
  * @copyright	Copyright (C) 2005 - 2008 Pollen 8 Design Ltd. All rights reserved.
  * @license		GNU/GPL
@@ -14,7 +14,7 @@ jimport( 'joomla.plugin.plugin');
 /**
  * Fabrik content plugin - renders forms and tables
  *
- * @package		Joomla.Plugin
+ * @package     Joomla.Plugin
  * @subpackage	Content
  * @since 		1.5
  */
@@ -104,7 +104,7 @@ class plgContentFabrik extends JPlugin
 		// $$$ hugh - see if we can remove formatting added by WYSIWYG editors
 		$match = strip_tags($match);
 		require_once(COM_FABRIK_FRONTEND . '/helpers/parent.php');
-		$w =new FabrikWorker();
+		$w =new FabrikWorker;
 		$match = preg_replace('/\s+/', ' ', $match);
 		// $$$ hugh - only replace []'s in value, not key, so we handle
 		// ranged filters and 'complex' filters

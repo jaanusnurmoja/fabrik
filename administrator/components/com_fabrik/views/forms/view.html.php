@@ -15,7 +15,7 @@ jimport('joomla.application.component.view');
  * View class for a list of forms.
  *
  * @package		Joomla.Administrator
- * @subpackage	com_fabrik
+ * @subpackage	Fabrik
  * @since		1.6
  */
 class FabrikViewForms extends JView
@@ -73,7 +73,7 @@ class FabrikViewForms extends JView
 		}
 		if ($this->state->get('filter.published') == -2 && $canDo->get('core.delete')) {
 			JToolBarHelper::deleteList('', 'forms.delete','JTOOLBAR_EMPTY_TRASH');
-		} else if ($canDo->get('core.edit.state')) {
+		} elseif ($canDo->get('core.edit.state')) {
 			JToolBarHelper::trash('forms.trash','JTOOLBAR_TRASH');
 		}
 		if ($canDo->get('core.admin')) {

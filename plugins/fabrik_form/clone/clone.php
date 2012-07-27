@@ -1,9 +1,9 @@
 <?php
 /**
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.form.clone
- * @copyright	Copyright (C) 2005 Fabrik. All rights reserved.
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.form.clone
+ * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Check to ensure this file is included in Joomla!
@@ -15,19 +15,22 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
 /**
  * Copy a series of form records
  *
- * @package		Joomla.Plugin
- * @subpackage	Fabrik.form.clone
+ * @package     Joomla.Plugin
+ * @subpackage  Fabrik.form.clone
+ * @since       3.0
  */
 
 class plgFabrik_FormClone extends plgFabrik_Form
 {
 
 	/**
-	 * process the plugin, called when form is submitted
+	 * Run right at the end of the form processing
+	 * form needs to be set to record in database for this to hook to be called
 	 *
-	 * @param	object	$params
-	 * @param	object	form model
-	 * @returns	bool
+	 * @param   object  $params      plugin params
+	 * @param   object  &$formModel  form model
+	 *
+	 * @return	bool
 	 */
 
 	public function onAfterProcess($params, &$formModel)
@@ -35,7 +38,16 @@ class plgFabrik_FormClone extends plgFabrik_Form
 		return $this->_process($params, $formModel);
 	}
 
-	private function _process(&$params, &$formModel)
+	/**
+	 * Clone the record
+	 *
+	 * @param   object  $params      plugin params
+	 * @param   object  &$formModel  form model
+	 *
+	 * @return  bool
+	 */
+
+	private function _process($params, &$formModel)
 	{
 		$clone_times_field_id = $params->get('clone_times_field', '');
 		$clone_batchid_field_id = $params->get('clone_batchid_field', '');
@@ -56,7 +68,8 @@ class plgFabrik_FormClone extends plgFabrik_Form
 				$formModel->_formData[$primaryKey . '_raw'] = $formModel->_fullFormData['rowid'];
 				$listModel->storeRow($formModel->_formData, $formModel->_fullFormData['rowid']);
 			}
-			//$clone_times_field = $elementModel->getFullName(false, true, false);
+
+			// $clone_times_field = $elementModel->getFullName(false, true, false);
 			$clone_times = $formModel->_formData[$element->name];
 			if (is_numeric($clone_times))
 			{
@@ -74,4 +87,3 @@ class plgFabrik_FormClone extends plgFabrik_Form
 	}
 
 }
-?>

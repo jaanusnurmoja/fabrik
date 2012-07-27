@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @package Joomla
- * @subpackage Fabrik
- * @copyright Copyright (C) 2005 Rob Clayburn. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @package     Joomla
+ * @subpackage  Fabrik
+ * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  */
 
 // Check to ensure this file is included in Joomla!
@@ -12,6 +12,9 @@ defined('_JEXEC') or die();
 
 jimport('joomla.application.component.model');
 require_once(COM_FABRIK_FRONTEND . '/models/parent.php'); //required for fabble
+
+// Required for fabble
+require_once COM_FABRIK_FRONTEND . '/models/parent.php';
 
 class FabrikPlugin extends JPlugin
 {
@@ -23,7 +26,7 @@ class FabrikPlugin extends JPlugin
 	var $_xmlPath = null;
 
 	/** @var object params **/
-	protected $_params  = null;
+	protected $_params = null;
 
 	var $attribs = null;
 
@@ -46,6 +49,11 @@ class FabrikPlugin extends JPlugin
 		$this->_id = $id;
 	}
 
+	public function getId()
+	{
+		return $this->id;
+	}
+
 	function getName()
 	{
 		return isset($this->name) ? $this->name : get_class($this);
@@ -59,6 +67,7 @@ class FabrikPlugin extends JPlugin
 	 * @param       array   $config  An array that holds the plugin configuration
 	 * @since       1.5
 	 */
+
 	public function __construct(&$subject, $config = array())
 	{
 		parent::__construct($subject, $config);
@@ -89,30 +98,31 @@ class FabrikPlugin extends JPlugin
 
 	/**
 	 * render the element admin settings
-	 * @param	array	data
-	 * @param	int		repeat plugin counter
-	 * @return	string	admin html
+	 * @param   array	data
+	 * @param   int		repeat plugin counter
+	 * @return  string	admin html
 	 */
 
-	function onRenderAdminSettings($data = array(), $repeatCounter = null)
+	public function onRenderAdminSettings($data = array(), $repeatCounter = null)
 	{
 		$document = JFactory::getDocument();
 		$type = str_replace('fabrik_', '', $this->_type);
-		//$this->loadLanguage(); //now done in contruct
 		JForm::addFormPath(JPATH_SITE . '/plugins/' . $this->_type . '/' . $this->_name);
 
 		$xmlFile = JPATH_SITE . '/plugins/' . $this->_type . '/' . $this->_name . '/forms/fields.xml';
 		$form = $this->getJForm();
 
 		$repeatScript = '';
+
 		// Used by fields when rendering the [x] part of their repeat name
 		// see administrator/components/com_fabrik/classes/formfield.php getName()
 		$form->repeatCounter = $repeatCounter;
+
 		// Add the plugin specific fields to the form.
 		$form->loadFile($xmlFile, false);
 
-		//copy over the data into the params array - plugin fields can have data in either
-		//jform[params][name] or jform[name]
+		// Copy over the data into the params array - plugin fields can have data in either
+		// jform[params][name] or jform[name]
 		$pluginData = array();
 		if (!array_key_exists('params', $data))
 		{
@@ -122,15 +132,17 @@ class FabrikPlugin extends JPlugin
 		{
 			$data['params'][$key] = is_array($val) ? JArrayHelper::getValue($val, $repeatCounter) : $val;
 		}
-		//bind the plugins data to the form
+		// Bind the plugins data to the form
 		$form->bind($data);
-		//$$$ rob 27/04/2011 - listfields element needs to know things like the group_id, and
+
+		// $$$ rob 27/04/2011 - listfields element needs to know things like the group_id, and
 		// as bind() onlys saves the values from $data with a corresponding xml field we set the raw data as well
 		$form->rawData = $data;
 		$str = '';
 
 		$repeatGroupCounter = 0;
-		//filer the forms fieldsets for those starting with the correct $serachName prefix
+
+		// Filer the forms fieldsets for those starting with the correct $serachName prefix
 		foreach ($form->getFieldsets() as $fieldset)
 		{
 			$class = 'adminform ' . $type . 'Settings page-' . $this->_name;
@@ -140,7 +152,7 @@ class FabrikPlugin extends JPlugin
 			$repeatDataMax = 1;
 			if ($repeat)
 			{
-				$opts = new stdClass();
+				$opts = new stdClass;
 				$opts->repeatmin = (isset($fieldset->repeatmin)) ? $fieldset->repeatmin : 1;
 				$repeatScript[] = "new FbRepeatGroup('$fieldset->name', " . json_encode($opts) . ');';
 				$repeatData = array();
@@ -163,7 +175,7 @@ class FabrikPlugin extends JPlugin
 				$str .= '<a class="addButton" href="#">' . JText::_('COM_FABRIK_ADD') . '</a>';
 			}
 			$str .= '<legend>' . JText::_($fieldset->label) . '</legend>';
-			for ($r = 0; $r < $repeatDataMax; $r ++)
+			for ($r = 0; $r < $repeatDataMax; $r++)
 			{
 				if ($repeat)
 				{
@@ -204,11 +216,13 @@ class FabrikPlugin extends JPlugin
 	}
 
 	/**
-	 *
-	 * used in plugin manager runPlugins to set the correct repeat set of
+	 * Used in plugin manager runPlugins to set the correct repeat set of
 	 * data for the plugin
-	 * @param	object	original params $params
-	 * @param	int		plugin $repeatCounter
+	 *
+	 * @param   object	original params $params
+	 * @param   int		plugin $repeatCounter
+	 *
+	 * @param   object  params
 	 */
 
 	function setParams(&$params, $repeatCounter)
@@ -281,12 +295,14 @@ class FabrikPlugin extends JPlugin
 	}
 
 	/**
-	 * determine if we use the plugin or not
-	 * both location and event criteria have to be match
-	 * @param	object	calling the plugin table/form
-	 * @param	string	location to trigger plugin on
-	 * @param	string	event to trigger plugin on
-	 * @return	bool	true if we should run the plugin otherwise false
+	 * Determine if we use the plugin or not
+	 * both location and event criteria have to be match when form plug-in
+	 *
+	 * @param   object  &$model    calling the plugin table/form
+	 * @param   string  $location  location to trigger plugin on
+	 * @param   string  $event     event to trigger plugin on
+	 *
+	 * @return  bool  true if we should run the plugin otherwise false
 	 */
 
 	public function canUse(&$model = null, $location = null, $event = null)
@@ -321,23 +337,13 @@ class FabrikPlugin extends JPlugin
 				case 'new':
 					if ($model->$k != 0)
 					{
-						if (isset($model->_copyingRow)) {
-							$ok = $model->copyingRow();
-						}
-						else {
-							$ok = false;
-						}
+						$ok = isset($model->_copyingRow) ? $model->copyingRow() : false;
 					}
 					break;
 				case 'edit':
 					if ($model->$k == 0)
 					{
-						if (isset($model->_copyingRow)) {
-							$ok = !$model->copyingRow();
-						}
-						else {
-							$ok = false;
-						}
+						$ok = isset($model->_copyingRow) ? !$model->copyingRow() : false;
 					}
 					break;
 			}
@@ -359,7 +365,6 @@ class FabrikPlugin extends JPlugin
 		$this->ajax_tables();
 	}
 
-
 	/**
 	 * ajax function to return a string of table drop down options
 	 * based on cid variable in query string
@@ -376,7 +381,7 @@ class FabrikPlugin extends JPlugin
 			if ($cid !== 0)
 			{
 				$query = $db->getQuery(true);
-				$query->select('id, label')->from('#__{package}_lists')->where(' connection_id = ' . $cid)->order('label ASC');
+				$query->select('id, label')->from('#__{package}_lists')->where('connection_id = ' . $cid)->order('label ASC');
 				$db->setQuery($query);
 				$rows = $db->loadObjectList();
 			}
@@ -435,14 +440,13 @@ class FabrikPlugin extends JPlugin
 					$db->setQuery($query);
 					$tid = $db->loadResult();
 				}
-				$db->setQuery('DESCRIBE ' . $db->nameQuote($tid));
-
+				$db->setQuery('DESCRIBE ' . $db->quoteName($tid));
 				$rows = $db->loadObjectList();
 				if (is_array($rows))
 				{
 					foreach ($rows as $r)
 					{
-						$c = new stdClass();
+						$c = new stdClass;
 						$c->value = $r->Field;
 						$c->label = $r->Field;
 						$arr[$r->Field] = $c;
@@ -500,9 +504,9 @@ class FabrikPlugin extends JPlugin
 						// as a temp hack
 						$v = $eVal->getFullName(false);
 					}
-					$c = new stdClass();
+					$c = new stdClass;
 					$c->value = $v;
-					$label = FabrikString::getShortDdLabel( $element->label);
+					$label = FabrikString::getShortDdLabel($element->label);
 					if ($groupModel->isJoin())
 					{
 						$label = $join->table_join . '.' . $label;
@@ -514,37 +518,37 @@ class FabrikPlugin extends JPlugin
 						$params = $eVal->getParams();
 						if ($params->get('sum_on', 0))
 						{
-							$c = new stdClass();
+							$c = new stdClass;
 							$c->value = 'sum___' . $v;
-							$c->label = JText::_('COM_FABRIK_SUM') . ': ' .$label;
+							$c->label = JText::_('COM_FABRIK_SUM') . ': ' . $label;
 							$arr[] = $c;
 						}
 						if ($params->get('avg_on', 0))
 						{
-							$c = new stdClass();
+							$c = new stdClass;
 							$c->value = 'avg___' . $v;
-							$c->label = JText::_('COM_FABRIK_AVERAGE') . ': ' .$label;
+							$c->label = JText::_('COM_FABRIK_AVERAGE') . ': ' . $label;
 							$arr[] = $c;
 						}
 						if ($params->get('median_on', 0))
 						{
-							$c = new stdClass();
+							$c = new stdClass;
 							$c->value = 'med___' . $v;
-							$c->label = JText::_('COM_FABRIK_MEDIAN') . ': ' .$label;
+							$c->label = JText::_('COM_FABRIK_MEDIAN') . ': ' . $label;
 							$arr[] = $c;
 						}
 						if ($params->get('count_on', 0))
 						{
-							$c = new stdClass();
+							$c = new stdClass;
 							$c->value = 'cnt___' . $v;
-							$c->label = JText::_('COM_FABRIK_COUNT') . ': ' .$label;
+							$c->label = JText::_('COM_FABRIK_COUNT') . ': ' . $label;
 							$arr[] = $c;
 						}
 						if ($params->get('custom_calc_on', 0))
 						{
-							$c = new stdClass();
+							$c = new stdClass;
 							$c->value = 'cnt___' . $v;
-							$c->label = JText::_('COM_FABRIK_CUSTOM') . ': ' .$label;
+							$c->label = JText::_('COM_FABRIK_CUSTOM') . ': ' . $label;
 							$arr[] = $c;
 						}
 					}
@@ -565,17 +569,19 @@ class FabrikPlugin extends JPlugin
 
 	protected function getAdminJsOpts($html)
 	{
-		$opts = new stdClass();
+		$opts = new stdClass;
 		$opts->livesite = COM_FABRIK_LIVESITE;
 		$opts->html = $html;
 		return $opts;
 	}
 
 	/**
-	 * if true then the plugin is stating that any subsequent plugin in the same group
+	 * If true then the plugin is stating that any subsequent plugin in the same group
 	 * should not be run.
-	 * @param	string	current plug-in call method e.g. onBeforeStore
-	 * @return	bool
+	 *
+	 * @param   string  $method  current plug-in call method e.g. onBeforeStore
+	 *
+	 * @return  bool
 	 */
 
 	public function runAway($method)
@@ -586,8 +592,8 @@ class FabrikPlugin extends JPlugin
 	/**
 	 * process the plugin, called when form is submitted
 	 *
-	 * @param	string	param name which contains the PHP code to eval
-	 * @param	array	data
+	 * @param   string	param name which contains the PHP code to eval
+	 * @param   array	data
 	 */
 
 	function shouldProcess($paramName, $data = null)
@@ -602,7 +608,7 @@ class FabrikPlugin extends JPlugin
 		{
 			return true;
 		}
-		$w = new FabrikWorker();
+		$w = new FabrikWorker;
 		$condition = trim($w->parseMessageForPlaceHolder($condition, $data));
 		$res = @eval($condition);
 		if (is_null($res))
@@ -645,7 +651,7 @@ class FabrikPlugin extends JPlugin
 		{
 			return;
 		}
-		switch($no_bytes)
+		switch ($no_bytes)
 		{
 			case 2:
 				{

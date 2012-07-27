@@ -15,7 +15,7 @@ jimport('joomla.application.component.view');
  * View to edit a list.
  *
  * @package		Joomla.Administrator
- * @subpackage	com_fabrik
+ * @subpackage	Fabrik
  * @since		1.5
  */
 class FabrikViewList extends JView
@@ -110,7 +110,7 @@ class FabrikViewList extends JView
 			$model->setId($id);
 			$table = $model->getTable();
 			$formModel = $model->getFormModel();
-			$row = new stdClass();
+			$row = new stdClass;
 			$row->id = $id;
 			$row->formid = $table->form_id;
 			$row->label = $table->label;
@@ -119,7 +119,7 @@ class FabrikViewList extends JView
 			$row->groups = array();
 			foreach ($groups as $group)
 			{
-				$grouprow = new stdClass();
+				$grouprow = new stdClass;
 				$g = $group->getGroup();
 				$grouprow->id = $g->id;
 				$grouprow->name = $g->name;
