@@ -627,7 +627,7 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 		if (is_object($groupModel) && !$groupModel->isJoin() && $groupModel->canRepeat()) {
 			return "VARCHAR(255)";
 		} else {
-			return "DATETIME";
+			return $p->get('date_db_field_type', "DATETIME"); //"DATETIME";
 		}
 	}
 
