@@ -3672,6 +3672,30 @@ INNER JOIN #__{package}_groups as g ON g.id = fg.group_id
 		array_shift($m);
 		return FabrikString::rtrimword(implode(":", $m), "}");
 	}
+	// Jaanus: New outro functions are identical to the intro functions above
+
+	public function getOutro()
+	{
+		$match = ((int) $this->_rowId === 0) ? 'new' : 'edit';
+		$remove = ((int) $this->_rowId === 0) ? 'edit' : 'new';
+		$match = "/{" . $match . ":\s*.*?}/i";
+		$remove = "/{" . $remove . ":\s*.*?}/i";
+		$outro = $this->getForm()->outro;
+		$outro = preg_replace_callback($match, array($this, '_getoutro'), $outro);
+		$outro = preg_replace($remove, '', $outro);
+		$outro = str_replace('[', '{', $outro);
+		$outro = str_replace(']', '}', $outro);
+		$w = new FabrikWorker;
+		$outro = $w->parseMessageForPlaceHolder($outro, $this->_data, true);
+		return $outro;
+	}
+
+	private function _getOutro($match)
+	{
+		$m = explode(":", $match[0]);
+		array_shift($m);
+		return FabrikString::rtrimword(implode(":", $m), "}");
+	}
 
 	/**
 	 * Get the form's label

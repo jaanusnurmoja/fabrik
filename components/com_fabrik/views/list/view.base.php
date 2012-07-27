@@ -341,6 +341,7 @@ class FabrikViewListBase extends JView
 		$this->table = new stdClass;
 		$this->table->label = $w->parseMessageForPlaceHolder($item->label, $_REQUEST);
 		$this->table->intro = $w->parseMessageForPlaceHolder($item->introduction);
+		$this->table->outro = $w->parseMessageForPlaceHolder($item->footertext);
 		$this->table->id = $item->id;
 		$this->table->renderid = $this->get('RenderContext');
 		$this->table->db_table_name = $item->db_table_name;
