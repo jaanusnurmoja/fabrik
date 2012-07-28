@@ -3672,15 +3672,15 @@ INNER JOIN #__{package}_groups as g ON g.id = fg.group_id
 		array_shift($m);
 		return FabrikString::rtrimword(implode(":", $m), "}");
 	}
-	// Jaanus: New outro functions are identical to the intro functions above
-
+	/* Jaanus: see text above about intro */
 	public function getOutro()
 	{
+		$params = $this->getParams();
 		$match = ((int) $this->_rowId === 0) ? 'new' : 'edit';
 		$remove = ((int) $this->_rowId === 0) ? 'edit' : 'new';
 		$match = "/{" . $match . ":\s*.*?}/i";
 		$remove = "/{" . $remove . ":\s*.*?}/i";
-		$outro = $this->getForm()->outro;
+		$outro = $params->get('outro');
 		$outro = preg_replace_callback($match, array($this, '_getoutro'), $outro);
 		$outro = preg_replace($remove, '', $outro);
 		$outro = str_replace('[', '{', $outro);
@@ -3689,6 +3689,15 @@ INNER JOIN #__{package}_groups as g ON g.id = fg.group_id
 		$outro = $w->parseMessageForPlaceHolder($outro, $this->_data, true);
 		return $outro;
 	}
+
+	/**
+	 * Used from getoutro as preg_replace_callback function to strip
+	 * undeisred text from form label outro
+	 *
+	 * @param   array  $match  preg matched strings
+	 *
+	 * @return  string  outro text
+	 */
 
 	private function _getOutro($match)
 	{
