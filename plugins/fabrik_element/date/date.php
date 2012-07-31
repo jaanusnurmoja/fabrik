@@ -72,25 +72,41 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 		$aNullDates = $this->getNullDates();
 		$params = $this->getParams();
 		$store_as_local = (int) $params->get('date_store_as_local', 0);
+		$fieldtype = $params->get('date_db_field_type');
 		$groupModel = $this->getGroup();
 		$data = FabrikWorker::JSONtoData($data, true);
 		$f = $params->get('date_table_format', '%Y-%m-%d');
-		if ($f == 'Y-m-d')
+		//Jaanus
+		if ($fieldtype == 'DATETIME')
 		{
-			$f = '%Y-%m-%d';
+			if ($f == 'Y-m-d')
+			{
+				$f = '%Y-%m-%d';
+			}
+		}
+		else 
+		{
+		$f = str_replace('%', '', $f);
 		}
 		$format = array();
 		foreach ($data as $d)
 		{
 			if (!in_array($d, $aNullDates))
 			{
-				$date = JFactory::getDate($d);
+				if ($fieldtype == 'DATETIME')
+				{
+					$date = JFactory::getDate($d);
 				/* $$$ rob - dates always stored with time (and hence timezone offset) so, unless stored_as_local
 				 * we must set the timezone
 				 */
-				if (!$store_as_local)
+					if (!$store_as_local)
+					{
+						$date->setTimeZone($timeZone);
+					}
+				}
+				else
 				{
-					$date->setTimeZone($timeZone);
+				$date = $d;
 				}
 				if ($f == '{age}')
 				{
@@ -98,7 +114,22 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 				}
 				else
 				{
-					$format[] = $date->toFormat($f, true);
+					if ($fieldtype == 'DATETIME')
+					{
+						$format[] = $date->toFormat($f, true);
+					}
+					else 
+					{
+						if(preg_match("/\\d{4}/", $date, $match))
+						//year must be in YYYY form 
+						{
+							$year = intval($match[0]);//converting the year to integer 
+							$diff = 1970 - $year;//calculating the difference between 1970 and the year 
+							$new_year = $year + $diff;//year + diff = new_year will be for sure > 1970 
+							$new_date = date($f, strtotime(str_replace($year, $new_year, $date)));//replacing the year with the new_year, try strtotime, rendering the date 
+							$format[] = str_replace($new_year, $year, $new_date);//returning the date with the correct year
+						}
+					}
 				}
 			}
 			else
@@ -221,6 +252,7 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 		$id = $this->getHTMLId($repeatCounter);
 		$params = $this->getParams();
 		$element = $this->getElement();
+		$fieldtype = $params->get('date_db_field_type');
 		$format = $params->get('date_form_format', $params->get('date_table_format', '%Y-%m-%d'));
 		$timeformat = $params->get('date_time_format');
 
@@ -228,11 +260,14 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 		$value = $this->getValue($data, $repeatCounter);
 		$store_as_local = (bool) $params->get('date_store_as_local', 0);
 
+		if ($fieldtype == 'DATETIME')
+		{
 		if ($params->get('date_showtime', 0) && !$element->hidden)
 		{
 			// Can't have names as simply [] as json only picks up the last one
 			$timeElName = $name . '[time]';
 			$name .= '[date]';
+		}
 		}
 
 		$readonly = $params->get('date_allow_typing_in_field', true) == false ? ' readonly="readonly" ' : '';
@@ -243,9 +278,16 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 		}
 
 		$str[] = '<div class="fabrikSubElementContainer" id="' . $id . '">';
-		if (!in_array($value, $aNullDates) && FabrikWorker::isDate($value))
+		if (!in_array($value, $aNullDates)) // && FabrikWorker::isDate($value)
 		{
-			$oDate = JFactory::getDate($value);
+				if ($fieldtype == 'DATETIME')
+				{
+				$oDate = JFactory::getDate($value);
+				}
+				else
+				{
+				$oDate = $value;
+				}
 
 			// If we are coming back from a validation then we don't want to re-offset the date
 			if (JRequest::getVar('Submit', '') == '' || $params->get('date_defaulttotoday', 0))
@@ -253,25 +295,45 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 				// $$$ rob - date is always stored with time now, so always apply tz unless store_as_local set
 				// or if we are defaulting to today
 				$showLocale = ($params->get('date_defaulttotoday', 0) && JRequest::getInt('rowid') == 0 || $params->get('date_alwaystoday', false));
-				if (!$store_as_local || $showLocale)
+				if ((!$store_as_local || $showLocale) && $fieldtype == 'DATETIME')
 				{
 					$oDate->setTimeZone($timeZone);
 				}
 			}
 			// Get the formatted date
 			$local = true;
-			$date = $oDate->toFormat($format, true);
-			$this->offsetDate = $oDate->toSql(true);
-			if (!$this->_editable)
+				if ($fieldtype == 'DATETIME')
+				{
+				$date = $oDate->toFormat($format, true);
+				$this->offsetDate = $oDate->toSql(true);
+				}
+				else 
+				{
+					$format = str_replace('%', '', $format);
+					if(preg_match("/\\d{4}/", $value, $match)) 
+					{ //year must be in YYYY form 
+						$year = intval($match[0]);//converting the year to integer 
+						$diff = 1970 - $year;//calculating the difference between 1970 and the year 
+						$new_year = $year + $diff;//year + diff = new_year will be for sure > 1970 
+						$new_date = date($format, strtotime(str_replace($year, $new_year, $oDate)));//replacing the year with the new_year, try strtotime, rendering the date 
+						$date = str_replace($new_year, $year, $new_date);//returning the date with the correct year
+					}
+				$this->offsetDate = $oDate;
+				}
+
+				if (!$this->_editable)
 			{
+				if ($fieldtype == 'DATETIME')
+				{
 				$time = ($params->get('date_showtime', 0)) ? ' ' . $oDate->toFormat($timeformat, true) : '';
+				}
 				return $date . $time;
-			}
 
 			// Get the formatted time
 			if ($params->get('date_showtime', 0))
 			{
 				$time = $oDate->toFormat($timeformat, true);
+			}
 			}
 		}
 		else
@@ -706,7 +768,7 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 		}
 		else
 		{
-			return "DATETIME";
+			return $p->get('date_db_field_type', "DATETIME");
 		}
 	}
 
