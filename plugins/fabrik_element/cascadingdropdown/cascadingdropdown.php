@@ -527,6 +527,8 @@ class plgFabrik_ElementCascadingdropdown extends plgFabrik_ElementDatabasejoin
 		}
 		$data = array_merge($data,$placeholders);
 		$where = $w->parseMessageForPlaceHolder($where, $data);
+		//Jaanus: to avoid errors where placeholder returns emptyness
+		$where = str_replace(array('= AND','= OR','()'), array('= \'\' AND','= \'\' OR','(\'\')'), $where);
 
 		$table = $this->getDbName();
 
