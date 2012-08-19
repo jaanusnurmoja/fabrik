@@ -4402,7 +4402,19 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 			$d = $this->rollover($d, $thisRow, 'list');
 			$d = $listModel->_addLink($d, $this, $thisRow, $i);
 		}
-		return $this->renderListDataFinal($data);
+		$other = $params->get('other_data'); 
+		$always = $params->get('other_always');
+		$final = $this->renderListDataFinal($data);
+		if ($other != '' && $this->renderListDataFinal($data) != '')
+		{
+		$final .= '<br />';
+		}
+		if (($this->renderListDataFinal($data) == '' && $always == '1') || $this->renderListDataFinal($data) != '')
+		{
+		$final .= $listModel->parseMessageForRowHolder($other, $rowData);
+		}
+		//return $this->renderListDataFinal($data); 
+		return $final; 
 	}
 
 	/**
