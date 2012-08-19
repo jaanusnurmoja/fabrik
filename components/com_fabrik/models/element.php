@@ -110,8 +110,10 @@ class plgFabrik_Element extends FabrikPlugin
 	/** @var bool ensures the query values are only escaped once */
 	var $escapedQueryValue = false;
 
+	/** @var  string  db table field type */
 	protected $fieldDesc = 'VARCHAR(%s)';
 
+	/** @var  string  db table field size */
 	protected $fieldSize = '255';
 
 	/**
@@ -2718,7 +2720,11 @@ class plgFabrik_Element extends FabrikPlugin
 		// Check if the elements group id is on of the table join groups if it is then we swap over the table name
 		$fromTable = $this->isJoin() ? $this->getJoinModel()->getJoin()->table_join : $origTable;
 		$joinStr = $incjoin ? $listModel->_buildQueryJoin() : $this->_buildFilterJoin();
-		$groupBy = 'GROUP BY ' . $params->get('filter_groupby', 'text') . ' ASC';
+
+		// New option not to order elements - required if you want to use db joins 'Joins where and/or order by statement'
+		$groupByCol = $params->get('filter_groupby', 'text');
+		$groupBy = ($groupByCol === '-1') ? '' : 'GROUP BY ' . $groupByCol . ' ASC';
+
 		foreach ($listModel->getJoins() as $aJoin)
 		{
 			// Not sure why the group id key wasnt found - but put here to remove error
@@ -2766,13 +2772,22 @@ class plgFabrik_Element extends FabrikPlugin
 		{
 			$sql .= 'WHERE ' . $id . ' IN (\'' . implode("','", $ids) . '\')';
 		}
+
+		// Apply element where/order by statements to the filter (e.g. dbjoins 'Joins where and/or order by statement')
+		$elementWhere = $this->_buildQueryWhere();
+		if (JString::stristr($sql, 'WHERE ') && JString::stristr($elementWhere, 'WHERE '))
+		{
+			$elementWhere = JString::str_ireplace('WHERE ', 'AND ', $elementWhere);
+		}
+		$sql .= $elementWhere;
+
 		$sql .= "\n" . $groupBy;
 		$sql = $listModel->pluginQuery($sql);
 		$fabrikDb->setQuery($sql);
 		$rows = $fabrikDb->loadObjectList();
 		if ($fabrikDb->getErrorNum() != 0)
 		{
-			JError::raiseNotice(500, 'filter query error: ' . $fabrikDb->getErrorMsg());
+			JError::raiseNotice(500, 'filter query error: ' . $this->getElement()->name . ' ' . $fabrikDb->getErrorMsg());
 		}
 		return $rows;
 
@@ -2820,9 +2835,6 @@ class plgFabrik_Element extends FabrikPlugin
 		$params = $this->getParams();
 		$element = $this->getElement();
 
-		// $$$ rob this caused issues if your element was a dbjoin with a concat label, but then you save it as a field
-		// if ($params->get('join_val_column_concat') == '') {
-		//if ($element->plugin != 'databasejoin')
 		// $$$ needs to apply to CDD's as well, so just making this an overideable method.
 		if ($this->quoteLabel())
 		{
@@ -3349,6 +3361,10 @@ class plgFabrik_Element extends FabrikPlugin
 		 * $$$ rob if we allow adding to the dropdown but not recording
 		 * then there will be no $key set to revert to the $val instead
 		 */
+		if ($v === $params->get('sub_default_value'))
+		{
+			$v = $params->get('sub_default_label');
+		}
 		return ($key === false) ? $v : JArrayHelper::getValue($labels, $key, $defaultLabel);
 	}
 
@@ -3549,6 +3565,7 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 			$uberObject->value = $uberTotal;
 			$uberObject->label = JText::_('COM_FABRIK_TOTAL');
 			$uberObject->class = 'splittotal';
+			$uberObject->special = true;
 			$results2[] = $uberObject;
 			$results = $this->formatCalcSplitLabels($results2, $plugin, 'sum');
 		}
@@ -3599,6 +3616,7 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 			$uberObject = new stdClass;
 			$uberObject->value = $uberTotal / count($results2);
 			$uberObject->label = JText::_('COM_FABRIK_AVERAGE');
+			$uberObject->special = true;
 			$uberObject->class = 'splittotal';
 			$results2[] = $uberObject;
 
@@ -3729,9 +3747,10 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 				$uberTotal += $pair->value;
 			}
 			$uberObject = new stdClass;
-			$uberObject->value = count($results2) == 0 ? 0 : $uberTotal / count($results2);
+			$uberObject->value = count($results2) == 0 ? 0 : $uberTotal;
 			$uberObject->label = JText::_('COM_FABRIK_TOTAL');
 			$uberObject->class = 'splittotal';
+			$uberObject->special = true;
 			$results = $this->formatCalcSplitLabels($results2, $plugin, 'count');
 			$results[JText::_('COM_FABRIK_TOTAL')] = $uberObject;
 		}
@@ -3811,6 +3830,12 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 		}
 		foreach ($results2 as $key => $val)
 		{
+			if (isset($val->special) && $val->special)
+			{
+				// Don't inlcude special values (ubers) in $tomerge, otherwise total sum added to first value
+				$results[$val->label] = $val;
+				continue;
+			}
 			if ($plugin->hasSubElements)
 			{
 				$val->label = ($type == 'median') ? $plugin->getLabelForValue($val->label) : $plugin->getLabelForValue($key);
@@ -4513,7 +4538,8 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 		$str[] = '<a href="#" title="' . JText::_('add option') . '" class="toggle-addoption">';
 		$str[] = '<img src="' . COM_FABRIK_LIVESITE . 'media/com_fabrik/images/action_add.png" alt="' . JText::_('COM_FABRIK_ADD') . '"/>';
 		$str[] = '</a>';
-		$str[] = '<div style="clear:left" class="addoption"><div>' . JText::_('COM_FABRIK_ADD_A_NEW_OPTION_TO_THOSE_ABOVE') . '</div>';
+		$str[] = '<div style="clear:left">';
+		$str[] = '<div class="addoption"><div>' . JText::_('COM_FABRIK_ADD_A_NEW_OPTION_TO_THOSE_ABOVE') . '</div>';
 		if (!$params->get('allowadd-onlylabel') && $params->get('savenewadditions'))
 		{
 			// $$$ rob dont wrap in <dl> as the html is munged when rendered inside form tab template
@@ -4526,8 +4552,9 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 		{
 			$str[] = $label;
 		}
-		$str[] = '<input class="button" type="button" id="' . $id . '_dd_add_entry" value="' . JText::_('COM_FABRIK_ADD') . '" />';
+		$str[] = '<input class="button btn" type="button" id="' . $id . '_dd_add_entry" value="' . JText::_('COM_FABRIK_ADD') . '" />';
 		$str[] = $this->getHiddenField($id . "_additions", '', $id . "_additions");
+		$str[] = '</div>';
 		$str[] = '</div>';
 		return implode("\n", $str);
 	}
@@ -5726,7 +5753,6 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 	}
 
 	/**
-	 *
 	 * Should the 'label' field be quoted.  Overridden by databasejoin and extended classes,
 	 * which may use a CONCAT'ed label which musn't be quoted.
 	 *
@@ -5734,9 +5760,25 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 	 *
 	 * @return boolean
 	 */
+
 	protected function quoteLabel()
 	{
 		return true;
+	}
+
+	/**
+	 * Create the where part for the query that selects the list options (not applicable for most elements except joins)
+	 *
+	 * @param   array   $data            current row data to use in placeholder replacements
+	 * @param   bool    $incWhere        should the additional user defined WHERE statement be included
+	 * @param   string  $thisTableAlias  db table alais
+	 *
+	 * @return string
+	 */
+
+	function _buildQueryWhere($data = array(), $incWhere = true, $thisTableAlias = null)
+	{
+		return '';
 	}
 
 }

@@ -14,16 +14,20 @@ defined('_JEXEC') or die();
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.textarea
+ * @since       3.0
  */
 
 class plgFabrik_ElementTextarea extends plgFabrik_Element
 {
 
+	/** @var  string  db table field type */
 	protected $fieldDesc = 'TEXT';
 
 	/**
-	 * tagify a string
-	 * @param   string	to tagify
+	 * Tagify a string
+	 *
+	 * @param   string  $data  tagify
+	 *
 	 * @return  string	tagified string
 	 */
 
@@ -56,7 +60,7 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 				}
 			}
 		}
-		// $$$ rbo 24/02/2011 remove duplicates from tags
+		// $$$ rob 24/02/2011 remove duplicates from tags
 		$data = array_unique($data);
 		$icon = FabrikHelperHTML::image('tag.png', 'form', @$this->tmpl, array('alt' => 'tag'));
 		foreach ($data as $d)
@@ -88,10 +92,10 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 
 	/**
 	 * Shows the data formatted for the list view
-	 * 
+	 *
 	 * @param   string  $data      elements data
 	 * @param   object  &$thisRow  all the data in the lists current row
-	 * 
+	 *
 	 * @return  string	formatted value
 	 */
 
@@ -135,7 +139,7 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 
 	/**
 	 * Does the element use the WYSWYG editor
-	 * 
+	 *
 	 * @return  bool	use wysiwyg editor
 	 */
 
@@ -156,7 +160,7 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 	/**
 	 * Determines if the element can contain data used in sending receipts,
 	 * e.g. fabrikfield returns true
-	 * 
+	 *
 	 * @return  bool
 	 */
 
@@ -167,10 +171,10 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 
 	/**
 	 * Draws the html form element
-	 * 
+	 *
 	 * @param   array  $data           to preopulate element with
 	 * @param   int    $repeatCounter  repeat group counter
-	 * 
+	 *
 	 * @return  string	elements html
 	 */
 
@@ -234,7 +238,7 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 				$bits['class'] .= " disabled";
 				$bits['disabled'] = 'disabled';
 			}
-			if ($params->get('textarea-showmax'))
+			if ($params->get('textarea-showmax') && $params->get('textarea_limit_type', 'char') === 'char')
 			{
 				$bits['maxlength'] = $params->get('textarea-maxlength');
 			}
@@ -248,38 +252,47 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 		}
 		if ($params->get('textarea-showmax'))
 		{
-			$charsLeft = $params->get('textarea-maxlength') - JString::strlen($value);
-			$str .= "<div class=\"fabrik_characters_left\"><span>" . $charsLeft . "</span> " . JText::_('PLG_ELEMENT_TEXTAREA_CHARACTERS_LEFT')
-				. "</div>";
+			if ($params->get('textarea_limit_type', 'char') === 'char')
+			{
+				$label = JText::_('PLG_ELEMENT_TEXTAREA_CHARACTERS_LEFT');
+				$charsLeft = $params->get('textarea-maxlength') - JString::strlen($value);
+			}
+			else
+			{
+				$label = JText::_('PLG_ELEMENT_TEXTAREA_WORDS_LEFT');
+				$charsLeft = $params->get('textarea-maxlength') - count(explode(' ', $value));
+			}
+
+			$str .= '<div class="fabrik_characters_left"><span>' . $charsLeft . '</span> ' . $label . '</div>';
 		}
 		return $str;
 	}
 
 	/**
 	 * Used to format the data when shown in the form's email
-	 * 
+	 *
 	 * @param   mixed  $value          element's data
 	 * @param   array  $data           form records data
 	 * @param   int    $repeatCounter  repeat group counter
-	 * 
+	 *
 	 * @return  string	formatted value
 	 */
 
-	function getEmailValue($value, $data, $c)
+	public function getEmailValue($value, $data, $repeatCounter)
 	{
 		$groupModel = $this->getGroup();
 		if ($groupModel->isJoin() && $groupModel->canRepeat())
 		{
-			$value = $value[$c];
+			$value = $value[$repeatCounter];
 		}
 		return $this->renderListData($value, new stdClass);
 	}
 
 	/**
 	 * Returns javascript which creates an instance of the class defined in formJavascriptClass()
-	 * 
+	 *
 	 * @param   int  $repeatCounter  repeat group counter
-	 * 
+	 *
 	 * @return  string
 	 */
 
@@ -301,6 +314,7 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 		}
 		$opts = $this->getElementJSOptions($repeatCounter);
 		$opts->max = $params->get('textarea-maxlength');
+		$opts->maxType = $params->get('textarea_limit_type', 'char');
 		$opts->wysiwyg = ($params->get('use_wysiwyg') && JRequest::getInt('ajax') != 1) ? true : false;
 		$opts->deleteOverflow = $params->get('delete_overflow', true) ? true : false;
 		$opts = json_encode($opts);
@@ -309,10 +323,10 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 
 	/**
 	 * Internal element validation
-	 * 
+	 *
 	 * @param   array  $data           form data
 	 * @param   int    $repeatCounter  repeeat group counter
-	 * 
+	 *
 	 * @return bool
 	 */
 
@@ -336,7 +350,7 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 
 	/**
 	 * Get validation error - run through JText
-	 * 
+	 *
 	 * @return  string
 	 */
 
@@ -346,19 +360,27 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 	}
 
 	/**
+	 * Get Joomfish translation type
+	 *
+	 * @deprecated
+	 *
 	 * @return  string	joomfish translation type e.g. text/textarea/referenceid/titletext
 	 */
 
-	function getJoomfishTranslationType()
+	public function getJoomfishTranslationType()
 	{
 		return 'textarea';
 	}
 
 	/**
+	 * Get Joomfish translation options
+	 *
+	 * @deprecated
+	 *
 	 * @return  array	key=>value options
 	 */
 
-	function getJoomfishOptions()
+	public function getJoomfishOptions()
 	{
 		$params = $this->getParams();
 		$return = array();
@@ -371,7 +393,7 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 
 	/**
 	 * Can the element plugin encrypt data
-	 * 
+	 *
 	 * @return  bool
 	 */
 
@@ -380,4 +402,3 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 		return true;
 	}
 }
-?>

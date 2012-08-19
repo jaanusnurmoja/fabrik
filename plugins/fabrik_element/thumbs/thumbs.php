@@ -31,15 +31,18 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 	protected $ignoreSearchAllDefault = true;
 
 	/**
-	 * (non-PHPdoc)
-	 * @see plgFabrik_Element::renderListData()
+	 * Shows the data formatted for the list view
+	 *
+	 * @param   string  $data      elements data
+	 * @param   object  &$thisRow  all the data in the lists current row
+	 *
+	 * @return  string	formatted value
 	 */
 
 	public function renderListData($data, &$thisRow)
 	{
 		$params = $this->getParams();
 		$imagepath = COM_FABRIK_LIVESITE . '/plugins/fabrik_element/thumbs/images/';
-		//$data = explode(GROUPSPLITTER, $data);
 		$data = FabrikWorker::JSONtoData($data, true);
 		$listid = $this->getlistModel()->getTable()->id;
 		$formid = $this->getlistModel()->getTable()->form_id;
@@ -83,6 +86,15 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 
 		return parent::renderListData($data, $thisRow);
 	}
+
+	/**
+	 * Shows the data formatted for the list view
+	 *
+	 * @param   string  $data      elements data
+	 * @param   object  $thisRow   all the data in the lists current row
+	 *
+	 * @return  string	formatted value
+	 */
 
 	private function _renderListData($data, $thisRow)
 	{
@@ -175,6 +187,8 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 		{
 			$type .= " elementErrorHighlight";
 		}
+
+		// @TODO use Fabrikimage rather than hardwired image path
 		$imagepath = COM_FABRIK_LIVESITE . '/plugins/fabrik_element/thumbs/images/';
 
 		$str = "<div id=\"$id" . "_div\" class=\"fabrikSubElementContainer\">";
@@ -299,7 +313,7 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 		$config = JFactory::getConfig();
 		$tzoffset = $config->getValue('config.offset');
 		$date = JFactory::getDate('now', $tzoffset);
-		$strDate = $db->quote($date->toMySQL());
+		$strDate = $db->quote($date->toSql());
 
 		$user = JFactory::getUser();
 		$userid = (int) $user->get('id');
@@ -309,7 +323,7 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 
 			$hash = $this->getCookieName($listid, $row_id);
 
-			//set cookie
+			// Set cookie
 			$lifetime = time() + 365 * 24 * 60 * 60;
 			setcookie($hash, '1', $lifetime, '/');
 			$userid = $db->quote($hash);
@@ -379,7 +393,6 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 	public function elementJavascript($repeatCounter)
 	{
 		$user = JFactory::getUser();
-		$params = $this->getParams();
 		if (JRequest::getVar('view') == 'form')
 		{
 			return;
@@ -397,34 +410,31 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 		$opts->myThumb = $this->_getMyThumb($listid, $formid, $row_id);
 		$opts->elid = $this->getElement()->id;
 		$opts->userid = (int) $user->get('id');
-		$opts->mode = $params->get('rating-mode');
 		$opts->view = JRequest::getCmd('view');
 		$opts->listid = $listid;
 		$opts = json_encode($opts);
 
-		$lang = new stdClass;
-		$lang->norating = JText::_('NO RATING');
-		$lang = json_encode($lang);
-		$str = "new FbThumbs('$id', $opts, '$value', $lang)";
+		$str = "new FbThumbs('$id', $opts, '$value')";
 		return $str;
 	}
 
 	/**
-	 * get js to ini js object that manages the behaviour of the thumbs element (non-PHPdoc)
-	 * @see components/com_fabrik/models/plgFabrik_Element#elementListJavascript()
+	 * Get JS code for ini element list js
+	 * Overwritten in plugin classes
+	 *
+	 * @return string
 	 */
 
-	function elementListJavascript()
+	public function elementListJavascript()
 	{
 		$user = JFactory::getUser();
-
 		$params = $this->getParams();
 		$user = JFactory::getUser();
 		$id = $this->getHTMLId();
 		$list = $this->getlistModel()->getTable();
 		$formid = $list->form_id;
 		$listMyThumbs = array();
-		$idFromCookie = NULL;
+		$idFromCookie = null;
 		$data = $this->getListModel()->getData();
 		$groupKeys = array_keys($data);
 		foreach ($groupKeys as $gKey)
@@ -458,10 +468,31 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 		return "new FbThumbsList('$id', $opts);\n";
 	}
 
-	function includeInSearchAll($advancedMode = false)
+	/**
+	 * Should the element's data be returned in the search all?
+	 *
+	 * @param   bool  $advancedMode  is the elements' list is advanced search all mode?
+	 *
+	 * @return  bool	true
+	 */
+
+	public function includeInSearchAll($advancedMode = false)
 	{
 		return false;
 	}
+
+	/**
+	 * Used by radio and dropdown elements to get a dropdown list of their unique
+	 * unique values OR all options - basedon filter_build_method
+	 *
+	 * @param   bool    $normal     do we render as a normal filter or as an advanced search filter
+	 * @param   string  $tableName  table name to use - defaults to element's current table
+	 * @param   string  $label      field to use, defaults to element name
+	 * @param   string  $id         field to use, defaults to element name
+	 * @param   bool    $incjoin    include join
+	 *
+	 * @return  array  text/value objects
+	 */
 
 	public function filterValueList($normal, $tableName = '', $label = '', $id = '', $incjoin = true)
 	{
@@ -527,4 +558,3 @@ class plgFabrik_ElementThumbs extends plgFabrik_Element
 		$db->query();
 	}
 }
-?>

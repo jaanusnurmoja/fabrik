@@ -186,6 +186,7 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 	 * Get the field name to use as the column that contains the join's label data
 	 *
 	 * @param   bool	use step in element name
+	 *
 	 * @return  string	join label column either returns concat statement or quotes `tablename`.`elementname`
 	 */
 
@@ -210,7 +211,7 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 			return 'CONCAT(' . $val . ')';
 		}
 		$label = $this->getJoinLabel();
-		$joinTableName = $join->table_join_alias;
+		$joinTableName = is_object($join) ? $join->table_join_alias : '';
 		$this->joinLabelCols[(int) $useStep] = $useStep ? $joinTableName . '___' . $label : $db->quoteName($joinTableName . '.' . $label);
 		return $this->joinLabelCols[(int) $useStep];
 	}
@@ -426,7 +427,8 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		foreach ($aDdObjs as &$o)
 		{
 			// For values like '1"'
-			$o->text = htmlspecialchars($o->text, ENT_NOQUOTES);
+			// $$$ hugh - added second two params so we set double_encode false
+			$o->text = htmlspecialchars($o->text, ENT_NOQUOTES, 'UTF-8', false);
 		}
 		$table = $this->getlistModel()->getTable()->db_table_name;
 		if (is_array($aDdObjs))
@@ -542,7 +544,7 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		$desc = $params->get('join_desc_column', '');
 		if ($desc !== '')
 		{
-			$desc = "REPLACE(".$db->quoteName($desc).", '\n', '<br />')";
+			$desc = "REPLACE(" . $db->quoteName($desc) . ", '\n', '<br />')";
 			$sql .= ', ' . $desc . ' AS description';
 		}
 		$sql .= $this->getAdditionalQueryFields();
@@ -588,6 +590,15 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		return '';
 	}
 
+	/**
+	 * Create the where part for the query that selects the list options
+	 *
+	 * @param   array   $data            current row data to use in placeholder replacements
+	 * @param   bool    $incWhere       should the additional user defined WHERE statement be included
+	 * @param   string  $thisTableAlias  db table alais
+	 *
+	 * @return string
+	 */
 	function _buildQueryWhere($data = array(), $incWhere = true, $thisTableAlias = null)
 	{
 		$where = '';
@@ -612,6 +623,7 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 			$this->orderBy = str_replace("{thistable}", $join->table_join_alias, $matches[0]);
 			$where = str_replace($this->orderBy, '', $where);
 		}
+
 		if (!empty($this->_autocomplete_where))
 		{
 			$where .= JString::stristr($where, 'WHERE') ? ' AND ' . $this->_autocomplete_where : ' WHERE ' . $this->_autocomplete_where;
@@ -1433,8 +1445,6 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		{
 			if (isset($this->orderBy))
 			{
-				/* $sql .= $this->orderBy;
-				unset($this->orderBy); */
 				return $this->orderBy;
 			}
 			else
@@ -1624,7 +1634,7 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 	 * @return  string	element filter name
 	 */
 
-	function getFilterFullName()
+	public function getFilterFullName()
 	{
 		$element = $this->getElement();
 		$params = $this->getParams();

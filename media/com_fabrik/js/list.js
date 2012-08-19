@@ -605,7 +605,8 @@ var FbList = new Class({
 				'contentURL': url,
 				'visible': false,
 				'width': this.options.popup_width,
-				'height': this.options.popup_height
+				'height': this.options.popup_height,
+			    'onContentLoaded': function () {}
 			};
 			
 			var w = Fabrik.getWindow(winOpts);
@@ -730,7 +731,8 @@ var FbList = new Class({
 				return false;
 			}
 		}
-		Fabrik.loader.start('listform_' + this.options.listRef);
+		// We may want to set this as an option - if long page loads feedback that list is doing something might be useful
+		// Fabrik.loader.start('listform_' + this.options.listRef);
 		if (task === 'list.filter') {
 			Fabrik['filter_listform_' + this.options.listRef].onSubmit();
 			this.form.task.value = task;
@@ -743,7 +745,8 @@ var FbList = new Class({
 			}
 		}
 		if (this.options.ajax) {
-			// for module & mambot
+			Fabrik.loader.start('listform_' + this.options.listRef);
+			// For module & mambot
 			// $$$ rob with modules only set view/option if ajax on
 			this.form.getElement('input[name=option]').value = 'com_fabrik';
 			this.form.getElement('input[name=view]').value = 'list';
@@ -776,7 +779,6 @@ var FbList = new Class({
 			Fabrik.fireEvent('fabrik.list.submit', [task, this.form.toQueryString().toObject()]);
 		} else {
 			this.form.submit();
-			Fabrik.loader.stop('listform_' + this.options.listRef);
 		}
 		//Fabrik['filter_listform_' + this.options.listRef].onUpdateData();
 		return false;

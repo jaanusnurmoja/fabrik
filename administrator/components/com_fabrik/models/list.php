@@ -285,15 +285,10 @@ class FabrikModelList extends FabModelAdmin
 
 	public function getJs()
 	{
-		$abstractPlugins = $this->getAbstractPlugins();
 		$connModel = $this->getCnn();
 		$plugins = $this->getPlugins();
 		$item = $this->getItem();
 		$pluginManager = JModel::getInstance('Pluginmanager', 'FabrikFEModel');
-		JText::script('COM_FABRIK_ACTION');
-		JText::script('COM_FABRIK_DO');
-		JText::script('COM_FABRIK_IN');
-		JText::script('COM_FABRIK_ON');
 		JText::script('COM_FABRIK_OPTIONS');
 		JText::script('COM_FABRIK_JOIN');
 		JText::script('COM_FABRIK_FIELD');
@@ -365,20 +360,9 @@ class FabrikModelList extends FabModelAdmin
 			$js .= "	oAdminTable.addJoin('{$j->group_id}','{$j->id}','{$j->join_type}','{$j->table_join}',";
 			$js .= "'{$j->table_key}','{$j->table_join_key}','{$j->join_from_table}', $joinFormFields, $joinToFields, $repeat);\n";
 		}
-		$js .= "var aPlugins = [];\n";
-		foreach ($abstractPlugins as $abstractPlugin)
-		{
-			$js .= "aPlugins.push(" . $abstractPlugin['js'] . ");\n";
-		}
-		$js .= "controller = new ListPluginManager(aPlugins);\n";
-		foreach ($plugins as $plugin)
-		{
-			$opts = array_key_exists('opts', $plugin) ? $plugin['opts'] : new stdClass;
-			$opts->location = @$plugin['location'];
-			$opts->event = @$plugin['event'];
-			$opts = json_encode($opts);
-			$js .= "controller.addAction('" . $plugin['html'] . "', '" . $plugin['plugin'] . "', " . $opts . ", false);\n";
-		}
+
+		$plugins = json_encode($this->getPlugins());
+		$js .= "controller = new PluginManager($plugins, " . (int) $this->getItem()->id . ", 'list');\n";
 
 		$js .= "oAdminFilters = new adminFilters('filterContainer', '$filterfields', $filterOpts);\n";
 		$form = $this->getForm();
@@ -464,74 +448,7 @@ class FabrikModelList extends FabModelAdmin
 	}
 
 	/**
-	 * Get the possible list plug-ins that can be selected for use
-	 *
-	 * @return  array
-	 */
-
-	public function getAbstractPlugins()
-	{
-		// Create a new dispatcher so that we only collect admin html for validation rules
-		$pluginDispatcher = new JDispatcher;
-
-		// Import the plugins and assign them to their custom dispatcher
-		JPluginHelper::importPlugin('fabrik_list', null, true, $pluginDispatcher);
-		$rules = array();
-
-		// Trigger the dispatcher to get the plug-in rules html
-		$plugins = JPluginHelper::getPlugin('fabrik_list');
-		$pluginManager = JModel::getInstance('Pluginmanager', 'FabrikFEModel');
-		$feListModel = JModel::getInstance('List', 'FabrikFEModel');
-		$feListModel->setId($this->getState('list.id'));
-
-		foreach ($plugins as $x => $plugin)
-		{
-			$data = array();
-			$o = $pluginManager->getPlugIn($plugin->name, 'List');
-			if (is_object($o))
-			{
-				$o->getJForm()->model = $feListModel;
-				/**
-				 * $$$ rob 0 was $x below but that rendered first set of plugins with indexes 1,2,3
-				 * think they should all be indexed 0
-				 */
-				$str = $o->onRenderAdminSettings($data, 0);
-				$js = $o->onGetAdminJs($plugin->name, $plugin->name, $str);
-				$str = addslashes(str_replace(array("\n", "\r"), "", $str));
-				$rules[] = array('plugin' => $plugin->name, 'html' => $str, 'js' => $js);
-			}
-		}
-		return $rules;
-	}
-
-	/**
-	 * Not required in list model
-	 *
-	 * @param   int  $repeatCounter  plugin counter
-	 *
-	 * @return string
-	 */
-
-	protected function getPluginLocation($repeatCounter)
-	{
-		return '';
-	}
-
-	/**
-	 * Not required in list model
-	 *
-	 * @param   int  $repeatCounter  plugin counter
-	 *
-	 * @return string
-	 */
-
-	protected function getPluginEvent($repeatCounter)
-	{
-		return '';
-	}
-
-	/**
-	 * load up a front end form model - used in saving the list
+	 * Load up a front end form model - used in saving the list
 	 *
 	 * @return  object  front end form model
 	 */
@@ -618,7 +535,7 @@ class FabrikModelList extends FabModelAdmin
 	}
 
 	/**
-	 * save the form
+	 * Save the form
 	 *
 	 * @param   array  $data  the jform part of the request data
 	 *
@@ -1065,7 +982,7 @@ class FabrikModelList extends FabModelAdmin
 		$user = JFactory::getUser();
 		$config = JFactory::getConfig();
 		$createdate = JFactory::getDate();
-		$createdate = $createdate->toMySQL();
+		$createdate = $createdate->toSql();
 		$post = JRequest::get('post');
 		$tableName = $post['jform']['db_table_name'];
 		$formModel = $this->getFormModel();
@@ -1334,7 +1251,7 @@ class FabrikModelList extends FabModelAdmin
 			$this->formModel->getForm();
 			jimport('joomla.utilities.date');
 			$createdate = JFactory::getDate();
-			$createdate = $createdate->toMySQL();
+			$createdate = $createdate->toSql();
 			$form = $this->getTable('Form');
 			$item = $this->getTable('List');
 			$form->label = $item->label;
@@ -1389,7 +1306,7 @@ class FabrikModelList extends FabModelAdmin
 		$group = $this->getTable('Group');
 		$group->bind($data);
 		$group->id = null;
-		$group->created = $createdate->toMySQL();
+		$group->created = $createdate->toSql();
 		$group->created_by = $user->get('id');
 		$group->created_by_alias = $user->get('username');
 		$group->published = 1;
@@ -1493,7 +1410,7 @@ class FabrikModelList extends FabModelAdmin
 
 			$item->form_id = $formModel->getTable()->id;
 			$createdate = JFactory::getDate();
-			$createdate = $createdate->toMySQL();
+			$createdate = $createdate->toSql();
 			$item->label = $post['names'][$pk]['listLabel'];
 			$item->created = $createdate;
 			$item->modified = $db->getNullDate();

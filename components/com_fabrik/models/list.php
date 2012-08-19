@@ -478,7 +478,7 @@ class FabrikFEModelList extends JModelForm
 	 * @return  array	of objects (rows)
 	 */
 
-	function getData()
+	public function getData()
 	{
 		$profiler = JProfiler::getInstance('Application');
 		$pluginManager = FabrikWorker::getPluginManager();
@@ -1820,7 +1820,8 @@ class FabrikFEModelList extends JModelForm
 				$slug = $slugElement->getSlugName($raw);
 			}
 
-			if ($slug != '')
+			// Test slug is not ``.``
+			if (preg_match('/[A-Z|a-z][0-9]/', $slug))
 			{
 				$slug = FabrikString::safeColName($slug);
 				$fields[] = "CONCAT_WS(':', $pk, $slug) AS slug";
@@ -4102,8 +4103,8 @@ class FabrikFEModelList extends JModelForm
 					$afilterConditions = JArrayHelper::getValue($prefilters, 'filter-conditions', array());
 					$afilterValues = JArrayHelper::getValue($prefilters, 'filter-value', array());
 					$afilterAccess = JArrayHelper::getValue($prefilters, 'filter-access', array());
-					$afilterEval = JArrayHelper::getValue($prefilters, 'filter-eval', '', array());
-					$afilterJoins = JArrayHelper::getValue($prefilters, 'filter-join', '', array());
+					$afilterEval = JArrayHelper::getValue($prefilters, 'filter-eval', array());
+					$afilterJoins = JArrayHelper::getValue($prefilters, 'filter-join', array());
 				}
 			}
 			$join = 'WHERE';

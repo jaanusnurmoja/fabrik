@@ -55,7 +55,7 @@ class FabrikViewListBase extends JView
 
 		$model->getCustomJsAction($src);
 		$src[] = 'media/com_fabrik/js/encoder.js';
-		FabrikHelperHTML::script($src);
+
 		$tmpl = $this->get('tmpl');
 		$this->assign('tmpl', $tmpl);
 
@@ -65,7 +65,7 @@ class FabrikViewListBase extends JView
 		$aJsPath = JPATH_SITE . '/components/com_fabrik/views/list/tmpl/' . $tmpl . '/javascript.js';
 		if (JFile::exists($aJsPath))
 		{
-			FabrikHelperHTML::script('components/com_fabrik/views/list/tmpl/' . $tmpl . '/javascript.js');
+			$src[] = 'components/com_fabrik/views/list/tmpl/' . $tmpl . '/javascript.js';
 		}
 
 		$origRows = $this->rows;
@@ -153,6 +153,7 @@ class FabrikViewListBase extends JView
 		$csvOpts->incfilters = (int) $params->get('incfilters');
 
 		$opts->data = $data;
+
 		// If table data starts as empty then we need the html from the row
 		// template otherwise we can't add a row to the table
 		ob_start();
@@ -229,6 +230,8 @@ class FabrikViewListBase extends JView
 		$script[] = $model->filterJs;
 		$script[] = "});";
 		$script = implode("\n", $script);
+
+		FabrikHelperHTML::script($src);
 		FabrikHelperHTML::addScriptDeclaration($script);
 		$this->getElementJs();
 
