@@ -1281,7 +1281,7 @@ class FabrikFEModelList extends JModelForm
 			$opts->title = JText::_('COM_FABRIK_ADD');
 			$opts->evalScripts = 1;
 			$opts = json_encode($opts);
-			$link = "<a rel=\"$opts\" href=\"$url\" class=\"popupwin\" title=\"$label\">" . $label . "</a>";
+			$link = "<a rel='$opts' href=\"$url\" class=\"popupwin\" title=\"$label\">" . $label . "</a>";
 		}
 		else
 		{
@@ -4881,8 +4881,14 @@ class FabrikFEModelList extends JModelForm
 
 	public function getAdvancedSearchOpts()
 	{
-		$list = $this->getTable();
+		$params = $this->getParams();
 		$opts = new stdClass;
+
+		// $$$ rob - 20/208/2012 if list advanced search off return nothing
+		if ($params->get('advanced-filter') == 0) {
+			return $opts;
+		}
+		$list = $this->getTable();
 		$listRef = $this->getRenderContext();
 		$opts->conditionList = FabrikHelperHTML::conditonList($listRef, '');
 		list($fieldNames, $firstFilter) = $this->getAdvancedSearchElementList();
@@ -5711,10 +5717,6 @@ class FabrikFEModelList extends JModelForm
 				}
 			}
 		}
-		/*
-		echo "joins to process keys = ";
-		print_r(array_keys($this->_joinsToProcess));
-		*/
 		return $this->_joinsToProcess;
 	}
 
