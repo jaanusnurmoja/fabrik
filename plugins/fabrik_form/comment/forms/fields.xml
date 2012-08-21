@@ -38,14 +38,14 @@
 			</field>
 			
 			<field default="0" description="PLG_FORM_COMMENT_NOTIFY_PLUGIN_ON_NEW_COMMENT_DESC" label="PLG_FORM_COMMENT_NOTIFY_PLUGIN_ON_NEW_COMMENT_LABEL" name="comment-plugin-notify" repeat="true" type="list">
-				<option value="0">JNO</option>
-				<option value="1">Choice</option>
-				<option value="2">Automatic</option>
+					<option value="0">JNO</option>
+					<option value="1">Choice</option>
+					<option value="2">Automatic</option>
 			</field>
 			
 			<field default="1" description="PLG_FORM_COMMENT_SHOW_COUNT_IN_TITLE_DESC" label="PLG_FORM_COMMENT_SHOW_COUNT_IN_TITLE_LABEL" name="comment-show-count-in-title" repeat="true" type="radio">
-				<option value="0">JNO</option>
-				<option value="1">JYES</option>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
 			</field>
 			
 			<field deafult="0" description="PLG_FORM_COMMENT_DIGG_DESC" label="PLG_FORM_COMMENT_DIGG_LABEL" name="comment-digg" repeat="true" type="radio">
