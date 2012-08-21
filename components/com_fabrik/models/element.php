@@ -4421,14 +4421,15 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label AS label FRO
 			$d = $this->rollover($d, $thisRow, 'list');
 			$d = $listModel->_addLink($d, $this, $thisRow, $i);
 		}
-		$other = $params->get('other_data'); 
-		$always = $params->get('other_always');
+		//Jaanus: trying to get additional data into list cell (included from other elements)
+		$other = $params->get('other_data'); // text, html, placeholders
+		$always = $params->get('other_always'); // whether we want to display other data when no original data is present
 		$final = $this->renderListDataFinal($data);
 		if ($other != '' && $this->renderListDataFinal($data) != '')
 		{
-		$final .= '<br />';
+		$final .= '<br />'; // if original data is present then additional data appears under it
 		}
-		if (($this->renderListDataFinal($data) == '' && $always == '1') || $this->renderListDataFinal($data) != '')
+		if (($this->renderListDataFinal($data) == '' && $always == '1' && $other != '') || ($this->renderListDataFinal($data) != '' && $other != '')) // when the other data should be displayed and parsed
 		{
 		$final .= $listModel->parseMessageForRowHolder($other, $rowData);
 		}
