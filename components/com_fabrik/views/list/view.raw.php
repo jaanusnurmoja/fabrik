@@ -46,7 +46,7 @@ class FabrikViewList extends JView{
 				}
 				$o->cursor = $i + $nav->limitstart;
 				$o->total = $nav->total;
-				$o->id = 'list_' . $table->id . '_row_' . @$o->data->__pk_val;
+				$o->id = 'list_' . $model->getRenderContext() . '_row_' . @$o->data->__pk_val;
 				$o->class = 'fabrik_row oddRow' . $c;
 				if (is_object($data[$groupk]))
 				{
@@ -59,7 +59,7 @@ class FabrikViewList extends JView{
 				$c = 1 - $c;
 			}
 		}
-		
+
 		$groups = $form->getGroupsHiarachy();
 		foreach ($groups as $groupModel)
 		{
@@ -78,6 +78,14 @@ class FabrikViewList extends JView{
 		$d['nav'] = $nav->getProperties();
 		$d['htmlnav'] = $params->get('show-table-nav', 1) ? $nav->getListFooter($model->getId(), $this->getTmpl()) : '';
 		$d['calculations'] = $model->getCalculations();
+		// $$$ hugh - see if we have a message to include, set by a list plugin
+		$context = 'com_fabrik.list' . $model->getRenderContext() . '.msg';
+		$session = JFactory::getSession();
+		if ($session->has($context))
+		{
+			$d['msg'] = $session->get($context);
+			$session->clear($context);
+		}
 		echo json_encode($d);
 	}
 
