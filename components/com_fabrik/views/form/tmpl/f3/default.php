@@ -26,6 +26,11 @@ echo "<div class=\"fabrikMainError fabrikError$active\">";
 echo FabrikHelperHTML::image('alert.png', 'form', 'f3');
 echo "$form->error</div>";?>
 	<?php
+	if ($form->editButton && $this->hasActions)
+	{
+	// Jaanus: and if user is allowed to edit data; visible only in details view
+	echo $form->editButton;
+	}
 	if ($this->showEmail) {
 		echo $this->emailLink;
 	}

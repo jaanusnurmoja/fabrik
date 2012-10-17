@@ -151,6 +151,33 @@
 				label="COM_FABRIK_FIELD_APPLY_BUTTON_LABEL_LABEL" 
 				description="COM_FABRIK_FIELD_APPLY_BUTTON_LABEL_DESC" />
 				
+			<field name="details_button" type="radio" 
+				default="0" 
+				label="COM_FABRIK_FIELD_DETAILS_BUTTON_LABEL" 
+				description="COM_FABRIK_FIELD_DETAILS_BUTTON_DESC">
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+			</field>
+			
+			<field name="details_button_label" 
+				type="text" 
+				default="Save and details" 
+				label="COM_FABRIK_FIELD_DETAILS_BUTTON_LABEL_LABEL" 
+				description="COM_FABRIK_FIELD_DETAILS_BUTTON_LABEL_DESC" />
+
+			<field name="edit_button" type="radio" 
+				default="1" 
+				label="COM_FABRIK_FIELD_EDIT_BUTTON_LABEL" 
+				description="COM_FABRIK_FIELD_EDIT_BUTTON_DESC">
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+			</field>
+			
+			<field name="edit_button_label" 
+				type="text" 
+				label="COM_FABRIK_FIELD_EDIT_BUTTON_LABEL_LABEL" 
+				description="COM_FABRIK_FIELD_EDIT_BUTTON_LABEL_DESC" />
+
 			<field name="delete_button" 
 				type="radio" 
 				default="0" 

@@ -704,6 +704,12 @@ class FabrikViewFormBase extends JView
 		$applyButtonType = $model->isAjax() ? 'button' : 'submit';
 		$form->applyButton = $params->get('apply_button', 0) && $this->editable
 			? '<input type="' . $applyButtonType . '" class="button btn" name="apply" value="' . $params->get('apply_button_label') . '" />' : '';
+		//Jaanus: added details and edit button
+		$detailsButtonType = $model->isAjax() ? 'button' : 'submit';
+		$form->detailsButton = $params->get('details_button', 0) && $this->editable
+			? '<input type="' . $detailsButtonType . '" class="button btn" name="details" value="' . $params->get('details_button_label') . '" />' : '';
+		$form->editButton = $params->get('edit_button', 0) && !$this->editable && $listModel->canEdit($model->_data)
+			? '<button class="button btn" style="float: right;" name="goedit" onclick="window.location.href=\'' . str_replace('details', 'form', $form->action) . '\'">' . $params->get('edit_button_label', JText::_('JGLOBAL_EDIT')) . ' </button>' : '';			
 		$form->deleteButton = $params->get('delete_button', 0) && $canDelete && $this->editable && $this_rowid != 0
 			? '<input type="submit" value="' . $params->get('delete_button_label', 'Delete') . '" class="button btn" name="delete" />' : '';
 		$form->gobackButton = $params->get('goback_button', 0) == "1"
@@ -735,7 +741,7 @@ class FabrikViewFormBase extends JView
 
 		// $$$ hugh - hide actions section is we're printing, or if not actions selected
 		$noButtons = (empty($form->nextButton) && empty($form->prevButton) && empty($form->submitButton) && empty($form->gobackButton)
-				&& empty($form->deleteButton) && empty($form->applyButton) && empty($form->copyButton) && empty($form->resetButton));
+				&& empty($form->deleteButton) && empty($form->applyButton) && empty($form->detailsButton) && empty($form->editButton) && empty($form->copyButton) && empty($form->resetButton));
 		if (JRequest::getVar('print', '0') == '1' || $noButtons)
 		{
 			$this->hasActions = false;
