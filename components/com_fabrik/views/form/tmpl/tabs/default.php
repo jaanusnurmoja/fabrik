@@ -110,7 +110,7 @@ echo "<div class=\"fabrikMainError fabrikError$active\">$form->error</div>";?>
 	<?php echo $this->pluginbottom; ?>
 	<div class="fabrikActions"><?php echo $form->resetButton;?> <?php echo $form->submitButton;?>
 	<?php echo $form->nextButton?> <?php echo $form->prevButton?>
-	 <?php echo $form->applyButton;?>
+	 <?php echo $form->applyButton . ' ' .$form->detailsButton;?>
 	<?php echo $form->copyButton  . " " . $form->gobackButton . ' ' . $form->deleteButton . ' ' . $this->message ?>
 	</div>
 
