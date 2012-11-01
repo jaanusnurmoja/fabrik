@@ -501,6 +501,11 @@ class FabrikFEModelForm extends FabModelForm
 		{
 			$srcs[] = 'components/com_fabrik/js/form_' . $this->getId() . '.js';
 		}
+		// Jaanus: ... and ability to use overriding javascript in templates that need it
+		elseif (JFile::exists(COM_FABRIK_FRONTEND . '/views/form/tmpl/' . $this->getTmpl() . '/default.js'))
+		{
+			$srcs[] = 'components/com_fabrik/views/form/tmpl/' . $this->getTmpl() . '/default.js';
+		}
 	}
 
 	/**
@@ -1141,23 +1146,32 @@ class FabrikFEModelForm extends FabModelForm
 			}
 			$ns = $val;
 
-			$ns = &$this->_fullFormData;
+			// $$$ hugh - changed name of $ns, as re-using after using it to set by reference was borking things up!
+			$ns_full = &$this->_fullFormData;
 			for ($i = 0; $i <= $pathNodes; $i++)
 			{
 				// If any node along the registry path does not exist, create it
 				// if (!isset($this->_formData[$nodes[$i]])) { //this messed up for joined data
-				if (!isset($ns[$nodes[$i]]))
+				if (!isset($ns_full[$nodes[$i]]))
 				{
-					$ns[$nodes[$i]] = array();
+					$ns_full[$nodes[$i]] = array();
 				}
-				$ns = &$ns[$nodes[$i]];
+				$ns_full = &$ns_full[$nodes[$i]];
 			}
-			$ns = $val;
+			$ns_full = $val;
 
 			// $$$ hugh - FIXME - nope, this won't work!  We don't know which path node is the element name.
+			// $$$ hugh again - should now work, with little preg_replace hack, if last part is numeric, then second to last will be element name
 			if ($update_raw)
 			{
-				$key .= '_raw';
+				if (preg_match('#\.\d+$#', $key))
+				{
+					$key = preg_replace('#(.*)(\.\d+)$#', '$1_raw$2', $key);
+				}
+				else
+				{
+					$key .= '_raw';
+				}
 				$nodes = explode('.', $key);
 				$count = count($nodes);
 				$pathNodes = $count - 1;
@@ -1165,31 +1179,31 @@ class FabrikFEModelForm extends FabModelForm
 				{
 					$pathNodes = 0;
 				}
-				$ns = &$this->_formData;
+				$ns_raw = &$this->_formData;
 				for ($i = 0; $i <= $pathNodes; $i++)
 				{
 					// If any node along the registry path does not exist, create it
 					// if (!isset($this->_formData[$nodes[$i]])) { //this messed up for joined data
-					if (!isset($ns[$nodes[$i]]))
+					if (!isset($ns_raw[$nodes[$i]]))
 					{
-						$ns[$nodes[$i]] = array();
+						$ns_raw[$nodes[$i]] = array();
 					}
-					$ns = &$ns[$nodes[$i]];
+					$ns_raw = &$ns_raw[$nodes[$i]];
 				}
-				$ns = $val;
+				$ns_raw = $val;
 
-				$ns = $this->_fullFormData;
+				$ns_raw_full = $this->_fullFormData;
 				for ($i = 0; $i <= $pathNodes; $i++)
 				{
 					// If any node along the registry path does not exist, create it
 					// if (!isset($this->_formData[$nodes[$i]])) { //this messed up for joined data
-					if (!isset($ns[$nodes[$i]]))
+					if (!isset($ns_raw_full[$nodes[$i]]))
 					{
-						$ns[$nodes[$i]] = array();
+						$ns_raw_full[$nodes[$i]] = array();
 					}
-					$ns = &$ns[$nodes[$i]];
+					$ns_raw_full = &$ns_raw_full[$nodes[$i]];
 				}
-				$ns = $val;
+				$ns_raw_full = $val;
 			}
 		}
 		else
@@ -3087,6 +3101,20 @@ class FabrikFEModelForm extends FabModelForm
 					// $$$ rob - use setFormData rather than JRequest::get()
 					// as it applies correct input filtering to data as defined in article manager parameters
 					$data = $this->setFormData();
+					// $$$ hugh - this chunk should probably go in setFormData, but don't want to risk any side effects just now
+					// problem is that fater failed validation, non-repeat join element data is not formatted as arrays,
+					// but from this point on, code is expecting even non-repeat join data to be arrays.
+					$groups = $this->getGroupsHiarachy();
+					foreach ($groups as $groupModel)
+					{
+						if ($groupModel->isJoin() && !$groupModel->canRepeat())
+						{
+							foreach ($data['join'][$groupModel->getJoinId()] as &$el)
+							{
+								$el = array($el);
+							}
+						}
+					}
 					$data = FArrayHelper::toObject($data, 'stdClass', false);
 
 					// $$$rob ensure "<tags>text</tags>" that are entered into plain text areas are shown correctly
@@ -3107,7 +3135,23 @@ class FabrikFEModelForm extends FabModelForm
 					if ($srow->data != '')
 					{
 						$sessionLoaded = true;
-						$data = array(FArrayHelper::toObject(array_merge(unserialize($srow->data), JArrayHelper::fromObject($data[0]))));
+						// $$$ hugh - this chunk should probably go in setFormData, but don't want to risk any side effects just now
+						// problem is that fater failed validation, non-repeat join element data is not formatted as arrays,
+						// but from this point on, code is expecting even non-repeat join data to be arrays.
+						$tmp_data = unserialize($srow->data);
+						$groups = $this->getGroupsHiarachy();
+						foreach ($groups as $groupModel)
+						{
+							if ($groupModel->isJoin() && !$groupModel->canRepeat())
+							{
+								foreach ($tmp_data['join'][$groupModel->getJoinId()] as &$el)
+								{
+									$el = array($el);
+								}
+							}
+						}
+						//$data = array(FArrayHelper::toObject(array_merge(unserialize($srow->data), JArrayHelper::fromObject($data[0]))));
+						$data = array(FArrayHelper::toObject(array_merge($tmp_data, JArrayHelper::fromObject($data[0]))));
 						FabrikHelperHTML::debug($data, 'form:getData from session (form not in Mambot and no errors');
 					}
 				}
@@ -3440,10 +3484,14 @@ class FabrikFEModelForm extends FabModelForm
 				for ($k = 0; $k < count($usekey); $k++)
 				{
 					// Ensure that the key value is not quoted as we Quote() afterwards
+					/*
+					 * $$$ rob 29/10/2012
+					 * commenting out as if key value = "ile d'ax" then this is set to "ile dax" which then returns no rows.
+					 * quote() shoudl deal with backslashing "'" so not sure why this line was here.
 					if (strstr($aRowIds[$k], "'"))
 					{
 						$aRowIds[$k] = str_replace("'", '', $aRowIds[$k]);
-					}
+					} */
 					if ($comparison == '=')
 					{
 						$parts[] = ' ' . $usekey[$k] . ' = ' . $db->quote($aRowIds[$k]);
@@ -3747,6 +3795,7 @@ class FabrikFEModelForm extends FabModelForm
 					if ($f->Key == 'PRI')
 					{
 						$pkField = $tblJoin->table_join . '___' . $f->Field;
+						break;
 					}
 				}
 				$usedkeys = array();
@@ -4762,47 +4811,63 @@ class FabrikFEModelForm extends FabModelForm
 	public function getRedirectURL($incSession = true, $isMambot = false)
 	{
 		$app = JFactory::getApplication();
+		$rowid = $app->input->get('rowid', '', 'string');
 		if ($app->isAdmin())
 		{
-			if (array_key_exists('apply', $this->_formData))
+			if (array_key_exists('apply', $this->_formData) || (!$this->_editable && $listModel->canEdit($this->_data) && array_key_exists('goedit', $this->_formData)))
 			{
-				$url = 'index.php?option=com_fabrik&task=form.view&formid=' . JRequest::getInt('formid') . '&rowid=' . JRequest::getInt('rowid');
+				$url = 'index.php?option=com_fabrik&task=form.view&formid=' . JRequest::getInt('formid') . '&rowid=' . $rowid;
 			}
 			else
-			{
-				$url = 'index.php?option=com_fabrik&task=list.view&listid=' . $this->getListModel()->getId();
+			{  //Jaanus: tried to add redirect urls that return details view from form and vice versa - here and below
+				if (array_key_exists('details', $this->_formData))
+				{
+					$url = 'index.php?option=com_fabrik&task=details.view&formid=' . JRequest::getInt('formid') . '&rowid=' . $rowid;			
+				}
+				else
+				{
+					$url = 'index.php?option=com_fabrik&task=list.view&listid=' . $this->getListModel()->getId();
+				}
 			}
 		}
 		else
 		{
-			if (array_key_exists('apply', $this->_formData))
+			if (array_key_exists('apply', $this->_formData) || (JRequest::getVar('view') == 'details' && $listModel->canEdit($this->_data) && array_key_exists('goedit', $this->_formData)))
 			{
-				$url = 'index.php?option=com_fabrik&view=form&formid=' . JRequest::getInt('formid') . '&rowid=' . JRequest::getInt('rowid')
+				$url = 'index.php?option=com_fabrik&view=form&formid=' . JRequest::getInt('formid') . '&rowid=' . $rowid
 					. '&listid=' . JRequest::getInt('listid');
 			}
 			else
 			{
-				if ($isMambot)
+				if (array_key_exists('details', $this->_formData))
 				{
-					// Return to the same page
-					$url = JArrayHelper::getvalue($_SERVER, 'HTTP_REFERER', 'index.php');
+					$url = 'index.php?option=com_fabrik&view=details&formid=' . JRequest::getInt('formid') . '&rowid=' . $rowid 
+					. '&listid=' . JRequest::getInt('listid');			
 				}
 				else
 				{
-					// Return to the page that called the form
-					$url = urldecode(JRequest::getVar('fabrik_referrer', 'index.php', 'post'));
-				}
-				$Itemid = (int) @$app->getMenu('site')->getActive()->id;
-				if ($url == '')
-				{
-					if ($Itemid !== 0)
+					if ($isMambot)
 					{
-						$url = 'index.php?' . http_build_query($app->getMenu('site')->getActive()->query) . '&Itemid=' . $Itemid;
+						// Return to the same page
+						$url = JArrayHelper::getvalue($_SERVER, 'HTTP_REFERER', 'index.php');
 					}
 					else
 					{
-						// No menu link so redirect back to list view
-						$url = 'index.php?option=com_fabrik&view=list&listid=' . JRequest::getInt('listid');
+						// Return to the page that called the form
+						$url = urldecode(JRequest::getVar('fabrik_referrer', 'index.php', 'post'));
+					}
+					$Itemid = (int) @$app->getMenu('site')->getActive()->id;
+					if ($url == '')
+					{
+						if ($Itemid !== 0)
+						{
+							$url = 'index.php?' . http_build_query($app->getMenu('site')->getActive()->query) . '&Itemid=' . $Itemid;
+						}
+						else
+						{
+							// No menu link so redirect back to list view
+							$url = 'index.php?option=com_fabrik&view=list&listid=' . JRequest::getInt('listid');
+						}
 					}
 				}
 			}

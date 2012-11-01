@@ -389,11 +389,9 @@ section for dropdowns radio buttons etc**/
 }
 
 #{$view}_$c .fabrikNotice{
-	/*background: url('images/alert.png') no-repeat scroll 10px center #DFFDFF !important;
+	background: url('images/alert.png') no-repeat scroll 10px center #DFFDFF !important;
     color: #009FBF;
     padding: 10px 10px 10px 35px;
-    */
-    display:none;
 }
 
 #{$view}_$c .fabrikError,

@@ -83,8 +83,8 @@ echo '</div>';
 	foreach ($this->groups as $group) {
       /* This is where the fieldset is set up */ ?>
 		<?php if ($group->canRepeat && $group->isTabular) { ?>
-		<table class="fabrikGroup" id="group<?php echo $group->id;?>" summary="<?php echo $group->title;?>">
-		<caption>
+			<table class="fabrikGroup" summary="<?php echo $group->title;?>">
+				<caption>
 		<?php if (trim($group->title) !== '') {?>
 			<<?php echo $form->legendTag ?> class="legend"><span><?php echo $group->title;?></span></<?php echo $form->legendTag ?>>
 		<?php }?>
@@ -94,7 +94,6 @@ echo '</div>';
 		<div style="clear:both;"></div>
 		</caption>
 		<thead><tr>
-		<th class="fabrikHide"></th>
 		<?php $this->elements = $group->elements; ?>
 		<?php foreach ( $this->elements as $element) { ?>
 		<th class="<?php echo $element->containerClass;?>">
@@ -106,17 +105,10 @@ echo '</div>';
 		<?php } ?>
 		</tr>
 		</thead>
-					<?php if ($group->editable) { ?>
-		<tfoot>
-		<tr><th>
-		</th></tr>
-		</tfoot>
-					<?php } ?>
-		<tbody>
+		<tbody class="fabrikGroup" id="group<?php echo $group->id;?>">
 			<?php foreach ($group->subgroups as $subgroup) {
 			?>
 			<tr class="fabrikSubGroup">
-						<td class="fabrikSubGroupElements fabrikHide"></td>
 						<?php
 						$this->elements = $subgroup;
 						echo $this->loadTemplate('tabular');
