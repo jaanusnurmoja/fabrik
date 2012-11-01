@@ -495,6 +495,7 @@ class FabrikFEModelList extends JModelForm
 	 * 2012-10-19 - $$$ hugh - trouble with preserving old list settings is there is no way to change them, without
 	 * directly poking around in the params in the database.  Commenting out the per-list checking.
 	 *
+	 * @deprecated   now handled in FabrikHelper::getDbo(), as it needs to apply to all queruies, including internal / default connection ones.
 	 * @since   3/16/2010
 	 *
 	 * @return  void
@@ -2059,7 +2060,7 @@ class FabrikFEModelList extends JModelForm
 					if ($dir != '' && $dir != '-' && trim($dir) != 'Array')
 					{
 						$strOrder == '' ? $strOrder = "\n ORDER BY " : $strOrder .= ',';
-						$strOrder .= $element->getOrderByName() . " $dir";
+						$strOrder .= $element->getOrderByName() . ' ' . $dir;
 						$this->orderEls[] = $element->getOrderByName();
 						$this->orderDirs[] = $dir;
 						$element->getAsField_html($this->selectedOrderFields, $aAsFields);
@@ -2978,9 +2979,6 @@ class FabrikFEModelList extends JModelForm
 		/* $$$ hugh - AAAAAAGHHHH!!!  This one took a while ...
 		 * canUserDo() returns true, false, or -1 ... when "loose" testing with !=
 		 * then true is the same as -1.  But we want strict testing, with !==
-		 * so it isn't the same!
-		 * Hmmm - I just noticed canDelete() already has a !== here.
-		 * if ($canUserDo != -1) {
 		 */
 		if ($canUserDo !== -1)
 		{
@@ -5019,7 +5017,7 @@ class FabrikFEModelList extends JModelForm
 		$arr = array();
 		foreach ($elements as $e)
 		{
-			$key = FabrikString::safeColName($e->getFullName(false, false, false));
+			$key = $e->getFilterFullName();
 			$arr[$key] = array('id' => $e->getId(), 'plugin' => $e->getElement()->plugin);
 		}
 		$opts->elementMap = $arr;
@@ -5044,7 +5042,7 @@ class FabrikFEModelList extends JModelForm
 			$elParams = $elementModel->getParams();
 			if ($elParams->get('inc_in_adv_search', 1))
 			{
-				$elName = FabrikString::safeColName($elementModel->getFullName(false, false, false));
+				$elName = $elementModel->getFilterFullName();
 				if (!$first)
 				{
 					$first = true;
@@ -8408,7 +8406,7 @@ class FabrikFEModelList extends JModelForm
 		$ec = count($data);
 		foreach ($groups as $groupModel)
 		{
-			if (($tableParams->get('group_by_template', '') !== '' && $this->getGroupBy() != '') || $this->outPutFormat == 'csv'
+			/* if (($tableParams->get('group_by_template', '') !== '' && $this->getGroupBy() != '') || $this->outPutFormat == 'csv'
 				|| $this->outPutFormat == 'feed')
 			{
 				$elementModels = $groupModel->getPublishedElements();
@@ -8416,7 +8414,14 @@ class FabrikFEModelList extends JModelForm
 			else
 			{
 				$elementModels = $groupModel->getPublishedListElements();
-			}
+			} */
+
+			/*
+			 * $$$ rob 29/10/2012 - see http://fabrikar.com/forums/showthread.php?t=28830
+			 * Calc may be set to show in list via menu item, but groupModel::getPublishedListElements() doesn't know
+			 * this. Seems best to run all calcs regardless of whether they are set to show in list.
+			 */
+			$elementModels = $groupModel->getPublishedElements();
 			foreach ($elementModels as $elementModel)
 			{
 				$col = $elementModel->getFullName(false, true, false);

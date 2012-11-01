@@ -1288,6 +1288,11 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		}
 		else
 		{
+			// Wierd one http://fabrikar.com/forums/showpost.php?p=153789&postcount=16, so lets try to ensure we have a value before using getLabelForValue()
+			$col = $this->getFullName(false, true, false) . '_raw';
+			$row = JArrayHelper::fromObject($thisRow);
+			$data = JArrayHelper::getValue($row, $col, $data);
+
 			// $$$ hugh - $data may already be JSON encoded, so we don't want to double-encode.
 			if (!FabrikWorker::isJSON($data))
 			{
@@ -1615,9 +1620,22 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		$params = $this->getParams();
 		$join = $this->getJoin();
 		$db = FabrikWorker::getDbo();
-		return $db->quoteName($join->table_join_alias . '.' . $params->get('join_key_column'));
+		return $db->quoteName($join->table_join_alias . '.' . $this->getJoinValueFieldName());
 	}
 
+	/**
+	 * Get the field name for the joined tables' pk
+	 *
+	 *  @since  3.0.7
+	 *
+	 * @return  string
+	 */
+
+	protected function getJoinValueFieldName()
+	{
+		$params = $this->getParams();
+		return $params->get('join_key_column');
+	}
 	/**
 	 * Builds an array containing the filters value and condition
 	 *
@@ -1689,9 +1707,13 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		$this->encryptFieldName($key);
 		if (!$this->_rawFilter && ($type == 'searchall' || $type == 'prefilter'))
 		{
+			$join = $this->getJoin();
+			//$k = $db->quoteName($params->get('join_db_name')) . '.' . $db->quoteName($this->getLabelParamVal());
+			$k = FabrikString::safeColName($join->table_join_alias) . '.' . $db->quoteName($this->getLabelParamVal());
+
 			// $$$rob wasnt working for 2nd+ db join element to same table (where key = `countries_0`.`label`)
 			// $k = '`' . $params->get('join_db_name'). "`.`".$params->get('join_val_column').'`';
-			$str = "$key $condition $value";
+			$str = "$k $condition $value";
 		}
 		else
 		{
@@ -1817,7 +1839,7 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		}
 		return FabrikString::safeColName($elName);
 	}
-	
+
 	protected function getLabelParamVal()
 	{
 		if (isset($this->labelParamVal))
@@ -2196,8 +2218,10 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		$key = $this->getJoinValueColumn();
 		$query->clear('where');
 		$query->where($key . ' = ' . $db->quote($v));
+		//echo $query . "<br>";
 		$db->setQuery($query);
 		$r = $db->loadObject();
+		//echo "r = ";print_r($r);
 		if (!$r)
 		{
 			return $defaultLabel;
@@ -2261,7 +2285,14 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		{
 			$join = $elementModel->getJoin()->table_join;
 			$opts = array();
-			$opts['label'] = !strstr($c, 'CONCAT') ? $join . '.' . $c : $c;
+			if (!strstr($c, 'CONCAT'))
+			{
+				$opts['label'] = strstr($c, '.') ? $c : $join . '.' . $c;
+			}
+			else
+			{
+				$opts['label'] =  $c;
+			}
 			return parent::cacheAutoCompleteOptions($elementModel, $search, $opts);
 		}
 		// $$$ hugh - added 'autocomplete_how', currently just "starts_with" or "contains"
@@ -2292,7 +2323,14 @@ class plgFabrik_ElementDatabasejoin extends plgFabrik_ElementList
 		$join = $this->getJoin();
 		$joinTable = $join->table_join_alias;
 		$joinVal = $this->getValColumn();
-		$return = !strstr($joinVal, 'CONCAT') ? $joinTable . '.' . $joinVal : $joinVal;
+		if (!strstr($joinVal, 'CONCAT'))
+		{
+			$return = strstr($joinVal, '___') ? FabrikString::safeColName($joinVal) : $joinTable . '.' . $joinVal;
+		}
+		else
+		{
+			$return = $joinVal;
+		}
 		if ($return == '.')
 		{
 			$return = parent::getOrderByName();
