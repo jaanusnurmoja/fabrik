@@ -38,14 +38,19 @@ class plgFabrik_ElementFblikebox extends plgFabrik_Element
 	 *
 	 * @var  string
 	 */
-	protected $fieldDesc = 'INT(%s)';
+	public function getFieldDescription()
+	{
+		return 'INT(1)';
+	}
+	
+	// protected $fieldDesc = 'INT(%s)';
 
 	/**
 	 * Db table field size
 	 *
 	 * @var  string
 	 */
-	protected $fieldLength = '1';
+	// protected $fieldLength = '1';
 
 	/**
 	 * Draws the html form element

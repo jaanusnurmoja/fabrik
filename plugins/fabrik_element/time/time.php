@@ -24,7 +24,12 @@ class plgFabrik_ElementTime extends plgFabrik_Element
 	public $hasSubElements = true;
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'TIME';
+	public function getFieldDescription()
+	{
+		return 'TIME';
+	}
+	
+	// protected $fieldDesc = 'TIME';
 
 	/**
 	 * Draws the form element

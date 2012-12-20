@@ -21,10 +21,14 @@ class PlgFabrik_ElementViewlevel extends PlgFabrik_Element
 {
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'INT(%s)';
+	public function getFieldDescription()
+	{
+			return 'INT(3)';
+		}
+	// protected $fieldDesc = 'INT(%s)';
 
 	/** @var  string  db table field size */
-	protected $fieldSize = '3';
+	// protected $fieldSize = '3';
 
 	/**
 	 * Draws the html form element

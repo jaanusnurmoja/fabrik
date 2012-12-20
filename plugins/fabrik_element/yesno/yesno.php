@@ -24,10 +24,14 @@ class plgFabrik_ElementYesno extends plgFabrik_ElementRadiobutton
 {
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'TINYINT(%s)';
+	public function getFieldDescription()
+	{
+	return 'TINYINT(1)';
+	}
+	// protected $fieldDesc = 'TINYINT(%s)';
 
 	/** @var  string  db table field size */
-	protected $fieldSize = '1';
+//	protected $fieldSize = '1';
 
 	/**
 	 * this really does get just the default value (as defined in the element's settings)

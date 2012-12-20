@@ -23,7 +23,12 @@ class plgFabrik_ElementImage extends plgFabrik_Element
 	var $ignoreFolders = array('cache', 'lib', 'install', 'modules', 'themes', 'upgrade', 'locks', 'smarty', 'tmp');
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'TEXT';
+	public function getFieldDescription()
+	{
+		return 'TEXT';
+	}
+	
+// protected $fieldDesc = 'TEXT';
 
 	/**
 	 * This really does get just the default value (as defined in the element's settings)

@@ -23,7 +23,12 @@ class plgFabrik_ElementLink extends plgFabrik_Element
 	public $hasSubElements = true;
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'TEXT';
+	public function getFieldDescription()
+	{
+		return 'TEXT';
+	}
+	
+// protected $fieldDesc = 'TEXT';
 
 	/**
 	 * Shows the data formatted for the list view

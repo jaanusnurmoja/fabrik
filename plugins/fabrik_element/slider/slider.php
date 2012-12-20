@@ -31,10 +31,15 @@ class plgFabrik_ElementSlider extends plgFabrik_Element
 	protected $ignoreSearchAllDefault = true;
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'INT(%s)';
+	public function getFieldDescription()
+	{
+		return 'INT(6)';
+	}
+	
+// protected $fieldDesc = 'INT(%s)';
 
 	/** @var  string  db table field size */
-	protected $fieldSize = '6';
+	// protected $fieldSize = '6';
 
 	/**
 	 * Shows the data formatted for the list view

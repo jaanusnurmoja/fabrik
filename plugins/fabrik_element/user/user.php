@@ -26,7 +26,11 @@ class plgFabrik_ElementUser extends plgFabrik_ElementDatabasejoin
 	var $_isJoin = true;
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'INT(11)';
+	public function getFieldDescription()
+	{
+		return 'INT(11)';
+	}
+		// protected $fieldDesc = 'INT(11)';
 
 	/**
 	* Load element params

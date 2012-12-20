@@ -21,7 +21,11 @@ class plgFabrik_ElementUsergroup extends plgFabrik_Element
 {
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'TEXT';
+	public function getFieldDescription()
+	{
+	return 'TEXT';
+	}
+	// protected $fieldDesc = 'TEXT';
 
 	/**
 	 * Draws the html form element

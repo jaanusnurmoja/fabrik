@@ -24,7 +24,11 @@ class plgFabrik_ElementDisplay extends plgFabrik_Element
 	 *
 	 * @var  string
 	 */
-	protected $fieldDesc = 'TEXT';
+		public function getFieldDescription()
+		{
+		return 'TEXT';
+		}
+		// protected $fieldDesc = 'TEXT';
 
 	/**
 	 * Does the element's data get recorded in the db

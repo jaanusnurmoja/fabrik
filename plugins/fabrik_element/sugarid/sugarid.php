@@ -23,10 +23,15 @@ class plgFabrik_ElementSugarid extends plgFabrik_Element
 {
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'CHAR(%s)';
+	public function getFieldDescription()
+	{
+		return 'CHAR(36)';
+	}
+	
+// protected $fieldDesc = 'CHAR(%s)';
 
 	/** @var  string  db table field size */
-	protected $fieldSize = '36';
+	//protected $fieldSize = '36';
 
 	/**
 	 * Draws the html form element

@@ -25,10 +25,15 @@ class plgFabrik_ElementRating extends plgFabrik_Element
 {
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'TINYINT(%s)';
+	public function getFieldDescription()
+	{
+		return 'TINYINT(1)';
+	}
+	
+	// protected $fieldDesc = 'TINYINT(%s)';
 
 	/** @var  string  db table field size */
-	protected $fieldSize = '1';
+	// protected $fieldSize = '1';
 
 	/** @var array average ratings */
 	protected $avgs = null;

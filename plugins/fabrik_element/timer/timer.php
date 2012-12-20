@@ -28,9 +28,13 @@ class plgFabrik_ElementTimer extends plgFabrik_Element
 	public $hasSubElements = false;
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'TIME';
 
-	 // Jaanus: works better when using datatype 'TIME' as above and forgetting any date part of data :)
+	public function getFieldDescription()
+	{
+		return 'TIME';
+	}
+
+	//protected $fieldDesc = 'TIME';
 
 	/**
 	 * Determines if the element can contain data used in sending receipts,

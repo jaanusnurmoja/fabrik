@@ -21,7 +21,12 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 {
 
 	/** @var  string  db table field type */
-	protected $fieldDesc = 'TEXT';
+	public function getFieldDescription()
+	{
+		return 'TEXT';
+	}
+	
+// protected $fieldDesc = 'TEXT';
 
 	/**
 	 * Tagify a string
