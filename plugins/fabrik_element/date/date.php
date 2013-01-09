@@ -718,7 +718,7 @@ class plgFabrik_ElementDate extends plgFabrik_Element
 		}
 		else
 		{
-			return $p->get('date_db_field_type', "DATETIME");
+			return "DATETIME";
 		}
 	}
 
