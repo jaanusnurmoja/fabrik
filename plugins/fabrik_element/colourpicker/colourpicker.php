@@ -21,11 +21,11 @@ class plgFabrik_ElementColourpicker extends plgFabrik_Element
 {
 
 	/** @var  string  db table field type */
-	public function getFieldDescription()
+/*	public function getFieldDescription()
 	{
 		return 'CHAR(10)';
 	}
-	// protected $fieldDesc = 'CHAR(%s)';
+*/	// protected $fieldDesc = 'CHAR(%s)';
 
 	/** @var  string  db table field size */
 	// protected $fieldSize = '10';
