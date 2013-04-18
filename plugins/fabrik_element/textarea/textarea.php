@@ -20,12 +20,13 @@ defined('_JEXEC') or die();
 class plgFabrik_ElementTextarea extends plgFabrik_Element
 {
 
-	/**
-	 * Db table field type
-	 *
-	 * @var string
-	 */
-	protected $fieldDesc = 'TEXT';
+	/** @var  string  db table field type */
+	public function getFieldDescription()
+	{
+		return 'TEXT';
+	}
+	
+// protected $fieldDesc = 'TEXT';
 
 	/**
 	 * Tagify a string
@@ -144,6 +145,25 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 	}
 
 	/**
+	 * Get the element's HTML label
+	 *
+	 * @param   int     $repeatCounter  Group repeat counter
+	 * @param   string  $tmpl           Form template
+	 *
+	 * @return  string  label
+	 */
+
+	public function getLabel($repeatCounter = 0, $tmpl = '')
+	{
+		$params = $this->getParams();
+		$element = $this->getElement();
+		if ($params->get('textarea_showlabel') == '0')
+		{
+			$element->label = '';
+		}
+		return parent::getLabel($repeatCounter, $tmpl);
+	}
+	/**
 	 * Does the element use the WYSWYG editor
 	 *
 	 * @return  bool	use wysiwyg editor
@@ -257,7 +277,7 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 			else
 			{
 				$editor = JFactory::getEditor();
-				$str = $editor->display($name, $value, $cols * 10, $rows * 15, $cols, $rows, true, $id);
+				$str = $editor->display($name, $value, $cols*10, $rows*15, $cols, $rows, true, $id);
 			}
 		}
 		else
@@ -318,62 +338,6 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 	}
 
 	/**
-	 * Used by radio and dropdown elements to get a dropdown list of their unique
-	 * unique values OR all options - basedon filter_build_method
-	 *
-	 * @param   bool    $normal     do we render as a normal filter or as an advanced search filter
-	 * @param   string  $tableName  table name to use - defaults to element's current table
-	 * @param   string  $label      field to use, defaults to element name
-	 * @param   string  $id         field to use, defaults to element name
-	 * @param   bool    $incjoin    include join
-	 *
-	 * @return  array  text/value objects
-	 */
-
-	public function filterValueList($normal, $tableName = '', $label = '', $id = '', $incjoin = true)
-	{
-		$params = $this->getParams();
-		if ($params->get('textarea-tagify') == true)
-		{
-			return $this->getTags();
-		}
-		else
-		{
-			return parent::filterValueList($normal, $tableName, $label, $id, $incjoin);
-		}
-	}
-
-	/**
-	 * Used for filter lists - get distinct array of all recorded tags
-	 *
-	 * @since   3.0.7
-	 *
-	 * @return   array
-	 */
-
-	protected function getTags()
-	{
-		$listModel = $this->getListModel();
-		$id = $this->getElement()->id;
-		$cols = $listModel->getColumnData($id);
-		$tags = array();
-		foreach ($cols as $col)
-		{
-			$col = explode(',', $col);
-			foreach ($col as $word)
-			{
-				$word = strtolower(trim($word));
-				if ($word !== '')
-				{
-					$tags[$word] = JHTML::_('select.option', $word, $word);
-				}
-			}
-		}
-		$tags = array_values($tags);
-		return $tags;
-	}
-
-	/**
 	 * Returns javascript which creates an instance of the class defined in formJavascriptClass()
 	 *
 	 * @param   int  $repeatCounter  Repeat group counter
@@ -389,8 +353,8 @@ class plgFabrik_ElementTextarea extends plgFabrik_Element
 			// $$$ rob need to use the NAME as the ID when wysiwyg end in joined group
 			$id = $this->getHTMLName($repeatCounter);
 
-			// Testing not using name as duplication of group does not trigger clone()
-			// $id = $this->getHTMLId($repeatCounter);
+			// testing not using name as duplication of group does not trigger clone()
+			//$id = $this->getHTMLId($repeatCounter);
 
 			if ($this->_inDetailedView)
 			{
