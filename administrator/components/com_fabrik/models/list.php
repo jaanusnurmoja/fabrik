@@ -1200,17 +1200,17 @@ class FabrikModelList extends FabModelAdmin
 			$type = preg_replace("/\((.*)\)/i", '', $type);
 
 			$element = FabTable::getInstance('Element', 'FabrikTable');
-			if (array_key_exists($ordering, $elementTypes))
+			// If the field is the primary key and it's an INT type set the plugin to be the fabrik internal id
+			if ($key[0]['colname'] == $label && JString::strtolower(substr($key[0]['type'], 0, 3)) === 'int')
 			{
-				// If importing from a CSV file then we have userselect field definitions
-				$plugin = $elementTypes[$ordering];
+				$plugin = 'internalid';
 			}
 			else
 			{
-				// If the field is the primary key and it's an INT type set the plugin to be the fabrik internal id
-				if ($key[0]['colname'] == $label && JString::strtolower(substr($key[0]['type'], 0, 3)) === 'int')
+				if (array_key_exists($ordering, $elementTypes))
 				{
-					$plugin = 'internalid';
+					// If importing from a CSV file then we have userselect field definitions
+					$plugin = $elementTypes[$ordering];
 				}
 				else
 				{
