@@ -2180,13 +2180,14 @@ class FabrikFEModelList extends JModelForm
 						if (count($tmpPks[$pk]) == 1)
 						{
 							$v = str_replace('`', '', $tmpPks[$pk][0]);
-							$v = explode('.', $v);
+							//$v = explode('.', $v);
 							$v[0] = $v[0] . '_0';
 							$tmpPks[$pk][0] = $db->quoteName($v[0] . '.' . $v[1]);
 						}
 						$v = str_replace('`', '', $pk);
 						$v = explode('.', $v);
-						$v[0] = $v[0] . '_' . count($tmpPks[$pk]);
+						// Jaanus: fixing mismatches between table join aliases here and under _makeJoinAliases. For this purpose also commented out the line under if above
+						$v[0] = $v[0] . '_' . (count($tmpPks[$pk]) -1);
 						$tmpPks[$pk][] = $db->quoteName($v[0] . '.' . $v[1]);
 					}
 				}
