@@ -2106,12 +2106,14 @@ $groupBy .= '_raw';
 						{
 							$v = str_replace('`', '', $tmpPks[$pk][0]);
 							$v = explode('.', $v);
-							$v[0] = $v[0] . '_0';
+							// $v[0] = $v[0] . '_0';
 							$tmpPks[$pk][0] = $db->quoteName($v[0] . '.' . $v[1]);
 						}
 						$v = str_replace('`', '', $pk);
 						$v = explode('.', $v);
-						$v[0] = $v[0] . '_' . count($tmpPks[$pk]);
+						// Jaanus: commenting out $v[0] = $v[0] . '_0' and adding -1 to the count below 
+						// makes join aliases generated here match the aliases generated under _makeJoinAliases()
+						$v[0] = $v[0] . '_' . (count($tmpPks[$pk]) - 1); 
 						$tmpPks[$pk][] = $db->quoteName($v[0] . '.' . $v[1]);
 					}
 				}
