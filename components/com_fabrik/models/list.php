@@ -8879,7 +8879,6 @@ class FabrikFEModelList extends JModelForm
 		return false;
 	}
 
-
 	/**
 	 * Get pluginmanager (get reference to form's plugin manager
 	 *

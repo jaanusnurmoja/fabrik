@@ -1515,7 +1515,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$pos = $params->get('tiplocation', 'top');
 		$opts->formTip = true;
 		$opts->position = $pos;
-		$opts->trigger = 'hover';
+		$opts->trigger = 'hover focus';
 		$opts->notice = true;
 
 		if ($this->editable)
@@ -5210,7 +5210,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 		else
 		{
-			$r = empty($data) ? '' : '<p>' . array_shift($data) . '</p>';
+			$r = empty($data) ? '' : '<div>' . array_shift($data) . '</div>';
 		}
 		return $r;
 	}
