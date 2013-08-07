@@ -4,12 +4,12 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
- * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
-// Check to ensure this file is included in Joomla!
-defined('_JEXEC') or die();
+// No direct access
+defined('_JEXEC') or die('Restricted access');
 
 jimport('joomla.application.component.model');
 jimport('joomla.filesystem.file');
@@ -832,8 +832,6 @@ class PlgFabrik_Element extends FabrikPlugin
 
 	public function canView($view = 'form')
 	{
-		// As list view acl is new we should inherit from the details view setting which was being applied to the list view.
-		//$default = ($view === 'list') ? $this->canView() : 1;
 		$default = 1;
 		$key = $view == 'form' ? 'view' : 'listview';
 		$prop = $view == 'form' ? 'view_access' : 'list_view_access';
@@ -1140,7 +1138,7 @@ class PlgFabrik_Element extends FabrikPlugin
 					$this->_default = $default === false ? '' : $default;
 				}
 			}
-			$this->default = $default;
+			$this->default = JText::_($default);
 		}
 		return $this->default;
 	}
@@ -1432,7 +1430,7 @@ class PlgFabrik_Element extends FabrikPlugin
 					$l .= FabrikHelperHTML::image($emptyIcon, 'form', $tmpl, $iconOpts) . ' ';
 				}
 			}
-			$l .= $j3 ? $element->label : '';
+			$l .= $j3 ? JText::_($element->label) : '';
 			$model = $this->getFormModel();
 			$str .= $l;
 			if ($bLabel && !$this->isHidden())
@@ -3100,6 +3098,10 @@ class PlgFabrik_Element extends FabrikPlugin
 				$opts[] = $phpOpt->text;
 			}
 		}
+		foreach ($opts as &$opt)
+		{
+			$opt = JText::_($opt);
+		}
 		return $opts;
 	}
 
@@ -3938,9 +3940,9 @@ class PlgFabrik_Element extends FabrikPlugin
 	/**
 	 * Used by elements with suboptions, given a value, return its label
 	 *
-	 * @param   string  $v              Value
-	 * @param   string  $defaultLabel   Default label
-	 * @param   bool    $forceCheck     Force check even if $v === $defaultLabel
+	 * @param   string  $v             Value
+	 * @param   string  $defaultLabel  Default label
+	 * @param   bool    $forceCheck    Force check even if $v === $defaultLabel
 	 *
 	 * @return  string	Label
 	 */
@@ -6263,148 +6265,6 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 
 		return $retStr;
-	}
-
-	/**
-	 * Inline edit
-	 *
-	 * @deprecated - should be in form view now as you can have > 1 element in inlineedit plugin
-	 *
-	 * @return null
-	 */
-
-	public function inLineEdit()
-	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
-		$listModel = JModelLegacy::getInstance('List', 'FabrikFEModel');
-		$listid = $input->getInt('listid');
-		$rowid = $input->get('rowid');
-		$elementid = $this->getElement()->id;
-		$listModel->setId($listid);
-		$data = JArrayHelper::fromObject($listModel->getRow($rowid));
-		$className = $input->get('plugin');
-		if (!$this->canUse())
-		{
-			if ($input->get('task') != 'element.save')
-			{
-				echo JText::_("JERROR_ALERTNOAUTHOR");
-				return;
-			}
-			$this->setEditable(false);
-		}
-		else
-		{
-			$this->setEditable(true);
-		}
-		$groupModel = $this->getGroup();
-
-		$repeatCounter = 0;
-		$html = '';
-		$key = $this->getFullName();
-
-		$template = JFactory::getApplication()->getTemplate();
-		FabrikHelperHTML::addPath(JPATH_SITE . '/administrator/templates/' . $template . '/images/', 'image', 'list');
-
-		// @TODO add acl checks here
-		$task = $input->get('task');
-		$saving = ($task == 'element.save' || $task == 'save') ? true : false;
-		$htmlid = $this->getHTMLId($repeatCounter);
-		if ($this->canToggleValue() && ($task !== 'element.save' && $task !== 'save'))
-		{
-			/**
-			 * Ok for yes/no elements activating them (double clicking in cell)
-			 * should simply toggle the stored value and return the new html to show
-			 */
-			$toggleValues = $this->getOptionValues();
-			$currentIndex = array_search($data[$key], $toggleValues);
-			if ($currentIndex === false || $currentIndex == count($toggleValues) - 1)
-			{
-				$nextIndex = 0;
-			}
-			else
-			{
-				$nextIndex = $currentIndex + 1;
-			}
-			$newvalue = $toggleValues[$nextIndex];
-			$data[$key] = $newvalue;
-			$shortkey = array_pop(explode('___', $key));
-			$listModel->storeCell($rowid, $shortkey, $newvalue);
-			$this->mode = 'readonly';
-			$html = $this->renderListData($data[$key], $data);
-
-			$script = array();
-			$script[] = '<script type="text/javasript">';
-
-			// Makes the inlined editor stop editing the cell
-			$script[] = "Fabrik.fireEvent('fabrik.list.inlineedit.stopEditing');";
-			$script[] = '</script>';
-
-			echo $html . implode("\n", $script);
-			return;
-		}
-		$listModel->clearCalculations();
-		$listModel->doCalculations();
-		$listRef = 'list_' . $input->get('listref');
-		$doCalcs = "\n
-				Fabrik.blocks['" . $listRef . "'].updateCals(" . json_encode($listModel->getCalculations()) . ')';
-
-		if (!$saving)
-		{
-			/**
-			 * so not an element with toggle values, so load up the form widget to enable user
-			 * to select/enter a new value
-			 * wrap in fabriKElement div to ensure element js code works
-			 */
-			$html .= '<div class="floating-tip" style="position:absolute">
-					<ul class="fabrikElementContainer">';
-			$html .= '<li class="fabrikElement">';
-			$html .= $this->preRenderElement($data, $repeatCounter);
-			$html .= '</li>';
-			$html .= '</ul>';
-
-			if ($input->getBool('inlinesave') || $input->getBool('inlinecancel'))
-			{
-				$html .= '<ul class="fabrik_buttons">';
-				if ($input->getBool('inlinecancel') == true)
-				{
-					$html .= '<li class="ajax-controls inline-cancel">';
-					$html .= '<a href="#" class="">';
-					$html .= FabrikHelperHTML::image('delete.png', 'list', @$this->tmpl, array('alt' => JText::_('COM_FABRIK_CANCEL')))
-					. '<span></span></a>';
-					$html .= '</li>';
-				}
-				if ($input->getBool('inlinesave') == true)
-				{
-					$html .= '<li class="ajax-controls inline-save">';
-					$html .= '<a href="#" class="">';
-					$html .= FabrikHelperHTML::image('save.png', 'list', @$this->tmpl, array('alt' => JText::_('COM_FABRIK_SAVE')));
-					$html .= '<span>' . JText::_('COM_FABRIK_SAVE') . '</span></a>';
-					$html .= '</li>';
-				}
-				$html .= '</ul>';
-			}
-
-			$html .= '</div>';
-			$elementJS = $this->elementJavascript($repeatCounter);
-			$onLoad = "Fabrik.inlineedit_$elementid = new " . $elementJS[0] . '("' . $elementJS[1] . '",' . json_encode($elementJS[2]) . ");\n"
-					. "Fabrik.inlineedit_$elementid.select();
-					Fabrik.inlineedit_$elementid.focus();
-					Fabrik.inlineedit_$elementid.token = '" . JSession::getFormToken() . "';\n";
-
-			$onLoad .= "Fabrik.fireEvent('fabrik.list.inlineedit.setData');\n";
-			$srcs = array();
-			$this->formJavascriptClass($srcs);
-			FabrikHelperHTML::script($srcs, $onLoad);
-		}
-		else
-		{
-			$html .= $this->renderListData($data[$key], $data);
-			$html .= '<script type="text/javasript">';
-			$html .= $doCalcs;
-			$html .= "</script>\n";
-		}
-		echo $html;
 	}
 
 	/**

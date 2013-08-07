@@ -1,13 +1,15 @@
 <?php
 /**
+ * Database Join Element
+ *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.databasejoin
- * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
-// Check to ensure this file is included in Joomla!
-defined('_JEXEC') or die();
+// No direct access
+defined('_JEXEC') or die('Restricted access');
 
 /**
  *  Plugin element to render list of data looked up from a database table
@@ -2680,7 +2682,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		}
 		// $$$ hugh - added 'autocomplete_how', currently just "starts_with" or "contains"
 		// default to "contains" for backward compat.
-		$elementModel->_autocomplete_where = $this->_autocompleteWhere($params->get('dbjoin_autocomplete_how', 'contains'), $c, $search);
+		$elementModel->_autocomplete_where = $elementModel->_autocompleteWhere($params->get('dbjoin_autocomplete_how', 'contains'), $c, $search);
 		$opts = array('mode' => 'filter');
 		$tmp = $elementModel->_getOptions(array(), 0, true, $opts);
 		return json_encode($tmp);

@@ -4,12 +4,12 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005 Fabrik. All rights reserved.
- * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
-// Check to ensure this file is included in Joomla!
-defined('_JEXEC') or die();
+// No direct access
+defined('_JEXEC') or die('Restricted access');
 
 jimport('joomla.application.component.model');
 require_once 'fabrikmodelform.php';
@@ -1004,7 +1004,6 @@ class FabrikFEModelForm extends FabModelForm
 			$app = JFactory::getApplication();
 			$input = $app->input;
 			$menu_rowid = FabrikWorker::getMenuOrRequestVar('rowid', '0', $this->isMambot, 'menu');
-			//$request_rowid = FabrikWorker::getMenuOrRequestVar('rowid', '0', $this->isMambot, 'request');
 
 			if ($menu_rowid == '-1')
 			{
@@ -3109,7 +3108,6 @@ class FabrikFEModelForm extends FabModelForm
 								}
 								else
 								{
-									//if ($groupModel->isJoin())
 									if ($groupModel->isJoin() && $groupModel->canRepeat())
 									{
 										$n =& $data[0]->$name;
@@ -3685,6 +3683,12 @@ class FabrikFEModelForm extends FabModelForm
 		if ($jplugins === 0 || ($jplugins === 2 && $this->isEditable()))
 		{
 			$text = preg_replace("/{\s*.*?}/i", '', $text);
+		}
+		$plain = strip_tags($text);
+		$translated = JText::_($plain);
+		if ($translated !== $plain)
+		{
+			$text = str_replace($plain, $translated, $text);
 		}
 		return $text;
 	}
@@ -4416,48 +4420,6 @@ class FabrikFEModelForm extends FabModelForm
 			$pk = $input->getInt('formid');
 		}
 		$this->setState('form.id', $pk);
-	}
-
-	/**
-	 * Inline edit show the edited element
-	 *
-	 * @return string
-	 */
-
-	public function inLineEditResult()
-	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
-		$listModel = $this->getListModel();
-		$listid = $listModel->getId();
-		$listModel->clearCalculations();
-		$listModel->doCalculations();
-		$elementid = $input->getInt('elid');
-		if ($elementid === 0)
-		{
-			return;
-		}
-		$elmentModel = $this->getElement($elementid, true);
-		if (!$elmentModel)
-		{
-			return;
-		}
-		$rowid = $input->get('rowid');
-		$listModel->setId($listid);
-
-		// If the inline edit stored a element join we need to reset back the table
-		$listModel->clearTable();
-		$listModel->getTable();
-		$data = JArrayHelper::fromObject($listModel->getRow($rowid));
-		$key = $input->get('element');
-		$html = '';
-		$html .= $elmentModel->renderListData($data[$key], $data);
-		$listRef = 'list_' . $input->get('listref');
-		$doCalcs = "\nFabrik.blocks['" . $listRef . "'].updateCals(" . json_encode($listModel->getCalculations()) . ")";
-		$html .= '<script type="text/javasript">';
-		$html .= $doCalcs;
-		$html .= "</script>\n";
-		return $html;
 	}
 
 	/**
