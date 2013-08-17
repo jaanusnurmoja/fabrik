@@ -1025,16 +1025,16 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			/*
 			 * if it's a new form, labels won't be set for any defaults.
 			 */
-			if ($formModel->getRowId() == 0)
+			if ($formModel->getRowId() == '')
 			{
-				foreach($defaultLabels as $key => $val)
+				foreach ($defaultLabels as $key => $val)
 				{
 					/*
 					 * Calling getLabelForVaue works, but it generates a database query for each one.
 					 * We should already have what we need in $tmp (the result of _getOptions), so lets
 					 * grab it from there.
 					 */
-					//$defaultLabels[$key] = $this->getLabelForValue($default[$key], $default[$key], true);
+					// $defaultLabels[$key] = $this->getLabelForValue($default[$key], $default[$key], true);
 					if (!empty($val))
 					{
 						foreach ($tmp as $t)
@@ -1251,7 +1251,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		 * $$$ rob 18/06/2012 if form submitted with errors - reshowing the auto-complete wont have access to the submitted values label
 		* 02/11/2012 if new form then labels not present either.
 		*/
-		if ($formModel->hasErrors() || $formModel->getRowId() == 0)
+		if ($formModel->hasErrors() || $formModel->getRowId() === '')
 		{
 			$label = (array) $this->getLabelForValue($label[0], $label[0], true);
 		}
@@ -1557,13 +1557,13 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	/**
 	 * Shows the data formatted for the list view
 	 *
-	 * @param   string  $data      Elements data
-	 * @param   object  &$thisRow  All the data in the lists current row
+	 * @param   string    $data      elements data
+	 * @param   stdClass  &$thisRow  all the data in the lists current row
 	 *
-	 * @return  string	Formatted value
+	 * @return  string	formatted value
 	 */
 
-	public function renderListData($data, &$thisRow)
+	public function renderListData($data, stdClass &$thisRow)
 	{
 		$params = $this->getParams();
 		$groupModel = $this->getGroupModel();
@@ -2611,7 +2611,29 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$query = $this->buildQuery(array(), false);
 		$key = $this->getJoinValueColumn();
 		$query->clear('where');
-		$query->where($key . ' = ' . $db->quote($v));
+		if (is_array($v))
+		{
+			/**
+			 * $$$ hugh - tweaked this a little, as IN () pitches an error in
+			 * MySQL, so we need to make sure we don't end up with that.  So as
+			 * IN (), if it worked, would produce no rows, just replace with 1=-1
+			 * Can't just count($v), as sometimes it's an array with a single null entry.
+			 */
+			array_map(array($db, 'quote'), $v);
+			$ins = implode(',', $v);
+			if (trim($ins) === '')
+			{
+				$query->where('1=-1');
+			}
+			else
+			{
+				$query->where($key . ' IN (' . $ins . ')');
+			}
+		}
+		else
+		{
+			$query->where($key . ' = ' . $db->quote($v));
+		}
 		$db->setQuery($query);
 		$r = $db->loadObject();
 		if (!$r)

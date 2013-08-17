@@ -75,9 +75,9 @@ class PlgFabrik_ElementBirthday extends PlgFabrik_Element
 		 * _form_data was not set to no readonly value was returned
 		 * added little test to see if the data was actually an array before using it
 		 */
-		if (is_array($this->_form->_data))
+		if (is_array($this->getFormModel()->data))
 		{
-			$data = $this->_form->_data;
+			$data = $this->getFormModel()->data;
 		}
 		$value = $this->getValue($data, $repeatCounter);
 		$fd = $params->get('details_date_format', 'd.m.Y');
@@ -453,13 +453,13 @@ class PlgFabrik_ElementBirthday extends PlgFabrik_Element
 	/**
 	 * Shows the data formatted for the list view
 	 *
-	 * @param   string  $data      elements data
-	 * @param   object  &$thisRow  all the data in the lists current row
+	 * @param   string    $data      elements data
+	 * @param   stdClass  &$thisRow  all the data in the lists current row
 	 *
 	 * @return  string	formatted value
 	 */
 
-	public function renderListData($data, &$thisRow)
+	public function renderListData($data, stdClass &$thisRow)
 	{
 		$groupModel = $this->getGroup();
 		/**

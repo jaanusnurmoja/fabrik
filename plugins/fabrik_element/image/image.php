@@ -98,13 +98,13 @@ class PlgFabrik_ElementImage extends PlgFabrik_Element
 	/**
 	 * Shows the data formatted for the list view
 	 *
-	 * @param   string  $data      elements data
-	 * @param   object  &$thisRow  all the data in the lists current row
+	 * @param   string    $data      elements data
+	 * @param   stdClass  &$thisRow  all the data in the lists current row
 	 *
 	 * @return  string	formatted value
 	 */
 
-	public function renderListData($data, &$thisRow)
+	public function renderListData($data, stdClass &$thisRow)
 	{
 		$w = new FabrikWorker;
 		$data = FabrikWorker::JSONtoData($data, true);
@@ -340,7 +340,7 @@ class PlgFabrik_ElementImage extends PlgFabrik_Element
 	}
 
 	/**
-	 * On Ajax files?
+	 * On Ajax files
 	 *
 	 * @return  void
 	 */
@@ -350,7 +350,11 @@ class PlgFabrik_ElementImage extends PlgFabrik_Element
 		$this->loadMeForAjax();
 		$app = JFactory::getApplication();
 		$folder = $app->input->get('folder', '', 'string');
-		$pathA = JPath::clean(JPATH_SITE . '/' . $folder);
+		if (!strstr($folder, JPATH_SITE))
+		{
+			$folder = JPATH_SITE . '/' . $folder;
+		}
+		$pathA = JPath::clean($folder);
 		$folder = array();
 		$files = array();
 		$images = array();

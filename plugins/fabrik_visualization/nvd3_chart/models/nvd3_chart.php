@@ -99,6 +99,11 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 				$this->data = $this->multiChartData();
 				return $this->data;
 			}
+			else
+			{
+				$this->data = $this->singleLineData();
+				return $this->data;
+			}
 			$this->data = new stdClass;
 			$this->data->key = 'todo2';
 			$db = JFactory::getDbo();
@@ -208,17 +213,9 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 		return $data;
 	}
 
-	/**
-	 * Build data for the mutli Chart types
-	 * Current only works
-	 *
-	 * @return stdClass
-	 */
-
-	protected function multiChartData()
+	protected function singleLineData()
 	{
 		$params = $this->getParams();
-		//echo "<pre>";print_r($params);echo "</pre>";;
 		if ($params->get('data_mode') == 0)
 		{
 			$labelColumns = $params->get('value_field');
@@ -235,8 +232,6 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 		$query = $db->getQuery(true);
 		$query->select($labelColumns)->from($table);
 
-		//test
-		$split = 'date';
 		if ($split !== '')
 		{
 			$query->select($split . ' AS ' . $db->nameQuote('key'));
@@ -245,7 +240,81 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 		{
 			if ($params->get('data_mode') == 0)
 			{
-				//$query->select($params->get('label_field') . ' AS ' . $db->nameQuote('key'));
+				$query->select('date AS ' . $db->nameQuote('key'));
+			}
+		}
+		$db->setQuery($query);
+		$rows = $db->loadObjectList();
+
+		$keys = array_keys(JArrayHelper::fromObject($rows[0]));
+
+		$colors = explode(',', $params->get('colours', '#B9C872,#88B593,#388093,#994B89,#ED5FA2,#4D1018,#8F353E,#D35761,#43574E,#14303C'));
+
+		$return = array();
+
+		$i = 0;
+		foreach ($keys as $key)
+		{
+			if ($key != 'key')
+			{
+				$values = array();
+				foreach ($rows as $row)
+				{
+					$o = new stdClass;
+
+					// Key needs to be a numeric value.
+					$o->x = (float) $row->key;
+					$o->y = (float) $row->$key;
+					$values[] = $o;
+					$a ++;
+				}
+				$entry = new stdClass;
+				$entry->values = $values;
+				$entry->key = $key;
+				$entry->color = $colors[$i];
+				$return[] = $entry;
+				$i ++;
+			}
+		}
+		return $return;
+	}
+
+	/**
+	 * Build data for the mutli Chart types
+	 * Current only works
+	 *
+	 * @return stdClass
+	 */
+
+	protected function multiChartData()
+	{
+		$params = $this->getParams();
+		if ($params->get('data_mode') == 0)
+		{
+			$labelColumns = $params->get('value_field');
+		}
+		else
+		{
+			$labelColumns = explode(',', $params->get('label_columns'));
+		}
+		$table = $params->get('tbl');
+		$split = $params->get('split', '');
+		$groupBy = $params->get('group_by');
+
+		$db = FabrikWorker::getDbo(false, $params->get('conn_id'));
+		$query = $db->getQuery(true);
+		$query->select($labelColumns)->from($table);
+
+		// Test
+		//$split = '';
+		if ($split !== '')
+		{
+			$query->select($split . ' AS ' . $db->nameQuote('key'));
+		}
+		else
+		{
+			if ($params->get('data_mode') == 0)
+			{
 				$query->select('date AS ' . $db->nameQuote('key'));
 			}
 		}
@@ -280,11 +349,10 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 	 *
 	 * @return stdClass
 	 */
-	protected function  multiChartLabelsNoSplit($rows)
+	protected function multiChartLabelsNoSplit($rows)
 	{
 		$o = new stdClass;
 		$o->values = array();
-		echo "<pre>";print_r($rows);echo "</pre>";
 		foreach ($rows as $d)
 		{
 			foreach ($d as $k => $v)
@@ -453,12 +521,42 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 		{
 			$str[] = 'chart.xAxis.rotateLabels(-' . $rotate . ');';
 		}
-		// Additonal margin needed for rotated labels
+		return implode("\n", $str);
+	}
+
+	/**
+	 * Add chart marings
+	 *
+	 * @return  string  chart.margn option
+	 */
+
+	protected function margins()
+	{
+		$str = '';
+		$params = $this->getParams();
 		if ($params->get('margin', '') !== '')
 		{
-			$str[] = 'chart.margin({bottom: 160, left: 60});';
+			$margins = explode(',', $params->get('margin', ''));
+			$marg = new stdClass;
+			$marg->top = 10;
+			$marg->bottom = 160;
+			$marg->right = 10;
+			$marg->left = 80;
+			if (count($margins) == 2)
+			{
+				$marg->top = $marg->bottom = $margins[0];
+				$marg->left = $marg->right = $margins[1];
+			}
+			elseif (count($margins) == 4)
+			{
+				$marg->top = $margins[0];
+				$marg->right = $margins[1];
+				$marg->bottom = $margins[2];
+				$marg->left = $margins[3];
+			}
+			$str = 'chart.margin(' . json_encode($marg) . ');';
 		}
-		return implode("\n", $str);
+		return $str;
 	}
 
 	/**
@@ -520,19 +618,17 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 
 				$str[] = '.x(function(d) { return d.label })';
 				$str[] = '.y(function(d) { return d.value })';
-				$str[] = $this->discreteBarChartOpts();
 				break;
 
 				// Test: was the same as stackedAreaChart (was the same as stackedAreaChart)
 			case 'multiBarChart':
 				$str[] = '.x(function(d) { return d.label })';
 				$str[] = '.y(function(d) { return d.value })';
+				//$str[] = $this->margins();
 				break;
 			case 'stackedAreaChart':
 			case 'lineWithFocusChart':
 				$str[] = '.x(function(d) { return d[0] })';
-
-
 				$str[] = '.y(function(d) { return d[1] })';
 				$str[] = '.clipEdge(true)';
 				break;
@@ -543,15 +639,15 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 
 		}
 
-		$margin = $params->get('margin', '');
-		if ($margin !== '')
+		switch ($chart)
 		{
-			$margin = explode(',', $margin);
-			if (count($margin) == 4)
-			{
-				$str[] = 'chart.margin({top: ' . (int) $margin[0] . ',right: ' . (int) $margin[1] . ', bottom: ' . (int) $margin[2] . ', left: ' . (int) $margin[3] . '});';
-			}
+			// @TODO add line chart axis label options.
+			case 'lineChart':
+				//$str[] = 'chart.xAxis.axisLabel(\'Time (ms)\');';
+				//$str[] = 'chart.yAxis.axisLabel(\'Voltage (v)\');';
+				break;
 		}
+		$str[] = $this->margins();
 
 		$this->showControls($str);
 
@@ -575,7 +671,6 @@ class FabrikModelNvd3_Chart extends FabrikFEModelVisualization
 		$str[] = 'return chart;';
 		$str[] = '});';
 		$str[] = '});';
-		// $str[] = 'console.log(' . $data . ');';
 		return implode("\n", $str);
 		/**
 

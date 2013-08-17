@@ -1,6 +1,6 @@
 <?php
 /**
- * Fabrik Elemenet Model
+ * Fabrik Element Model
  *
  * @package     Joomla
  * @subpackage  Fabrik
@@ -15,7 +15,7 @@ jimport('joomla.application.component.model');
 jimport('joomla.filesystem.file');
 
 /**
- * Fabrik Elemenet Model
+ * Fabrik Element Model
  *
  * @package  Fabrik
  * @since    3.0
@@ -867,14 +867,13 @@ class PlgFabrik_Element extends FabrikPlugin
 	 * If location is 'list' then we don't check the group canEdit() option - causes inline edit plugin not to work
 	 * when followed by a update_col plugin.
 	 *
-	 * @param   object  &$model    Calling the plugin list/form
 	 * @param   string  $location  To trigger plugin on form/list for elements
 	 * @param   string  $event     To trigger plugin on
 	 *
 	 * @return  bool can use or not
 	 */
 
-	public function canUse(&$model = null, $location = null, $event = null)
+	public function canUse($location = null, $event = null)
 	{
 		$element = $this->getElement();
 
@@ -1138,7 +1137,18 @@ class PlgFabrik_Element extends FabrikPlugin
 					$this->_default = $default === false ? '' : $default;
 				}
 			}
-			$this->default = JText::_($default);
+			if (is_array($default))
+			{
+				foreach ($default as &$d)
+				{
+					$d = JText::_($d);
+				}
+				$this->default = $default;
+			}
+			else
+			{
+				$this->default = JText::_($default);
+			}
 		}
 		return $this->default;
 	}
@@ -1409,7 +1419,12 @@ class PlgFabrik_Element extends FabrikPlugin
 			}
 			if ($bLabel && !$this->isHidden())
 			{
-				$str .= '<label for="' . $elementHTMLId . '" class="' . $labelClass . '">';
+				$tip = $this->tipHtml();
+				if ($tip !== '')
+				{
+					$labelClass .= ' fabrikTip';
+				}
+				$str .= '<label for="' . $elementHTMLId . '" class="' . $labelClass . '" ' . $this->tipHtml() . '>';
 			}
 			elseif (!$bLabel && !$this->isHidden())
 			{
@@ -1513,7 +1528,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$pos = $params->get('tiplocation', 'top');
 		$opts->formTip = true;
 		$opts->position = $pos;
-		$opts->trigger = 'hover focus';
+		$opts->trigger = 'hover';
 		$opts->notice = true;
 
 		if ($this->editable)
@@ -1926,12 +1941,22 @@ class PlgFabrik_Element extends FabrikPlugin
 				$element->tipSide = $tip;
 				break;
 		}
+		return $element;
+	}
 
+	/**
+	 * Buidl the tip HTML
+	 *
+	 * @return string
+	 */
+
+	protected function tipHtml()
+	{
+		$model = $this->getFormModel();
 		$title = $this->tipTextAndValidations('form', $model->data);
 		$opts = $this->tipOpts();
 		$opts = json_encode($opts);
-		$element->containerProperties = $title !== '' ? 'title="' . $title . '" opts=\'' . $opts . '\'' : '';
-		return $element;
+		return $title !== '' ? 'title="' . $title . '" opts=\'' . $opts . '\'' : '';
 	}
 
 	/**
@@ -1971,11 +1996,6 @@ class PlgFabrik_Element extends FabrikPlugin
 		if ($element->error != '')
 		{
 			$c[] = 'fabrikError';
-		}
-		$title = $this->tipTextAndValidations('form');
-		if ($title !== '')
-		{
-			$c[] = 'fabrikTip';
 		}
 		return implode(' ', $c);
 	}
@@ -2042,7 +2062,9 @@ class PlgFabrik_Element extends FabrikPlugin
 			// $$$ rob changed from span wrapper to div wrapper as element's content may contain divs which give html error
 
 			// Placeholder to be updated by ajax code
-			return '<div id="' . $htmlid . '">' . $this->getROElement($data, $repeatCounter) . '</div>';
+			$v = $this->getROElement($data, $repeatCounter);
+			$v = $v == '' ? '&nbsp;' : $v;
+			return '<div id="' . $htmlid . '">' . $v . '</div>';
 		}
 	}
 
@@ -2493,71 +2515,76 @@ class PlgFabrik_Element extends FabrikPlugin
 			$elId = $this->getHTMLId($repeatCount);
 			foreach ($allJsActions[$element->id] as $jsAct)
 			{
-				$js = addslashes($jsAct->code);
+				$js = $jsAct->code;
 				$js = str_replace(array("\n", "\r"), "", $js);
 				if ($jsAct->action == 'load')
 				{
-					$js = preg_replace('#\bthis\b#', "\$(\\'$elId\\')", $js);
+					// JS code is already stored in the db as htmlspecialchars() 09/08/2013
+					$quote = '&#039;';
+					$js = preg_replace('#\bthis\b#', 'document.id(' . $quote . $elId . $quote . ')', $js);
 				}
 				if ($jsAct->action != '' && $js !== '')
 				{
 					$jsStr .= $jsControllerKey . ".dispatchEvent('$element->plugin', '$elId', '$jsAct->action', '$js');\n";
 				}
-
-				// Build wysiwyg code
-				if (isset($jsAct->js_e_event) && $jsAct->js_e_event != '')
+				else
 				{
-					// $$$ rob get the correct element id based on the repeat counter
-					$triggerEl = $this->getFormModel()->getElement(str_replace('fabrik_trigger_element_', '', $jsAct->js_e_trigger));
-					$triggerid = is_object($triggerEl) ? 'element_' . $triggerEl->getHTMLId($repeatCount) : $jsAct->js_e_trigger;
-					if (!array_key_exists($jsAct->js_e_trigger, $fxadded))
-					{
-						$jsStr .= $jsControllerKey . ".addElementFX('$triggerid', '$jsAct->js_e_event');\n";
-						$fxadded[$jsAct->js_e_trigger] = true;
-					}
-					$f = JFilterInput::getInstance();
-					$post = $f->clean($_POST, 'array');
-					$jsAct->js_e_value = $w->parseMessageForPlaceHolder(htmlspecialchars_decode($jsAct->js_e_value), $post);
 
-					if ($jsAct->js_e_condition == 'hidden')
+					// Build wysiwyg code
+					if (isset($jsAct->js_e_event) && $jsAct->js_e_event != '')
 					{
-						$js = "if (this.getContainer().getStyle('display') === 'none') {";
-					}
-					elseif ($jsAct->js_e_condition == 'shown')
-					{
-						$js = "if (this.getContainer().getStyle('display') !== 'none') {";
-					}
-					elseif ($jsAct->js_e_condition == 'CONTAINS')
-					{
-						$js = "if (Array.from(this.get('value')).contains('$jsAct->js_e_value')) {";
-					}
-					elseif ($jsAct->js_e_condition == '!CONTAINS')
-					{
-						$js = "if (!Array.from(this.get('value')).contains('$jsAct->js_e_value')) {";
-					}
-					// $$$ hugh if we always quote the js_e_value, numeric comparison doesn't work, as '100' < '3'.
-					// So let's assume if they use <, <=, > or >= they mean numbers.
-					elseif (in_array($jsAct->js_e_condition, array('<', '<=', '>', '>='))) {
-						$js .= "if(this.get('value').toFloat() $jsAct->js_e_condition '$jsAct->js_e_value'.toFloat()) {";
-					}
-					else
-					{
-						$js = "if (this.get('value') $jsAct->js_e_condition '$jsAct->js_e_value') {";
-					}
+						// $$$ rob get the correct element id based on the repeat counter
+						$triggerEl = $this->getFormModel()->getElement(str_replace('fabrik_trigger_element_', '', $jsAct->js_e_trigger));
+						$triggerid = is_object($triggerEl) ? 'element_' . $triggerEl->getHTMLId($repeatCount) : $jsAct->js_e_trigger;
+						if (!array_key_exists($jsAct->js_e_trigger, $fxadded))
+						{
+							$jsStr .= $jsControllerKey . ".addElementFX('$triggerid', '$jsAct->js_e_event');\n";
+							$fxadded[$jsAct->js_e_trigger] = true;
+						}
+						$f = JFilterInput::getInstance();
+						$post = $f->clean($_POST, 'array');
+						$jsAct->js_e_value = $w->parseMessageForPlaceHolder(htmlspecialchars_decode($jsAct->js_e_value), $post);
 
-					// Need to use corrected triggerid here as well
-					if (preg_match('#^fabrik_trigger#', $triggerid))
-					{
-						$js .= $jsControllerKey . ".doElementFX('" . $triggerid . "', '$jsAct->js_e_event', this)";
+						if ($jsAct->js_e_condition == 'hidden')
+						{
+							$js = "if (this.getContainer().getStyle('display') === 'none') {";
+						}
+						elseif ($jsAct->js_e_condition == 'shown')
+						{
+							$js = "if (this.getContainer().getStyle('display') !== 'none') {";
+						}
+						elseif ($jsAct->js_e_condition == 'CONTAINS')
+						{
+							$js = "if (Array.from(this.get('value')).contains('$jsAct->js_e_value')) {";
+						}
+						elseif ($jsAct->js_e_condition == '!CONTAINS')
+						{
+							$js = "if (!Array.from(this.get('value')).contains('$jsAct->js_e_value')) {";
+						}
+						// $$$ hugh if we always quote the js_e_value, numeric comparison doesn't work, as '100' < '3'.
+						// So let's assume if they use <, <=, > or >= they mean numbers.
+						elseif (in_array($jsAct->js_e_condition, array('<', '<=', '>', '>='))) {
+							$js .= "if(this.get('value').toFloat() $jsAct->js_e_condition '$jsAct->js_e_value'.toFloat()) {";
+						}
+						else
+						{
+							$js = "if (this.get('value') $jsAct->js_e_condition '$jsAct->js_e_value') {";
+						}
+
+						// Need to use corrected triggerid here as well
+						if (preg_match('#^fabrik_trigger#', $triggerid))
+						{
+							$js .= $jsControllerKey . ".doElementFX('" . $triggerid . "', '$jsAct->js_e_event', this)";
+						}
+						else
+						{
+							$js .= $jsControllerKey . ".doElementFX('fabrik_trigger_" . $triggerid . "', '$jsAct->js_e_event', this)";
+						}
+						$js .= "}";
+						$js = addslashes($js);
+						$js = str_replace(array("\n", "\r"), "", $js);
+						$jsStr .= $jsControllerKey . ".dispatchEvent('$element->plugin', '$elId', '$jsAct->action', '$js');\n";
 					}
-					else
-					{
-						$js .= $jsControllerKey . ".doElementFX('fabrik_trigger_" . $triggerid . "', '$jsAct->js_e_event', this)";
-					}
-					$js .= "}";
-					$js = addslashes($js);
-					$js = str_replace(array("\n", "\r"), "", $js);
-					$jsStr .= $jsControllerKey . ".dispatchEvent('$element->plugin', '$elId', '$jsAct->action', '$js');\n";
 				}
 			}
 		}
@@ -2654,7 +2681,7 @@ class PlgFabrik_Element extends FabrikPlugin
 					{
 						if ($searchType != 'prefilter')
 						{
-							$default = $filters['origvalue'][$k];
+							$default = JArrayHelper::getValue($filters['origvalue'], $k);
 						}
 					}
 				}
@@ -5141,6 +5168,10 @@ class PlgFabrik_Element extends FabrikPlugin
 		$formModel = $this->getFormModel();
 		$name = $this->getFullName(true, false);
 
+		/**
+		 * @TODO - fix this to use formData instead of formDataWithTableName,
+		 * which we need to deprecate.
+		 */
 		if (!array_key_exists($name, $formModel->formDataWithTableName))
 		{
 			$this->getEmptyDataValue($data);
@@ -5156,13 +5187,13 @@ class PlgFabrik_Element extends FabrikPlugin
 	/**
 	 * Shows the data formatted for the list view
 	 *
-	 * @param   string  $data      elements data
-	 * @param   object  &$thisRow  all the data in the lists current row
+	 * @param   string    $data      elements data
+	 * @param   stdClass  &$thisRow  all the data in the lists current row
 	 *
 	 * @return  string	formatted value
 	 */
 
-	public function renderListData($data, &$thisRow)
+	public function renderListData($data, stdClass &$thisRow)
 	{
 		$params = $this->getParams();
 		$listModel = $this->getListModel();
@@ -5212,7 +5243,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 		else
 		{
-			$r = empty($data) ? '' : '<div>' . array_shift($data) . '</div>';
+			$r = empty($data) ? '' : array_shift($data);
 		}
 		return $r;
 	}
@@ -5518,7 +5549,6 @@ class PlgFabrik_Element extends FabrikPlugin
 		$o->view_access = 1;
 		$o->show_in_rss_feed = 0;
 		$o->show_label_in_rss_feed = 0;
-		$o->use_as_fake_key = 0;
 		$o->icon_folder = -1;
 		$o->use_as_row_class = 0;
 		$o->filter_access = 1;

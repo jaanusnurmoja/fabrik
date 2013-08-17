@@ -1007,11 +1007,12 @@ EOD;
 		else
 		{
 			$deps->deps[] = 'fab/lib/art';
-			$deps->deps[] = 'fab/encoder' . $ext;
+
 			$deps->deps[] = 'fab/tips' . $ext;
 			$deps->deps[] = 'fab/icons' . $ext;
 			$deps->deps[] = 'fab/icongen' . $ext;
 		}
+		$deps->deps[] = 'fab/encoder' . $ext;
 
 		$framework['fab/fabrik' . $ext] = $deps;
 
@@ -1451,6 +1452,8 @@ EOD;
 		}
 		else
 		{
+			// Remove any <pre> tags provided by e.g. JQuery::dump
+			$content = preg_replace('/(^\s*<pre( .*)?>)|(<\/pre>\s*$)/i','',$content);
 			echo htmlspecialchars($content);
 		}
 		echo '</div>';

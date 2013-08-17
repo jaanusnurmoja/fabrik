@@ -60,13 +60,13 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 	/**
 	 * Shows the data formatted for the list view
 	 *
-	 * @param   string  $data      Elements data
-	 * @param   object  &$thisRow  All the data in the lists current row
+	 * @param   string    $data      elements data
+	 * @param   stdClass  &$thisRow  all the data in the lists current row
 	 *
 	 * @return  string	formatted value
 	 */
 
-	public function renderListData($data, &$thisRow)
+	public function renderListData($data, stdClass &$thisRow)
 	{
 		if ($data == '')
 		{
@@ -337,7 +337,7 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		}
 		$timelength = JString::strlen($timeformat);
 		FabrikHelperHTML::addPath(COM_FABRIK_BASE . 'plugins/fabrik_element/date/images/', 'image', 'form', false);
-		$str[] = '<input type="text" class="' . $class .'" ' . $readonly . ' size="' . $timelength . '" value="' . $time . '" name="'
+		$str[] = '<input type="text" class="' . $class . '" ' . $readonly . ' size="' . $timelength . '" value="' . $time . '" name="'
 				. $timeElName . '" />';
 		$opts = array('alt' => JText::_('PLG_ELEMENT_DATE_TIME'), 'class' => 'timeButton');
 		$file = FabrikWorker::j3() ? 'clock.png' : 'time.png';
@@ -888,10 +888,19 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 			$date = JFactory::getDate();
 			$value = $date->toSQL();
 		}
-		if ($newRecord && $defaultToday)
+		if ($newRecord && $defaultToday && $value == '')
 		{
-			$date = JFactory::getDate();
-			$value = $date->toSQL();
+			// Set to local time as its then converted to correct utc/local time in _indStoreDBFormat
+			$timeZone = new DateTimeZone(JFactory::getConfig()->get('offset'));
+			$date = JFactory::getDate('now', $timeZone);
+
+			$value = $date->toSQL(true);
+
+			// If we aren't showing the time then remove the time from $value
+			if (!$params->get('date_showtime', 0))
+			{
+				$value = $this->setMySQLTimeToZero($value);
+			}
 		}
 		return $value;
 	}
@@ -909,7 +918,6 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 
 	public function toDbVal($str)
 	{
-		echo "str = $str";exit;
 		/**
 		 * Only format if not empty otherwise search forms will filter
 		 * for todays date even when no date entered

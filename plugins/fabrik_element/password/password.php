@@ -97,7 +97,7 @@ class PlgFabrik_ElementPassword extends PlgFabrik_Element
 		$value = '';
 		if (!$this->isEditable())
 		{
-			return $value;
+			return '***********';
 		}
 		$bits = $this->inputProperties($repeatCounter, 'password');
 		$bits['value'] = $value;
@@ -138,6 +138,10 @@ class PlgFabrik_ElementPassword extends PlgFabrik_Element
 
 	public function validate($data, $repeatCounter = 0)
 	{
+		if (!$this->isEditable())
+		{
+			return true;
+		}
 		$app = JFactory::getApplication();
 		$input = $app->input;
 		$k = $this->getlistModel()->getTable()->db_primary_key;
