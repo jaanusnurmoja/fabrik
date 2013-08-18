@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * DO NOT USE IN FABRIK 3.x TILL THIS NOTICE IS REMOVED!  We are in the process of porting
@@ -14,8 +15,7 @@
  * @author hugh.messenger@gmail.com
  *
  */
-class ImportCSVCreateUser
-{
+class ImportCSVCreateUser {
 
 	/**
 	 * DO NOT set these class variables here.  Instead, set them in your copy of create_client_user.php
@@ -52,10 +52,10 @@ class ImportCSVCreateUser
 	 *
 	 * user_created_value - value to use when setting user_created_element above.
 	 */
-	protected $password_element = '';
-	protected $first_password_element = '';
-	protected $user_created_element = '';
-	protected $user_created_value = '1';
+	var $password_element = '';
+	var $first_password_element = '';
+	var $user_created_element = '';
+	var $user_created_value = '1';
 
 	/**
 	 *
@@ -63,44 +63,39 @@ class ImportCSVCreateUser
 	 *
 	 * Feel free to modify this code to suit your needs ... but there's nothing "configurable" beyond here
 	 *
-	 * @return string
 	 */
 
 	private function rand_str($length = 8, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890')
 	{
-		$chars_length = strlen($chars) - 1;
-		$string = $chars{rand(0, $chars_length)};
-		for ($i = 1; $i < $length; $i = strlen($string))
-		{
-			$r = $chars{rand(0, $chars_length)};
-			if ($r != $string{$i - 1})
-			{
-				$string .= $r;
-			}
-		}
-		return $string;
+	    $chars_length = (strlen($chars) - 1);
+	    $string = $chars{rand(0, $chars_length)};
+	    for ($i = 1; $i < $length; $i = strlen($string))
+	    {
+	        $r = $chars{rand(0, $chars_length)};
+	        if ($r != $string{$i - 1}) $string .=  $r;
+	    }
+	    return $string;
 	}
 
-	public function createUser(&$listModel)
-	{
-		// Include the JLog class.
-		jimport('joomla.log.log');
+	public function createUser(&$listModel) {
+		jimport('joomla.mail.helper');
+		$app =& JFactory::getApplication();
+		$db =& JFactory::getDBO();
+		$log =& JTable::getInstance( 'Log', 'Table' );
+		$log->id = null;
+		$log->message = "";
+		$log->referring_url = $_SERVER['HTTP_REFERER'];
+		$log->message_type='plg.list.listcsv.csv_import_user.information';
 
-		$app = JFactory::getApplication();
-		$db = JFactory::getDbo();
-		$query = $db->getQuery(true);
-		$logMessageType='plg.list.listcsv.csv_import_user.information';
-
-		$formModel = $listModel->getFormModel();
-		$data = $formModel->formData;
+		$formModel =& $listModel->getForm();
+		$data =& $formModel->_formData;
 
 		$clear_passwd = '';
 
 		// Load in the com_user language file
 		$lang = JFactory::getLanguage();
 		$lang->load('com_user');
-
-		// Grab username, name and email
+		// grab username, name and email
 		// @TODO - sanity check these config vars (plus userid) to make sure they have been edited.
 		$userdata['username'] = $data[$this->username_element];
 		$userdata['email'] = $data[$this->email_element];
@@ -112,45 +107,38 @@ class ImportCSVCreateUser
 			{
 				$app->enqueueMessage("No email for {$userdata['username']}");
 			}
-			JLog::add('No email for ' . $userdata['username'], JLog::NOTICE, $logMessageType);
+			$log->message_type='plg.table.tablecsv.csv_import_user.warning';
+			$log->message = "No email for {$userdata['username']}";
+			$log->store();
 			return false;
 		}
 
-		$query->select('*')->from('#__users')->where('username = ' . $db->quote($userdata['username']));
-		$db->setQuery($query);
+		$db->setQuery("SELECT * FROM #__users WHERE username = ".$db->Quote($userdata['username']));
 		$existing_user = $db->loadObject();
 
-		if (!empty($existing_user))
-		{
+		if (!empty($existing_user)) {
 			$user_id = $existing_user->id;
 			$isNew = false;
 		}
-		else
-		{
-			$query->clear();
-			$query->select('*')->from('#__users')
-			->where('username != ' . $db->quote($userdata['username']) . ' AND email = ' . $db->quote($userdata['email']));
-			$db->setQuery($query);
+		else {
+			$db->setQuery("SELECT * FROM #__users WHERE username != ".$db->Quote($userdata['username'])." AND email = ".$db->Quote($userdata['email']));
 			$existing_email = $db->loadObject();
-			if (!empty($existing_email))
-			{
-				$msg = 'Email ' . $userdata['email'] . ' for ' . $userdata['username'] . ' already in use by ' . $existing_email->username;
-				if ($app->isAdmin())
-				{
-					$app->enqueueMessage($msg);
+			if (!empty($existing_email)) {
+				if ($app->isAdmin()) {
+					$app->enqueueMessage("Email {$userdata['email']} for {$userdata['username']} already in use by {$existing_email->username}");
 				}
-				JLog::add($msg, JLog::NOTICE, $logMessageType);
+				$log->message_type='plg.table.tablecsv.csv_import_user.warning';
+				$log->message = "Email {$userdata['email']} for {$userdata['username']} already in use by {$existing_email->username}";
+				$log->store();
 				return false;
 			}
 			$user_id = 0;
 			$isNew = true;
-			if (!empty($this->password_element))
-			{
+			if (!empty($this->password_element)) {
 				$clear_passwd = $userdata['password'] = $userdata['password2'] = $data[$this->password_element];
 				$data[$this->password_element] = '';
 			}
-			else
-			{
+			else {
 				$clear_passwd = $userdata['password'] = $userdata['password2'] = $this->rand_str();
 			}
 		}
@@ -161,57 +149,57 @@ class ImportCSVCreateUser
 		$userdata['block'] = 0;
 		$userdata['id'] = $user_id;
 
-		if ($isNew)
-		{
-			$now = JFactory::getDate();
-			$user->set('registerDate', $now->toSql());
+		if ($isNew) {
+			$now =& JFactory::getDate();
+			$user->set( 'registerDate', $now->toSql() );
 		}
 
 		if (!$user->bind($userdata))
 		{
-			if ($app->isAdmin())
-			{
-				$app->enqueueMessage(JText::_('CANNOT SAVE THE USER INFORMATION'), 'message');
-				$app->enqueueMessage($user->getError(), 'error');
+			if ($app->isAdmin()) {
+				$app->enqueueMessage( JText::_('CANNOT SAVE THE USER INFORMATION'), 'message' );
+				$app->enqueueMessage( $user->getError(), 'error' );
 			}
-			JLog::add('Error binding user info for: ' . $userdata['username'], JLog::NOTICE, $logMessageType);
+			$log->message_type='plg.table.tablecsv.csv_import_user.error';
+			$log->message = "Error storing user info for: {$userdata['username']}";
+			$log->store();
 			return false;
 		}
 
 		if (!$user->save())
 		{
-			if ($app->isAdmin())
-			{
+			if ($app->isAdmin()) {
 				$app->enqueueMessage(JText::_('CANNOT SAVE THE USER INFORMATION'), 'message');
 				$app->enqueueMessage($user->getError(), 'error');
 			}
-			JLog::add('Error storing user info for: ' . $userdata['username'], JLog::NOTICE, $logMessageType);
+			$log->message_type='plg.table.tablecsv.csv_import_user.error';
+			$log->message = "Error storing user info for: {$userdata['username']}";
+			$log->store();
 			return false;
 		}
 
-		// Save clear text password if requested
-		if ($isNew && !empty($this->first_password_element))
-		{
+		// save clear text password if requested
+		if ($isNew && !empty($this->first_password_element)) {
 			$data[$this->first_password_element] = $clear_passwd;
 		}
 
-		// Store the userid
+		// store the userid
 		$data[$this->userid_element] = $user->get('id');
 
-		// Optionally set 'created' flag
-		if (!empty($this->user_created_element))
-		{
+		// optionally set 'created' flag
+		if (!empty($this->user_created_element)) {
 			$data[$this->user_created_element] = $this->user_created_value;
 		}
 
-		if ($isNew)
-		{
-			JLog::add('Created user: ' . $userdata['username'], JLog::NOTICE, $logMessageType);
+		if ($isNew) {
+			$log->message = "Created user: {$userdata['username']}";
 		}
-		else
-		{
-			JLog::add('Modified user: ' . $userdata['username'], JLog::NOTICE, $logMessageType);
+		else {
+			$log->message = "Modified user: {$userdata['username']}";
 		}
+		$log->store();
 		return true;
 	}
 }
+
+?>
