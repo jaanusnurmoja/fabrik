@@ -1,6 +1,6 @@
 <?php
 /**
- * Bootstrap Details Template
+ * Bootstrap Details Template - Labels None
  *
  * @package     Joomla
  * @subpackage  Fabrik
@@ -14,7 +14,7 @@ defined('_JEXEC') or die('Restricted access');
 
 $element = $this->element;?>
 <div class=" <?php echo $element->containerClass . $element->span; ?>">
-	<?php echo $element->label;?>
+	<span style="display:none"><?php echo $element->label;?></span>
 
 	<?php if ($this->tipLocation == 'above') : ?>
 		<span class="help-block"><?php echo $element->tipAbove ?></span>

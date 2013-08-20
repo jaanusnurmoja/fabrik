@@ -111,7 +111,6 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 		{
 			return $default;
 		}
-		$params = $this->getParams();
 		$elementModel = FabrikWorker::getPluginManager()->getElementPlugin($params->get($pname));
 		$name = $elementModel->getFullName(true, false);
 		return JArrayHelper::getValue($data, $name, $default);
@@ -531,18 +530,18 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 				$data['mailfrom'] = $config->get('mailfrom');
 				$data['sitename'] = $config->get('sitename');
 				$data['siteurl'] = JUri::base();
-	
+
 				$uri = JURI::getInstance();
 				$base = $uri->toString(array('scheme', 'user', 'pass', 'host', 'port'));
-	
+
 				// Handle account activation/confirmation emails.
 				if ($useractivation == 2 && !$bypassActivation && !$autoLogin)
 				{
 					// Set the link to confirm the user email.
 					$data['activate'] = $base . JRoute::_('index.php?option=com_users&task=registration.activate&token=' . $data['activation'], false);
-	
+
 					$emailSubject = JText::sprintf('COM_USERS_EMAIL_ACCOUNT_DETAILS', $data['name'], $data['sitename']);
-	
+
 					$emailBody = JText::sprintf('COM_USERS_EMAIL_REGISTERED_WITH_ADMIN_ACTIVATION_BODY', $data['name'], $data['sitename'],
 						$data['siteurl'] . 'index.php?option=com_users&task=registration.activate&token=' . $data['activation'], $data['siteurl'],
 						$data['username'], $data['password_clear']
@@ -552,9 +551,9 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 				{
 					// Set the link to activate the user account.
 					$data['activate'] = $base . JRoute::_('index.php?option=com_users&task=registration.activate&token=' . $data['activation'], false);
-	
+
 					$emailSubject = JText::sprintf('COM_USERS_EMAIL_ACCOUNT_DETAILS', $data['name'], $data['sitename']);
-	
+
 					$emailBody = JText::sprintf('COM_USERS_EMAIL_REGISTERED_WITH_ACTIVATION_BODY', $data['name'], $data['sitename'],
 						$data['siteurl'] . 'index.php?option=com_users&task=registration.activate&token=' . $data['activation'], $data['siteurl'],
 						$data['username'], $data['password_clear']
@@ -563,7 +562,7 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 				elseif ($autoLogin)
 				{
 					$emailSubject = JText::sprintf('COM_USERS_EMAIL_ACCOUNT_DETAILS', $data['name'], $data['sitename']);
-	
+
 					$emailBody = JText::sprintf('PLG_FABRIK_FORM_JUSER_AUTO_LOGIN_BODY', $data['name'], $data['sitename'],
 						$data['siteurl'],
 						$data['username'], $data['password_clear']
@@ -572,15 +571,15 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 				elseif ($params->get('juser_bypass_accountdetails') != 1)
 				{
 					$emailSubject = JText::sprintf('COM_USERS_EMAIL_ACCOUNT_DETAILS', $data['name'], $data['sitename']);
-	
+
 					$emailBody = JText::sprintf('COM_USERS_EMAIL_REGISTERED_BODY', $data['name'], $data['sitename'], $data['siteurl']);
 				}
-	
+
 				// Send the registration email.
 				if ($emailSubject !== '')
 				{
 					$return = $mail->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
-	
+
 					$db = JFactory::getDBO();
 					/*
 					 * Added email to admin code, but haven't had a chance to test it yet.
@@ -594,27 +593,27 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 						$data['name'],
 						$data['sitename']
 					    );
-	
+
 					    $emailBodyAdmin = JText::sprintf(
 						'COM_USERS_EMAIL_REGISTERED_NOTIFICATION_TO_ADMIN_BODY',
 						$data['name'],
 						$data['username'],
 						$data['siteurl']
 					    );
-	
+
 					    // Get all admin users
 					    $query = 'SELECT name, email, sendEmail' .
 						' FROM #__users' .
 						' WHERE sendEmail=1';
-	
+
 					    $db->setQuery($query);
 					    $rows = $db->loadObjectList();
-	
+
 					    // Send mail to all superadministrators id
 					    foreach ($rows as $row)
 					    {
 						$return = JFactory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $row->email, $emailSubject, $emailBodyAdmin);
-	
+
 						// Check for an error.
 						if ($return !== true)
 						{
@@ -624,12 +623,12 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 					    }
 					}
 					 */
-	
+
 					// Check for an error.
 					if ($return !== true)
 					{
 						$this->setError(JText::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'));
-	
+
 						// Send a system message to administrators receiving system mails
 						$query = $db->getQuery(true);
 						$query->select('id')->from('#__users')->where('block = 0 AND sendEmail = 1');
@@ -638,7 +637,7 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 						if (count($sendEmail) > 0)
 						{
 							$jdate = new JDate;
-	
+
 							// Build the query to add the messages
 							$q = "INSERT INTO `#__messages` (`user_id_from`, `user_id_to`, `date_time`, `subject`, `message`)
 										VALUES ";
@@ -648,7 +647,7 @@ class PlgFabrik_FormJUser extends plgFabrik_Form
 								$messages[] = "(" . $userid . ", " . $userid . ", '" . $jdate->toSql() . "', "
 									. $db->quote(JText::_('COM_USERS_MAIL_SEND_FAILURE_SUBJECT')) . ", "
 									. $db->quote(JText::sprintf('COM_USERS_MAIL_SEND_FAILURE_BODY', $return, $data['username'])) . ")";
-	
+
 							}
 							$q .= implode(',', $messages);
 							$db->setQuery($q);
