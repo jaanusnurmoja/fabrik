@@ -332,6 +332,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	protected function getJoin()
 	{
 		$app = JFactory::getApplication();
+		$input = $app->input;
 		if (isset($this->join))
 		{
 			return $this->join;
@@ -353,7 +354,6 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		else
 		{
 			$listModel = $this->getlistModel();
-
 			$table = $listModel->getTable();
 			$joins = $listModel->getJoins();
 			foreach ($joins as $join)
@@ -369,7 +369,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				}
 			}
 		}
-		if (!in_array($app->input->get('task'), array('inlineedit', 'form.inlineedit')))
+		if (!in_array($input->get('task'), array('inlineedit', 'form.inlineedit')) && $input->get('format') !== 'raw')
 		{
 			/*
 			 * Suppress error for inlineedit, something not quiet right as groupModel::getPublishedElements() is limited by the elementid request va
@@ -668,12 +668,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		}
 
 		$query->select('DISTINCT(' . $key . ') AS value, ' . $val . ' AS text');
-		$desc = $params->get('join_desc_column', '');
-		if ($desc !== '')
-		{
-			$desc = "REPLACE(" . $db->quoteName($desc) . ", '\n', '<br />')";
-			$query->select($desc . ' AS description');
-		}
+		$this->buildQueryDescription($query, $data);
+
 		$additionalFields = $this->getAdditionalQueryFields();
 		if ($additionalFields != '')
 		{
@@ -690,6 +686,35 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$query = $this->getOrderBy('', $query);
 		$this->_sql[$sig] = $query;
 		return $this->_sql[$sig];
+	}
+
+	/**
+	 * Add the description field to the buildQuery select statement
+	 *
+	 * @param   JQuery  &$query  BuildQuery
+	 * @param   array   $data    BuildQuery data
+	 *
+	 * @return  void
+	 */
+	protected function buildQueryDescription(&$query, $data)
+	{
+		$params = $this->getParams();
+		$desc = $params->get('join_desc_column', '');
+		if ($desc !== '')
+		{
+			$db = FabrikWorker::getDbo();
+			$w = new FabrikWorker;
+			$lang = JFactory::getLanguage();
+			$data = is_array($data) ? $data : array();
+			if (!isset($data['lang']))
+			{
+				$data['lang'] = $lang->getTag();
+				$data['lang'] = str_replace('-', '_', $data['lang']);
+			}
+			$desc = $w->parseMessageForPlaceHolder($desc, $data, false);
+			$desc = "REPLACE(" . $db->quoteName($desc) . ", '\n', '<br />')";
+			$query->select($desc . ' AS description');
+		}
 	}
 
 	/**
@@ -1082,7 +1107,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				// If add and select put them in a button group.
 				if ($frontEndSelect && $frontEndAdd && $this->isEditable())
 				{
-					$html[] = '<div class="btn-group">';
+					// Set position inherit otherwise btn-group blocks selection of checkboxes
+					$html[] = '<div class="btn-group" style="position:inherit">';
 				}
 				if ($frontEndSelect && $this->isEditable())
 				{
@@ -1187,7 +1213,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$query->select('id')->from('#__{package}_lists')->where('form_id =' . $popupformid);
 		$db->setQuery($query);
 		$listid = $db->loadResult();
-		return 'index.php?option=com_' . $package . '&view=details&formid=' . $popupformid . '&listid=' . $listid . '&rowid=' ;
+		return 'index.php?option=com_' . $package . '&view=details&formid=' . $popupformid . '&listid=' . $listid . '&rowid=';
 	}
 
 	/**
@@ -2579,9 +2605,9 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	/**
 	 * Used by elements with suboptions, given a value, return its label
 	 *
-	 * @param   string  $v              Value
-	 * @param   string  $defaultLabel   Default label
-	 * @param   bool    $forceCheck     Force check even if $v === $defaultLabel
+	 * @param   string  $v             Value
+	 * @param   string  $defaultLabel  Default label
+	 * @param   bool    $forceCheck    Force check even if $v === $defaultLabel
 	 *
 	 * @return  string	Label
 	 */
@@ -2715,9 +2741,9 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	/**
 	 * Get the autocomplete Where clause based on the parameter
 	 *
-	 * @param   string  $how            dbjoin_autocomplete_how setting - contains, words, starts_with
-	 * @param   string  $label          Field
-	 * @param   string  $search         Search string
+	 * @param   string  $how     Dbjoin_autocomplete_how setting - contains, words, starts_with
+	 * @param   string  $field   Field
+	 * @param   string  $search  Search string
 	 *
 	 * @return  string  with required where clause based upon dbjoin_autocomplete_how setting
 	 */
@@ -2733,7 +2759,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				break;
 			case 'words':
 				$words = array_filter(explode(' ', $search));
-				foreach ($words as &$word) {
+				foreach ($words as &$word)
+				{
 					$word = $db->quote('%' . $word . '%');
 				}
 				$where = $field . ' LIKE ' . implode(' AND ' . $field . ' LIKE ', $words);
@@ -2896,9 +2923,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			if ($groupModel->isJoin())
 			{
 				// Need to set the joinTable to be the group's table
-				$groupJoin = $groupModel->getJoinModel()->getJoin();
-				$parentKey = $groupJoin->table_join . '.' . $groupJoin->table_key;
-
+				$groupJoin = $groupModel->getJoinModel();
+				$parentKey = $groupJoin->getForeignKey();
 			}
 		}
 		return $parentKey;

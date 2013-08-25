@@ -96,7 +96,7 @@ class PlgFabrik_List extends FabrikPlugin
 	/**
 	 * Prep the button if needed
 	 *
-	 * @param   array   &$args  Arguements
+	 * @param   array  &$args  Arguements
 	 *
 	 * @since  3.0.6.2
 	 *
@@ -181,12 +181,10 @@ class PlgFabrik_List extends FabrikPlugin
 	/**
 	 * onGetData method
 	 *
-	 * @param   object  $params  List params
-	 *
 	 * @return bol currently ignored
 	 */
 
-	public function onLoadData($params)
+	public function onLoadData()
 	{
 		return true;
 	}
@@ -194,12 +192,10 @@ class PlgFabrik_List extends FabrikPlugin
 	/**
 	 * onFiltersGot method - run after the list has created filters
 	 *
-	 * @param   object  $params  Plugin params
-	 *
 	 * @return bol currently ignored
 	 */
 
-	public function onFiltersGot($params)
+	public function onFiltersGot()
 	{
 		return true;
 	}
@@ -307,8 +303,7 @@ class PlgFabrik_List extends FabrikPlugin
 	/**
 	 * Allows to to alter the table's select query
 	 *
-	 * @param   object  $params  plugin params
-	 * @param   array   &$args   arguements - first value is an object with a JQuery object
+	 * @param   array  &$args  Arguements - first value is an object with a JQuery object
 	 * contains the current query:
 	 * $args[0]->query
 	 *
