@@ -727,6 +727,11 @@ class FabrikWorker
 				$msg = str_replace('{$_SERVER-&gt;' . $key . '}', $val, $msg);
 			}
 		}
+
+		$lang = JFactory::getLanguage()->getTag();
+		$lang = str_replace('-', '_', $lang);
+		$msg = str_replace('{lang}', $lang, $msg);
+
 		$session = JFactory::getSession();
 		$token = $session->get('session.token');
 		$msg = str_replace('{session.token}', $token, $msg);
@@ -793,14 +798,13 @@ class FabrikWorker
 			}
 		}
 
-		// $$$ hugh - NOOOOOOO!!  Screws up where people actually have mixed case element names
-		// $match = JString::strtolower($match);
 		$match = preg_replace("/ /", "_", $match);
 		if (!strstr($match, '.'))
 		{
-			/* for some reason array_key_exists wasnt working for nested arrays?? */
+			// For some reason array_key_exists wasnt working for nested arrays??
 			$aKeys = array_keys($this->_searchData);
-			/* remove the table prefix from the post key */
+
+			// Remove the table prefix from the post key
 			$aPrefixFields = array();
 			for ($i = 0; $i < count($aKeys); $i++)
 			{
@@ -816,11 +820,12 @@ class FabrikWorker
 			{
 				$match = $aPrefixFields[$match] . '___' . $match;
 			}
+
 			// Test to see if the made match is in the post key arrays
 			$found = in_array($match, $aKeys, true);
 			if ($found)
 			{
-				/* get the post data */
+				// Get the post data
 				$match = $this->_searchData[$match];
 				if (is_array($match))
 				{
@@ -848,7 +853,7 @@ class FabrikWorker
 		}
 		else
 		{
-			/* could be looking for URL field type eg for $_POST[url][link] the match text will be url.link */
+			// Could be looking for URL field type eg for $_POST[url][link] the match text will be url.link
 			$aMatch = explode(".", $match);
 			$aPost = $this->_searchData;
 			foreach ($aMatch as $sPossibleArrayKey)
@@ -1175,14 +1180,14 @@ class FabrikWorker
 			$errString .= $indentHTML . sprintf($msg, "unknown error - php version < 5.2.0");
 		}
 
-		FabrikWorker::logError($errString, $enqMsgType);
+		self::logError($errString, $enqMsgType);
 	}
 
 	/**
 	 * Raise a J Error notice if in dev mode or log a J error otherwise
 	 *
-	 * @param   string  $errorString  Message to display / log
-	 * @param   string  $msgType      Joomla enqueueMessage message type e.g. 'error', 'warning' etc.
+	 * @param   string  $errString  Message to display / log
+	 * @param   string  $msgType    Joomla enqueueMessage message type e.g. 'error', 'warning' etc.
 	 *
 	 * @return  void
 	 */
@@ -1196,7 +1201,20 @@ class FabrikWorker
 		}
 		else
 		{
-			JLog::add($errString, JLog::ERROR, 'com_fabrik');
+			switch ($msgType)
+			{
+				case 'message':
+					$priority = JLog::INFO;
+					break;
+				case 'warning':
+					$priority = JLog::WARNING;
+					break;
+				case 'error':
+				default:
+					$priority = JLog::ERROR;
+					break;
+			}
+			JLog::add($errString, $priority, 'com_fabrik');
 		}
 	}
 
@@ -1492,7 +1510,7 @@ class FabrikWorker
 		}
 		else
 		{
-			//$gobackaction = 'onclick=\'history.back();\'';
+			// $gobackaction = 'onclick=\'history.back();\'';
 			$gobackaction = 'onclick="parent.location=\'' . JArrayHelper::getValue($_SERVER, 'HTTP_REFERER') . '\'"';
 		}
 		return $gobackaction;
