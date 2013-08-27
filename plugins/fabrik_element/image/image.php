@@ -11,6 +11,11 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
+if (!defined('DS'))
+{
+	define('DS', DIRECTORY_SEPARATOR);
+}
+
 /**
  * Plugin element to render an image already located on the server
  *

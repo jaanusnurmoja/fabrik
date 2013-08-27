@@ -514,23 +514,24 @@ class FabrikFEModelForm extends FabModelForm
 			/* $$$ need &amp; for pdf output which is parsed through xml parser otherwise fails
 			 * If FabrikHelperHTML::styleSheetajax loaded then dont do &amp;
 			 */
+			$view = $this->isEditable() ? 'form' : 'details';
 			$qs .= FabrikHelperHTML::cssAsAsset() ? '&view=' . $v : '&amp;view=' . $v;
-			$tmplPath = 'templates/' . $app->getTemplate() . '/html/com_fabrik/form/' . $tmpl . '/template_css.php' . $qs;
+			$tmplPath = 'templates/' . $app->getTemplate() . '/html/com_fabrik/' . $view .'/' . $tmpl . '/template_css.php' . $qs;
 			if (!FabrikHelperHTML::stylesheetFromPath($tmplPath))
 			{
-				FabrikHelperHTML::stylesheetFromPath('components/com_fabrik/views/form/' . $jTmplFolder . '/' . $tmpl . '/template_css.php' . $qs);
+				$ok = FabrikHelperHTML::stylesheetFromPath('components/com_fabrik/views/' . $view .'/' . $jTmplFolder . '/' . $tmpl . '/template_css.php' . $qs);
 			}
 			/* $$$ hugh - as per Skype convos with Rob, decided to re-instate the custom.css convention.  So I'm adding two files:
 			 * custom.css - for backward compat with existing 2.x custom.css
 			 * custom_css.php - what we'll recommend people use for custom css moving foward.
 			 */
-			if (!FabrikHelperHTML::stylesheetFromPath('templates/' . $app->getTemplate() . '/html/com_fabrik/form/' . $tmpl . '/custom.css' . $qs))
+			if (!FabrikHelperHTML::stylesheetFromPath('templates/' . $app->getTemplate() . '/html/com_fabrik/' . $view .'/' . $tmpl . '/custom.css' . $qs))
 			{
-				FabrikHelperHTML::stylesheetFromPath('components/com_fabrik/views/form/' . $jTmplFolder . '/' . $tmpl . '/custom.css' . $qs);
+				FabrikHelperHTML::stylesheetFromPath('components/com_fabrik/views/' . $view .'/' . $jTmplFolder . '/' . $tmpl . '/custom.css' . $qs);
 			}
-			if (!FabrikHelperHTML::stylesheetFromPath('templates/' . $app->getTemplate() . '/html/com_fabrik/form/' . $tmpl . '/custom_css.php' . $qs))
+			if (!FabrikHelperHTML::stylesheetFromPath('templates/' . $app->getTemplate() . '/html/com_fabrik/' . $view .'/' . $tmpl . '/custom_css.php' . $qs))
 			{
-				FabrikHelperHTML::stylesheetFromPath('components/com_fabrik/views/form/' . $jTmplFolder . '/' . $tmpl . '/custom_css.php' . $qs);
+				FabrikHelperHTML::stylesheetFromPath('components/com_fabrik/views/' . $view .'/' . $jTmplFolder . '/' . $tmpl . '/custom_css.php' . $qs);
 			}
 		}
 		if ($app->isAdmin() && $input->get('tmpl') === 'components')
@@ -2012,7 +2013,7 @@ class FabrikFEModelForm extends FabModelForm
 					$this->errors[$elName][$c] = array();
 
 					// $$$ rob $this->formData was $_POST, but failed to get anything for calculation elements in php 5.2.1
-					$form_data = $elementModel->getValue($this->formData, $c, array('runplugins' => 0, 'use_default' => false));
+					$form_data = $elementModel->getValue($this->formData, $c, array('runplugins' => 0, 'use_default' => false, 'use_querystring' => false));
 					if (get_magic_quotes_gpc())
 					{
 						if (is_array($form_data))
@@ -3728,12 +3729,7 @@ class FabrikFEModelForm extends FabModelForm
 		{
 			$text = preg_replace("/{\s*.*?}/i", '', $text);
 		}
-		$plain = strip_tags($text);
-		$translated = JText::_($plain);
-		if ($translated !== $plain)
-		{
-			$text = str_replace($plain, $translated, $text);
-		}
+		$text = FabrikString::translate($text);
 		return $text;
 	}
 
@@ -3783,7 +3779,7 @@ class FabrikFEModelForm extends FabModelForm
 			$replace = $this->isNewRecord() ? JText::_('COM_FABRIK_ADD') : JText::_('COM_FABRIK_EDIT');
 			$label = str_replace("{Add/Edit}", $replace, $label);
 		}
-		return $label;
+		return JText::_($label);
 	}
 
 	/**
@@ -4218,18 +4214,7 @@ class FabrikFEModelForm extends FabModelForm
 			$groupTable = $groupModel->getGroup();
 			$group = $groupModel->getGroupProperties($this);
 			$groupParams = $groupModel->getParams();
-			$group->intro = $groupParams->get('intro');
-			$group->outro = $groupParams->get('outro');
-			$group->columns = $groupParams->get('group_columns', 1);
-			$group->splitPage = $groupParams->get('split_page', 0);
-			if ($groupModel->canRepeat())
-			{
-				$group->tmpl = $groupParams->get('repeat_template', 'repeatgroup');
-			}
-			else
-			{
-				$group->tmpl = 'group';
-			}
+
 			$aElements = array();
 
 			// Check if group is acutally a table join
@@ -4671,6 +4656,36 @@ class FabrikFEModelForm extends FabModelForm
 	}
 
 	/**
+	 * Get the success message
+	 *
+	 * @return  string
+	 */
+	public function getSuccessMsg()
+	{
+		$app = JFactory::getApplication();
+		$session = JFactory::getSession();
+		$package = $app->getUserState('com_fabrik.package', 'fabrik');
+		$registry = $session->get('registry');
+
+		// $$$ rob 30/03/2011 if using as a search form don't show record added message
+		if ($registry && $registry->get('com_' . $package . '.searchform.fromForm') != $this->get('id'))
+		{
+			if (!$this->showSuccessMsg())
+			{
+				return '';
+			}
+			$params = $this->getParams();
+			return JText::_($params->get('submit-success-msg', 'COM_FABRIK_RECORD_ADDED_UPDATED'));
+		}
+		else
+		{
+			return '';
+		}
+
+
+	}
+
+	/**
 	 * Should we show ACL messages
 	 *
 	 * @since  3.0.7
@@ -4714,20 +4729,8 @@ class FabrikFEModelForm extends FabModelForm
 	public function getRedirectMessage()
 	{
 		$app = JFactory::getApplication();
-		$package = $app->getUserState('com_fabrik.package', 'fabrik');
 		$session = JFactory::getSession();
-		$registry = $session->get('registry');
-		$formdata = $session->get('com_' . $package . '.form.data');
-
-		// $$$ rob 30/03/2011 if using as a search form don't show record added message
-		if ($registry && $registry->get('com_' . $package . '.searchform.fromForm') != $this->get('id'))
-		{
-			$msg = $this->showSuccessMsg() ? $this->getParams()->get('submit-success-msg', JText::_('COM_FABRIK_RECORD_ADDED_UPDATED')) : '';
-		}
-		else
-		{
-			$msg = '';
-		}
+		$msg = $this->getSuccessMsg();
 		$context = $this->getRedirectContext();
 		$smsg = $session->get($context . 'msg', array($msg));
 		if (!is_array($smsg))
@@ -4750,7 +4753,6 @@ class FabrikFEModelForm extends FabModelForm
 		{
 			$msg = $custommsg;
 		}
-		$app = JFactory::getApplication();
 		$q = $app->getMessageQueue();
 		$found = false;
 		foreach ($q as $m)
