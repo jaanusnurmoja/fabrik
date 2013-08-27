@@ -5243,7 +5243,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 		else
 		{
-			$r = empty($data) ? '' : '<p>' . array_shift($data) . '</p>';
+			$r = empty($data) ? '' : '<div>' . array_shift($data) . '</div>';
 		}
 		return $r;
 	}
