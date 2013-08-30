@@ -16,5 +16,9 @@ echo "
 .fabrikGroup {
 clear: left;
 }
+
+.nav-tabs li {
+list-style: none;
+}
 ";
 ?>
