@@ -5050,7 +5050,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 	public function getEmailValue($value, $data = array(), $repeatCounter = 0)
 	{
-		if ($this->inRepeatGroup)
+		if ($this->inRepeatGroup && is_array($value))
 		{
 			$val = array();
 			foreach ($value as $v2)
@@ -5440,24 +5440,6 @@ class PlgFabrik_Element extends FabrikPlugin
 	public function requiresAJAXSubmit()
 	{
 		return false;
-	}
-
-	/**
-	 * Called on failed form validation.
-	 * Ensures submitted form data is converted back into the format
-	 * that the form would expect to get it in, if the data had been
-	 * draw from the database record
-	 *
-	 * @param   string  $str  submitted form value
-	 *
-	 * @deprecated since 3.1b2 (not used by any plugin)
-	 *
-	 * @return  string	formated value
-	 */
-
-	public function toDbVal($str)
-	{
-		return $str;
 	}
 
 	/**
