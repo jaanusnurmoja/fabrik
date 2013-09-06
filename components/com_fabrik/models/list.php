@@ -8204,6 +8204,11 @@ class FabrikFEModelList extends JModelForm
 		$keyIdentifier = $this->getKeyIndetifier($row);
 		$row = JArrayHelper::fromObject($row);
 		$link = $this->parseMessageForRowHolder($link, $row);
+		if (preg_match('/([\?&]rowid=)/', htmlspecialchars_decode($link)))
+		{
+			$this->rowIdentifierAdded = true;
+		}
+
 		if ($this->rowIdentifierAdded === false)
 		{
 			if (strstr($link, '?'))
