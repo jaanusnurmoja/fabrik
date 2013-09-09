@@ -44,9 +44,13 @@ echo $this->plugintop;
 </div>
 
 <div class="row-fluid nav">
-	<div class="span12">
+	<div class="span6 pull-right">
 		<?php
 		echo $this->loadTemplate('buttons');
+		?>
+	</div>
+	<div class="span6">
+		<?php
 		echo $this->loadTemplate('relateddata');
 		?>
 	</div>
@@ -81,6 +85,11 @@ foreach ($this->groups as $group) :
 		 */
 		$this->elements = $group->elements;
 		echo $this->loadTemplate($group->tmpl);
+
+		if (!empty($group->outro)) : ?>
+			<div class="groupoutro"><?php echo $group->outro ?></div>
+		<?php
+		endif;
 	?>
 	</fieldset>
 <?php

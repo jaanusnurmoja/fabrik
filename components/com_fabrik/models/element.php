@@ -2209,10 +2209,10 @@ class PlgFabrik_Element extends FabrikPlugin
 	 * @return string
 	 */
 
-	protected function getHiddenField($name, $value, $id = '', $class = '')
+	protected function getHiddenField($name, $value, $id = '', $class = 'fabrikinput inputbox hidden')
 	{
 		$value = htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
-		$opts = array('class' => 'fabrikinput inputbox', 'type' => 'hidden', 'name' => $name, 'value' => $value, 'id' => $id);
+		$opts = array('class' => $class, 'type' => 'hidden', 'name' => $name, 'value' => $value, 'id' => $id);
 		return $this->buildInput('input', $opts);
 	}
 
@@ -2230,7 +2230,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$str = '<' . $node . ' ';
 		foreach ($bits as $key => $val)
 		{
-			$str .= $key . ' = "' . $val . '" ';
+			$str .= $key . '="' . $val . '" ';
 		}
 		$str .= '/>';
 		return $str;
@@ -5343,42 +5343,6 @@ class PlgFabrik_Element extends FabrikPlugin
 	public function renderListData_csv($data, &$thisRow)
 	{
 		return $data;
-	}
-
-	/**
-	 * Determines if the element should be shown in the list view
-	 *
-	 * @param   object  &$listModel  list model
-	 *
-	 * @deprecated - not used
-	 *
-	 * @return  bool
-	 */
-
-	public function inTableFields(&$listModel)
-	{
-		$params = $this->getParams();
-		$element = $this->getElement();
-		$table = $listModel->getTable();
-		$elFullName = $this->getFullName(false, false);
-		if ($listModel->getOutPutFormat() === 'rss')
-		{
-			$bAddElement = ($params->get('show_in_rss_feed') == '1');
-			/* if its the date ordering col we should add it to the list of allowed elements */
-			if ($elFullName == $listModel->getParams()->get('feed_date', ''))
-			{
-				$bAddElement = true;
-			}
-		}
-		else
-		{
-			$bAddElement = $element->show_in_list_summary;
-		}
-		if ($table->db_primary_key == $elFullName)
-		{
-			$listModel->temp_db_key_addded = true;
-		}
-		return $bAddElement;
 	}
 
 	/**
