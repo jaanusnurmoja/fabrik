@@ -55,46 +55,95 @@ class PlgSystemFabrik extends JPlugin
 	}
 
 	/**
-	 * Insert require.js config an app ini script into head.
-	 * Clears out js.config, js.scripts and js.shim from session
+	 * Get Page JavaScript from either session or cached .js file
+	 *
+	 * @return string
+	 */
+
+	public static function js()
+	{
+		$config = JFactory::getConfig();
+		if ($config->get('caching') == 0)
+		{
+			$script = self::buildJs();
+		}
+		else
+		{
+			$uri = JURI::getInstance();
+			$session = JFactory::getSession();
+			$uri = $uri->toString(array('path', 'query'));
+			$file = md5($uri) . '.js';
+			$folder = JPATH_SITE . '/cache/com_fabrik/js/';
+			if (!JFolder::exists($folder))
+			{
+				JFolder::create($folder);
+			}
+			$cacheFile = $folder . $file;
+
+			// Check for cached version
+			if (!JFile::exists($cacheFile))
+			{
+				$script = self::buildJs();
+				file_put_contents($cacheFile, $script);
+			}
+			else
+			{
+				$script = JFile::read($cacheFile);
+			}
+		}
+		self::clearJs();
+		return $script;
+	}
+
+	/**
+	 * Clear session js store
+	 *
+	 * @return  void
+	 */
+	public static function clearJs()
+	{
+		$session = JFactory::getSession();
+		$session->clear('fabrik.js.scripts');
+		$session->clear('fabrik.js.config');
+		$session->clear('fabrik.js.shim');
+	}
+
+	/**
+	 * Build Page <script> tag for insertion into DOM or for storing in cache
+	 *
+	 * @return string
+	 */
+
+	public static function buildJs()
+	{
+		$session = JFactory::getSession();
+		$shim = $session->get('fabrik.js.config', array());
+		$shim = implode("\n", $shim);
+
+		$js = $session->get('fabrik.js.scripts', array());
+		$js = implode("\n", $js);
+		if ($shim.$js !== '')
+		{
+			$script = '<script type="text/javascript">' . "\n" . $shim . "\n" . $js . "\n" . '</script>';
+		}
+		else
+		{
+			$script = '';
+		}
+		return $script;
+	}
+
+	/**
+	 * Insert require.js config an app ini script into body.
 	 *
 	 * @return  void
 	 */
 
 	public function onAfterRender()
 	{
-		$document = JFactory::getDocument();
-		$session = JFactory::getSession();
-		$shim = $session->get('fabrik.js.config', array());
-		$shim = implode("\n", $shim);
-		$js = $session->get('fabrik.js.scripts', array());
-		$js = implode("\n", $js);
-
-		$script = '';
-
-		$session->clear('fabrik.js.scripts');
-		$session->clear('fabrik.js.config');
-		$session->clear('fabrik.js.shim');
-
+		$script = self::js();
 		$content = JResponse::getBody();
-		if (stristr($content, '</head>'))
-		{
-			// In preg_replace \\ is replaced with \, doubling up the quotes keeps \\ as \\.
-			$js = str_replace("\\", "\\\\", $js);
-			if ($shim !== '' && $js !== '')
-			{
-				$script = '<script type="text/javascript">' . "\n" . $shim . "\n" . $js . "\n" . '</script>';
-			}
-			$content = preg_replace('#(</head>)#', $script . '</head>', $content);
-		}
-		else
-		{
-			if ($js !== '')
-			{
-				$script = '<script type="text/javascript">' . "\n" . $shim . "\n" . $js . "\n" . '</script>';
-			}
-			$content .= $script;
-		}
+		$content .= $script;
 		JResponse::setBody($content);
 	}
 
