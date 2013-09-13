@@ -9276,7 +9276,7 @@ class FabrikFEModelList extends JModelForm
 			/* as we are modifying the main getData query, we need to make sure and
 			 * clear table data, forcing next getData() to do the query again, no cache
 			*/
-			$this->set('_data', null);
+			$this->resetQuery();
 		}
 		// Return true just for the heck of it
 		return true;
@@ -9869,6 +9869,18 @@ class FabrikFEModelList extends JModelForm
 	}
 
 	/**
+	 * make sure a new getData query wil recreate data and query from scratch
+	 *
+	 * @return  void
+	 */
+
+	public function resetQuery()
+	{
+		unset($this->_whereSQL);
+		unset($this->data);
+	}
+
+	/**
 	 * Get the lists <table> class
 	 *
 	 * @return string
@@ -9948,7 +9960,9 @@ class FabrikFEModelList extends JModelForm
 			}
 
 			// Migration test
-			if (!JFolder::exists(JPATH_SITE . '/components/com_fabrik/views/list/tmpl/' . $this->tmpl))
+			$modFolder = JPATH_SITE . '/templates/' . $app->getTemplate() . '/html/com_fabrik/list/' . $this->tmpl;
+			$componentFolder = JPATH_SITE . '/components/com_fabrik/views/list/tmpl/' . $this->tmpl;
+			if (!JFolder::exists($componentFolder) && !JFolder::exists($modFolder))
 			{
 				$this->tmpl = FabrikWorker::j3() ? 'bootstrap' : 'default';
 			}
