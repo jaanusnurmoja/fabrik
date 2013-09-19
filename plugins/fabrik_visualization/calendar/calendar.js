@@ -117,7 +117,8 @@ var fabrikCalendar = new Class({
 				'border-right': '0',
 				'border-left': '0',
 				'overflow': 'auto',
-				'opacity': 0.6
+				'opacity': 0.6,
+				'padding': '0 4px'
 			};
 		if (opts.height) {
 			style.height = opts.height.toInt() + 'px';
@@ -153,7 +154,7 @@ var fabrikCalendar = new Class({
 				dataContent += '<hr /><div class=\"btn-group\" style=\"text-align:center\">' + buttons + '</div>';
 			}
 			eventCont = new Element('a', {
-				'class': 'fabrikEvent label',
+				'class': 'fabrikEvent label ' + entry.status,
 				'id': id,
 				'styles': style,
 				'rel': 'popover',
@@ -205,7 +206,7 @@ var fabrikCalendar = new Class({
 						}
 					}.bind(this)
 			}
-			}).appendText(label);
+			}).set('html', label);
 		} else {
 			if (entry.custom) {
 				label = label === '' ? 'click' : label;
@@ -215,9 +216,9 @@ var fabrikCalendar = new Class({
 								Fabrik.fireEvent('fabrik.viz.calendar.event', [e]);
 							}
 					}
-				}).appendText(label);
+				}).set('html', label);
 			} else {
-				x = new Element('span').appendText(label);
+				x = new Element('span').set('html', label);
 			}
 		}
 		eventCont.adopt(x);
@@ -866,7 +867,7 @@ var fabrikCalendar = new Class({
 	openAddEvent: function (e)
 	{
 		var rawd;
-		if (this.options.canAdd === 0) {
+		if (this.options.canAdd === false) {
 			return;
 		}
 		e.stop();

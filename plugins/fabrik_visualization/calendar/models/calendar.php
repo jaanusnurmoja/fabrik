@@ -93,6 +93,7 @@ class FabrikModelCalendar extends FabrikFEModelVisualization
 			$dateFields = (array) $params->get('calendar_startdate_element');
 			$dateFields2 = (array) $params->get('calendar_enddate_element');
 			$labels = (array) $params->get('calendar_label_element');
+			$stati = (array) $params->get('status_element');
 			$colours = (array) $params->get('colour');
 
 			$query = $db->getQuery(true);
@@ -108,6 +109,7 @@ class FabrikModelCalendar extends FabrikFEModelVisualization
 				$rows[$i]->startdate_element = $dateFields[$i];
 				$rows[$i]->enddate_element = JArrayHelper::getValue($dateFields2, $i);
 				$rows[$i]->label_element = $labels[$i];
+				$rows[$i]->status = $stati[$i];
 				$rows[$i]->colour = $colours[$i];
 			}
 			$this->eventLists = $rows;
@@ -202,6 +204,8 @@ class FabrikModelCalendar extends FabrikFEModelVisualization
 			$customUrls = (array) $params->get('custom_url');
 			$colour = (array) $params->get('colour');
 			$legend = (array) $params->get('legendtext');
+			$stati = (array) $params->get('status_element');
+
 			$this->_events = array();
 			for ($i = 0; $i < count($tables); $i++)
 			{
@@ -243,7 +247,7 @@ class FabrikModelCalendar extends FabrikFEModelVisualization
 					$customUrl = JArrayHelper::getValue($customUrls, $i, '');
 					$this->_events[$tables[$i]][] = array('startdate' => $startDate, 'enddate' => $endDate, 'startShowTime' => $startShowTime,
 						'endShowTime' => $endShowTime, 'label' => $table_label[$i], 'colour' => $colour[$i], 'legendtext' => $legend[$i],
-						'formid' => $table->form_id, 'listid' => $tables[$i], 'customUrl' => $customUrl);
+						'formid' => $table->form_id, 'listid' => $tables[$i], 'customUrl' => $customUrl, 'status' => $stati[$i]);
 				}
 			}
 		}
@@ -271,7 +275,7 @@ class FabrikModelCalendar extends FabrikFEModelVisualization
 	}
 
 	/**
-	 * Go over all the tables whose data is displayed in the calendar
+	 * Go over all the lists whose data is displayed in the calendar
 	 * if any element is found in the request data, assign it to the session
 	 * This will then be used by the table to filter its data.
 	 * nice :)
@@ -373,6 +377,7 @@ class FabrikModelCalendar extends FabrikFEModelVisualization
 		$calendar = $this->getRow();
 		$aLegend = "$this->calName.addLegend([";
 		$jsevents = array();
+
 		foreach ($this->_events as $listid => $record)
 		{
 			$listModel = JModelLegacy::getInstance('list', 'FabrikFEModel');
@@ -396,7 +401,13 @@ class FabrikModelCalendar extends FabrikFEModelVisualization
 				$enddate = trim($data['enddate']) !== '' ? $db->quoteName($data['enddate']) : "''";
 				$label = trim($data['label']) !== '' ? $db->quoteName($data['label']) : "''";
 				$customUrl = $data['customUrl'];
+				/**
+				 * $$$ hugh @FIXME - $label has already been quoted, so quoting it again meant the array_key_exists
+				 * check was never matching, as the name got double quoted.
+				 * But ... the code that isn't running is broken, so for now ... If It Ain't Working, Don't Fix It :)
+				 */
 				$qlabel = $db->quoteName($label);
+				//$qlabel = $label;
 				if (array_key_exists($qlabel, $els))
 				{
 					// If db join selected for the label we need to get the label element and not the value
@@ -415,10 +426,9 @@ class FabrikModelCalendar extends FabrikFEModelVisualization
 				}
 				$pk = $listModel->getTable()->db_primary_key;
 
-
-				// @TODO JQuery this
 				$query = $db->getQuery(true);
-				$query->select($pk . ' AS id, ' . $startdate . ' AS startdate, ' . $enddate . ' AS enddate, "" AS link, ' . $label . ' AS label, ' . $db->quote($data['colour']) . ' AS colour, 0 AS formid')
+				$query->select($pk . ' AS id, ' . $pk . ' AS rowid, ' . $startdate . ' AS startdate, ' . $enddate . ' AS enddate, "" AS link, ' . $label . ' AS label, ' . $db->quote($data['colour']) . ' AS colour, 0 AS formid')
+				->select($data['status'] . ' AS status')
 				->from($table->db_table_name)
 				->order($startdate . ' ASC');
 				$query = $listModel->buildQueryJoin($query);
