@@ -1217,16 +1217,8 @@ var FbForm = new Class({
 		return h;
 	},
 
-	watchGroupButtons: function () {
-		/*this.form.getElements('.deleteGroup').each(function (g, i) {
-			g.addEvent('click', function (e) {
-				this.deleteGroup(e);
-			}.bind(this));
-		}.bind(this));*/
-		if (typeOf(this.form) === 'null') {
-			fconsole('form: watchgroup buttons - didnt find form');
-			return;
-		}
+	watchGroupButtons : function () {
+
 		this.form.addEvent('click:relay(.deleteGroup)', function (e, target) {
 			e.preventDefault();
 			this.deleteGroup(e);
@@ -1259,14 +1251,14 @@ var FbForm = new Class({
 			return;
 		}
 		// Check for new form
-		if (this.options.rowid.toInt() === 0 || this.options.rowid === '') {
+		if (this.options.rowid === '') {
 			// $$$ hugh - added ability to override min count
 			// http://fabrikar.com/forums/index.php?threads/how-to-initially-show-repeat-group.32911/#post-170147
 			Fabrik.fireEvent('fabrik.form.group.duplicate.min', [this]);
 			Object.each(this.options.minRepeat, function (min, groupId) {
 				// $$$ hugh - trying out min of 0 for Troester
 				// http://fabrikar.com/forums/index.php?threads/how-to-start-a-new-record-with-empty-repeat-group.34666/#post-175408
-				if (!this.options.failed_validation && min === 0) {
+				if (min === 0) {
 					// Create mock event
 					var del_btn = this.form.getElement('#group' + groupId + ' .deleteGroup');
 					if (typeOf(del_btn) !== 'null') {
