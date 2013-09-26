@@ -1263,6 +1263,7 @@
 
 			<field name="show_lock_add"
 				type="radio"
+				class="btn-group"
 				default="0"
 				label="COM_FABRIK_SHOW_LOCK_ADD_LABEL"
 				description="COM_FABRIK_SHOW_LOCK_ADD_DESC"
