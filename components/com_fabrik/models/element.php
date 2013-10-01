@@ -7024,7 +7024,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			$groupJoinModel = $groupModel->getJoinModel();
 			$idKey = $join->table_join . '___id';
 			$paramsKey = $join->table_join . '___params';
-			$k = $groupJoinModel->getForeignKey();
+			$k = str_replace('`', '', str_replace('.', '___', $groupJoinModel->getJoin()->params->get('pk')));
 			$parentIds = (array) $formData[$k];
 		}
 		else
