@@ -66,7 +66,7 @@ class FabrikFEModelList extends JModelForm
 	 *
 	 * @var array
 	 */
-	private $_aJoins = null;
+	private $joins = null;
 
 	/**
 	 * Column calculations
@@ -108,13 +108,6 @@ class FabrikFEModelList extends JModelForm
 	 * @var array
 	 */
 	protected $dbFields = null;
-
-	/**
-	 * Data contains request data
-	 *
-	 * @var array
-	 */
-	private $_aData = null;
 
 	/**
 	 * Used when making custom links to determine if we need to append the rowid to the url
@@ -4114,7 +4107,7 @@ class FabrikFEModelList extends JModelForm
 
 	public function &getJoins()
 	{
-		if (!isset($this->_aJoins))
+		if (!isset($this->joins))
 		{
 			$form = $this->getFormModel();
 			$form->getGroupsHiarachy();
@@ -4135,10 +4128,10 @@ class FabrikFEModelList extends JModelForm
 			 		*/
 			$query->order('id');
 			$db->setQuery($query);
-			$this->_aJoins = $db->loadObjectList();
-			$this->_makeJoinAliases($this->_aJoins);
+			$this->joins = $db->loadObjectList();
+			$this->_makeJoinAliases($this->joins);
 
-			foreach ($this->_aJoins as &$join)
+			foreach ($this->joins as &$join)
 			{
 				if (is_string($join->params))
 				{
@@ -4148,7 +4141,7 @@ class FabrikFEModelList extends JModelForm
 			}
 		}
 
-		return $this->_aJoins;
+		return $this->joins;
 	}
 
 	/**
@@ -10687,7 +10680,7 @@ class FabrikFEModelList extends JModelForm
 		unset($this->filterModel);
 		unset($this->searchAllAsFields);
 		unset($this->joinsSQL);
-		unset($this->_aJoins);
+		unset($this->joins);
 		unset($this->orderBy);
 		unset($this->_joinsNoCdd);
 		unset($this->elements);
