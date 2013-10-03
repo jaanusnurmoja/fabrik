@@ -1763,8 +1763,8 @@ class FabrikFEModelList extends JModelForm
 		{
 			if ($params->get('show_lock_add', '0') == '1')
 			{
-			return '<div style="text-align:center"><a title="' . JText::_('JERROR_ALERTNOAUTHOR')
-			. '"><img src="' . COM_FABRIK_LIVESITE . 'media/com_fabrik/images/login.png" alt="' . JText::_('JERROR_ALERTNOAUTHOR') . '" /></a></div>';
+				return '<div style="text-align:center"><a title="' . JText::_('JERROR_ALERTNOAUTHOR')
+				. '"><img src="' . COM_FABRIK_LIVESITE . 'media/com_fabrik/images/login.png" alt="' . JText::_('JERROR_ALERTNOAUTHOR') . '" /></a></div>';
 			}
 			else
 			{
@@ -2208,14 +2208,13 @@ class FabrikFEModelList extends JModelForm
 						if (count($tmpPks[$pk]) == 1)
 						{
 							$v = str_replace('`', '', $tmpPks[$pk][0]);
-							//$v = explode('.', $v);
+							$v = explode('.', $v);
 							$v[0] = $v[0] . '_0';
 							$tmpPks[$pk][0] = $db->quoteName($v[0] . '.' . $v[1]);
 						}
 						$v = str_replace('`', '', $pk);
 						$v = explode('.', $v);
-						// Jaanus: fixing mismatches between table join aliases here and under _makeJoinAliases. For this purpose also commented out the line under if above
-						$v[0] = $v[0] . '_' . (count($tmpPks[$pk]) -1);
+						$v[0] = $v[0] . '_' . count($tmpPks[$pk]);
 						$tmpPks[$pk][] = $db->quoteName($v[0] . '.' . $v[1]);
 					}
 				}
@@ -9276,7 +9275,7 @@ class FabrikFEModelList extends JModelForm
 			/* as we are modifying the main getData query, we need to make sure and
 			 * clear table data, forcing next getData() to do the query again, no cache
 			*/
-			$this->resetQuery();
+			$this->set('_data', null);
 		}
 		// Return true just for the heck of it
 		return true;
@@ -9869,18 +9868,6 @@ class FabrikFEModelList extends JModelForm
 	}
 
 	/**
-	 * make sure a new getData query wil recreate data and query from scratch
-	 *
-	 * @return  void
-	 */
-
-	public function resetQuery()
-	{
-		unset($this->_whereSQL);
-		unset($this->data);
-	}
-
-	/**
 	 * Get the lists <table> class
 	 *
 	 * @return string
@@ -9960,9 +9947,7 @@ class FabrikFEModelList extends JModelForm
 			}
 
 			// Migration test
-			$modFolder = JPATH_SITE . '/templates/' . $app->getTemplate() . '/html/com_fabrik/list/' . $this->tmpl;
-			$componentFolder = JPATH_SITE . '/components/com_fabrik/views/list/tmpl/' . $this->tmpl;
-			if (!JFolder::exists($componentFolder) && !JFolder::exists($modFolder))
+			if (!JFolder::exists(JPATH_SITE . '/components/com_fabrik/views/list/tmpl/' . $this->tmpl))
 			{
 				$this->tmpl = FabrikWorker::j3() ? 'bootstrap' : 'default';
 			}
