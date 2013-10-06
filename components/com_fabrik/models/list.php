@@ -8473,7 +8473,7 @@ class FabrikFEModelList extends JModelForm
 		}
 
 		$query = $db->getQuery(true);
-		$query->delete($table->db_table_name)->where($key . ' IN (' . $val . ')');
+		$query->delete($db->quoteName($table->db_table_name))->where($key . ' IN (' . $val . ')');
 		$db->setQuery($query);
 
 		if (!$db->execute())
