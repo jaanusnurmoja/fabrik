@@ -804,6 +804,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	{
 		$table = $this->getListModel()->getTable();
 
+		//if ($this->getGroupModel()->isJoin() && !$this->isJoin())
 		if ($this->getGroupModel()->isJoin() && $this->isJoin())
 		{
 			$groupJoin = $this->getGroupModel()->getJoinModel()->getJoin();
@@ -1530,7 +1531,8 @@ class PlgFabrik_Element extends FabrikPlugin
 				$str .= '<span class="' . $labelClass . ' faux-label">';
 			}
 
-			$l = $j3 ? '' : htmlspecialchars($element->label);
+			$labelText = $config->get('fbConf_wysiwyg_label', false) ? $element->label : htmlspecialchars(JText::_($element->label));
+			$l = $j3 ? '' : $labelText;
 			$iconOpts = array('icon-class' => 'small');
 
 			if ($rollOver)
@@ -1549,7 +1551,7 @@ class PlgFabrik_Element extends FabrikPlugin
 				}
 			}
 
-			$l .= $j3 ? htmlspecialchars(JText::_($element->label)) : '';
+			$l .= $j3 ? $labelText : '';
 			$model = $this->getFormModel();
 			$str .= $l;
 
@@ -7026,6 +7028,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			$groupJoinModel = $groupModel->getJoinModel();
 			$idKey = $join->table_join . '___id';
 			$paramsKey = $join->table_join . '___params';
+			//$k = $groupJoinModel->getForeignKey();
 			$k = str_replace('`', '', str_replace('.', '___', $groupJoinModel->getJoin()->params->get('pk')));
 			$parentIds = (array) $formData[$k];
 		}

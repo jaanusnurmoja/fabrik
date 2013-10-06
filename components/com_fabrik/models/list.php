@@ -1197,7 +1197,8 @@ class FabrikFEModelList extends JModelForm
 			{
 				if (isset($data[$i]->$groupBy))
 				{
-					$sdata = $data[$i]->$groupBy;
+					// get rid of & as it blows up SimpleXMLElement, and dont want to use htmlspecialchars as don't want to mess with <, >, etc.
+					$sdata = str_replace('&', '&amp;', str_replace('&amp;', '&', $data[$i]->$groupBy));
 
 					// Test if its just an <a>*</a> tag - if so allow HTML (enables use of icons)
 					$xml = new SimpleXMLElement('<div>' . $sdata . '</div>');
@@ -1843,15 +1844,8 @@ class FabrikFEModelList extends JModelForm
 
 		if (!$facetTable->canAdd())
 		{
-			if ($params->get('show_lock_add', '0') == '1')
-			{
 			return '<div style="text-align:center"><a title="' . JText::_('JERROR_ALERTNOAUTHOR')
 			. '"><img src="' . COM_FABRIK_LIVESITE . 'media/com_fabrik/images/login.png" alt="' . JText::_('JERROR_ALERTNOAUTHOR') . '" /></a></div>';
-			}
-			else
-			{
-				return '';
-			}
 		}
 
 		if ($app->isAdmin())
@@ -2330,15 +2324,16 @@ class FabrikFEModelList extends JModelForm
 						if (count($tmpPks[$pk]) == 1)
 						{
 							$v = str_replace('`', '', $tmpPks[$pk][0]);
-							//$v = explode('.', $v);
-							$v[0] = $v[0] . '_0';
+							$v = explode('.', $v);
+							// $v[0] = $v[0] . '_0';
 							$tmpPks[$pk][0] = $db->quoteName($v[0] . '.' . $v[1]);
 						}
 
 						$v = str_replace('`', '', $pk);
 						$v = explode('.', $v);
-						// Jaanus: fixing mismatches between table join aliases here and under _makeJoinAliases. For this purpose also commented out the line under if above
-						$v[0] = $v[0] . '_' . (count($tmpPks[$pk]) -1);
+						// Jaanus: commenting out $v[0] = $v[0] . '_0' under 'if' above and adding -1 to the count below 
+						// makes join aliases generated here match the aliases generated under _makeJoinAliases()
+						$v[0] = $v[0] . '_' . (count($tmpPks[$pk]) - 1); 
 						$tmpPks[$pk][] = $db->quoteName($v[0] . '.' . $v[1]);
 					}
 				}
@@ -11266,6 +11261,7 @@ class FabrikFEModelList extends JModelForm
 			$formModel->rowId = $id;
 			$formModel->unsetData();
 			$row = $formModel->getData();
+			$formModel->copyFromRaw($row, 'fromraw', true);
 			$row['Copy'] = '1';
 			$row['fabrik_copy_from_table'] = '1';
 			$formModel->formData = $row;
