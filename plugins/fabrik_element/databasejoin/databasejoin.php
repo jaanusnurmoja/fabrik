@@ -2825,17 +2825,46 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		// If rendering as mulit/checkbox then {thistable} should not refer to the joining repeat table, but the end table.
 		if ($this->isJoin())
 		{
-			$jkey = str_replace($jointable, $dbName, $jkey);
+			$jkey = str_replace($jointable, 'lookup', $jkey);
 		}
+
+		$parentKey = $this->buildQueryParentKey();
 		$fullElName = $this->getFullName(false, true, false);
 		$sql = "(SELECT GROUP_CONCAT(" . $jkey . " " . $where . " SEPARATOR '" . GROUPSPLITTER . "') FROM $jointable
-		LEFT JOIN " . $dbName . " ON " . $dbName . "." . $this->getJoinValueFieldName() . " = $jointable." . $this->getElement()->name . " WHERE "
-				. $jointable . ".parent_id = " . $item->db_primary_key . ")";
+		LEFT JOIN " . $dbName . " AS lookup ON lookup." . $this->getJoinValueFieldName() . " = $jointable." . $this->getElement()->name . " WHERE "
+				. $jointable . ".parent_id = " . $parentKey . ")";
 		if ($addAs)
 		{
 			$sql .= ' AS ' . $fullElName;
 		}
 		return $sql;
+	}
+
+	/**
+	 * Get the parent key element name
+	 *
+	 * @return string
+	 */
+
+	protected function buildQueryParentKey()
+	{
+		$item = $this->getListModel()->getTable();
+		$parentKey = $item->db_primary_key;
+
+		if ($this->isJoin())
+		{
+			$groupModel = $this->getGroupModel();
+
+			if ($groupModel->isJoin())
+			{
+				// Need to set the joinTable to be the group's table
+				$groupJoin = $groupModel->getJoinModel();
+				//$parentKey = $groupJoin->getForeignKey();
+				$parentKey = $groupJoin->getJoin()->params->get('pk');
+			}
+		}
+
+		return $parentKey;
 	}
 
 	/**
@@ -2856,9 +2885,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$dbtable = $this->actualTableName();
 		$db = JFactory::getDbo();
 		$table = $this->getListModel()->getTable();
-		$fullElName = $this->getFullName(false, true, false) . "_id";
-		$str .= ", (SELECT GROUP_CONCAT(" . $this->_element->name . " SEPARATOR '" . GROUPSPLITTER . "') FROM $jointable WHERE " . $jointable
-		. ".parent_id = " . $table->db_primary_key . ") AS $fullElName";
+		$parentKey = $this->buildQueryParentKey();
+		$fullElName = $this->getFullName(true, false) . "_id";
+		$str .= ", (SELECT GROUP_CONCAT(" . $this->element->name . " SEPARATOR '" . GROUPSPLITTER . "') FROM $jointable WHERE " . $jointable
+		. ".parent_id = " . $parentKey . ") AS $fullElName";
+
 		return $str;
 	}
 
@@ -2867,13 +2898,14 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 *
 	 * @since 2.1.1
 	 *
-	 * @return array of element names to search data in to create join data array
+	 * @return  array  of element names to search data in to create join data array
 	 * in this case append with the repeatnums data for checkboxes rendered in repeat groups
 	 */
 
 	public function getJoinDataNames()
 	{
 		$a = parent::getJoinDataNames();
+
 		if ($this->isJoin())
 		{
 			$element = $this->getElement();

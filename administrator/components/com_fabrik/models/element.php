@@ -1091,6 +1091,7 @@ class FabrikModelElement extends JModelAdmin
 		}
 		$row->name = str_replace('`', '', $row->name);
 		$listModel = $elementModel->getListModel();
+		$groupModel = $elementModel->getGroup();
 		$tableName = $this->getRepeatElementTableName($elementModel, $row);
 
 		// Create db table!
@@ -1117,12 +1118,22 @@ class FabrikModelElement extends JModelAdmin
 			$jdb->execute();
 		}
 		// Create or update fabrik join
-		$data = array('list_id' => $listModel->getTable()->id, 'element_id' => $row->id, 'join_from_table' => $listModel->getTable()->db_table_name,
+		if ($groupModel->isJoin())
+		{
+			$joinFromTable = $groupModel->getJoinModel()->getJoin()->table_join;		
+		}
+		else
+		{
+			$joinFromTable = $listModel->getTable()->db_table_name;
+		}
+
+		$data = array('list_id' => $listModel->getTable()->id, 'element_id' => $row->id, 'join_from_table' => $joinFromTable,
 			'table_join' => $tableName, 'table_key' => $row->name, 'table_join_key' => 'parent_id', 'join_type' => 'left');
 		$join = $this->getTable('join');
 		$join->load(array('element_id' => $data['element_id']));
 		$opts = new stdClass;
 		$opts->type = 'repeatElement';
+		$opts->pk = $db->quoteName($tableName) . '.' . $db->quoteName('id');
 		$data['params'] = json_encode($opts);
 		$join->bind($data);
 		$join->store();
@@ -1140,11 +1151,22 @@ class FabrikModelElement extends JModelAdmin
 	protected function getRepeatElementTableName($elementModel, $row = null)
 	{
 		$listModel = $elementModel->getListModel();
+		$groupModel = $elementModel->getGroup();
+
 		if (is_null($row))
 		{
 			$row = $elementModel->getElement();
 		}
-		$origTableName = $listModel->getTable()->db_table_name;
+
+		if ($groupModel->isJoin())
+		{
+			$origTableName = $groupModel->getJoinModel()->getJoin()->table_join;		
+		}
+		else
+		{
+			$origTableName = $listModel->getTable()->db_table_name;
+		}
+
 		return $origTableName . '_repeat_' . str_replace('`', '', $row->name);
 	}
 

@@ -631,9 +631,12 @@ class PlgFabrik_Element extends FabrikPlugin
 		$dbtable = $this->actualTableName();
 		$db = JFactory::getDbo();
 		$table = $this->getListModel()->getTable();
-		$fullElName = $db->quoteName($jointable . '___' . $this->_element->name);
+		$pkfield = $this->groupConcactJoinKey();
+		$fullElName = $db->quoteName($dbtable . '___' . $this->_element->name);
 		$sql = '(SELECT GROUP_CONCAT(' . $jkey . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $jointable . ' WHERE parent_id = '
-			. $table->db_primary_key . ')';
+				. $pkfield . ')'; 
+// Jaanus: joined group pk? set in groupConcactJoinKey()
+
 		if ($addAs)
 		{
 			$sql .= ' AS ' . $fullElName;
@@ -658,9 +661,12 @@ class PlgFabrik_Element extends FabrikPlugin
 		$dbtable = $this->actualTableName();
 		$db = JFactory::getDbo();
 		$table = $this->getListModel()->getTable();
-		$fullElName = $db->quoteName($jointable . '___' . $this->_element->name . '_raw');
-		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $jointable . ' WHERE parent_id = ' . $table->db_primary_key
-			. ') AS ' . $fullElName;
+		$fullElName = $db->quoteName($dbtable . '___' . $this->_element->name . '_raw');
+		$pkField = $this->groupConcactJoinKey();
+
+		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $jointable . ' WHERE parent_id = ' . $pkField
+		. ') AS ' . $fullElName; 
+// Jaanus: joined group pk set in groupConcactJoinKey()
 	}
 
 	/**
@@ -737,12 +743,13 @@ class PlgFabrik_Element extends FabrikPlugin
 			}
 			if ($this->isJoin())
 			{
+				$pkField = $this->groupConcactJoinKey();
 				$str = $this->buildQueryElementConcatId();
 				$aFields[] = $str;
 				$aAsFields[] = $fullElName;
 				$fullElName = $db->quoteName($jointable . '___params');
 				$str = '(SELECT GROUP_CONCAT(params SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $jointable . ' WHERE parent_id = '
-					. $table->db_primary_key . ') AS ' . $fullElName;
+					. $pkField . ') AS ' . $fullElName;
 				$aFields[] = $str;
 				$aAsFields[] = $fullElName;
 			}
@@ -757,6 +764,45 @@ class PlgFabrik_Element extends FabrikPlugin
 				$aAsFields[] = $fullElName;
 			}
 		}
+	}
+
+	/**
+	 * OMG! If repeat element inside a repeat group then the group_concat subquery needs to change the key
+	 * it selected on - so it could either be the table pk or the joined groups pk.... :D
+	 *
+	 * @since   3.1rc1
+	 *
+	 * @return string
+	 */
+
+	protected function groupConcactJoinKey()
+	{
+		$table = $this->getListModel()->getTable();
+		$eid = $this->_element->id;
+
+		//if ($this->getGroupModel()->isJoin() && !$this->isJoin())
+		if ($this->getGroupModel()->isJoin() && $this->isJoin())
+		{
+			$db = fabrikWorker::getDbo();
+			$db->setQuery("SELECT  `#__{package}_joins`.`params` 
+							FROM  `#__{package}_joins`, `#__{package}_groups`, `#__{package}_elements`
+							WHERE  `#__{package}_joins`.`join_from_table` <>  '' 
+							AND `#__{package}_joins`.`element_id` = 0 
+							AND `#__{package}_groups`.`id` = `#__{package}_joins`.`group_id`
+							AND `#__{package}_elements`.`group_id` = `#__{package}_groups`.`id`
+							AND `#__{package}_elements`.`id` = $eid");
+			if ($db->loadResult())
+			{
+				$params = json_decode($db->loadResult());
+				$pkField = $params->get('pk');
+			}
+		}
+		else
+		{
+			$pkField = $table->db_primary_key;
+		}
+
+		return $pkField;
 	}
 
 	/**
@@ -3906,7 +3952,8 @@ class PlgFabrik_Element extends FabrikPlugin
 				{
 					// Query the joined table concatanating into one field
 					$jointable = $this->getJoinModel()->getJoin()->table_join;
-					$pk = $this->getListModel()->getTable()->db_primary_key;
+					//$pk = $this->getListModel()->getTable()->db_primary_key; // Jaanus: joined group pk?
+					$pk = $this->groupConcactJoinKey(); // Jaanus: set in groupConcactJoinKey()
 					$key = "(SELECT GROUP_CONCAT(id SEPARATOR '" . GROUPSPLITTER . "') FROM $jointable WHERE parent_id = $pk)";
 					$value = str_replace("'", '', $value);
 					$query = "($key = '$value' OR $key LIKE '$value" . GROUPSPLITTER . "%' OR
@@ -6425,7 +6472,7 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label FROM " . Fab
 			}
 
 			$html .= '</div>';
-			$elementJS = $this->elementJavascript($repeatCounter);
+			$elementJS = $this->_elementJavascript($repeatCounter);
 			$onLoad = "Fabrik.inlineedit_$elementid = new " . $elementJS[0] . '("' . $elementJS[1] . '",' . json_encode($elementJS[2]) . ");\n"
 				. "Fabrik.inlineedit_$elementid.select();
 			Fabrik.inlineedit_$elementid.focus();
@@ -6711,7 +6758,187 @@ FROM (SELECT DISTINCT $item->db_primary_key, $name AS value, $label FROM " . Fab
 	{
 		$params = $this->getParams();
 		$element = $this->getElement();
-		return $not_shown_only ? $element->show_in_list_summary == 0 && $params->get('always_render', '0') == '1' : $params->get('always_render', '0') == '1';
+		$alwaysRender = $params->get('always_render', '0');
+
+		return $not_shown_only ? $element->show_in_list_summary == 0 && $alwaysRender == '1' : $alwaysRender == '1';
 	}
 
+	/**
+	 * Called at end of form record save. Used for many-many join elements to save their data
+	 *
+	 * @param   array  &$data  Form data
+	 *
+	 * @since  3.1rc1
+	 *
+	 * @return  void
+	 */
+
+	public function onFinalStoreRow(&$data)
+	{
+		if (!$this->isJoin())
+		{
+			return;
+		}
+
+		$groupModel = $this->getGroupModel();
+		$listModel = $this->getListModel();
+		$joinModel = $this->getJoinModel();
+		$db = $listModel->getDb();
+		$query = $db->getQuery(true);
+		$formData =& $this->getFormModel()->formDataWithTableName;
+		$tableName = $listModel->getTable()->db_table_name;
+
+		// I set this to raw for cdd.
+		$name = $this->getFullName(true, false) . '_raw';
+		$shortName = $this->getElement()->name;
+		$eid = $this->getElement()->id;
+		$join = $this->getJoin();
+
+		// The submitted element's values
+		$allJoinValues = (array) $formData[$name];
+
+		if ($groupModel->isJoin())
+		{
+			$db->setQuery("SELECT  `#__{package}_joins`.`params` 
+							FROM  `#__{package}_joins`, `#__{package}_groups`, `#__{package}_elements`
+							WHERE  `#__{package}_joins`.`join_from_table` <>  '' 
+							AND `#__{package}_joins`.`element_id` = 0 
+							AND `#__{package}_groups`.`id` = `#__{package}_joins`.`group_id`
+							AND `#__{package}_elements`.`group_id` = `#__{package}_groups`.`id`
+							AND `#__{package}_elements`.`id` = $eid");
+			$params = json_decode($db->loadResult());
+			$pk = $params->get('pk');
+			$groupJoinModel = $groupModel->getJoinModel();
+			$idKey = $join->table_join . '___id';
+			$paramsKey = $join->table_join . '___params';
+			//$k = $groupJoinModel->getForeignKey();
+			$k = $db->quoteName(FabrikString::safeColNameToArrayKey($pk));
+			$parentIds = (array) $formData[$k];
+		}
+		else
+		{
+			$k = 'rowid';
+			$idKey = $name . '___id';
+			$paramsKey = $name . '___params';
+			$parentIds = empty($allJoinValues) ? array() : array_fill(0, count($allJoinValues), $formData[$k]);
+		}
+
+		$allJoinIds = JArrayHelper::getValue($formData, $idKey, array());
+		$allParams = array_values(JArrayHelper::getValue($formData, $paramsKey, array()));
+		$i = 0;
+		$idsToKeep = array();
+
+		foreach ($parentIds as $parentId)
+		{
+			if (!array_key_exists($parentId, $idsToKeep))
+			{
+				$idsToKeep[$parentId] = array();
+			}
+
+			if ($groupModel->canRepeat())
+			{
+				$joinValues = JArrayHelper::getValue($allJoinValues, $i, array());
+			}
+			else
+			{
+				$joinValues = $allJoinValues;
+			}
+
+			$joinValues = (array) $joinValues;
+
+			// Get existing records
+			if ($parentId == '')
+			{
+				$ids = array();
+			}
+			else
+			{
+				$query->clear();
+				$query->select('id, ' . $shortName)->from($join->table_join)->where('parent_id = ' . $parentId);
+				$db->setQuery($query);
+				$ids = (array) $db->loadObjectList($shortName);
+			}
+
+			foreach ($joinValues as $jIndex => $jid)
+			{
+				$record = new stdClass;
+				$record->parent_id = $parentId;
+				$fkVal = $joinValues[$jIndex];
+				$record->$shortName = $fkVal;
+				$record->params = JArrayHelper::getValue($allParams, $jIndex);
+
+				// Stop notice with fileupload where fkVal is an array
+				if (is_string($fkVal) && array_key_exists($fkVal, $ids))
+				{
+					$record->id = $ids[$fkVal]->id;
+					$idsToKeep[$parentId][] = $record->id;
+				}
+				else
+				{
+					$record->id = 0;
+				}
+
+				if ($record->id == 0)
+				{
+					$ok = $listModel->insertObject($join->table_join, $record);
+					$lastInsertId = $listModel->getDb()->insertid();
+					$idsToKeep[$parentId][] = $lastInsertId;
+				}
+				else
+				{
+					$ok = $listModel->updateObject($join->table_join, $record, 'id');
+				}
+
+				if (!$ok)
+				{
+					throw new RuntimeException('didnt save db joined repeat element');
+				}
+			}
+
+			$i ++;
+		}
+
+		// Delete any records that were unselected.
+		$this->deleteDeselectedItems($idsToKeep, $k);
+	}
+
+	/**
+	 * Delete any deselected items from the cross-reference table
+	 *
+	 * @param   array   $idsToKeep  List of ids to keep
+	 * @param   string  $k          Parent record key name
+	 *
+	 * @return  void
+	 */
+
+	protected function deleteDeselectedItems($idsToKeep, $k)
+	{
+		$listModel = $this->getListModel();
+		$join = $this->getJoin();
+		$db = $listModel->getDb();
+		$query = $db->getQuery(true);
+
+		if (empty($idsToKeep))
+		{
+			$formData = $this->getFormModel()->formDataWithTableName;
+			$parentId = $formData[$k];
+			$query->delete($join->table_join)->where('parent_id = ' . $db->quote($parentId));
+			$db->setQuery($query);
+			$db->execute();
+		}
+
+		foreach ($idsToKeep as $parentId => $ids)
+		{
+			$query->clear();
+			$query->delete($join->table_join)->where('parent_id = ' . $parentId);
+
+			if (!empty($ids))
+			{
+				$query->where('id NOT IN ( ' . implode($ids, ',') . ')');
+			}
+
+			$db->setQuery($query);
+			$db->execute();
+		}
+	}
 }
