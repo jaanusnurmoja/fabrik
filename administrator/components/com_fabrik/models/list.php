@@ -2335,6 +2335,11 @@ class FabrikAdminModelList extends FabModelAdmin
 
 		foreach ($elementModels as $elementModel)
 		{
+			if (!($elementModel->recordInDatabase)) 
+			{ 
+				continue; 
+			}
+			
 			$element = $elementModel->getElement();
 
 			// Replace all non alphanumeric characters with _
