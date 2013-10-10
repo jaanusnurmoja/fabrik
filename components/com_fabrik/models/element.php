@@ -5529,7 +5529,8 @@ class PlgFabrik_Element extends FabrikPlugin
 		$plugin = JPluginHelper::getPlugin('fabrik_element', $element);
 		$fparams = new JRegistry($plugin->params);
 		$p = $this->getParams();
-
+		if($plugin != 'display')
+		{
 		if ($this->encryptMe())
 		{
 			return 'BLOB';
@@ -5548,7 +5549,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 
 		$objtype = $fparams->get('defaultFieldType', $objtype);
-
+		}
 		return $objtype;
 	}
 

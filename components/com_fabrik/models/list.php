@@ -4370,10 +4370,7 @@ class FabrikFEModelList extends JModelForm
 		$app = JFactory::getApplication();
 		$db = FabrikWorker::getDbo();
 		$return = array(false, '', '', '', '', false);
-		if ($elementModel->getElement()->plugin != 'display')
-		{
-			$element = $elementModel->getElement();
-		}
+		$element = $elementModel->getElement();
 		$pluginManager = FabrikWorker::getPluginManager();
 		$basePlugIn = $pluginManager->getPlugIn($element->plugin, 'element');
 		$fbConfig = JComponentHelper::getParams('com_fabrik');
@@ -4436,7 +4433,7 @@ class FabrikFEModelList extends JModelForm
 
 		if (!array_key_exists($element->name, $dbdescriptions))
 		{
-			if ($origColName == '')
+			if ($origColName == '' && !$this->getElementsOfType('display'))
 			{
 				if ($this->canAddFields())
 				{
@@ -4522,7 +4519,7 @@ class FabrikFEModelList extends JModelForm
 		$tableName = FabrikString::safeColName($tableName);
 		$lastfield = FabrikString::safeColName($lastfield);
 
-		if (empty($origColName) || !in_array($origColName, $existingfields) || ($app->input->get('task') === 'save2copy' && $this->canAddFields()))
+		if (empty($origColName) || !in_array($origColName, $existingfields) || ($app->input->get('task') === 'save2copy' && $this->canAddFields()) && !$this->getElementsOfType('display'))
 		{
 			if (!$altered)
 			{
@@ -4619,7 +4616,7 @@ class FabrikFEModelList extends JModelForm
 			}
 		}
 
-		if (!is_null($objtype) && $element->plugin != 'display')
+		if (!is_null($objtype) && !$this->getElementsOfType('display'))
 		{
 			foreach ($dbdescriptions as $dbdescription)
 			{
@@ -4711,13 +4708,11 @@ class FabrikFEModelList extends JModelForm
 		$params = $this->getParams();
 		$fbConfig = JComponentHelper::getParams('com_fabrik');
 		$alter = $params->get('alter_existing_db_cols', 'default');
-
 		if ($alter === 'default')
 		{
 			$alter = $fbConfig->get('fbConf_alter_existing_db_cols', true);
 		}
-
-		return $alter;
+		return $this->getElementsOfType('display') ? 0 : $alter;
 	}
 
 	/**
