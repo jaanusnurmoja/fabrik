@@ -717,7 +717,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db = FabrikWorker::getDbo();
 		$table = $this->getListModel()->getTable();
 		$fullElName = JArrayHelper::getValue($opts, 'alias', $db->quoteName($dbtable . '___' . $this->element->name));
-		if ($this->element->plugin <> 'display')
+		if ($this->element->plugin != 'display')
 		{
 			$fName = $dbtable . '.' . $this->element->name;
 			$k = $db->quoteName($fName);
@@ -764,7 +764,7 @@ class PlgFabrik_Element extends FabrikPlugin
 				$aAsFields[] = $fullElName;
 			}
 
-			if ($this->element->plugin <> 'display')
+			if ($this->element->plugin != 'display')
 			{
 				$k = $db->quoteName($dbtable . '.' . $this->element->name);
 			}
