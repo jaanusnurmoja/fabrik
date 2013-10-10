@@ -1197,7 +1197,7 @@ class FabrikFEModelList extends JModelForm
 			{
 				if (isset($data[$i]->$groupBy))
 				{
-					// get rid of & as it blows up SimpleXMLElement, and dont want to use htmlspecialchars as don't want to mess with <, >, etc.
+					// Get rid of & as it blows up SimpleXMLElement, and dont want to use htmlspecialchars as don't want to mess with <, >, etc.
 					$sdata = str_replace('&', '&amp;', str_replace('&amp;', '&', $data[$i]->$groupBy));
 
 					// Test if its just an <a>*</a> tag - if so allow HTML (enables use of icons)
@@ -8339,7 +8339,7 @@ class FabrikFEModelList extends JModelForm
 	 *
 	 * @throws  Exception  If no key found or main delete row fails (perhaps due to INNODB foreign constraints)
 	 *
-	 * @return  void
+	 * @return  bool
 	 */
 
 	public function deleteRows(&$ids, $key = '')
@@ -8465,14 +8465,14 @@ class FabrikFEModelList extends JModelForm
 
 		if (in_array(false, $pluginManager->runPlugins('onDeleteRowsForm', $this->getFormModel(), 'form', $rows)))
 		{
-			return;
+			return false;
 		}
 
 		$pluginManager->getPlugInGroup('list');
 
 		if (in_array(false, $pluginManager->runPlugins('onDeleteRows', $this, 'list')))
 		{
-			return;
+			return false;
 		}
 
 		$query = $db->getQuery(true);
@@ -8489,6 +8489,8 @@ class FabrikFEModelList extends JModelForm
 		// Clean the cache.
 		$cache = JFactory::getCache($app->input->get('option'));
 		$cache->clean();
+
+		return true;
 	}
 
 	/**

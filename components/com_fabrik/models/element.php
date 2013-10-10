@@ -820,7 +820,6 @@ class PlgFabrik_Element extends FabrikPlugin
 	{
 		$table = $this->getListModel()->getTable();
 
-		//if ($this->getGroupModel()->isJoin() && !$this->isJoin())
 		if ($this->getGroupModel()->isJoin() && $this->isJoin())
 		{
 			$groupJoin = $this->getGroupModel()->getJoinModel()->getJoin();
@@ -1547,7 +1546,7 @@ class PlgFabrik_Element extends FabrikPlugin
 				$str .= '<span class="' . $labelClass . ' faux-label">';
 			}
 
-			$labelText = $config->get('fbConf_wysiwyg_label', false) ? $element->label : htmlspecialchars(JText::_($element->label));
+			$labelText = JText::_($element->label);
 			$l = $j3 ? '' : $labelText;
 			$iconOpts = array('icon-class' => 'small');
 
@@ -2082,7 +2081,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		if ($tip !== '')
 		{
-			$tip = '<div class="fabrikInlineTip">' . FabrikHelperHTML::image('question-sign.png', 'form', $tmpl) . ' ' . $tip . '</div>';
+			$tip = FabrikHelperHTML::image('question-sign.png', 'form', $tmpl) . ' ' . $tip;
 		}
 
 		switch ($model->getParams()->get('tiplocation'))
@@ -7044,7 +7043,6 @@ class PlgFabrik_Element extends FabrikPlugin
 			$groupJoinModel = $groupModel->getJoinModel();
 			$idKey = $join->table_join . '___id';
 			$paramsKey = $join->table_join . '___params';
-			//$k = $groupJoinModel->getForeignKey();
 			$k = str_replace('`', '', str_replace('.', '___', $groupJoinModel->getJoin()->params->get('pk')));
 			$parentIds = (array) $formData[$k];
 		}
