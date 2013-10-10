@@ -4368,10 +4368,7 @@ class FabrikFEModelList extends JModelForm
 		$app = JFactory::getApplication();
 		$db = FabrikWorker::getDbo();
 		$return = array(false, '', '', '', '', false);
-		if ($elementModel->getElement()->plugin != 'display')
-		{
-			$element = $elementModel->getElement();
-		}
+		$plugin = $element->plugin;
 		$pluginManager = FabrikWorker::getPluginManager();
 		$basePlugIn = $pluginManager->getPlugIn($element->plugin, 'element');
 		$fbConfig = JComponentHelper::getParams('com_fabrik');
@@ -4413,8 +4410,11 @@ class FabrikFEModelList extends JModelForm
 		$basePlugIn->setGroupModel($elementModel->getGroupModel());
 
 		// The element type AFTER saving
-		$objtype = $elementModel->getFieldDescription();
-		$dbdescriptions = $this->getDBFields($tableName, 'Field');
+		if ($plugin != 'display')
+		{
+			$objtype = $elementModel->getFieldDescription();
+			$dbdescriptions = $this->getDBFields($tableName, 'Field');
+		}
 
 		if (!$this->canAlterFields() && !$this->canAddFields())
 		{
@@ -4436,7 +4436,7 @@ class FabrikFEModelList extends JModelForm
 		{
 			if ($origColName == '')
 			{
-				if ($this->canAddFields())
+				if ($this->canAddFields() && $plugin != 'display')
 				{
 					$fabrikDb
 					->setQuery("ALTER TABLE $tableName ADD COLUMN " . FabrikString::safeColName($element->name) . " $objtype AFTER $lastfield");
@@ -4465,7 +4465,7 @@ class FabrikFEModelList extends JModelForm
 				*/
 		$existingDef = '';
 
-		if (isset($thisFieldDesc->Type))
+		if (isset($thisFieldDesc->Type) && $plugin != 'display')
 		{
 			$existingDef = $thisFieldDesc->Type;
 
@@ -4501,7 +4501,7 @@ class FabrikFEModelList extends JModelForm
 		$existingDef = str_replace(array(' INTEGER', ' TINYINT', ' SMALLINT', ' MEDIUMINT', ' BIGINT'), ' INT', $existingDef);
 		$existingDef = trim($existingDef);
 
-		if ($element->name == $origColName && $existingDef == $objtypeUpper)
+		if ($element->name == $origColName && $existingDef == $objtypeUpper && $plugin != 'display')
 		{
 			// No changes to the element name or field type
 			return $return;
@@ -4524,7 +4524,7 @@ class FabrikFEModelList extends JModelForm
 		{
 			if (!$altered)
 			{
-				if (!in_array($element->name, $existingfields))
+				if (!in_array($element->name, $existingfields) && $plugin != 'display')
 				{
 					$fabrikDb->setQuery("ALTER TABLE $tableName ADD COLUMN " . FabrikString::safeColName($element->name) . " $objtype AFTER $lastfield");
 
@@ -4547,7 +4547,7 @@ class FabrikFEModelList extends JModelForm
 		{
 			// $$$ rob don't alter it yet - lets defer this and give the user the choice if they
 			// really want to do this
-			if ($this->canAlterFields())
+			if ($this->canAlterFields() && $plugin != 'display')
 			{
 				$origColName = $origColName == null ? $fabrikDb->quoteName($element->name) : $fabrikDb->quoteName($origColName);
 
@@ -4594,6 +4594,7 @@ class FabrikFEModelList extends JModelForm
 	{
 		$db = FabrikWorker::getDbo();
 		$element = $elementModel->getElement();
+		$plugin = $element->plugin;
 		$pluginManager = FabrikWorker::getPluginManager();
 		$basePlugIn = $pluginManager->getPlugIn($element->plugin, 'element');
 		$fbConfig = JComponentHelper::getParams('com_fabrik');
@@ -4617,7 +4618,7 @@ class FabrikFEModelList extends JModelForm
 			}
 		}
 
-		if (!is_null($objtype) && $element->plugin != 'display')
+		if (!is_null($objtype)  && $plugin != 'display')
 		{
 			foreach ($dbdescriptions as $dbdescription)
 			{
@@ -4714,7 +4715,6 @@ class FabrikFEModelList extends JModelForm
 		{
 			$alter = $fbConfig->get('fbConf_alter_existing_db_cols', true);
 		}
-
 		return $alter;
 	}
 
