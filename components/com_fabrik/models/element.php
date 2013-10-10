@@ -717,8 +717,15 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db = FabrikWorker::getDbo();
 		$table = $this->getListModel()->getTable();
 		$fullElName = JArrayHelper::getValue($opts, 'alias', $db->quoteName($dbtable . '___' . $this->element->name));
-		$fName = $dbtable . '.' . $this->element->name;
-		$k = $db->quoteName($fName);
+		if ($this->element->plugin <> 'display')
+		{
+			$fName = $dbtable . '.' . $this->element->name;
+			$k = $db->quoteName($fName);
+		}
+		else
+		{
+			$k = $db->quote('');
+		}
 		$secret = JFactory::getConfig()->get('secret');
 
 		if ($this->encryptMe())
@@ -757,8 +764,14 @@ class PlgFabrik_Element extends FabrikPlugin
 				$aAsFields[] = $fullElName;
 			}
 
-			$k = $db->quoteName($dbtable . '.' . $this->element->name);
-
+			if ($this->element->plugin <> 'display')
+			{
+				$k = $db->quoteName($dbtable . '.' . $this->element->name);
+			}
+			else 
+			{
+				$k = $db->quote('');
+			}
 			if ($this->encryptMe())
 			{
 				$k = 'AES_DECRYPT(' . $k . ', ' . $db->quote($secret) . ')';
@@ -1824,16 +1837,24 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db_table_name = $table->db_table_name;
 		$thisStep = ($useStep) ? $formModel->joinTableElementStep : '.';
 		$group = $groupModel->getGroup();
-
-		if ($groupModel->isJoin())
+		$joins = $listModel->getJoins();
+		foreach ($joins as $al_join)
 		{
-			$joinModel = $groupModel->getJoinModel();
-			$join = $joinModel->getJoin();
-			$fullName = $join->table_join . $thisStep . $element->name;
-		}
-		else
-		{
-			$fullName = $db_table_name . $thisStep . $element->name;
+			if ($groupModel->isJoin())
+			{
+				$joinModel = $groupModel->getJoinModel();
+				$join = $joinModel->getJoin();
+				if ($al_join->id == $join->id)
+				{
+					$alias = $al_join->table_join_alias;
+				}
+				$fullName = $alias . $thisStep . $element->name;
+				//var_dump($alias);
+			}
+			else
+			{
+				$fullName = $db_table_name . $thisStep . $element->name;
+			}
 		}
 
 		if ($groupModel->canRepeat() == 1 && $incRepeatGroup)
