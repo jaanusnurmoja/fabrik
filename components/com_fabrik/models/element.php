@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Fabrik Element Model
  *
@@ -650,7 +650,8 @@ class PlgFabrik_Element extends FabrikPlugin
 		$pkfield = $this->groupConcactJoinKey();
 		$fullElName = $db->quoteName($dbtable . '___' . $this->element->name);
 		$sql = '(SELECT GROUP_CONCAT(' . $jkey . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $jointable . ' WHERE parent_id = '
-				. $pkfield . ')'; // Jaanus: joined group pk? set in groupConcactJoinKey()
+				. $pkfield . ')'; 
+// Jaanus: joined group pk? set in groupConcactJoinKey()
 
 		if ($addAs)
 		{
@@ -681,7 +682,8 @@ class PlgFabrik_Element extends FabrikPlugin
 		$pkField = $this->groupConcactJoinKey();
 
 		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $jointable . ' WHERE parent_id = ' . $pkField
-		. ') AS ' . $fullElName; // Jaanus: joined group pk set in groupConcactJoinKey()
+		. ') AS ' . $fullElName; 
+// Jaanus: joined group pk set in groupConcactJoinKey()
 	}
 
 	/**
@@ -786,7 +788,8 @@ class PlgFabrik_Element extends FabrikPlugin
 
 				$as = $db->quoteName($dbtable . '___' . $this->element->name . '___params');
 				$str = '(SELECT GROUP_CONCAT(params SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $jointable . ' WHERE parent_id = '
-						. $pkField . ') AS ' . $as; // Jaanus: joined group pk set in groupConcactJoinKey()
+						. $pkField . ') AS ' . $as; 
+						// Jaanus: joined group pk set in groupConcactJoinKey()
 				$aFields[] = $str;
 				$aAsFields[] = $as;
 			}
@@ -1837,24 +1840,16 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db_table_name = $table->db_table_name;
 		$thisStep = ($useStep) ? $formModel->joinTableElementStep : '.';
 		$group = $groupModel->getGroup();
-		$joins = $listModel->getJoins();
-		foreach ($joins as $al_join)
+
+		if ($groupModel->isJoin())
 		{
-			if ($groupModel->isJoin())
-			{
-				$joinModel = $groupModel->getJoinModel();
-				$join = $joinModel->getJoin();
-				if ($al_join->id == $join->id)
-				{
-					$alias = $al_join->table_join_alias;
-				}
-				$fullName = $alias . $thisStep . $element->name;
-				//var_dump($alias);
-			}
-			else
-			{
-				$fullName = $db_table_name . $thisStep . $element->name;
-			}
+			$joinModel = $groupModel->getJoinModel();
+			$join = $joinModel->getJoin();
+			$fullName = $join->table_join . $thisStep . $element->name;
+		}
+		else
+		{
+			$fullName = $db_table_name . $thisStep . $element->name;
 		}
 
 		if ($groupModel->canRepeat() == 1 && $incRepeatGroup)
