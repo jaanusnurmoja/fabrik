@@ -1054,7 +1054,10 @@ class FabrikAdminModelList extends FabModelAdmin
 		$formModel = $this->getFormModel();
 		$groupData = FabrikWorker::formDefaults('group');
 		$groupData['name'] = $this->getTable()->label . '- [' . $joinTable . ']';
-		$groupData['label'] = $joinTable;
+		// $groupData['label'] = $joinTable;
+		// Jaanus: as we can't set the label when creating join in list admin the initially blank label would make more sense -
+		// so we wouldn't be forced to edit group if we prefer it without label text
+		$groupData['label'] = '';
 		$groupId = $this->createLinkedGroup($groupData, true, $isRepeat);
 
 		$origTable = JArrayHelper::getValue($input->get('jform', array(), 'array'), 'db_table_name');
@@ -1708,12 +1711,12 @@ class FabrikAdminModelList extends FabModelAdmin
 	 * @return  mixed  false / JError
 	 */
 
-	private function addKey($fieldName, $autoIncrement, $type = "INT(6)")
+	private function addKey($fieldName, $autoIncrement, $type = "INT(11)")
 	{
 		$db = $this->getFEModel()->getDb();
 		$app = JFactory::getApplication();
 		$input = $app->input;
-		$type = $autoIncrement != true ? $type : 'INT(6)';
+		$type = $autoIncrement != true ? $type : 'INT(11)';
 		$jform = $input->get('jform', array(), 'array');
 		$tableName = ($jform['db_table_name'] != '') ? $jform['db_table_name'] : $jform['_database_name'];
 		$tableName = preg_replace('#[^0-9a-zA-Z_]#', '_', $tableName);
@@ -2533,8 +2536,8 @@ class FabrikAdminModelList extends FabModelAdmin
 							{
 								$objtype = 'VARCHAR(255)';
 							}
-
-							if ($objname != "" && !is_null($objtype))
+							// Jaanus: no sense that we create a db fields for display elements
+							if ($objname != "" && !is_null($objtype) && $objtypeid != 'display')
 							{
 								$ammend = true;
 								$add = "ADD COLUMN " . $db->quoteName($objname) . " $objtype null";

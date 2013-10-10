@@ -4370,7 +4370,10 @@ class FabrikFEModelList extends JModelForm
 		$app = JFactory::getApplication();
 		$db = FabrikWorker::getDbo();
 		$return = array(false, '', '', '', '', false);
-		$element = $elementModel->getElement();
+		if ($elementModel->getElement()->plugin != 'display')
+		{
+			$element = $elementModel->getElement();
+		}
 		$pluginManager = FabrikWorker::getPluginManager();
 		$basePlugIn = $pluginManager->getPlugIn($element->plugin, 'element');
 		$fbConfig = JComponentHelper::getParams('com_fabrik');
@@ -4616,7 +4619,7 @@ class FabrikFEModelList extends JModelForm
 			}
 		}
 
-		if (!is_null($objtype))
+		if (!is_null($objtype) && $element->plugin != 'display')
 		{
 			foreach ($dbdescriptions as $dbdescription)
 			{
