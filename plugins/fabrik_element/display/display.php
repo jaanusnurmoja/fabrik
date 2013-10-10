@@ -26,7 +26,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 	 *
 	 * @var  string
 	 */
-	protected $fieldDesc = 'TEXT';
+	//protected $fieldDesc = 'TEXT';
 
 	/**
 	 * Does the element's data get recorded in the db
