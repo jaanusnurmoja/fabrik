@@ -1277,7 +1277,7 @@ class FabrikAdminModelList extends FabModelAdmin
 					}
 				}
 				// Then alter if defined in Fabrik global config
-				$plugin = $fbConfig->get($type, $plugin);
+				$plugin = ($key[0]['colname'] == $label && JString::strtolower(substr($key[0]['type'], 0, 3)) === 'int') ? 'internalid' : $fbConfig->get($type, $plugin);
 			}
 
 			$element->plugin = $plugin;
