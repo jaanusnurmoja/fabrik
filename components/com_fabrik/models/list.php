@@ -4368,6 +4368,7 @@ class FabrikFEModelList extends JModelForm
 		$app = JFactory::getApplication();
 		$db = FabrikWorker::getDbo();
 		$return = array(false, '', '', '', '', false);
+		$element = $elementModel->getElement();
 		$plugin = $element->plugin;
 		$pluginManager = FabrikWorker::getPluginManager();
 		$basePlugIn = $pluginManager->getPlugIn($element->plugin, 'element');
