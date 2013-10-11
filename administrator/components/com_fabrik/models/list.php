@@ -1054,10 +1054,7 @@ class FabrikAdminModelList extends FabModelAdmin
 		$formModel = $this->getFormModel();
 		$groupData = FabrikWorker::formDefaults('group');
 		$groupData['name'] = $this->getTable()->label . '- [' . $joinTable . ']';
-		// $groupData['label'] = $joinTable;
-		// Jaanus: as we can't set the label when creating join in list admin the initially blank label would make more sense -
-		// so we wouldn't be forced to edit group if we prefer it without label text
-		$groupData['label'] = '';
+		$groupData['label'] = $joinTable;
 		$groupId = $this->createLinkedGroup($groupData, true, $isRepeat);
 
 		$origTable = JArrayHelper::getValue($input->get('jform', array(), 'array'), 'db_table_name');
@@ -1711,12 +1708,12 @@ class FabrikAdminModelList extends FabModelAdmin
 	 * @return  mixed  false / JError
 	 */
 
-	private function addKey($fieldName, $autoIncrement, $type = "INT(11)")
+	private function addKey($fieldName, $autoIncrement, $type = "INT(6)")
 	{
 		$db = $this->getFEModel()->getDb();
 		$app = JFactory::getApplication();
 		$input = $app->input;
-		$type = $autoIncrement != true ? $type : 'INT(11)';
+		$type = $autoIncrement != true ? $type : 'INT(6)';
 		$jform = $input->get('jform', array(), 'array');
 		$tableName = ($jform['db_table_name'] != '') ? $jform['db_table_name'] : $jform['_database_name'];
 		$tableName = preg_replace('#[^0-9a-zA-Z_]#', '_', $tableName);
