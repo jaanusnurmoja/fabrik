@@ -2332,7 +2332,7 @@ class FabrikAdminModelList extends FabModelAdmin
 
 		foreach ($elementModels as $elementModel)
 		{
-			if (!($elementModel->recordInDatabase)) 
+			if ($elementModel->getElement()->plugin == 'display') 
 			{ 
 				continue; 
 			}
