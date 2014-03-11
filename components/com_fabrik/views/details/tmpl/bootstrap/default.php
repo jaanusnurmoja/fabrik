@@ -36,9 +36,10 @@ echo $this->loadTemplate('buttons');
 echo $this->loadTemplate('relateddata');
 foreach ($this->groups as $group) :
 	$this->group = $group;
+if (!$group->is_child) :
 	?>
 
-		<div class="<?php echo $group->class; ?>" id="group<?php echo $group->id;?>" style="<?php echo $group->css;?>">
+		<div class="<?php echo $group->class; ?>" id="group<?php echo $group->id;?>" style="<?php echo $group->css;?>"> 
 
 		<?php
 		if ($group->showLegend) :?>
@@ -50,8 +51,16 @@ foreach ($this->groups as $group) :
 		if (!empty($group->intro)) : ?>
 			<div class="groupintro"><?php echo $group->intro ?></div>
 		<?php
-		endif;
-
+		endif; 
+		/*	if ($group->is_join)
+			{
+		?>
+			<div><?php echo '<pre>';
+			var_dump($group->is_child, $group->list_table, $group->is_join, $group->join_id, $group->join_from_table, $group->table_join, $group->table_key, $group->table_join_key, $group->pk, $group->fk);
+			echo '</pre>';?></div>
+		<?php
+			}
+		*/
 		// Load the group template - this can be :
 		//  * default_group.php - standard group non-repeating rendered as an unordered list
 		//  * default_repeatgroup.php - repeat group rendered as an unordered list
@@ -67,6 +76,7 @@ foreach ($this->groups as $group) :
 		?>
 	</div>
 <?php
+endif;
 endforeach;
 
 echo $this->pluginbottom;

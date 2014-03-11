@@ -29,6 +29,31 @@ $group = $this->group;
 		<?php
 	endforeach;
 
+// maybe there is some nested group
+	foreach ($this->groups as $child):
+	if ($child->parentgroup == $this->group->id):
+	$this->child = $child;
+	?>
+	<th id="group<?php echo $child->id;?>" style="display: none;"></th>
+		<?php
+
+		/* Load the group template - this can be :
+		 *  * default_group.php - standard group non-repeating rendered as an unordered list
+		 *  * default_repeatgroup.php - repeat group rendered as an unordered list
+		 *  * default_repeatgroup_table.php - repeat group rendered in a table.
+		 */
+		$this->elements = $child->elements;
+		foreach ($this->elements as $element):
+			$style = $element->hidden ? 'style="display:none"' : '';
+			?>
+			<th <?php echo $style; ?> class="<?php echo $element->containerClass?>">
+			<?php echo $element->label_raw;?>
+			</th>
+			<?php 
+		endforeach;
+		endif;
+	endforeach; 
+
 	// This column will contain the add/delete buttons
 	if ($group->editable) : ?>
 	<th></th>

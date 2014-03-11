@@ -67,6 +67,13 @@
 				label="COM_FABRIK_FIELD_GROUP_ACCESS_LABEL"
 				description="COM_FABRIK_FIELD_GROUP_ACCESS_DESC" />
 
+			<field name="parentgroup"
+				type="grouplist"
+				description="COM_FABRIK_GROUP_PARENTGROUP_DESC"
+				label="COM_FABRIK_GROUP_PARENTGROUP_LABEL"
+				required="false" 
+				default="0" />
+
 			<field name="intro"
 				type="editor"
 				filter="FabrikAdminHelper::filterText"
@@ -184,6 +191,29 @@
 			<field class="btn-group" default="0" description="COM_FABRIK_RANDOMISE_ELEMENTS_DESC" label="COM_FABRIK_RANDOMISE_ELEMENTS_LABEL" name="random" type="radio">
 					<option value="0">JNO</option>
 					<option value="1">JYES</option>
+			</field>
+			<field name="labels_above"
+				type="radio"
+				class="btn-group"
+				default="-1"
+				label="COM_FABRIK_FIELD_LABELS_ABOVE_LABEL"
+				description="COM_FABRIK_FIELD_LABELS_ABOVE_DESC" >
+					<option value="-1">COM_FABRIK_FIELD_LABELS_ABOVE_GLOBAL</option>
+					<option value="0">COM_FABRIK_FIELD_LABELS_ABOVE_LEFT</option>
+					<option value="1">COM_FABRIK_FIELD_LABELS_ABOVE_ABOVE</option>
+					<option value="2">COM_FABRIK_FIELD_LABELS_ABOVE_NONE</option>
+			</field>
+
+			<field name="labels_above_details"
+				type="radio"
+				class="btn-group"
+				default="-1"
+				label="COM_FABRIK_FIELD_LABELS_ABOVE_DETAILS_LABEL"
+				description="COM_FABRIK_FIELD_LABELS_ABOVE_DETAILS_DESC" >
+					<option value="-1">COM_FABRIK_FIELD_LABELS_ABOVE_GLOBAL</option>
+					<option value="0">COM_FABRIK_FIELD_LABELS_ABOVE_LEFT</option>
+					<option value="1">COM_FABRIK_FIELD_LABELS_ABOVE_ABOVE</option>
+					<option value="2">COM_FABRIK_FIELD_LABELS_ABOVE_NONE</option>
 			</field>
 	</fieldset>
 	</fields>

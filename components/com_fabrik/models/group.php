@@ -990,6 +990,7 @@ class FabrikFEModelGroup extends FabModel
 		$group = new stdClass;
 		$groupTable = $this->getGroup();
 		$params = $this->getParams();
+		$db = FabrikWorker::getDbo();
 
 		if (!isset($this->editable))
 		{
@@ -1059,6 +1060,8 @@ class FabrikFEModelGroup extends FabModel
 		$group->columns = $params->get('group_columns', 1);
 		$group->splitPage = $params->get('split_page', 0);
 		$group->showLegend = $this->showLegend($group);
+		$group->labels = $params->get('labels_above', -1);
+		$group->dlabels = $params->get('labels_above_details', -1);
 
 		if ($this->canRepeat())
 		{
@@ -1068,6 +1071,23 @@ class FabrikFEModelGroup extends FabModel
 		{
 			$group->tmpl = 'group';
 		}
+		
+		if ($this->isJoin())
+		{
+			$group->is_join = (bool) $this->isJoin();
+			$group->join_id = (int) $this->getJoinId();
+			$join = $this->getJoinModel()->getJoin();
+			$group->join = $join;
+			$group->join_from_table = $join->join_from_table;
+			$group->table_join = $join->table_join;
+			$group->table_key = $join->table_key;
+			$group->table_join_key = $join->table_join_key;
+			$group->pk = $join->params->get('pk');
+			$group->fk = $db->quoteName($join->table_join . '.' . $join->table_join_key);
+		}
+		$group->parentgroup = $params->get('parentgroup', 0);
+		$group->list_table = $this->getListModel()->getTable()->db_table_name;
+		$group->is_child = (int) $group->parentgroup > 0 || ($group->is_join && $group->list_table != $group->join_from_table);
 
 		return $group;
 	}

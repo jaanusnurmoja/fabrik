@@ -62,6 +62,7 @@ echo $this->plugintop;
 	<?php
 	$i = 0;
 	foreach ($this->groups as $group) :
+		if (!$group->is_child) :
 		// If this ismultipage then groups are consolidated until a group with a page break
 		// So we should only show a tab if: it is first tab, or if it is a page break
 		if (!$model->isMultiPage() || $i == 0 || $group->splitPage) :
@@ -83,6 +84,7 @@ echo $this->plugintop;
 			<?php
 			$i ++;
 		endif;
+		endif;
 	endforeach;
 	?>
 </ul>
@@ -91,6 +93,7 @@ echo $this->plugintop;
 
 	$i = 0;
 	foreach ($this->groups as $group) :
+	if (!$group->is_child) :
 		$this->group = $group;
 		if ($i == 0 || !$model->isMultiPage() || $group->splitPage) :
 			if ($i != 0)
@@ -129,6 +132,7 @@ echo $this->plugintop;
 			?>
 			</fieldset>
 		<?php
+	endif;
 	endforeach;
 	?>
 	</div>

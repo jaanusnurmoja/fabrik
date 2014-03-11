@@ -1,6 +1,6 @@
 <?php
 /**
- * Bootstrap Details Template
+ * Bootstrap Form Template - Actions
  *
  * @package     Joomla
  * @subpackage  Fabrik
