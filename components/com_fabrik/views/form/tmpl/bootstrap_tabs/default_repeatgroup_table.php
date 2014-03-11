@@ -24,10 +24,30 @@ $group = $this->group;
 		$style = $el->hidden ? 'style="display:none"' : '';
 		?>
 		<th <?php echo $style; ?> class="<?php echo $el->containerClass?>">
-			<?php echo $el->label?>
+			<?php echo $el->label_raw?>
 		</th>
 		<?php
 	endforeach;
+
+// maybe there is some nested group
+	foreach ($this->groups as $child):
+	if ($child->parentgroup == $this->group->id):
+	$this->child = $child;
+	?>
+	<th id="group<?php echo $child->id;?>" style="display: none;"></th>
+		<?php
+
+		$this->elements = $child->elements;
+		foreach ($this->elements as $element):
+			$style = $element->hidden ? 'style="display:none"' : '';
+			?>
+			<th <?php echo $style; ?> class="<?php echo $element->containerClass?>">
+			<?php echo $element->label_raw;?>
+			</th>
+			<?php 
+		endforeach;
+		endif;
+	endforeach; 
 
 	// This column will contain the add/delete buttons
 	if ($group->editable) : ?>

@@ -41,6 +41,46 @@ $group = $this->group;
 	</td>
 	<?php
 	endforeach;
+	foreach ($this->groups as $child):
+	if ($child->parentgroup == $this->group->id):
+	$this->child = $child;
+	?>
+	<td id="group<?php echo $child->id;?>" style="display: none;"></td>
+
+		 <?php
+		$this->elements = $child->elements;
+		foreach ($this->elements as $element) :
+			?>
+				<td class="<?php echo $element->containerClass; ?>">
+				<?php
+				if ($this->tipLocation == 'above') :
+				?>
+					<div><?php echo $element->tipAbove; ?></div>
+				<?php
+				endif;
+				echo $element->errorTag; ?>
+				<div class="fabrikElement">
+				<?php echo $element->element; ?>
+				</div>
+
+				<?php if ($this->tipLocation == 'side') :
+					echo $element->tipSide;
+				endif;
+				if ($this->tipLocation == 'below') : ?>
+					<div>
+					<?php echo $element->tipBelow; ?>
+					</div>
+				<?php endif;
+				?>
+				</td>
+			<?php
+			endforeach;
+
+?>
+<?php
+	endif;
+	endforeach; 
+
  	if ($group->editable) : ?>
 		<td class="fabrikGroupRepeater">
 			<div class="pull-right">

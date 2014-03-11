@@ -1,12 +1,12 @@
 <?php
 /**
- * Bootstrap Tabs Form Template: Labels None
+ * Bootstrap Form Template: Labels None
  *
  * @package     Joomla
  * @subpackage  Fabrik
  * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
- * @since       3.1
+ * @since       3.0
  */
 
 // No direct access

@@ -58,16 +58,15 @@ echo $this->plugintop;
 
 <?php
 foreach ($this->groups as $group) :
+if (!$group->is_child) :
 	$this->group = $group;
 	?>
-
 	<fieldset class="<?php echo $group->class; ?>" id="group<?php echo $group->id;?>" style="<?php echo $group->css;?>">
 		<?php
 		if ($group->showLegend) :?>
 			<legend class="legend"><?php echo $group->title;?></legend>
 		<?php
 		endif;
-
 		if (!empty($group->intro)) : ?>
 			<div class="groupintro"><?php echo $group->intro ?></div>
 		<?php
@@ -79,15 +78,17 @@ foreach ($this->groups as $group) :
 		 *  * default_repeatgroup_table.php - repeat group rendered in a table.
 		 */
 		$this->elements = $group->elements;
+		// $groupTmpl = $model->editable ? $group->tmpl : 'group_details';
 		echo $this->loadTemplate($group->tmpl);
 
 		if (!empty($group->outro)) : ?>
 			<div class="groupoutro"><?php echo $group->outro ?></div>
-		<?php
+		<?php 
 		endif;
-	?>
+?>
 	</fieldset>
 <?php
+endif;
 endforeach;
 if ($model->editable) : ?>
 <div class="fabrikHiddenFields">

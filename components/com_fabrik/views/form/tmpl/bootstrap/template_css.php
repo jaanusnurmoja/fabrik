@@ -16,5 +16,11 @@ echo "
 .fabrikGroup {
 clear: left;
 }
+
+.fabrikChildGroup {
+display: table;
+float: left;
+min-width: 45%;
+border: 1px;
 ";
 ?>

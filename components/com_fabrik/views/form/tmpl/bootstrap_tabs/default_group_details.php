@@ -1,6 +1,6 @@
 <?php
 /**
- * Bootstrap Tabs Form Template - group details
+ * Bootstrap Form Template - group details
  *
  * @package     Joomla
  * @subpackage  Fabrik
@@ -13,12 +13,13 @@
 defined('_JEXEC') or die('Restricted access');
 
 foreach ($this->elements as $element) :
-	if ($element->startRow) :?>
-		<div class="row-fluid">
-	<?php
-	endif;
+	 if (!$element->hidden) {
+		if ($element->startRow) :?>
+			<div class="row-fluid">
+		<?php
+		endif;
+		?>
 
-	if (!$element->hidden) :?>
 		<div class="<?php echo $element->span;?>">
 			<div class="row-fluid">
 				<div class="span4"><em><?php echo $element->label_raw ?></em></div>
@@ -27,9 +28,10 @@ foreach ($this->elements as $element) :
 		</div>
 
 	<?php
-	endif;
-	if ($element->endRow) :?>
+	if ($element->endRow) :
+	?>
 		</div>
 	<?php
 	endif;
-endforeach;
+	}
+endforeach; ?>

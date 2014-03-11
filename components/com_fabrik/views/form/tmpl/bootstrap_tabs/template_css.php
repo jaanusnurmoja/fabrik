@@ -15,6 +15,18 @@ echo "
 
 .fabrikGroup {
 clear: left;
+display: block;
+}
+
+.fabrikChildGroup {
+min-width: 48%;
+display: table;
+float: left;
+margin: 5px;
+}
+
+.nav-tabs li {
+list-style: none;
 }
 ";
 ?>

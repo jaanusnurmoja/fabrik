@@ -14,7 +14,7 @@ defined('_JEXEC') or die('Restricted access');
 
 $element = $this->element;
 ?>
-<?php echo $element->label;?>
+<?php echo $element->label_raw;?>
 
 <?php if ($this->tipLocation == 'above') : ?>
 	<span class=""><?php echo $element->tipAbove ?></span>
