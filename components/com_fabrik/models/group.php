@@ -1071,7 +1071,10 @@ class FabrikFEModelGroup extends FabModel
 		{
 			$group->tmpl = 'group';
 		}
-		
+		$group->is_join = false;		
+		$group->join_id = null;
+		$group->table_join = '';
+		$group->join_from_table = '';
 		if ($this->isJoin())
 		{
 			$group->is_join = (bool) $this->isJoin();
@@ -1085,10 +1088,19 @@ class FabrikFEModelGroup extends FabModel
 			$group->pk = $join->params->get('pk');
 			$group->fk = $db->quoteName($join->table_join . '.' . $join->table_join_key);
 		}
-		$group->parentgroup = $params->get('parentgroup', 0);
+		$otherjoins = $this->getListModel()->getJoins();
+		$group->parent_joingroup_id = 0;
+		for ($x = 0; $x < count($otherjoins); $x++)
+		{
+			if ($otherjoins[$x]->id != $group->join_id && $otherjoins[$x]->table_join == $group->join_from_table)
+			{
+				$group->parent_join_id = $otherjoins[$x]->id;
+				$group->parent_joingroup_id = $otherjoins[$x]->group_id;
+			}
+		}
+		$group->parentgroup = $params->get('parentgroup', 0) == 0 ? $group->parent_joingroup_id : $params->get('parentgroup', 0);
 		$group->list_table = $this->getListModel()->getTable()->db_table_name;
 		$group->is_child = (int) $group->parentgroup > 0 || ($group->is_join && $group->list_table != $group->join_from_table);
-
 		return $group;
 	}
 
