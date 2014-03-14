@@ -15,7 +15,6 @@ defined('_JEXEC') or die('Restricted access');
 ?>
 <div class="row-striped">
 <?php
-$group = $this->group;
 $rowStarted = false;
 foreach ($this->elements as $element) :
 	$this->element = $element;
@@ -35,7 +34,7 @@ foreach ($this->elements as $element) :
 		$rowStarted = true;
 	endif;
 	$style = $element->hidden ? 'style="display:none"' : '';
-		$labels_above = (!$group->dlabels || (int) $group->dlabels == -1) ? $this->params->get('labels_above_details', 0) : (int) $group->dlabels;
+	$labels_above = $element->dlabels;
 
 	if ($labels_above == 1)
 	{
@@ -60,47 +59,8 @@ foreach ($this->elements as $element) :
 		$rowStarted = false;
 	endif;
 endforeach;
- ?>
+// If the last element was not closing the row add an additional div
+if ($rowStarted === true) :?>
+</div><!-- end row-fluid for open row -->
+<?php endif;?>
 </div>
-
-<?php
-foreach ($this->groups as $child):
-	if ($child->is_child):
-		if ((!$child->is_join && $child->parentgroup == $this->group->id) || ($child->is_join && $child->join_from_table == $this->group->table_join)):
-		
-		//		&& (($this->group->canRepeat && !$child->canRepeat) || (!$this->group->canRepeat && $child->canRepeat) || (!$this->group->canRepeat && !$child->canRepeat))):
-			
-			$this->child = $child;
-?>
-			<div class="fabrikChildGroup" id="group<?php echo $child->id;?>" style="<?php echo $child->css;?>">
-		<?php
-			if ($child->showLegend) :?>
-				<h4><?php echo $child->title;?></h4>
-		<?php
-			endif;
-			/*
-			if ($child->is_join && $child->join_from_table == $this->group->table_join)
-			{
-		?>
-			<div><?php echo '<pre>';
-			var_dump($child->is_child, $child->list_table, $child->is_join, $child->join_id, $child->join_from_table, $child->table_join, $child->table_key, $child->table_join_key, $child->pk, $child->fk);
-			echo '</pre>';?></div>
-		<?php
-			}
-			*/
-
-		/* Load the group template - this can be :
-		 *  * default_group.php - standard group non-repeating rendered as an unordered list
-		 *  * default_repeatgroup.php - repeat group rendered as an unordered list
-		 *  * default_repeatgroup_table.php - repeat group rendered in a table.
-		 */
-		$this->elements = $child->elements;
-		echo $this->loadTemplate('child_' . $child->tmpl);
-?>
-	</div>
-<?php
-		endif;
-	endif;
-endforeach; 
-?>
-<div style="clear: both;"></div>
