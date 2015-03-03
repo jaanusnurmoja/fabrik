@@ -8217,7 +8217,8 @@ class FabrikFEModelList extends JModelForm
 		$pluginMananger = FabrikWorker::getPluginManager();
 		$element = $pluginMananger->getPlugIn('field', 'element');
 		$item = $element->getDefaultProperties();
-		$item->name = $item->label = 'parent_id';
+		$parentid = $this->getTable()->db_table_name . '_' . FabrikString::shortColName($this->getTable()->db_primary_key);
+		$item->name = $item->label = $parentid;
 		$item->hidden = 1;
 		$item->group_id = $groupId;
 
