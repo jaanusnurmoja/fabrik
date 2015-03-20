@@ -165,7 +165,7 @@ class FabrikAdminModelGroup extends FabModelAdmin
 
 		if ($this->checkRepeatAndPK($data))
 		{
-			$makeJoin = ($data['params']['repeat_group_button'] == 1);
+			$makeJoin = (in_array($data['params']['repeat_group_button'], array(1,2));
 
 			if ($makeJoin)
 			{
@@ -186,7 +186,7 @@ class FabrikAdminModelGroup extends FabModelAdmin
 		}
 		else
 		{
-			if (($data['params']['repeat_group_button'] == 1))
+			if ((in_array($data['params']['repeat_group_button'], array(1,2)))
 			{
 				$data['params']['repeat_group_button'] = 0;
 				JFactory::getApplication()->enqueueMessage('You can not set the group containing the list primary key to be repeatable', 'notice');
@@ -465,6 +465,12 @@ class FabrikAdminModelGroup extends FabModelAdmin
 			return false;
 		}
 
+		$groupModel = JModelLegacy::getInstance('Group', 'FabrikFEModel');
+		$listModel = $groupModel->getListModel();
+		$list = $listModel->getTable();
+		$listpk = FabrikString::shortColName($list->db_primary_key);
+		$parentid = $list->db_table_name . '_' . $listpk;
+
 		$db = FabrikWorker::getDbo(true);
 		$query = $db->getQuery(true);
 		$query->delete('#__{package}_joins')->where('group_id = ' . $data['id']);
@@ -472,7 +478,7 @@ class FabrikAdminModelGroup extends FabModelAdmin
 		$return = $db->execute();
 
 		$query = $db->getQuery(true);
-		$query->select('id')->from('#__{package}_elements')->where('group_id  = ' . $data['id'] . ' AND name IN ("id", "parent_id")');
+		$query->select('id')->from('#__{package}_elements')->where('group_id  = ' . $data['id'] . ' AND name IN ("id", "' . $parentid . '")');
 		$db->setQuery($query);
 		$elids = $db->loadColumn();
 		$elementModel = JModelLegacy::getInstance('Element', 'FabrikModel');
