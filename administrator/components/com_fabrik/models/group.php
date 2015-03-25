@@ -165,7 +165,7 @@ class FabrikAdminModelGroup extends FabModelAdmin
 
 		if ($this->checkRepeatAndPK($data))
 		{
-			$makeJoin = (in_array($data['params']['repeat_group_button'], array(1,2));
+			$makeJoin = in_array($data['params']['repeat_group_button'], array(1,2));
 
 			if ($makeJoin)
 			{
@@ -186,7 +186,7 @@ class FabrikAdminModelGroup extends FabModelAdmin
 		}
 		else
 		{
-			if ((in_array($data['params']['repeat_group_button'], array(1,2)))
+			if (in_array($data['params']['repeat_group_button'], array(1,2)))
 			{
 				$data['params']['repeat_group_button'] = 0;
 				JFactory::getApplication()->enqueueMessage('You can not set the group containing the list primary key to be repeatable', 'notice');
