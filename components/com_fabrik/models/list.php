@@ -2261,15 +2261,15 @@ class FabrikFEModelList extends JModelForm
 
 	public function straightJoin() 
 	{
-      $fbConfig = JComponentHelper::getParams('com_fabrik');
-      $params = $this->getParams();
-      $globalSJ = $fbConfig->get('enable_straight_join', 0) == 1;
-      $listSJ = $params->get('enable_straight_join', -1) == 1;
-      $useGlobal = $params->get('enable_straight_join', -1) == -1;
-      $straightJoin = $useGlobal ? $globalSJ : $listSJ;
-      $string = $straightJoin ? 'STRAIGHT_JOIN ' : '';
-      return $string;
-  }
+		$fbConfig = JComponentHelper::getParams('com_fabrik');
+		$params = $this->getParams();
+		$globalSJ = $fbConfig->get('enable_straight_join', 0) == 1;
+		$listSJ = $params->get('enable_straight_join', -1) == 1;
+		$useGlobal = $params->get('enable_straight_join', -1) == -1;
+		$straightJoin = $useGlobal ? $globalSJ : $listSJ;
+		$string = $straightJoin ? 'STRAIGHT_JOIN ' : '';
+		return $string;
+	}
 
 	/**
 	 * get query to make records
