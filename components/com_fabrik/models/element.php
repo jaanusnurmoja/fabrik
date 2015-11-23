@@ -909,28 +909,30 @@ class PlgFabrik_Element extends FabrikPlugin
 
 			if (!empty($data) &&  $this->user->get('id') !== 0)
 			{
-				$lookUpId = $params->get('view_access_user', '');
-				$lookUp = $formModel->getElement($lookUpId, true);
+				$lookUpParams = explode(',', $params->get('view_access_user', ''));
+				foreach($lookUpParams as $lookUpId)
+				{
+					$lookUp = $formModel->getElement($lookUpId, true);
 
-				// Could be  a linked parent element in which case the form doesn't contain the element whose id is $lookUpId
-				if (!$lookUp)
-				{
-					$lookUp = FabrikWorker::getPluginManager()->getElementPlugin($lookUpId);
-				}
+					// Could be  a linked parent element in which case the form doesn't contain the element whose id is $lookUpId
+					if (!$lookUp)
+					{
+						$lookUp = FabrikWorker::getPluginManager()->getElementPlugin($lookUpId);
+					}
 
-				if ($lookUp)
-				{
-					$fullName = $lookUp->getFullName(false, true);
-					$value = $formModel->getElementData($fullName, true);
-					$this->access->$key = ($this->user->get('id') == $value) ? true : false;
-				}
-				else
-				{
-					FabrikWorker::logError('Did not load element ' . $lookUpId . ' for element::canView()', 'error');
+					if ($lookUp)
+					{
+						$fullName = $lookUp->getFullName(false, true);
+						$value = $formModel->getElementData($fullName, true);
+						$this->access->$key = ($this->user->get('id') == $value) ? true : false;
+					}
+					else
+					{
+						FabrikWorker::logError('Did not load element ' . $lookUpId . ' for element::canView()', 'error');
+					}
 				}
 			}
 		}
-
 		return $this->access->$key;
 	}
 
@@ -989,24 +991,27 @@ class PlgFabrik_Element extends FabrikPlugin
 
 					if (!empty($data) &&  $this->user->get('id') !== 0)
 					{
-						$lookUpId = $params->get('edit_access_user', '');
-						$lookUp = $formModel->getElement($lookUpId, true);
+						$lookUpParams = explode(',', $params->get('edit_access_user', ''));
+						foreach($lookUpParams as $lookUpId)
+						{
+							$lookUp = $formModel->getElement($lookUpId, true);
 
-						// Could be  a linked parent element in which case the form doesn't contain the element whose id is $lookUpId
-						if (!$lookUp)
-						{
-							$lookUp = FabrikWorker::getPluginManager()->getElementPlugin($lookUpId);
-						}
+							// Could be  a linked parent element in which case the form doesn't contain the element whose id is $lookUpId
+							if (!$lookUp)
+							{
+								$lookUp = FabrikWorker::getPluginManager()->getElementPlugin($lookUpId);
+							}
 
-						if ($lookUp)
-						{
-							$fullName = $lookUp->getFullName(true, true);
-							$value = (array) $formModel->getElementData($fullName, true);
-							$this->access->use = in_array($this->user->get('id'), $value);
-						}
-						else
-						{
-							FabrikWorker::logError('Did not load element ' . $lookUpId . ' for element::canUse()', 'error');
+							if ($lookUp)
+							{
+								$fullName = $lookUp->getFullName(true, true);
+								$value = (array) $formModel->getElementData($fullName, true);
+								$this->access->use = in_array($this->user->get('id'), $value);
+							}
+							else
+							{
+								FabrikWorker::logError('Did not load element ' . $lookUpId . ' for element::canUse()', 'error');
+							}
 						}
 					}
 				}

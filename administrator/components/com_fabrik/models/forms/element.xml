@@ -651,6 +651,7 @@
 
 					<field name="edit_access_user"
 						type="listfields"
+						mode="gui"
 						label="COM_FABRIK_OR_USE_VALUE_LABEL"
 						description="COM_FABRIK_EDIT_OR_USE_VALUE_DESC" />
 
@@ -662,6 +663,7 @@
 
 					<field name="view_access_user"
 						type="listfields"
+						mode="gui"
 						label="COM_FABRIK_OR_USE_VALUE_LABEL"
 						description="COM_FABRIK_OR_USE_VALUE_DESC" />
 
