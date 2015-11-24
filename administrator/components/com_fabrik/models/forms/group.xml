@@ -154,7 +154,6 @@
 
 			<field name="repeat_delete_access_user"
 				type="listfields"
-				mode="gui"
 				description="COM_FABRIK_FIELD_OR_USE_FIELD_DELETE_LABEL"
 				label="COM_FABRIK_FIELD_OR_USE_FIELD_LABEL"
 				valueformat="tableelement"/>

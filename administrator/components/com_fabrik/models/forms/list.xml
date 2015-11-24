@@ -287,7 +287,6 @@
 			<field name="allow_edit_details2"
 				type="listfields"
 				valueformat="tableelement"
-				mode="gui"
 				label="COM_FABRIK_FIELD_OR_USE_FIELD_LABEL"
 				description="COM_FABRIK_FIELD_OR_USE_FIELD_DESC"
 			/>
@@ -309,7 +308,6 @@
 			<field name="allow_delete2"
 				type="listfields"
 				valueformat="tableelement"
-				mode="gui"
 				label="COM_FABRIK_FIELD_OR_USE_FIELD_LABEL"
 				description="COM_FABRIK_FIELD_OR_USE_FIELD_DELETE_LABEL"
 			/>
