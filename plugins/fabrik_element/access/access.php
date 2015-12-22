@@ -4,12 +4,14 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.access
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\String\String;
 
 /**
  * Access element
@@ -18,7 +20,6 @@ defined('_JEXEC') or die('Restricted access');
  * @subpackage  Fabrik.element.access
  * @since       3.0
  */
-
 class PlgFabrik_ElementAccess extends PlgFabrik_Element
 {
 	/**
@@ -52,7 +53,6 @@ class PlgFabrik_ElementAccess extends PlgFabrik_Element
 	 *
 	 * @return  string	elements html
 	 */
-
 	public function render($data, $repeatCounter = 0)
 	{
 		$name = $this->getHTMLName($repeatCounter);
@@ -72,8 +72,6 @@ class PlgFabrik_ElementAccess extends PlgFabrik_Element
 			}
 		}
 
-		$gtree = $this->getOpts();
-
 		if (!$this->isEditable())
 		{
 			$row = new stdClass;
@@ -81,7 +79,14 @@ class PlgFabrik_ElementAccess extends PlgFabrik_Element
 			return $this->renderListData($arSelected[0], $row);
 		}
 
-		return JHTML::_('select.genericlist', $gtree, $name, 'class="inputbox" size="6"', 'value', 'text', $arSelected[0], $id);
+		$layout = $this->getLayout('form');
+		$displayData = new stdClass;
+		$displayData->id = $id;
+		$displayData->name = $name;
+		$displayData->options = $this->getOpts();
+		$displayData->selected =  $arSelected[0];
+
+		return $layout->render($displayData);
 	}
 
 	/**
@@ -94,21 +99,23 @@ class PlgFabrik_ElementAccess extends PlgFabrik_Element
 
 	private function getOpts($allowAll = true)
 	{
-		$db = JFactory::getDbo();
-		$db
+		$this->_db
 			->setQuery(
 				'SELECT a.id AS value, a.title AS text, COUNT(DISTINCT b.id) AS level' . ' FROM #__usergroups AS a'
 					. ' LEFT JOIN `#__usergroups` AS b ON a.lft > b.lft AND a.rgt < b.rgt' . ' GROUP BY a.id' . ' ORDER BY a.lft ASC');
-		$options = $db->loadObjectList();
+		$options = $this->_db->loadObjectList();
 
 		for ($i = 0, $n = count($options); $i < $n; $i++)
 		{
 			$options[$i]->text = str_repeat('- ', $options[$i]->level) . $options[$i]->text;
 		}
 
-		// If all usergroups is allowed, push it into the array.
+		// If all user groups is allowed, push it into the array.
 		if ($allowAll)
 		{
+			// If in front end we need to load the admin language..
+			$this->lang->load('joomla', JPATH_ADMINISTRATOR, null, false, false);
+
 			array_unshift($options, JHtml::_('select.option', '', FText::_('JOPTION_ACCESS_SHOW_ALL_GROUPS')));
 		}
 
@@ -118,24 +125,32 @@ class PlgFabrik_ElementAccess extends PlgFabrik_Element
 	/**
 	 * Shows the data formatted for the list view
 	 *
-	 * @param   string    $data      elements data
-	 * @param   stdClass  &$thisRow  all the data in the lists current row
+	 * @param   string    $data      Elements data
+	 * @param   stdClass  &$thisRow  All the data in the lists current row
+	 * @param   array     $opts      Rendering options
 	 *
 	 * @return  string	formatted value
 	 */
-
-	public function renderListData($data, stdClass &$thisRow)
+	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$gtree = $this->getOpts();
-		$filter = JFilterInput::getInstance(null, null, 1, 1);
+		$options = $this->getOpts();
+		$text = '';
 
-		foreach ($gtree as $o)
+		if ((string) $data !== '')
 		{
-			if ($o->value == $data)
+			foreach ($options as $o)
 			{
-				return JString::ltrim($filter->clean($o->text, 'word'), '&nbsp;');
+				if ($o->value == $data)
+				{
+					$text = String::ltrim(str_replace('-', '', $o->text));
+				}
 			}
 		}
+
+		$layoutData = new stdClass;
+		$layoutData->text = $text;
+
+		return parent::renderListData($layoutData, $thisRow, $opts);
 	}
 
 	/**
@@ -143,11 +158,8 @@ class PlgFabrik_ElementAccess extends PlgFabrik_Element
 	 *
 	 * @return  string  db field type
 	 */
-
 	public function getFieldDescription()
 	{
-		$p = $this->getParams();
-
 		if ($this->encryptMe())
 		{
 			return 'BLOB';
@@ -163,7 +175,6 @@ class PlgFabrik_ElementAccess extends PlgFabrik_Element
 	 *
 	 * @return  array
 	 */
-
 	public function elementJavascript($repeatCounter)
 	{
 		$id = $this->getHTMLId($repeatCounter);

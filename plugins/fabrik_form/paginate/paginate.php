@@ -4,12 +4,14 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.paginate
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\String\String;
 
 // Require the abstract plugin class
 require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
@@ -21,9 +23,21 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
  * @subpackage  Fabrik.form.paginate
  * @since       3.0
  */
-
 class PlgFabrik_FormPaginate extends PlgFabrik_Form
 {
+	/**
+	 * Output
+	 * @var string
+	 */
+	protected $data = '';
+
+	/**
+	 * Navigation ids.
+	 *
+	 * @var Object
+	 */
+	protected $ids;
+
 	/**
 	 * Inject custom html into the bottom of the form
 	 *
@@ -31,7 +45,6 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 	 *
 	 * @return  string  html
 	 */
-
 	public function getBottomContent_result($c)
 	{
 		return $this->data;
@@ -42,34 +55,32 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 	 *
 	 * @return void
 	 */
-
 	public function getBottomContent()
 	{
-		$params = $this->getParams();
+		/** @var FabrikFEModelForm $formModel */
 		$formModel = $this->getModel();
 
 		if (!$this->show())
 		{
+			$this->data = '';
 			return;
 		}
 
 		$j3 = FabrikWorker::j3();
-		$app = JFactory::getApplication();
-		$input = $app->input;
-		$package = $app->getUserState('com_fabrik.package', 'fabrik');
+		$input = $this->app->input;
 		$formId = $formModel->getForm()->id;
-		$mode = JString::strtolower($input->get('view'));
-		$this->ids = $this->getNavIds($formModel);
+		$mode = String::strtolower($input->get('view', 'form'));
+		$this->ids = $this->getNavIds();
 		$linkStartPrev = $this->ids->index == 0 ? ' disabled' : '';
 		$linkNextEnd = $this->ids->index == $this->ids->lastKey ? ' disabled' : '';
 
-		if ($app->isAdmin())
+		if ($this->app->isAdmin())
 		{
-			$url = 'index.php?option=com_fabrik&view=' . $mode . '&formid=' . $formId . '&rowid=';
+			$url = 'index.php?option=com_fabrik&task=' . $mode . '.view&formid=' . $formId . '&rowid=';
 		}
 		else
 		{
-			$url = 'index.php?option=com_' . $package . '&view=' . $mode . '&formid=' . $formId . '&rowid=';
+			$url = 'index.php?option=com_' . $this->package . '&view=' . $mode . '&formid=' . $formId . '&rowid=';
 		}
 
 		$links = array();
@@ -82,17 +93,16 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 
 		if ($j3)
 		{
-			$layout = new JLayoutFile('plugins.fabrik_form.paginate.layouts.default_paginate', JPATH_BASE);
+			$layout = new JLayoutFile('plugins.fabrik_form.paginate.layouts.default_paginate', JPATH_SITE);
 			$this->data = $layout->render($links);
 		}
 		else
 		{
-			$ajax = (bool) $params->get('paginate_ajax', true);
 			$firstLink = ($linkStartPrev) ? '<span>&lt;&lt;</span>' . FText::_('COM_FABRIK_START')
 				: '<a href="' . $links['first'] . '" class="pagenav paginateFirst ' . $linkStartPrev . '"><span>&lt;&lt;</span>'
 					. FText::_('COM_FABRIK_START') . '</a>';
 			$prevLink = ($linkStartPrev) ? '<span>&lt;</span>' . FText::_('COM_FABRIK_PREV')
-				: '<a href="' . $lins['prev'] . '" class="pagenav paginatePrevious ' . $linkStartPrev . '"><span>&lt;</span>'
+				: '<a href="' . $links['prev'] . '" class="pagenav paginatePrevious ' . $linkStartPrev . '"><span>&lt;</span>'
 					. FText::_('COM_FABRIK_PREV') . '</a>';
 
 			$nextLink = ($linkNextEnd) ? FText::_('COM_FABRIK_NEXT') . '<span>&gt;</span>'
@@ -110,8 +120,6 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 		}
 
 		FabrikHelperHTML::stylesheet('plugins/fabrik_form/paginate/paginate.css');
-
-		return true;
 	}
 
 	/**
@@ -119,9 +127,9 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 	 *
 	 * @return  object
 	 */
-
 	protected function getNavIds()
 	{
+		/** @var FabrikFEModelForm $formModel */
 		$formModel = $this->getModel();
 		$listModel = $formModel->getListModel();
 		$table = $listModel->getTable();
@@ -133,6 +141,13 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 		$query = $listModel->buildQueryJoin($query);
 		$query = $listModel->buildQueryWhere(true, $query);
 		$query = $listModel->buildQueryOrder($query);
+
+		foreach ($listModel->orderEls as $orderName)
+		{
+			$orderName = FabrikString::safeColNameToArrayKey($orderName);
+			$query->select(FabrikString::safeColName($orderName) . ' AS ' . $orderName);
+		}
+
 		$db->setQuery($query);
 		$rows = $db->loadColumn();
 		$keys = array_flip($rows);
@@ -152,7 +167,6 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 	 *
 	 * @return  bool
 	 */
-
 	protected function show()
 	{
 		/* Nobody except form model constructor sets editable property yet -
@@ -161,6 +175,8 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 		 * Let's set it here before use it
 		 */
 		$params = $this->getParams();
+
+		/** @var FabrikFEModelForm $formModel */
 		$formModel = $this->getModel();
 		$formModel->checkAccessFromListSettings();
 		$where = $params->get('paginate_where');
@@ -177,17 +193,19 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 				return (bool) $formModel->isEditable() == 0;
 				break;
 		}
+
+		return false;
 	}
 
 	/**
 	 * Need to do this rather than on onLoad as otherwise in chrome form.js addevents is fired
-	 * before autocomplete class ini'd so then the autocomplete class never sets itself up
+	 * before auto-complete class ini'd so then the auto-complete class never sets itself up
 	 *
 	 * @return  void
 	 */
-
 	public function onAfterJSLoad()
 	{
+		/** @var FabrikFEModelForm $formModel */
 		$formModel = $this->getModel();
 		$params = $this->getParams();
 
@@ -201,16 +219,15 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 			return;
 		}
 
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$input = $this->app->input;
 		$opts = new stdClass;
 		$opts->liveSite = COM_FABRIK_LIVESITE;
 		$opts->view = $input->get('view');
 		$opts->ids = $this->ids;
-		$opts->pkey = FabrikString::safeColNameToArrayKey($formModel->getTableModel()->getTable()->db_primary_key);
+		$opts->pkey = $formModel->getListModel()->getPrimaryKey(true);
 		$opts = json_encode($opts);
 		$container = $formModel->jsKey();
-		$this->formJavascriptClass($params, $formModel);
+		$this->formJavascriptClass();
 		$formModel->formPluginJS .= "\n var " . $container . "_paginate = new FabRecordSet($container, $opts);";
 	}
 
@@ -219,24 +236,18 @@ class PlgFabrik_FormPaginate extends PlgFabrik_Form
 	 *
 	 * @return  void
 	 */
-
 	public function onXRecord()
 	{
-		$app = JFactory::getApplication();
-		$package = $app->getUserState('com_fabrik.package', 'fabrik');
-		$input = $app->input;
-		$formid = $input->getInt('formid');
-		$rowid = $input->get('rowid', '', 'string');
+		$input = $this->app->input;
+		$formId = $input->getInt('formid');
+		$rowId = $input->get('rowid', '', 'string');
 		$mode = $input->get('mode', 'details');
 		$model = JModelLegacy::getInstance('Form', 'FabrikFEModel');
-		$model->setId($formid);
+		$model->setId($formId);
 		$this->setModel($model);
-		$model->rowId = $rowid;
+		$model->rowId = $rowId;
 		$ids = $this->getNavIds();
-		$url = COM_FABRIK_LIVESITE
-			. 'index.php?option=com_' . $package . '&format=raw&controller=plugin&g=form&task=pluginAjax&plugin=paginate&method=xRecord&formid=' . $formid
-			. '&rowid=' . $rowid;
-		$url = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $package . '&view=' . $mode . '&formid=' . $formid . '&rowid=' . $rowid . '&format=raw';
+		$url = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $this->package . '&view=' . $mode . '&formid=' . $formId . '&rowid=' . $rowId . '&format=raw';
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_URL, $url);

@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Administrator
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  * @since       1.6
  */
@@ -89,13 +89,16 @@ class FabrikAdminModelPlugin extends JModelLegacy
 
 		$c = $this->getState('c') + 1;
 
-		// Add plugin published state, locations and events
+		// Add plugin published state, locations, descriptions and events
 		$state = (array) FArrayHelper::getValue($data, 'plugin_state');
 		$locations = (array) FArrayHelper::getValue($data, 'plugin_locations');
 		$events = (array) FArrayHelper::getValue($data, 'plugin_events');
+		$descriptions = (array) FArrayHelper::getValue($data, 'plugin_description');
+
 		$data['params']['plugin_state'] = FArrayHelper::getValue($state, $c, 1);
 		$data['plugin_locations'] = FArrayHelper::getValue($locations, $c);
 		$data['plugin_events'] = FArrayHelper::getValue($events, $c);
+		$data['plugin_description'] = FArrayHelper::getValue($descriptions, $c);
 
 		return $data;
 	}

@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.subscriptions
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -69,7 +69,6 @@ class FabrikSubscriptionsIPN
 	 */
 	protected function activateSubscription($listModel, $request, &$set_list, &$err_msg, $recurring = true)
 	{
-
 		$db = JFactory::getDbo();
 		$mail = JFactory::getMailer();
 		$app = JFactory::getApplication();
@@ -507,7 +506,7 @@ class FabrikSubscriptionsIPN
 
 	/**
 	 * Seems to get called when you do a silver paypal payment (not sub)
-	 * but as it occurs before anything else (e.g. form.paypal.ipn.completed 
+	 * but as it occurs before anything else (e.g. form.paypal.ipn.completed
 	 * the expired invoice doesn't rest expired but shows as active
 	 *
 	 * @param   object  $listModel  List model

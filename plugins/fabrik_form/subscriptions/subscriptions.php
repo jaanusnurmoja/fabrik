@@ -4,12 +4,15 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.subscriptions
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\String\String;
+use Joomla\Utilities\ArrayHelper;
 
 // Require the abstract plugin class
 require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
@@ -23,7 +26,6 @@ JTable::addIncludePath(JPATH_SITE . '/plugins/fabrik_form/subscriptions/tables')
  * @subpackage  Fabrik.form.subscriptions
  * @since       3.0
  */
-
 class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 {
 	/**
@@ -62,7 +64,6 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  string  email
 	 */
-
 	protected function getBusinessEmail()
 	{
 		$w = $this->getWorker();
@@ -79,7 +80,6 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  string  cost
 	 */
-
 	protected function getAmount()
 	{
 		$billingCycle = $this->getBillingCycle();
@@ -92,14 +92,13 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  object  row
 	 */
-
 	protected function getBillingCycle()
 	{
 		if (!isset($this->billingCycle))
 		{
 			try
 			{
-				$db = JFactory::getDbo();
+				$db = $this->_db;
 				$query = $db->getQuery(true);
 				$data = $this->getProcessData();
 				$cycleField = $db->replacePrefix('#__fabrik_subs_users___billing_cycle');
@@ -140,14 +139,13 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  false|object  row or false
 	 */
-
 	protected function getGateway()
 	{
 		if (!isset($this->gateway))
 		{
 			try
 			{
-				$db = JFactory::getDbo();
+				$db = $this->_db;
 				$query = $db->getQuery(true);
 				$data = $this->getProcessData();
 				$gatewayField = $db->replacePrefix('#__fabrik_subs_users___gateway');
@@ -184,7 +182,6 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  array  item name
 	 */
-
 	protected function getItemName()
 	{
 		$data = $this->getProcessData();
@@ -200,18 +197,16 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  void
 	 */
-
 	protected function setSubscriptionValues(&$opts)
 	{
 		$w = $this->getWorker();
-		$config = JFactory::getConfig();
 		$data = $this->getProcessData();
 		$gateWay = $this->getGateway();
 
 		$item = $data['jos_fabrik_subs_users___billing_cycle'][0] . ' ' . $data['jos_fabrik_subs_users___gateway'][0];
 		$item_raw = $data['jos_fabrik_subs_users___billing_cycle_raw'][0];
 
-		$db = JFactory::getDbo();
+		$db = $this->_db;
 		$query = $db->getQuery(true);
 		$query->select('cost, label, plan_name, duration AS p3, period_unit AS t3, ' . $db->quote($item_raw) . ' AS item_number ')
 		->from('#__fabrik_subs_plan_billing_cycle')->where('id = ' . $db->quote($item_raw));
@@ -222,8 +217,8 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 		// @TODO test replace various placeholders
 		$filter = JFilterInput::getInstance();
 		$post = $filter->clean($_REQUEST, 'array');
-		$name = $config->get('sitename') . ' {plan_name}  User: {jos_fabrik_subs_users___name} ({jos_fabrik_subs_users___username})';
-		$tmp = array_merge($post, JArrayHelper::fromObject($sub));
+		$name = $this->config->get('sitename') . ' {plan_name}  User: {jos_fabrik_subs_users___name} ({jos_fabrik_subs_users___username})';
+		$tmp = array_merge($post, ArrayHelper::fromObject($sub));
 
 		// 'http://fabrikar.com/ '.$sub->item_name. ' - User: subtest26012010 (subtest26012010)';
 		$opts['item_name'] = $w->parseMessageForPlaceHolder($name, $tmp);
@@ -253,7 +248,6 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return FabrikWorker
 	 */
-
 	protected function getWorker()
 	{
 		if (!isset($this->w))
@@ -269,7 +263,6 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  void
 	 */
-
 	public function getBottomContent()
 	{
 		$pendingSub = $this->pendingSub();
@@ -287,7 +280,6 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  string  html
 	 */
-
 	public function getBottomContent_result($c)
 	{
 		return $this->html;
@@ -299,11 +291,8 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return	bool
 	 */
-
 	public function onBeforeLoad()
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
 		$pendingSub = $this->pendingSub();
 
 		if ($pendingSub !== false)
@@ -311,7 +300,7 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 			/* $input->set('usekey', false);
 			$formModel->unsetData();
 			$formModel->setRowId($pendingSub->id); */
-			$app->enqueueMessage('We found an existing pending subscription from ' . $pendingSub->signup_date);
+			$this->app->enqueueMessage('We found an existing pending subscription from ' . $pendingSub->signup_date);
 		}
 
 		return true;
@@ -341,19 +330,17 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  bool
 	 */
-
 	protected function pendingSub($newRow = true)
 	{
 		// Check if the user has pending subscriptions
 		$formModel = $this->getModel();
-		$user = JFactory::getUser();
-		$rowid = $formModel->getRowId();
+		$rowId = $formModel->getRowId();
 
-		if (($rowid === '' || !$newRow) && $user->get('id') !== 0)
+		if (($rowId === '' || !$newRow) && $this->user->get('id') !== 0)
 		{
-			$db = JFactory::getDbo();
+			$db = $this->_db;
 			$query = $db->getQuery(true);
-			$query->select('*')->from('#__fabrik_subs_subscriptions')->where('userid = ' . (int) $user->get('id'))
+			$query->select('*')->from('#__fabrik_subs_subscriptions')->where('userid = ' . (int) $this->user->get('id'))
 			->where('status = ' . $db->quote('Pending'))
 			->order('signup_date DESC');
 			$db->setQuery($query);
@@ -377,16 +364,14 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return	bool
 	 */
-
 	public function onAfterProcess()
 	{
 		$formModel = $this->getModel();
 		$params = $this->getParams();
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$input = $this->app->input;
 		$this->data = $formModel->fullFormData;
 
-		if (!$this->shouldProcess('subscriptions_conditon'))
+		if (!$this->shouldProcess('subscriptions_conditon', null, $params))
 		{
 			return true;
 		}
@@ -439,11 +424,10 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 		// $$$ rob 04/02/2011 no longer doing redirect from ANY plugin EXCEPT the redirect plugin
 		// - instead a session var is set as the preferred redirect url
 
-		$session = JFactory::getSession();
 		$context = $formModel->getRedirectContext();
-		$surl = (array) $session->get($context . 'url', array());
+		$surl = (array) $this->session->get($context . 'url', array());
 		$surl[$this->renderOrder] = $url;
-		$session->set($context . 'url', $surl);
+		$this->session->set($context . 'url', $surl);
 
 		// @TODO use JLog instead of fabrik log
 		// JLog::add($subject . ', ' . $body, JLog::NOTICE, 'com_fabrik');
@@ -455,7 +439,6 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  string  currency code
 	 */
-
 	protected function getCurrencyCode()
 	{
 		$cycle = $this->getBillingCycle();
@@ -469,18 +452,16 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  string  url
 	 */
-
 	protected function getNotifyUrl()
 	{
-		$app = JFactory::getApplication();
+		/** @var FabrikFEModelForm $formModel */
 		$formModel = $this->getModel();
 		$params = $this->getParams();
-		$package = $app->getUserState('com_fabrik.package', 'fabrik');
 		$testSite = $params->get('subscriptions_test_site', '');
 		$testSiteQs = $params->get('subscriptions_test_site_qs', '');
 		$testMode = $params->get('subscriptions_testmode', false);
 		$ppurl = ($testMode == 1 && !empty($testSite)) ? $testSite : COM_FABRIK_LIVESITE;
-		$ppurl .= '/index.php?option=com_' . $package . '&task=plugin.pluginAjax&formid=' . $formModel->get('id')
+		$ppurl .= '/index.php?option=com_' . $this->package . '&task=plugin.pluginAjax&formid=' . $formModel->get('id')
 		. '&g=form&plugin=subscriptions&method=ipn';
 
 		if ($testMode == 1 && !empty($testSiteQs))
@@ -498,19 +479,16 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  string  url.
 	 */
-
 	protected function getReturnUrl()
 	{
-		$app = JFactory::getApplication();
 		$formModel = $this->getModel();
-		$package = $app->getUserState('com_fabrik.package', 'fabrik');
 		$url = '';
 		$params = $this->getParams();
 		$testSite = $params->get('subscriptions_test_site', '');
 		$testSiteQs = $params->get('subscriptions_test_site_qs', '');
 		$testMode = (bool) $params->get('subscriptions_testmode', false);
 
-		$qs = 'index.php?option=com_' . $package . '&task=plugin.pluginAjax&formid=' . $formModel->get('id')
+		$qs = 'index.php?option=com_' . $this->package . '&task=plugin.pluginAjax&formid=' . $formModel->get('id')
 		. '&g=form&plugin=subscriptions&method=thanks&rowid=' . $this->data['rowid'] . '&renderOrder=' . $this->renderOrder;
 
 		if ($testMode)
@@ -535,29 +513,29 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  void
 	 */
-
 	public function onThanks()
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
-		$formid = $input->getInt('formid');
-		$rowid = $input->getString('rowid', '', 'string');
+		$input = $this->app->input;
+		$formId = $input->getInt('formid');
+		$rowId = $input->getString('rowid', '', 'string');
 		JModelLegacy::addIncludePath(COM_FABRIK_FRONTEND . '/models');
-		$formModel = JModelLegacy::getInstance('Form', 'FabrikFEModel');
-		$formModel->setId($formid);
-		$params = $formModel->getParams();
-		$ret_msg = (array) $params->get('subscriptions_return_msg');
-		$ret_msg = array_values($ret_msg);
-		$ret_msg = FArrayHelper::getValue($ret_msg, 0);
 
-		if ($ret_msg)
+		/** @var FabrikFEModelForm $formModel */
+		$formModel = JModelLegacy::getInstance('Form', 'FabrikFEModel');
+		$formModel->setId($formId);
+		$params = $formModel->getParams();
+		$msg = (array) $params->get('subscriptions_return_msg');
+		$msg = array_values($msg);
+		$msg = FArrayHelper::getValue($msg, 0);
+
+		if ($msg)
 		{
 			$w = $this->getWorker();
 			$listModel = $formModel->getlistModel();
-			$row = $listModel->getRow($rowid);
-			$ret_msg = $w->parseMessageForPlaceHolder($ret_msg, $row);
+			$row = $listModel->getRow($rowId);
+			$msg = $w->parseMessageForPlaceHolder($msg, $row);
 
-			if (JString::stristr($ret_msg, '[show_all]'))
+			if (String::stristr($msg, '[show_all]'))
 			{
 				$all_data = array();
 
@@ -569,10 +547,10 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 				$input->set('show_all', implode('<br />', $all_data));
 			}
 
-			$ret_msg = str_replace('[', '{', $ret_msg);
-			$ret_msg = str_replace(']', '}', $ret_msg);
-			$ret_msg = $w->parseMessageForPlaceHolder($ret_msg, $_REQUEST);
-			echo $ret_msg;
+			$msg = str_replace('[', '{', $msg);
+			$msg = str_replace(']', '}', $msg);
+			$msg = $w->parseMessageForPlaceHolder($msg, $_REQUEST);
+			echo $msg;
 		}
 		else
 		{
@@ -589,17 +567,14 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  void
 	 */
-
 	public function onIpn()
 	{
-		$config = JFactory::getConfig();
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$input = $this->app->input;
 		JLog::add($_SERVER['REQUEST_URI'] . ' ' . http_build_query($_REQUEST), JLog::INFO, 'fabrik.ipn.start');
 
 		// Lets try to load in the custom returned value so we can load up the form and its parameters
 		$custom = $input->get('custom', '', 'string');
-		list($formid, $invoiceId) = explode(':', $custom);
+		list($formId, $invoiceId) = explode(':', $custom);
 
 		$input->set('invoiceid', $invoiceId);
 		$mail = JFactory::getMailer();
@@ -607,7 +582,7 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 		// Pretty sure they are added but double add
 		JModelLegacy::addIncludePath(COM_FABRIK_FRONTEND . '/models');
 		$formModel = JModelLegacy::getInstance('Form', 'FabrikFEModel');
-		$formModel->setId($formid);
+		$formModel->setId($formId);
 		$listModel = $formModel->getlistModel();
 		$params = $formModel->getParams();
 		$table = $listModel->getTable();
@@ -621,7 +596,7 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 
 		$w = $this->getWorker();
 
-		$email_from = $admin_email = $config->get('mailfrom');
+		$email_from = $adminEmail = $this->config->get('mailfrom');
 
 		// Read the post from Subscriptions system and add 'cmd'
 		$req = 'cmd=_notify-validate';
@@ -653,7 +628,7 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 		$header = "POST /cgi-bin/webscr HTTP/1.0\r\n";
 		$header .= $sandBox ? "Host: www.sandbox.paypal.com:443\r\n" : "Host: www.paypal.com:443\r\n";
 		$header .= "Content-Type: application/x-www-form-urlencoded\r\n";
-		$header .= "Content-Length: " . JString::strlen($req) . "\r\n\r\n";
+		$header .= "Content-Length: " . String::strlen($req) . "\r\n\r\n";
 
 		$subscriptionsurl = $sandBox ? 'ssl://www.sandbox.paypal.com' : 'ssl://www.paypal.com';
 
@@ -673,7 +648,7 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 		$err_msg = '';
 		$err_title = '';
 
-		if (empty($formid) || empty($invoiceId))
+		if (empty($formId) || empty($invoiceId))
 		{
 			$status = false;
 			$err_title = 'form.subscriptions.ipnfailure.custom_error';
@@ -704,7 +679,7 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 					* check that payment_amount/payment_currency are correct
 					* process payment
 					*/
-					if (JString::strcmp(strtoupper($res), "VERIFIED") == 0)
+					if (String::strcmp(strtoupper($res), "VERIFIED") == 0)
 					{
 						$query = $db->getQuery(true);
 						$query->select($ipn_status_field)->from('#__fabrik_subs_invoices')
@@ -806,7 +781,7 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 							}
 						}
 					}
-					elseif (JString::strcmp($res, "INVALID") == 0)
+					elseif (String::strcmp($res, "INVALID") == 0)
 					{
 						$status = false;
 						$err_title = 'form.subscriptions.ipnfailure.invalid';
@@ -834,14 +809,14 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 		if ($status == false)
 		{
 			$logLevel = JLog::CRITICAL;
-			$subject = $config->get('sitename') . ": Error with Fabrik Subscriptions IPN";
+			$subject = $this->config->get('sitename') . ": Error with Fabrik Subscriptions IPN";
 			$logMessageTitle = $err_title;
 			$logMessage .= $err_msg;
 			$payer_emailtext = "There was an error processing your Subscriptions payment.  The administrator of this site has been informed.";
 		}
 		else
 		{
-			$subject = $config->get('sitename') . ': IPN ' . $payment_status;
+			$subject = $this->config->get('sitename') . ': IPN ' . $payment_status;
 			$logMessageTitle = 'form.subscriptions.ipn.' . $payment_status;
 			$payer_subject = "Subscriptions success";
 			$payer_emailtext = "Your Subscriptions payment was successfully processed.  The Subscriptions transaction id was $txn_id";
@@ -849,7 +824,7 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 
 		if ($receive_debug_emails == '1')
 		{
-			$mail->sendMail($email_from, $email_from, $admin_email, $subject, $emailtext, false);
+			$mail->sendMail($email_from, $email_from, $adminEmail, $subject, $emailtext, false);
 		}
 
 		if ($send_default_email == '1')
@@ -912,14 +887,13 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 		{
 			try
 			{
-				$app = JFactory::getApplication();
-				$input = $app->input;
-				$db = JFactory::getDbo();
+				$input = $this->app->input;
+				$db = $this->_db;
 				$planField = $db->replacePrefix('#__fabrik_subs_users___plan_id');
-				$planid = $input->getInt($planField, $input->getInt($planField . '_raw'));
+				$planId = $input->getInt($planField, $input->getInt($planField . '_raw'));
 				$query = $db->getQuery(true);
 
-				$query->select('*')->from('#__fabrik_subs_plans')->where('id = ' . $planid);
+				$query->select('*')->from('#__fabrik_subs_plans')->where('id = ' . $planId);
 				$db->setQuery($query);
 				$this->plan = $db->loadObject();
 
@@ -949,16 +923,11 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  JTable subscription
 	 */
-
 	protected function createSubscription()
 	{
 		$gateway = $this->getGateway();
 		$plan = $this->getPlan();
-		$db = JFactory::getDbo();
-		$app = JFactory::getApplication();
-		$date = JFactory::getDate();
-		$input = $app->input;
-		$user = JFactory::getUser();
+		$input = $this->app->input;
 		$sub = JTable::getInstance('Subscription', 'FabrikTable');
 
 		// Replace fields with db prefix
@@ -973,16 +942,16 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 		}
 
 		// If upgrading fall back to logged in user id
-		$sub->userid = $input->getInt('newuserid', $user->get('id'));
+		$sub->userid = $input->getInt('newuserid', $this->user->get('id'));
 		$sub->primary = 1;
 		$sub->type = $gateway->id;
 		$sub->status = $plan->free == 1 ? 'Active' : 'Pending';
-		$sub->signup_date = $date->toSql();
+		$sub->signup_date = $this->date->toSql();
 		$sub->plan = $billingCycle->plan_id;
 		$sub->lifetime = $input->getInt('lifetime', 0);
 		$sub->recurring = $gateway->subscription;
 		$sub->billing_cycle_id = $billingCycle->id;
-		$input->setVar('recurring', $sub->recurring);
+		$input->set('recurring', $sub->recurring);
 		$sub->store();
 
 		return $sub;
@@ -995,21 +964,16 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  JTable Invoice
 	 */
-
 	protected function createInvoice($sub)
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
-		$db = JFactory::getDbo();
-		$query = $db->getQuery(true);
-		$date = JFactory::getDate();
+		$input = $this->app->input;
 
 		$invoice = JTable::getInstance('Invoice', 'FabrikTable');
 		$invoice->invoice_number = uniqid('', true);
 		$input->setVar('invoice_number', $invoice->invoice_number);
 
 		$this->setInvoicePaymentOptions($invoice);
-		$invoice->created_date = $date->toSql();
+		$invoice->created_date = $this->date->toSql();
 		$invoice->subscr_id = $sub->id;
 		$invoice->store();
 
@@ -1023,7 +987,6 @@ class PlgFabrik_FormSubscriptions extends PlgFabrik_Form
 	 *
 	 * @return  void
 	 */
-
 	protected function setInvoicePaymentOptions(&$invoice)
 	{
 		$gateway = $this->getGateway();

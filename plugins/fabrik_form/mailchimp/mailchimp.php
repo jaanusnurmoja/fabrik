@@ -4,12 +4,14 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.mailchimp
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\Utilities\ArrayHelper;
 
 // Require the abstract plugin class
 require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
@@ -35,12 +37,11 @@ class PlgFabrik_FormMailchimp extends PlgFabrik_Form
 
 	public function getBottomContent()
 	{
-		$app = JFactory::getApplication();
 		$params = $this->getParams();
 
 		if ($params->get('mailchimp_userconfirm', true))
 		{
-			$checked = $app->input->get('fabrik_mailchimp_signup', '') !== '' ? ' checked="checked"' : '';
+			$checked = $this->app->input->get('fabrik_mailchimp_signup', '') !== '' ? ' checked="checked"' : '';
 			$this->html = '<label class="mailchimpsignup"><input type="checkbox" name="fabrik_mailchimp_signup" class="fabrik_mailchimp_signup" value="1" '
 				. $checked . '/>' . $params->get('mailchimp_signuplabel') . '</label>';
 		}
@@ -55,7 +56,7 @@ class PlgFabrik_FormMailchimp extends PlgFabrik_Form
 	/**
 	 * Get Mailchimp email groups
 	 *
-	 * @param   JRegistry  $params  Params
+	 * @param   \Joomla\Registry\Registry  $params  Params
 	 *
 	 * @throws RuntimeException
 	 *
@@ -106,7 +107,6 @@ class PlgFabrik_FormMailchimp extends PlgFabrik_Form
 	public function onAfterProcess()
 	{
 		$params = $this->getParams();
-		$app = JFactory::getApplication();
 		$formModel = $this->getModel();
 		$emailData = $this->getProcessData();
 		$filter = JFilterInput::getInstance();
@@ -161,7 +161,7 @@ class PlgFabrik_FormMailchimp extends PlgFabrik_Form
 					$groupOpt->groups = $w->parseMessageForPlaceHolder($groupOpt->groups, $emailData);
 
 					// An array of additional options: array('name'=>'Your Interests:', 'groups'=>'Bananas,Apples')
-					$groups[] = JArrayHelper::fromObject($groupOpt);
+					$groups[] = ArrayHelper::fromObject($groupOpt);
 				}
 				else
 				{
@@ -189,7 +189,7 @@ class PlgFabrik_FormMailchimp extends PlgFabrik_Form
 
 		if ($api->errorCode)
 		{
-			$app->enqueueMessage($api->errorCode, 'Mailchimp: ' . $api->errorMessage, 'notice');
+			$this->app->enqueueMessage($api->errorCode, 'Mailchimp: ' . $api->errorMessage, 'notice');
 
 			if ((bool) $params->get('mailchimp_fail_on_error', true) === true)
 			{

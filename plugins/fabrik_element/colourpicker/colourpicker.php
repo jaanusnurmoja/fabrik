@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.colourpicker
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -18,7 +18,6 @@ defined('_JEXEC') or die('Restricted access');
  * @subpackage  Fabrik.element.colourpicker
  * @since       3.0
  */
-
 class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 {
 	/**
@@ -40,11 +39,11 @@ class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 	 *
 	 * @param   string    $data      Elements data
 	 * @param   stdClass  &$thisRow  All the data in the lists current row
+	 * @param   array     $opts      Rendering options
 	 *
 	 * @return  string	formatted value
 	 */
-
-	public function renderListData($data, stdClass &$thisRow)
+	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
 		$data = FabrikWorker::JSONtoData($data, true);
 		$str = '';
@@ -54,7 +53,11 @@ class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 			$str .= '<div style="width:15px;height:15px;background-color:rgb(' . $d . ')"></div>';
 		}
 
-		return $str;
+		$layout = $this->getLayout('list');
+		$displayData = new stdClass;
+		$displayData->text = $str;
+
+		return $layout->render($displayData);
 	}
 
 	/**
@@ -65,7 +68,6 @@ class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 	 *
 	 * @return  mixed
 	 */
-
 	public function storeDatabaseFormat($val, $data)
 	{
 		$val = parent::storeDatabaseFormat($val, $data);
@@ -80,7 +82,6 @@ class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 	 *
 	 * @return  array
 	 */
-
 	public function elementJavascript($repeatCounter)
 	{
 		if (!$this->isEditable())
@@ -90,7 +91,6 @@ class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 
 		FabrikHelperHTML::addPath(COM_FABRIK_BASE . 'plugins/fabrik_element/colourpicker/images/', 'image', 'form', false);
 		$params = $this->getParams();
-		$element = $this->getElement();
 		$id = $this->getHTMLId($repeatCounter);
 		$data = $this->getFormModel()->data;
 		$value = $this->getValue($data, $repeatCounter);
@@ -132,7 +132,6 @@ class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 	 *
 	 * @return  string	value
 	 */
-
 	public function getValue($data, $repeatCounter = 0, $opts = array())
 	{
 		$value = parent::getValue($data, $repeatCounter, $opts);
@@ -149,67 +148,21 @@ class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 	 *
 	 * @return  string	elements html
 	 */
-
 	public function render($data, $repeatCounter = 0)
 	{
-		$name = $this->getHTMLName($repeatCounter);
-		$id = $this->getHTMLId($repeatCounter);
 		$value = $this->getValue($data, $repeatCounter);
 		$params = $this->getParams();
-		$showPicker = (bool) $params->get('show_picker', 1);
-		$str = array();
-		$str[] = '<div class="fabrikSubElementContainer">';
-		$style = 'border:1px solid #EEEEEE;float:left;width:25px;height:25px;background-color:rgb(' . $value . ')';
-		$str[] = '<input class="fabrikinput" type="hidden" name="' . $name . '" id="' . $id
-			. '" /><div class="colourpicker_bgoutput img-rounded " style="' . $style . '"></div>';
 
-		if ($this->isEditable())
-		{
-			$str[] = '<div class="colourPickerBackground colourpicker-widget fabrikWindow" style="display:none;min-width:350px;min-height:250px;">';
-			$str[] = '<div class="draggable modal-header">';
-			$str[] = '<div class="colourpicker_output img-rounded" style="width:15px;height:15px;float:left;margin-right:10px;"></div> ';
-			$str[] = FText::_('PLG_FABRIK_COLOURPICKER_COLOUR');
+		$layout = $this->getLayout('form');
+		$displayData = new stdClass;
+		$displayData->id = $this->getHTMLId($repeatCounter);;
+		$displayData->name = $this->getHTMLName($repeatCounter);;
+		$displayData->value = $value;
+		$displayData->editable = $this->isEditable();
+		$displayData->j3 = FabrikWorker::j3();
+		$displayData->showPicker = (bool) $params->get('show_picker', 1);
 
-			if (FabrikWorker::j3())
-			{
-				$str[] = '<a class="pull-right" href="#"><i class="icon-cancel  icon-remove-sign"></i></a>';
-			}
-			else
-			{
-				$str[] = FabrikHelperHTML::image("close.gif", 'form', @$this->tmpl, array());
-			}
-
-			if ($showPicker)
-			{
-				$str[] = '</div>';
-				$str[] = '<div class="itemContentPadder">';
-				$str[] = '<div class="row-fluid">';
-				$str[] = '  <div class="span7">';
-				$str[] = '    <ul class="nav nav-tabs">';
-				$str[] = '      <li class="active"><a href="#' . $id . '-picker" data-toggle="tab">' . FText::_('PLG_FABRIK_COLOURPICKER_PICKER') . '</a></li>';
-				$str[] = '      <li><a href="#' . $id . '-swatch" data-toggle="tab">' . FText::_('PLG_FABRIK_COLOURPICKER_SWATCH') . '</a></li>';
-				$str[] = '    </ul>';
-				$str[] = '    <div class="tab-content">';
-				$str[] = '      <div class="tab-pane active" id="' . $id . '-picker"></div>';
-				$str[] = '      <div class="tab-pane" id="' . $id . '-swatch"></div>';
-				$str[] = '    </div>';
-				$str[] = '  </div>';
-				$str[] = '  <div class="span5 sliders" style="margin-top:50px">';
-				$str[] = '  </div>';
-				$str[] = '</div>';
-				$str[] = '</div>';
-			}
-			else
-			{
-				$str[] = '</div><div class="tab-pane" id="' . $id . '-swatch"></div>';
-			}
-
-			$str[] = '</div>';
-		}
-
-		$str[] = '</div>';
-
-		return implode("\n", $str);
+		return $layout->render($displayData);
 	}
 
 	/**
@@ -217,16 +170,13 @@ class PlgFabrik_ElementColourpicker extends PlgFabrik_Element
 	 *
 	 * @return  string  Bb field type
 	 */
-
 	public function getFieldDescription()
 	{
-		$p = $this->getParams();
-
 		if ($this->encryptMe())
 		{
 			return 'BLOB';
 		}
 
-		return "VARCHAR(30)";
+		return 'VARCHAR(30)';
 	}
 }

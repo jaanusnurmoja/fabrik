@@ -5,7 +5,7 @@
  * @license:   GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
-window.FbRadio = new Class({
+FbRadio = new Class({
 	Extends: FbElementList,
 
 	options: {
@@ -183,5 +183,10 @@ window.FbRadio = new Class({
 		}
 		this.parent(c);
 		this.btnGroup();
+	},
+	
+	getChangeEvent: function () {
+		return this.options.changeEvent;
 	}
+	
 });

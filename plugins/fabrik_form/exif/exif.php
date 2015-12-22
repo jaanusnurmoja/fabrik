@@ -2,12 +2,14 @@
 /**
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.exif
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\String\String;
 
 // Require the abstract plugin class
 require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
@@ -46,7 +48,7 @@ class PlgFabrik_FormExif extends PlgFabrik_Form
 	 */
 	protected function exifToNumber($value, $format)
 	{
-		$spos = JString::strpos($value, '/');
+		$spos = String::strpos($value, '/');
 
 		if ($spos === false)
 		{
@@ -135,12 +137,10 @@ class PlgFabrik_FormExif extends PlgFabrik_Form
 	public function onBeforeStore()
 	{
 		// Initialize some variables
-		$db = FabrikWorker::getDbo();
 		$formModel = $this->getModel();
 		$data = $formModel->formData;
 		$params = $this->getParams();
 		$plugin = FabrikWorker::getPluginManager()->getElementPlugin($params->get('exif_map_field'));
-		$element = $plugin->getElement(true);
 		$this->map_field = $plugin->getFullName();
 		$plugin->setId($params->get('exif_upload_field'));
 		$element = $plugin->getElement(true);

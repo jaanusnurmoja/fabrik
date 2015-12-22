@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -27,7 +27,6 @@ jimport('joomla.html.pagination');
  * @package  Fabrik
  * @since    3.0
  */
-
 class FPagination extends JPagination
 {
 	/**
@@ -86,7 +85,6 @@ class FPagination extends JPagination
 	 *
 	 * @return  void
 	 */
-
 	public function setId($id)
 	{
 		$this->id = $id;
@@ -95,13 +93,12 @@ class FPagination extends JPagination
 	/**
 	 * Return the pagination footer
 	 *
-	 * @param   string  $listRef  list reference
-	 * @param   string  $tmpl     list template
+	 * @param   int     $listRef  List reference
+	 * @param   string  $tmpl     List template
 	 *
 	 * @return	string	Pagination footer
 	 */
-
-	public function getListFooter($listRef = 0, $tmpl = 'default')
+	public function getListFooter($listRef = '', $tmpl = 'default')
 	{
 		$app = JFactory::getApplication();
 		$this->listRef = $listRef;
@@ -138,29 +135,28 @@ class FPagination extends JPagination
 	 *
 	 * @return	string	The html for the limit # input box
 	 */
-
 	public function getLimitBox()
 	{
 		// Initialize variables
 		$limits = array();
-		$vals = array();
+		$values = array();
 
 		for ($i = 5; $i <= 30; $i += 5)
 		{
-			$vals[] = $i;
+			$values[] = $i;
 		}
 
-		$vals[] = 50;
-		$vals[] = 100;
+		$values[] = 50;
+		$values[] = 100;
 
-		if (!in_array($this->startLimit, $vals))
+		if (!in_array($this->startLimit, $values))
 		{
-			$vals[] = $this->startLimit;
+			$values[] = $this->startLimit;
 		}
 
-		asort($vals);
+		asort($values);
 
-		foreach ($vals as $v)
+		foreach ($values as $v)
 		{
 			$limits[] = JHTML::_('select.option', $v);
 		}
@@ -172,8 +168,8 @@ class FPagination extends JPagination
 
 		$selected = $this->viewAll ? '-1' : $this->limit;
 		$js = '';
-		$attribs = 'class="inputbox input-mini" size="1" onchange="' . $js . '"';
-		$html = JHTML::_('select.genericlist', $limits, 'limit' . $this->id, $attribs, 'value', 'text', $selected);
+		$attributes = 'class="inputbox input-mini" size="1" onchange="' . $js . '"';
+		$html = JHTML::_('select.genericlist', $limits, 'limit' . $this->id, $attributes, 'value', 'text', $selected);
 
 		return $html;
 	}
@@ -185,30 +181,23 @@ class FPagination extends JPagination
 	 *
 	 * @return   string  HTML link
 	 */
-
 	protected function _item_active(JPaginationObject $item)
 	{
-		$app = JFactory::getApplication();
-
 		return '<a title="' . $item->text . '" href="' . $item->link . '" class="pagenav">' . $item->text . '</a>';
 	}
 
 	/**
 	 * Create and return the pagination page list string, i.e. Previous, Next, 1 2 3 ... x.
 	 *
-	 * @param   string  $listRef  unique list reference
-	 * @param   string  $tmpl     list template name
+	 * @param   int     $listRef  Unique list reference
+	 * @param   string  $tmpl     List template name
 	 *
 	 * @return  string  Pagination page list string.
 	 *
 	 * @since   11.1
 	 */
-
 	public function getPagesLinks($listRef = 0, $tmpl = 'default')
 	{
-		$app = JFactory::getApplication();
-		$lang = JFactory::getLanguage();
-
 		// Build the page navigation list
 		$data = $this->_buildDataObject();
 
@@ -325,31 +314,13 @@ class FPagination extends JPagination
 	 *
 	 * @return  string  HTML for a list start, previous, next,end
 	 */
-
 	protected function _list_render($list)
 	{
-		// Reverse output rendering for right-to-left display.
-		$html = '<div class="pagination">';
-		$html .= '<ul class="pagination-list">';
-		$class = $list['start']['active'] == 1 ? ' ' : ' active';
-		$html .= '<li class="pagination-start' . $class . '">' . $list['start']['data'] . '</li>';
-		$class = $list['previous']['active'] == 1 ? ' ' : ' active';
-		$html .= '<li class="pagination-prev' . $class . '">' . $list['previous']['data'] . '</li>';
+		$displayData = new stdClass;
+		$displayData->list = $list;
+		$layout = FabrikHelperHTML::getLayout('pagination.fabrik-pagination-links');
 
-		foreach ($list['pages'] as $page)
-		{
-			$class = $page['active'] == 1 ? '' : 'active';
-			$html .= '<li class="' . $class . '">' . $page['data'] . '</li>';
-		}
-
-		$class = $list['next']['active'] == 1 ? ' ' : ' active';
-		$html .= '<li class="pagination-next' . $class . '">' . $list['next']['data'] . '</li>';
-		$class = $list['end']['active'] == 1 ? ' ' : ' active';
-		$html .= '<li class="pagination-end' . $class . '">' . $list['end']['data'] . '</li>';
-		$html .= '</ul>';
-		$html .= '</div>';
-
-		return $html;
+		return $layout->render($displayData);
 	}
 
 	/**
@@ -365,11 +336,8 @@ class FPagination extends JPagination
 	 *
 	 * @return	object	Pagination data object
 	 */
-
 	protected function _buildDataObject()
 	{
-		$app = JFactory::getApplication();
-
 		// Initialize variables
 		$data = new stdClass;
 		$this->url = preg_replace("/limitstart{$this->id}=(.*)?(&|)/", '', $this->url);
@@ -443,25 +411,30 @@ class FPagination extends JPagination
 	/**
 	 * Create the HTML for a list footer
 	 *
-	 * @param   array  $list  Pagination list data structure.
+	 * @param   array   $list  Pagination list data structure.
 	 *
 	 * @return  string  HTML for a list footer
 	 */
-
 	protected function _list_footer($list)
 	{
-		// Initialize variables
-		$html = array();
-		$html[] = '<div class="list-footer">';
 		$limitLabel = $this->showDisplayNum ? FText::_('COM_FABRIK_DISPLAY_NUM') : '';
-		$html[] = '<div class="limit"><div class="input-prepend input-append"><span class="add-on"><small>';
-		$html[] = $limitLabel . '</small></span>' . $list['limitfield'] . '<span class="add-on"><small>';
-		$html[] = $list['pagescounter'] . '</small></span></div></div>';
-		$html[] = $list['pageslinks'];
-		$html[] = '<input type="hidden" name="limitstart' . $this->id . '" id="limitstart' . $this->id . '" value="' . $list['limitstart'] . '" />';
-		$html[] = '</div>';
 
-		return implode("\n", $html);
+		// Initialize variables
+		$paths = array();
+		$displayData = new stdClass;
+		$displayData->id = $this->id;
+		$displayData->label = $limitLabel;
+		$displayData->value = $list['limitstart'];
+		$displayData->list = $list['limitfield'];
+		$displayData->pagesCounter = $list['pagescounter'];
+		$displayData->listName =  'limit' . $this->id;
+		$displayData->links = $list['pageslinks'];
+
+		$paths[] = JPATH_THEMES . '/' . JFactory::getApplication()->getTemplate() . '/html/layouts/com_fabrik/list_' . $this->id;
+
+		$layout = FabrikHelperHTML::getLayout('pagination.fabrik-pagination-footer', $paths);
+
+		return $layout->render($displayData);
 	}
 
 	/**

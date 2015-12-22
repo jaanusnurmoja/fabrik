@@ -4,13 +4,15 @@
  *
  * @package     Joomla.Administrator
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  * @since       1.6
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\String\String;
 
 /**
  * Fabrik Component Helper
@@ -43,7 +45,7 @@ class FabrikAdminHelper
 		}
 		else
 		{
-			if (JString::strlen(trim($strdate)) <= 10)
+			if (String::strlen(trim($strdate)) <= 10)
 			{
 				$strdate .= ' 00:00:00';
 			}
@@ -167,7 +169,7 @@ class FabrikAdminHelper
 
 			// Each group the user is in could have different filtering properties.
 			$filterData = $filters->$groupId;
-			$filterType = JString::strtoupper($filterData->filter_type);
+			$filterType = String::strtoupper($filterData->filter_type);
 
 			if ($filterType == 'NH')
 			{

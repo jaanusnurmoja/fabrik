@@ -2,7 +2,7 @@
 /**
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.limit
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -19,7 +19,6 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
  * @subpackage  Fabrik.form.limit
  * @since       3.0
  */
-
 class PlgFabrik_FormLimit extends PlgFabrik_Form
 {
 	/**
@@ -27,7 +26,6 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 	 *
 	 * @return  void
 	 */
-
 	public function onLoad()
 	{
 		return $this->_process();
@@ -41,11 +39,10 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 	private function _process()
 	{
 		$params = $this->getParams();
-		$app = JFactory::getApplication();
 		$formModel = $this->getModel();
 		$this->data = $this->getProcessData();
 
-		if (!$this->shouldProcess('limit_condition', null))
+		if (!$this->shouldProcess('limit_condition', null, $params))
 		{
 			return;
 		}
@@ -55,13 +52,20 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 			return true;
 		}
 
-		if (JFactory::getApplication()->input->get('view') === 'details' || $formModel->getRowId() !== '')
+		if ($this->app->input->get('view') === 'details' || $formModel->getRowId() !== '')
 		{
 			return true;
 		}
 
 		$limit = $this->limit();
 		$c = $this->count();
+
+		if ($c === false)
+		{
+			$this->app->enqueueMessage(FText::_("PLG_FORM_LIMIT_NOT_SETUP"));
+
+			return false;
+		}
 
 		// Allow for unlimited
 		if ($limit == -1)
@@ -73,7 +77,7 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 		{
 			$msg = $params->get('limit_reached_message', JText::sprintf('PLG_FORM_LIMIT_LIMIT_REACHED', $limit));
 			$msg = str_replace('{limit}', $limit, $msg);
-			$app->enqueueMessage(FText::_($msg), 'notice');
+			$this->app->enqueueMessage(FText::_($msg), 'notice');
 
 			return false;
 		}
@@ -81,7 +85,7 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 		{
 			if ($params->get('show_limit_message', true))
 			{
-				$app->enqueueMessage(JText::sprintf('PLG_FORM_LIMIT_ENTRIES_LEFT_MESSAGE', $limit - $c, $limit));
+				$this->app->enqueueMessage(JText::sprintf('PLG_FORM_LIMIT_ENTRIES_LEFT_MESSAGE', $limit - $c, $limit));
 			}
 		}
 
@@ -96,11 +100,15 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 	protected function count()
 	{
 		$formModel = $this->getModel();
-		$user = JFactory::getUser();
 		$params = $this->getParams();
 		$field = $params->get('limit_userfield');
 		$fk = $params->get('limit_fk');
 		$fkVal = '';
+
+		if (empty($field))
+		{
+			return false;
+		}
 
 		if (!empty($fk))
 		{
@@ -119,14 +127,14 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 		$list = $listModel->getTable();
 		$db = $listModel->getDb();
 		$query = $db->getQuery(true);
-		$query->clear()->select(' COUNT(' . $field . ')')->from($list->db_table_name)->where($field . ' = ' . (int) $user->get('id'));
+		$query->clear()->select(' COUNT(' . $field . ')')->from($list->db_table_name)->where($field . ' = ' .
+			(int) $this->user->get('id'));
 
 		if (!empty($fkVal))
 		{
-			$query->where($db->quoteName($fk) . ' = ' . $db->quote($fkVal), 'AND');
+			$query->where($db->qn($fk) . ' = ' . $db->q($fkVal), 'AND');
 		}
 
-		$strq = (string) $query;
 		$db->setQuery($query);
 
 		return (int) $db->loadResult();
@@ -140,9 +148,9 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 	protected function limit()
 	{
 		$params = $this->getParams();
-		$listid = (int) $params->get('limit_table');
+		$listId = (int) $params->get('limit_table');
 
-		if ($listid === 0)
+		if ($listId === 0)
 		{
 			// Use the limit setting supplied in the admin params
 			$limit = (int) $params->get('limit_length');
@@ -164,11 +172,10 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 	 */
 	protected function limitQuery()
 	{
-		$user = JFactory::getUser();
 		$params = $this->getParams();
-		$listid = (int) $params->get('limit_table');
+		$listId = (int) $params->get('limit_table');
 		$listModel = JModelLegacy::getInstance('List', 'FabrikFEModel');
-		$listModel->setId($listid);
+		$listModel->setId($listId);
 		$dbTable = $listModel->getTable()->db_table_name;
 		$db = $listModel->getDb();
 		$query = $db->getQuery(true);
@@ -179,16 +186,39 @@ class PlgFabrik_FormLimit extends PlgFabrik_Form
 
 		if ($type == 'user')
 		{
-			$query->where($lookup . ' = ' . (int) $user->get('id'));
+			$query->where($lookup . ' = ' . (int) $this->user->get('id'));
 		}
 		else
 		{
-			$groups = $user->getAuthorisedGroups();
+			$groups = $this->user->getAuthorisedGroups();
 			$query->where($lookup . ' IN (' . implode(',', $groups) . ')');
 		}
 
 		$db->setQuery($query);
-		$limit = (int) $db->loadResult();
+		$limit = $db->loadResult();
+
+		if (!isset($limit))
+		{
+			$addSql = $params->get('limit_add_sql', '');
+
+			if (!empty($addSql))
+			{
+				$w = new FabrikWorker;
+				$addSql = $w->parseMessageForPlaceHolder($addSql);
+				$db->setQuery($addSql);
+				$db->execute();
+				$limit = (int) $params->get('limit_length', '0');
+
+			}
+			else
+			{
+				$limit = 0;
+			}
+		}
+		else
+		{
+			$limit = (int) $limit;
+		}
 
 		return $limit;
 	}

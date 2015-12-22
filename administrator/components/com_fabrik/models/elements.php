@@ -4,13 +4,16 @@
  *
  * @package     Joomla.Administrator
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  * @since       1.6
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 require_once 'fabmodellist.php';
 
@@ -39,7 +42,7 @@ class FabrikAdminModelElements extends FabModelList
 		if (empty($config['filter_fields']))
 		{
 			$config['filter_fields'] = array('e.id', 'e.name', 'e.label', 'e.show_in_list_summary', 'e.published', 'e.ordering', 'g.label',
-				'e.plugin');
+				'e.plugin', 'g.name');
 		}
 
 		parent::__construct($config);
@@ -171,7 +174,7 @@ class FabrikAdminModelElements extends FabModelList
 		}
 
 		//$sql = (string)$query;
-		
+
 		return $query;
 	}
 
@@ -199,7 +202,7 @@ class FabrikAdminModelElements extends FabModelList
 			}
 
 			// Add a tip containing the access level information
-			$params = new JRegistry($item->params);
+			$params = new Registry($item->params);
 
 			$addAccessTitle = FArrayHelper::getValue($viewLevels, $item->access);
 			$addAccessTitle = is_object($addAccessTitle) ? $addAccessTitle->title : 'n/a';
@@ -370,7 +373,7 @@ class FabrikAdminModelElements extends FabModelList
 
 	public function batch($ids, $batch)
 	{
-		JArrayHelper::toInteger($ids);
+		ArrayHelper::toInteger($ids);
 
 		foreach ($ids as $id)
 		{
@@ -389,7 +392,7 @@ class FabrikAdminModelElements extends FabModelList
 	 */
 	public function canUnpublish($ids)
 	{
-		JArrayHelper::toInteger($ids);
+		ArrayHelper::toInteger($ids);
 		$blocked = array();
 		$allowed = array();
 

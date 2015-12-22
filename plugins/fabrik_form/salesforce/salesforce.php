@@ -4,12 +4,14 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.salesforce
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\String\String;
 
 // Require the abstract plugin class
 require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
@@ -52,14 +54,15 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 	/**
 	 * Sets up HTML to be injected into the form's bottom
 	 *
+	 * @throws Exception
+	 *
 	 * @return void
 	 */
-
 	public function getBottomContent()
 	{
 		if (!class_exists('SoapClient'))
 		{
-			JError::raiseWarning(E_WARNING, FText::_('PLG_FORM_SALESFORCE_ERR_SOAP_NOT_INSTALLED'));
+			throw new Exception(FText::_('PLG_FORM_SALESFORCE_ERR_SOAP_NOT_INSTALLED'));
 		}
 	}
 
@@ -69,10 +72,11 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 	 *
 	 * @return	bool
 	 */
-
 	public function onAfterProcess()
 	{
 		@ini_set("soap.wsdl_cache_enabled", "0");
+
+		/** @var FabrikFEModelForm $formModel */
 		$formModel = $this->getModel();
 		$client = $this->client();
 		$params = $this->getParams();
@@ -100,14 +104,14 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 
 				$key = array_pop(explode('___', $key));
 
-				if (JString::strtolower($key) == JString::strtolower($name) && JString::strtolower($name) != 'id')
+				if (String::strtolower($key) == String::strtolower($name) && String::strtolower($name) != 'id')
 				{
 					$submission[$name] = $val;
 				}
 				else
 				{
 					// Check custom fields
-					if (JString::strtolower($key . '__c') == JString::strtolower($name) && JString::strtolower($name) != 'id')
+					if (String::strtolower($key . '__c') == String::strtolower($name) && String::strtolower($name) != 'id')
 					{
 						$submission[$name] = $val;
 					}
@@ -115,12 +119,12 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 			}
 		}
 
-		$key = FabrikString::safeColNameToArrayKey($formModel->getlistModel()->getTable()->db_primary_key);
-		$customkey = $params->get('salesforce_customid') . '__c';
+		$key = $formModel->getlistModel()->getPrimaryKey(true);
+		$customKey = $params->get('salesforce_customid') . '__c';
 
 		if ($params->get('salesforce_allowupsert', 0))
 		{
-			$submission[$customkey] = $formModel->fullFormData[$key];
+			$submission[$customKey] = $formModel->fullFormData[$key];
 		}
 
 		$sObjects = array();
@@ -130,11 +134,10 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 		$sObject->type = $updateObject;
 		$sObject->fields = $submission;
 		array_push($sObjects, $sObject);
-		$app = JFactory::getApplication();
 
 		if ($params->get('salesforce_allowupsert', 0))
 		{
-			$result = $this->upsert($client, $sObjects, $customkey);
+			$result = $this->upsert($client, $sObjects, $customKey);
 		}
 		else
 		{
@@ -145,11 +148,11 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 		{
 			if ($result->created == '' && $params->get('salesforce_allowupsert', 0))
 			{
-				$app->enqueueMessage(JText::sprintf(SALESFORCE_UPDATED, $updateObject));
+				$this->app->enqueueMessage(JText::sprintf(SALESFORCE_UPDATED, $updateObject));
 			}
 			else
 			{
-				$app->enqueueMessage(JText::sprintf(SALESFORCE_CREATED, $updateObject));
+				$this->app->enqueueMessage(JText::sprintf(SALESFORCE_CREATED, $updateObject));
 			}
 		}
 		else
@@ -160,7 +163,7 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 				{
 					foreach ($result->errors as $error)
 					{
-						JError::raiseWarning(500, FText::_('SALESFORCE_ERR') . $errors->message);
+						JError::raiseWarning(500, FText::_('SALESFORCE_ERR') . $error->message);
 					}
 				}
 				else

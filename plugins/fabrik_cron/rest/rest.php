@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.cron.rest
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -21,7 +21,6 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-cron.php';
  * @subpackage  Fabrik.cron.rest
  * @since       3.0
  */
-
 class PlgFabrik_CronRest extends PlgFabrik_Cron
 {
 	/**
@@ -33,7 +32,6 @@ class PlgFabrik_CronRest extends PlgFabrik_Cron
 	 *
 	 * @return  number of records updated
 	 */
-
 	public function process(&$data, &$listModel, &$adminListModel)
 	{
 		$this->oAuth();
@@ -107,11 +105,9 @@ class PlgFabrik_CronRest extends PlgFabrik_Cron
 	 *
 	 * @return  void
 	 */
-
 	protected function createList($listModel, $adminListModel)
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$input = $this->app->input;
 		$params = $this->getParams();
 		$table = $params->get('create_list');
 
@@ -128,8 +124,7 @@ class PlgFabrik_CronRest extends PlgFabrik_Cron
 		$db->setQuery($query);
 		$res = (int) $db->loadResult();
 
-		$now = JFactory::getDate()->toSql();
-		$user = JFactory::getUser();
+		$now = $this->date->toSql();
 
 		$data = array();
 
@@ -142,7 +137,7 @@ class PlgFabrik_CronRest extends PlgFabrik_Cron
 		$data['db_table_name'] = $table;
 		$data['published'] = 1;
 		$data['created'] = $now;
-		$data['created_by'] = $user->get('id');
+		$data['created_by'] = $this->user->get('id');
 
 		$input->set('jform', $data);
 		$adminListModel->save($data);

@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.user
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -20,7 +20,6 @@ require_once JPATH_SITE . '/plugins/fabrik_element/databasejoin/databasejoin.php
  * @subpackage  Fabrik.element.user
  * @since       3.0
  */
-
 class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 {
 	/**
@@ -36,7 +35,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  object  default element params
 	 */
-
 	public function getParams()
 	{
 		$params = parent::getParams();
@@ -63,37 +61,36 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string	elements html
 	 */
-
 	public function render($data, $repeatCounter = 0)
 	{
 		$element = $this->getElement();
 		$name = $this->getHTMLName($repeatCounter);
-		$html_id = $this->getHTMLId($repeatCounter);
-		$id = $html_id;
+		$htmlId = $this->getHTMLId($repeatCounter);
+		$id = $htmlId;
 		$params = $this->getParams();
 
 		/**
 		 *  $$$ rob - if embedding a form inside a details view then rowid is true (for the detailed view) but we are still showing a new form
 		 *  so take a look at the element form's rowId and not app input
 		 */
-		$rowid = $this->getForm()->rowId;
+		$rowId = $this->getFormModel()->rowId;
 		/**
 		 * @TODO when editing a form with joined repeat group the rowid will be set but
 		 * the record is in fact new
 		 */
-		if ($params->get('update_on_edit') || !$rowid || ($this->inRepeatGroup && $this->_inJoin && $this->_repeatGroupTotal == $repeatCounter))
+		if ($params->get('update_on_edit') || !$rowId || ($this->inRepeatGroup && $this->_inJoin && $this->_repeatGroupTotal == $repeatCounter))
 		{
 			// Set user to logged in user
 			if ($this->isEditable())
 			{
-				$user = JFactory::getUser();
+				$user = $this->user;
 			}
 			else
 			{
-				$userid = (int) $this->getValue($data, $repeatCounter);
+				$userId = (int) $this->getValue($data, $repeatCounter);
 
 				// On failed validation value is 1 - user ids are always more than that so don't load userid=1 otherwise an error is generated
-				$user = $userid <= 1 ? JFactory::getUser() : JFactory::getUser($userid);
+				$user = $userId <= 1 ? $this->user : JFactory::getUser($userId);
 			}
 		}
 		else
@@ -107,7 +104,7 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 			// $$$ hugh ... what a mess ... of course if it's a new form, $data doesn't exist ...
 			if (empty($data))
 			{
-				$user = JFactory::getUser();
+				$user = $this->user;
 			}
 			else
 			{
@@ -122,7 +119,7 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 					 *  $$$ hugh 10/31/2011 - but if we don't do it, $id is the label not the value (like 'username')
 					 *  so wrong uid is written to form, and wipes out real ID when form is submitted.
 					 *  OK, problem was we were using $id further on as the html ID, so if we added _raw, element
-					 *  on form had wrong ID.  Added $html_id above, to use as (duh) html ID instead of $id.
+					 *  on form had wrong ID.  Added $htmlId above, to use as (duh) html ID instead of $id.
 					 */
 					if (!strstr($id, '_raw') && array_key_exists($id . '_raw', $data))
 					{
@@ -142,9 +139,9 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 				 * Or it may be an array with JSON and or urlencode and or ... yada yada ... who the f*ck knows
 				 * So let's just cover all the bases, shall we?
 				 */
-				
+
 				$id = is_array($id) ? $id[0] : $id;
-				
+
 				$id = html_entity_decode($id);
 				if (FabrikWorker::isJSON($id))
 				{
@@ -155,59 +152,30 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 				/* $$$ hugh - hmmm, might not necessarily be a new row.  So corner case check for
 				 * editing a row, where user element is not set yet, and 'update on edit' is No.
 				 */
-				if ($rowid && empty($id) && !$params->get('update_on_edit'))
+				if ($rowId && empty($id) && !$params->get('update_on_edit'))
 				{
 					$user = JFactory::getUser(0);
 				}
 				else
 				{
-					$user = $id === '' ? JFactory::getUser() : JFactory::getUser((int) $id);
+					$user = $id === '' ? $this->user : JFactory::getUser((int) $id);
 				}
 			}
 		}
 
-		/**
-		 *  If the table database is not the same as the joomla database then
-		 *  we should simply return a hidden field with the user id in it.
-		 */
-		if (!$this->inJDb())
-		{
-			return $this->getHiddenField($name, $user->get('id'), $html_id);
-		}
+		$displayParam = $this->getLabelOrConcatVal();
+		$layout = $this->getLayout('form');
+		$layoutData = new stdClass;
+		$layoutData->inJDb = $this->inJDb();
+		$layoutData->name = $name;
+		$layoutData->id = $htmlId;
+		$layoutData->isEditable = $this->isEditable();
+		$layoutData->hidden = $element->hidden;
+		$layoutData->input = parent::render($data, $repeatCounter);
+		$layoutData->readOnly = is_a($user, 'JUser') ? $user->get($displayParam) : '';
+		$layoutData->value = is_a($user, 'JUser') ? $user->get('id') : '';
 
-		$str = '';
-
-		if ($this->isEditable())
-		{
-			$value = is_object($user) ? $user->get('id') : '';
-
-			if ($element->hidden)
-			{
-				$str = $this->getHiddenField($name, $value, $html_id);
-			}
-			else
-			{
-				$str = '<div class="input-append">';
-				$str .= parent::render($data, $repeatCounter);
-				$str .= '<span class="add-on"><span class="icon-user"></span></span>';
-				$str .= '</div>';
-			}
-		}
-		else
-		{
-			$displayParam = $this->getLabelOrConcatVal();
-
-			if (is_a($user, 'JUser'))
-			{
-				$str = $user->get($displayParam);
-			}
-			else
-			{
-				JError::raiseWarning(E_NOTICE, "Didn't load for $element->default");
-			}
-		}
-
-		return $str;
+		return $layout->render($layoutData);
 	}
 
 	/**
@@ -216,7 +184,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  bool
 	 */
-
 	public function isHidden()
 	{
 		if ($this->inJDb())
@@ -236,11 +203,9 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return void
 	 */
-
 	public function preProcess($c)
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$input = $this->app->input;
 		$params = $this->getParams();
 
 		/**
@@ -262,17 +227,14 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 					$context = 'fabrik.plugin.' . $input->get('fabrik_social_profile_hash', '') . '.profile_id';
 				}
 
-				$session = JFactory::getSession();
-
-				if ($session->has($context))
+				if ($this->session->has($context))
 				{
-					$profile_id = $session->get($context);
+					$profileId = $this->session->get($context);
 					$form = $this->getFormModel();
 					$group = $this->getGroup();
-					$joinid = $group->getGroup()->join_id;
 					$key = $this->getFullName(true, false);
-					$shortkey = $this->getFullName(true, false);
-					$rawkey = $key . '_raw';
+					$shortKey = $this->getFullName(true, false);
+					$rawKey = $key . '_raw';
 
 					if ($group->canRepeat())
 					{
@@ -280,12 +242,12 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 						{
 							$key = str_replace("][", '.', $key);
 							$key = str_replace(array('[', ']'), '.', $key) . "$c";
-							$rawkey = str_replace($shortkey, $shortkey . '_raw', $key);
+							$rawKey = str_replace($shortKey, $shortKey . '_raw', $key);
 						}
 						else
 						{
 							$key = $key . '.' . $c;
-							$rawkey = $rawkey . '.' . $c;
+							$rawKey = $rawKey . '.' . $c;
 						}
 					}
 					else
@@ -295,14 +257,14 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 							$key = str_replace("][", ".", $key);
 							$key = str_replace(array('[', ']'), '.', $key);
 							$key = rtrim($key, '.');
-							$rawkey = str_replace($shortkey, $shortkey . '_raw', $key);
+							$rawKey = str_replace($shortKey, $shortKey . '_raw', $key);
 						}
 					}
 
-					$form->updateFormData($key, $profile_id);
-					$form->updateFormData($rawkey, $profile_id);
-					$input->post->set($key, $profile_id);
-					$input->post->set($rawkey, $profile_id);
+					$form->updateFormData($key, $profileId);
+					$form->updateFormData($rawKey, $profileId);
+					$input->post->set($key, $profileId);
+					$input->post->set($rawKey, $profileId);
 				}
 			}
 		}
@@ -318,7 +280,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  bool  If false, data should not be added.
 	 */
-
 	public function onStoreRow(&$data, $repeatCounter = 0)
 	{
 		if (!parent::onStoreRow($data, $repeatCounter))
@@ -326,19 +287,24 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 			return false;
 		}
 
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		// $$$ hugh - if importing a CSV, just use the data as is
+		if ($this->getListModel()->importingCSV)
+		{
+			return true;
+		}
+
+		$input = $this->app->input;
 
 		// $$$ hugh - special case, if we have just run the fabrikjuser plugin, we need to
 		// use the 'newuserid' as set by the plugin.
-		$newuserid = $input->getInt('newuserid', 0);
+		$newUserId = $input->getInt('newuserid', 0);
 
-		if (!empty($newuserid))
+		if (!empty($newUserId))
 		{
-			$newuserid_element = $input->get('newuserid_element', '');
-			$this_fullname = $this->getFullName(true, false);
+			$newUserIdElement = $input->get('newuserid_element', '');
+			$thisFullName = $this->getFullName(true, false);
 
-			if ($newuserid_element == $this_fullname)
+			if ($newUserIdElement == $thisFullName)
 			{
 				return true;
 			}
@@ -396,8 +362,7 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 			// $$$ rob if we cant use the element or its hidden force the use of current logged in user
 			if (!$this->canUse() || $this->getElement()->hidden == 1)
 			{
-				$user = JFactory::getUser();
-				$data[$element->name] = $user->get('id');
+				$data[$element->name] = $this->user->get('id');
 				$data[$element->name . '_raw'] = $data[$element->name];
 			}
 		}
@@ -420,16 +385,15 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 		{
 			if ($this->updateOnEdit())
 			{
-				$user = JFactory::getUser();
-				$data[$element->name] = $user->get('id');
+				$data[$element->name] = $this->user->get('id');
 				$data[$element->name . '_raw'] = $data[$element->name];
 
 				// $$$ hugh - need to add to updatedByPlugin() in order to override write access settings.
 				// This allows us to still 'update on edit' when element is write access controlled.
 				if (!$this->canUse())
 				{
-					$this_fullname = $this->getFullName(true, false);
-					$this->getFormModel()->updatedByPlugin($this_fullname, $user->get('id'));
+					$thisFullName = $this->getFullName(true, false);
+					$this->getFormModel()->updatedByPlugin($thisFullName, $this->user->get('id'));
 				}
 			}
 
@@ -441,23 +405,24 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 			else if ($this->getListModel()->importingCSV)
 			{
 				$formData = $this->getFormModel()->formData;
-				$userid = FArrayHelper::getValue($formData, $element->name, '');
-				if (!empty($userid) && !is_numeric($userid))
+				$userId = FArrayHelper::getValue($formData, $element->name, '');
+				if (!empty($userId) && !is_numeric($userId))
 				{
-					$user = JFactory::getUser($userid);
-					$new_userid = $user->get('id');
-					if (empty($new_userid) && FabrikWorker::isEmail($userid))
+					$user = JFactory::getUser($userId);
+					$newUserId = $user->get('id');
+
+					if (empty($newUserId) && FabrikWorker::isEmail($userId))
 					{
-						$db = JFactory::getDbo();
+						$db = $this->_db;
 						$query = $db->getQuery(true)
-						->select($db->quoteName('id'))
-						->from($db->quoteName('#__users'))
-						->where($db->quoteName('email') . ' = ' . $db->quote($userid));
+						->select($db->qn('id'))
+						->from($db->qn('#__users'))
+						->where($db->qn('email') . ' = ' . $db-->q($userId));
 						$db->setQuery($query, 0, 1);
 
-						$new_userid = (int) $db->loadResult();
+						$newUserId = (int) $db->loadResult();
 					}
-					$data[$element->name] = $new_userid;
+					$data[$element->name] = $newUserId;
 				}
 			}
 		}
@@ -473,19 +438,19 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	protected function updateOnEdit()
 	{
 		$params = $this->getParams();
-		$updaeOnEdit = $params->get('update_on_edit', 0);
+		$updateOnEdit = $params->get('update_on_edit', 0);
 
-		if ($updaeOnEdit == 1)
+		if ($updateOnEdit == 1)
 		{
-			$updaeOnEdit = !$this->canUse() || $this->getElement()->hidden == 1;
+			$updateOnEdit = !$this->canUse() || $this->getElement()->hidden == 1;
 		}
 
-		if ($updaeOnEdit == 2)
+		if ($updateOnEdit == 2)
 		{
-			$updaeOnEdit = true;
+			$updateOnEdit = true;
 		}
 
-		return $updaeOnEdit;
+		return $updateOnEdit;
 	}
 
 	/**
@@ -505,12 +470,9 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  bool  can view or not
 	 */
-
 	public function canView($view = 'form')
 	{
-		$app = JFactory::getApplication();
-
-		if ($app->input->get('task', '') == 'processForm')
+		if ($this->app->input->get('task', '') == 'processForm')
 		{
 			return true;
 		}
@@ -525,7 +487,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  array
 	 */
-
 	public function elementJavascript($repeatCounter)
 	{
 		$opts = parent::elementJavascriptOpts($repeatCounter);
@@ -544,7 +505,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return void
 	 */
-
 	public function formJavascriptClass(&$srcs, $script = '', &$shim = array())
 	{
 		$s = new stdClass;
@@ -565,7 +525,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string
 	 */
-
 	protected function _getSelectLabel($filter = false)
 	{
 		return $this->getParams()->get('user_noselectionlabel', FText::_('COM_FABRIK_PLEASE_SELECT'));
@@ -580,12 +539,10 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  void
 	 */
-
 	public function getAsField_html(&$aFields, &$aAsFields, $opts = array())
 	{
 		$table = $this->actualTableName();
 		$element = $this->getElement();
-		$params = $this->getParams();
 		$db = FabrikWorker::getDbo();
 		$fullElName = FArrayHelper::getValue($opts, 'alias', $table . '___' . $element->name);
 
@@ -606,22 +563,22 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 
 			if (FArrayHelper::getValue($opts, 'inc_raw', true))
 			{
-				$aFields[] = $k . ' AS ' . $db->quoteName($fullElName . '_raw');
-				$aAsFields[] = $db->quoteName($fullElName . '_raw');
+				$aFields[] = $k . ' AS ' . $db->qn($fullElName . '_raw');
+				$aAsFields[] = $db->qn($fullElName . '_raw');
 			}
 
-			$aFields[] = $k2 . ' AS ' . $db->quoteName($fullElName);
-			$aAsFields[] = $db->quoteName($fullElName);
+			$aFields[] = $k2 . ' AS ' . $db->qn($fullElName);
+			$aAsFields[] = $db->qn($fullElName);
 		}
 		else
 		{
-			$k = $db->quoteName($table) . '.' . $db->quoteName($element->name);
+			$k = $db->qn($table) . '.' . $db->qn($element->name);
 
 			// Its not so revert back to selecting the id
-			$aFields[] = $k . ' AS ' . $db->quoteName($fullElName . '_raw');
-			$aAsFields[] = $db->quoteName($fullElName . '_raw');
-			$aFields[] = $k . ' AS ' . $db->quoteName($fullElName);
-			$aAsFields[] = $db->quoteName($fullElName);
+			$aFields[] = $k . ' AS ' . $db->qn($fullElName . '_raw');
+			$aAsFields[] = $db->qn($fullElName . '_raw');
+			$aFields[] = $k . ' AS ' . $db->qn($fullElName);
+			$aAsFields[] = $db->qn($fullElName);
 		}
 	}
 
@@ -632,7 +589,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  bool  save ok or not
 	 */
-
 	public function onSave($data)
 	{
 		$params = json_decode($data['params']);
@@ -653,7 +609,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string
 	 */
-
 	protected function getJoinLabel()
 	{
 		$label = parent::getJoinLabel();
@@ -673,13 +628,11 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return mixed
 	 */
-
 	public function getDefaultValue($data = array())
 	{
 		if (!isset($this->default))
 		{
-			$user = JFactory::getUser();
-			$this->default = $user->get('id');
+			$this->default = $this->user->get('id');
 		}
 
 		return $this->default;
@@ -694,11 +647,14 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string	value
 	 */
-
 	public function getValue($data, $repeatCounter = 0, $opts = array())
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		if ($this->getListModel()->importingCSV)
+		{
+			return parent::getValue($data, $repeatCounter, $opts);
+		}
+
+		$input = $this->app->input;
 
 		// Kludge for 2 scenarios
 		if (array_key_exists('rowid', $data))
@@ -740,7 +696,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string	filter html
 	 */
-
 	public function getFilter($counter = 0, $normal = true)
 	{
 		$listModel = $this->getlistModel();
@@ -752,18 +707,16 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 			return '';
 		}
 
-		$table = $listModel->getTable();
 		$element = $this->getElement();
-		$params = $this->getParams();
 
 		$elName = $this->getFullName(true, false);
-		$htmlid = $this->getHTMLId() . 'value';
 		$v = $this->filterName($counter, $normal);
 
 		// Correct default got
 		$default = $this->getDefaultFilterVal($normal, $counter);
+		$this->filterDisplayValues = array($default);
 		$return = array();
-		$tabletype = $this->getLabelOrConcatVal();
+		$tableType = $this->getLabelOrConcatVal();
 		$join = $this->getJoin();
 		$joinTableName = FabrikString::safeColName($join->table_join_alias);
 
@@ -771,8 +724,9 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 		// so added '' to this test.  Should probably set $element->filter_type to a default somewhere.
 		if (in_array($element->filter_type, array('range', 'dropdown', '', 'checkbox')))
 		{
-			$rows = $this->filterValueList($normal, '', $joinTableName . '.' . $tabletype, '', false);
+			$rows = $this->filterValueList($normal, '', $joinTableName . '.' . $tableType, '', false);
 			$rows = (array) $rows;
+			$this->getFilterDisplayValues($default, $rows);
 
 			if ($element->filter_type !== 'checkbox')
 			{
@@ -780,47 +734,26 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 			}
 		}
 
-		$class = $this->filterClass();
-
 		switch ($element->filter_type)
 		{
 			case 'checkbox':
 				$return[] = $this->checkboxFilter($rows, $default, $v);
 				break;
-			case "range":
-				$attribs = 'class="' . $class . '" size="1" ';
-				$default1 = is_array($default) ? $default[0] : '';
-				$return[] = JHTML::_('select.genericlist', $rows, $v . '[]', $attribs, 'value', 'text', $default1, $element->name . "_filter_range_0");
-				$default1 = is_array($default) ? $default[1] : '';
-				$return[] = JHTML::_('select.genericlist', $rows, $v . '[]', $attribs, 'value', 'text', $default1, $element->name . "_filter_range_1");
+			case 'range':
+				$this->rangedFilterFields($default, $return, $rows, $v, 'list');
 				break;
 			case 'dropdown':
 			case 'multiselect':
 			default:
-				$max = count($rows) < 7 ? count($rows) : 7;
-				$size = $element->filter_type === 'multiselect' ? 'multiple="multiple" size="' . $max . '"' : 'size="1"';
-				$v = $element->filter_type === 'multiselect' ? $v . '[]' : $v;
-				$return[] = JHTML::_('select.genericlist', $rows, $v, 'class="' . $class . '" ' . $size, 'value', 'text', $default, $htmlid);
+				$return[] = $this->selectFilter($rows, $default, $v);
 				break;
 
 			case 'field':
-				if (get_magic_quotes_gpc())
-				{
-					$default = stripslashes($default);
-				}
-
-				$default = htmlspecialchars($default);
-				$return[] = '<input type="text" name="' . $v . '" class="' . $class . '" value="' . $default . '" id="' . $htmlid . '" />';
+				$return[] = $this->singleFilter($default, $v);
 				break;
 
 			case 'hidden':
-				if (get_magic_quotes_gpc())
-				{
-					$default = stripslashes($default);
-				}
-
-				$default = htmlspecialchars($default);
-				$return[] = '<input type="hidden" name="' . $v . '" class="' . $class . '" value="' . $default . '" id="' . $htmlid . '" />';
+				$return[] = $this->singleFilter($default, $v, 'hidden');
 				break;
 
 			case 'auto-complete':
@@ -849,7 +782,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string  required join text to ensure exact filter list code produces a valid query.
 	 */
-
 	protected function buildFilterJoin()
 	{
 		$params = $this->getParams();
@@ -874,7 +806,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string	sql query part e,g, "key = value"
 	 */
-
 	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal')
 	{
 		if (!$this->inJDb())
@@ -883,7 +814,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 		}
 
 		$element = $this->getElement();
-		$db = JFactory::getDbo();
 
 		// $$$ hugh - we need to use the join alias, not hard code #__users
 		$join = $this->getJoin();
@@ -910,7 +840,7 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 
 			if (!array_key_exists($key, $get))
 			{
-				$key = $db->quoteName($joinTableName . '.id');
+				$key = $this->_db->qn($joinTableName . '.id');
 				$this->encryptFieldName($key);
 
 				return $key . ' ' . $condition . ' ' . $value;
@@ -919,13 +849,11 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 
 		if ($type == 'advanced')
 		{
-			$key = $db->quoteName($joinTableName . '.id');
+			$key = $this->_db->qn($joinTableName . '.id');
 			$this->encryptFieldName($key);
 
 			return $key . ' ' . $condition . ' ' . $value;
 		}
-
-		$params = $this->getParams();
 
 		if ($type != 'prefilter')
 		{
@@ -933,26 +861,26 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 			{
 				case 'range':
 				case 'dropdown':
-					$tabletype = 'id';
+					$tableType = 'id';
 					break;
 				case 'field':
 				default:
-					$tabletype = $this->getLabelOrConcatVal();
+					$tableType = $this->getLabelOrConcatVal();
 					break;
 			}
 
-			$k = $db->quoteName($joinTableName . '.' . $tabletype);
+			$k = $this->_db->qn($joinTableName . '.' . $tableType);
 		}
 		else
 		{
 			if ($this->_rawFilter)
 			{
-				$k = $db->quoteName($joinTableName . '.id');
+				$k = $this->_db->qn($joinTableName . '.id');
 			}
 			else
 			{
-				$tabletype = $this->getLabelOrConcatVal();
-				$k = $db->quoteName($joinTableName . '.' . $tabletype);
+				$tableType = $this->getLabelOrConcatVal();
+				$k = $this->_db->qn($joinTableName . '.' . $tableType);
 			}
 		}
 
@@ -967,7 +895,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  object	database
 	 */
-
 	public function getDb()
 	{
 		return FabrikWorker::getDbo(true);
@@ -982,42 +909,41 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string	formatted value
 	 */
-
 	public function getEmailValue($value, $data = array(), $repeatCounter = 0)
 	{
 		$key = $this->getFullName(true, false);
-		$rawkey = $key . '_raw';
-		$userid = $value;
+		$rawKey = $key . '_raw';
+		$userId = $value;
 
-		if (array_key_exists($rawkey, $data))
+		if (array_key_exists($rawKey, $data))
 		{
-			$userid = $data[$rawkey];
+			$userId = $data[$rawKey];
 		}
 		elseif (array_key_exists($key, $data))
 		{
-			$userid = $data[$key];
+			$userId = $data[$key];
 		}
 
 		if ($this->getGroup()->canRepeat())
 		{
-			$userid = FArrayHelper::getValue($userid, $repeatCounter, 0);
+			$userId = FArrayHelper::getValue($userId, $repeatCounter, 0);
 		}
-		
-		if (is_array($userid))
+
+		if (is_array($userId))
 		{
-			$userid = (int) array_shift($userid);
+			$userId = (int) array_shift($userId);
 		}
 		else
 		{
 			// Test json string e.g. ["350"] - fixes JUser: :_load: User does not exist notices
-			if (!is_int($userid))
+			if (!is_int($userId))
 			{
-				$userid = FabrikWorker::JSONtoData($userid, true);
-				$userid = (int) FArrayHelper::getValue($userid, 0, 0);
+				$userId = FabrikWorker::JSONtoData($userId, true);
+				$userId = (int) FArrayHelper::getValue($userId, 0, 0);
 			}
 		}
 
-		$user = $userid === 0 ? JFactory::getUser() : JFactory::getUser($userid);
+		$user = $userId === 0 ? JFactory::getUser() : JFactory::getUser($userId);
 
 		return $this->getUserDisplayProperty($user);
 	}
@@ -1031,11 +957,8 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string
 	 */
-
 	protected function getUserDisplayProperty($user)
 	{
-		static $displayMessage;
-		$params = $this->getParams();
 		$displayParam = $this->getLabelOrConcatVal();
 
 		return is_a($user, 'JUser') ? $user->get($displayParam) : false;
@@ -1046,14 +969,12 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string
 	 */
-
 	protected function getJoinValueColumn()
 	{
-		$params = $this->getParams();
 		$join = $this->getJoin();
 		$db = FabrikWorker::getDbo();
 
-		return $db->quoteName($join->table_join_alias) . '.id';
+		return $db->qn($join->table_join_alias) . '.id';
 	}
 
 	/**
@@ -1062,7 +983,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return string element filter name
 	 */
-
 	public function getFilterFullName()
 	{
 		$elName = $this->getFullName(true, false);
@@ -1077,15 +997,13 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return mixed value to copy into new record
 	 */
-
 	public function onCopyRow($val)
 	{
 		$params = $this->getParams();
 
 		if ($params->get('update_on_edit'))
 		{
-			$user = JFactory::getUser();
-			$val = $user->get('id');
+			$val = $this->user->get('id');
 		}
 
 		return $val;
@@ -1098,15 +1016,13 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  mixed  value to copy into new record
 	 */
-
 	public function onSaveAsCopy($val)
 	{
 		$params = $this->getParams();
 
 		if ($params->get('update_on_copy', false))
 		{
-			$user = JFactory::getUser();
-			$val = $user->get('id');
+			$val = $this->user->get('id');
 		}
 
 		return $val;
@@ -1118,11 +1034,9 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  string
 	 */
-
 	protected function getLabelOrConcatVal()
 	{
 		static $displayMessage;
-		$app = JFactory::getApplication();
 		$params = $this->getParams();
 		$displayParam = $params->get('my_table_data', 'username');
 
@@ -1132,7 +1046,7 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 
 			if (!isset($displayMessage))
 			{
-				$app->enqueueMessage(JText::sprintf('PLG_ELEMENT_USER_NOTICE_GID', $this->getElement()->id), 'notice');
+				$this->app->enqueueMessage(JText::sprintf('PLG_ELEMENT_USER_NOTICE_GID', $this->getElement()->id), 'notice');
 				$displayMessage = true;
 			}
 		}
@@ -1149,7 +1063,6 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  array  html ids to watch for validation
 	 */
-
 	public function getValidationWatchElements($repeatCounter)
 	{
 		$id = $this->getHTMLId($repeatCounter);
