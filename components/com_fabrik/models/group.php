@@ -1041,6 +1041,8 @@ class FabrikFEModelGroup extends FabModel
 		$group->showLegend = $this->showLegend($group);
 		$group->labels = $params->get('labels_above', -1);
 		$group->dlabels = $params->get('labels_above_details', -1);
+		$group->start = in_array($params->get('repeat_table_part', 0), array(0, 1));
+		$group->end = in_array($params->get('repeat_table_part', 0), array(0, 3));
 
 		if ($this->canRepeat())
 		{
