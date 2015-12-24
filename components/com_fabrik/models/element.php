@@ -471,7 +471,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function setGroupModel($group)
 	{
-		$this->_group = $group;
+		$this->group = $group;
 	}
 
 	/**
@@ -1586,7 +1586,6 @@ class PlgFabrik_Element extends FabrikPlugin
 	 *
 	 * @return  string  label
 	 */
-
 	public function getLabel($repeatCounter, $tmpl = '')
 	{
 		$element = $this->getElement();
@@ -2285,6 +2284,8 @@ class PlgFabrik_Element extends FabrikPlugin
 		{
 			$c[] = 'fabrikError';
 		}
+
+		$c[] = $this->getParams()->get('containerclass');
 
 		return implode(' ', $c);
 	}
