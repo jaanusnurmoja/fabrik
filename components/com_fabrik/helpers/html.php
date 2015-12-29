@@ -251,7 +251,7 @@ class FabrikHelperHTML
 		$input  = $app->input;
 		$script = '';
 
-		// Don't include in an Request.JSON call - for autofill form plugin
+		// Don't include in an Request.JSON call - for auto-fill form plugin
 		$headers = self::parseRequestHeaders();
 
 		if (FArrayHelper::getValue($headers, 'X-Request') === 'JSON')
@@ -843,6 +843,7 @@ EOD;
 			if ($version->RELEASE > 2.5)
 			{
 				JHtml::_('bootstrap.framework');
+				self::loadBootstrapCSS();
 			}
 
 			// Require js test - list with no cal loading ajax form with cal
@@ -1101,6 +1102,7 @@ EOD;
 		$config[]   = "});";
 		$config[]   = "\n";
 
+
 		// Store in session - included in fabrik system plugin
 		$session->set('fabrik.js.shim', $newShim);
 		$session->set('fabrik.js.config', $config);
@@ -1145,6 +1147,21 @@ EOD;
 	public static function mootools()
 	{
 		self::framework();
+	}
+
+	/**
+	 * Load J!'s bootstrap CSS if requested.  Special case for iframes in non J! pages loading us.
+	 *
+	 * @return  void
+	 */
+	public static function loadBootstrapCSS()
+	{
+		$app = JFactory::getApplication();
+		if ($app->input->get('loadbootstrapcss', '') !== '')
+		{
+			$doc = JFactory::getDocument();
+			JHtmlBootstrap::loadCss(true, $doc->direction);
+		}
 	}
 
 	/**
@@ -2364,7 +2381,7 @@ $inputDataAttributes = array())
 	 */
 	public static function tagBaseUrl($fullName, $rootUrl = null)
 	{
-		$url  = $_SERVER['REQUEST_URI'];
+		$url  = filter_var(ArrayHelper::getValue($_SERVER, 'REQUEST_URI', 'index.php'), FILTER_SANITIZE_URL);
 		$bits = explode('?', $url);
 		$root = isset($rootUrl) ? $rootUrl : FArrayHelper::getValue($bits, 0, '', 'string');
 		$bits = FArrayHelper::getValue($bits, 1, '', 'string');
