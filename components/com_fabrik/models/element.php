@@ -2948,11 +2948,25 @@ class PlgFabrik_Element extends FabrikPlugin
 						}
 						elseif ($jsAct->js_e_condition == 'regex')
 						{
-							$js .= "if (this.get('value').test(/" . $jsAct->js_e_value . "/)) {";
+							if (preg_match('#^/.+/\w*#', $jsAct->js_e_value))
+							{
+								$js .= "if (this.get('value').test(%%REGEX%%)) {";
+							}
+							else
+							{
+								$js .= "if (this.get('value').test(/%%REGEX%%/)) {";
+							}
 						}
 						elseif ($jsAct->js_e_condition == '!regex')
 						{
-							$js .= "if (!this.get('value').test(/" . $jsAct->js_e_value . "/)) {";
+							if (preg_match('#^/.+/\w*#', $jsAct->js_e_value))
+							{
+								$js .= "if (this.get('value').test(%%REGEX%%)) {";
+							}
+							else
+							{
+								$js .= "if (!this.get('value').test(/%%REGEX%%/)) {";
+							}
 						}
 						else
 						{
@@ -2971,6 +2985,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 						$js .= "}";
 						$js = addslashes($js);
+						$js = str_replace('%%REGEX%%', $jsAct->js_e_value, $js);
 						$js = str_replace(array("\n", "\r"), "", $js);
 						$jsStr .= $jsControllerKey . ".dispatchEvent('$element->plugin', '$elId', '$jsAct->action', '$js');\n";
 					}
