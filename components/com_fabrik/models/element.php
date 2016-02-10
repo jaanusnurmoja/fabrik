@@ -1689,22 +1689,14 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	protected function addErrorHTML($repeatCounter, $tmpl = '')
 	{
-		$err = $this->getErrorMsg($repeatCounter);
-		$err = htmlspecialchars($err, ENT_QUOTES);
-		$str = '<span class="fabrikErrorMessage">';
+		$err               = $this->getErrorMsg($repeatCounter);
+		$err               = htmlspecialchars($err, ENT_QUOTES);
+		$layout            = FabrikHelperHTML::getLayout('element.fabrik-element-error');
+		$displayData       = new stdClass;
+		$displayData->err  = $err;
+		$displayData->tmpl = $tmpl;
 
-		if ($err !== '')
-		{
-			$err         = '<span>' . $err . '</span>';
-			$usersConfig = JComponentHelper::getParams('com_fabrik');
-			$icon        = FabrikWorker::j3() ? $usersConfig->get('error_icon', 'exclamation-sign') . '.png' : 'alert.png';
-			$str .= '<a href="#" class="fabrikTip" title="' . $err . '" opts="{notice:true}">' . FabrikHelperHTML::image($icon, 'form', $tmpl)
-				. '</a>';
-		}
-
-		$str .= '</span>';
-
-		return $str;
+		return $layout->render($displayData);
 	}
 
 	/**
@@ -2656,6 +2648,9 @@ class PlgFabrik_Element extends FabrikPlugin
 					break;
 			}
 		}
+
+		// Bootstrap 3
+		$class[] = 'form-control';
 
 		if ($this->elementError != '')
 		{
@@ -4645,7 +4640,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$params = $this->getParams();
 		$values = $this->getSubOptionValues();
 		$labels = $this->getSubOptionLabels();
-		$key    = array_search($v, $values);
+		$key    = array_search($v, $values, true);
 		/**
 		 * $$$ rob if we allow adding to the dropdown but not recording
 		 * then there will be no $key set to revert to the $val instead
