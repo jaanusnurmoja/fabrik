@@ -584,9 +584,9 @@ class FabrikWorker
 	* @param   string 	$rom    	Romanic number in array
 	* @param   int   	$arb 		Arabian number in array
 	* @param   int   	$integer	Convertable value using 
-									$w = new FabrikWorker; 
-									$integer = $w->romanicNumber($integer, true);
-
+	*					$w = new FabrikWorker; 
+	*					$integer = $w->romanicNumber($integer, true);
+	*
 	* @return $romanic
 	*/
 
