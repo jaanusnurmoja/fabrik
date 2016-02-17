@@ -840,6 +840,18 @@
 				<option value="UTF-16LE">UTF-16LE</option>
 				<option value="ISO-8859-15">ISO-8859-15</option>
 				<option value="macintosh">Mac Roman</option>
+					<option value="macintosh">Mac Roman</option>
+			</field>
+			
+			<field name="csv_double_quote"
+				type="radio"
+				class="btn-group"
+				default="1"
+				label="COM_FABRIK_FIELD_CSV_DOUBLE_QUOTE_LABEL"
+				description="COM_FABRIK_FIELD_CSV_DOUBLE_QUOTE_DESC"
+			>
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
 			</field>
 
 			<field name="csv_double_quote"

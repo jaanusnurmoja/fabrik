@@ -141,14 +141,27 @@ class FPagination extends JPagination
 		// Initialize variables
 		$limits = array();
 		$values = array();
-
+		$defaults = array();
+		$lim = $this->limit;
 		for ($i = 5; $i <= 30; $i += 5)
 		{
-			$values[] = $i;
+			$defaults[] = $i;
 		}
-
-		$values[] = 50;
-		$values[] = 100;
+		
+		if(!in_array($lim, $defaults))
+		{
+			for ($i = $lim; $i <= (6*$lim); $i += $lim)
+			{
+				$values[] = $i;
+			}
+		}
+		else
+		{
+			$values = $defaults;
+		}
+		
+		$values[] = !in_array($lim, $defaults) && ((10*$lim) < 100 && (10*$lim) > 50) ? (10*$lim) : 50;
+		$values[] = in_array($lim, $defaults) || (20*$lim) < 100 ? 100 : null;
 
 		if (!in_array($this->startLimit, $values))
 		{
