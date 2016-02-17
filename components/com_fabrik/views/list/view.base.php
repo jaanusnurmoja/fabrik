@@ -357,7 +357,6 @@ class FabrikViewListBase extends FabrikView
 						$o->cursor = $w->romanicNumber($o->cursor, true);
 					}
 					
-					$listClass = explode($model->htmlClass());
 					$o->rtag = array('<td id="rownumber">', '</td>');
 					$o->rowNum	= '<div class="rownumber">' . $o->cursor . '</div>';		
 				}
