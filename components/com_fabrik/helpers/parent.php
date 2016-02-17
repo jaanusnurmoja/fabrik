@@ -2011,6 +2011,8 @@ class FabrikWorker
 	 *                                               to inverse this priority
 	 * @param   array  $opts                         Options 'listid' -> if priority = menu then the menu list id must
 	 *                                               match this value to use the menu param.
+	 * @param   array  $opts     Options 'listid' -> if priority = menu then the menu list id must match this value to
+	 *                                               use the menu param.
 	 *
 	 * @return  string
 	 */
