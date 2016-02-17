@@ -249,10 +249,10 @@ FbForm = new Class({
 	/**
 	 * Attach an effect to an elements
 	 *
-	 * @param   string  id      Element or group to apply the fx TO, triggered from another element
-	 * @param   string  method  JS event which triggers the effect (click,change etc.)
+	 * @param {string}  id      Element or group to apply the fx TO, triggered from another element
+	 * @param {string}  method  JS event which triggers the effect (click,change etc.)
 	 *
-	 * @return false if no element found or element fx
+	 * @return {*} false if no element found or element fx
 	 */
 	addElementFX: function (id, method) {
 		var c, k, fxdiv;
@@ -1608,7 +1608,7 @@ FbForm = new Class({
 		// Find which repeat group was deleted
 		var delIndex = 0;
 		group.getElements('.deleteGroup').each(function (b, x) {
-			if (b.getElement('img') === e.target || b.getElement('i') === e.target || b === e.target) {
+			if (jQuery(b).find('[data-role=fabrik_delete_group]')[0] === e.target) {
 				delIndex = x;
 			}
 		}.bind(this));

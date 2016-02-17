@@ -960,7 +960,7 @@ EOD;
 		$tipJs[] = "\t});";
 
 		// Load tips
-		$tipJs[] = "\tFabrik.tips.attach('.fabrikTip');";
+		//$tipJs[] = "\tFabrik.tips.attach('.fabrikTip');";
 
 		return implode("\n", $tipJs);
 	}
@@ -2342,7 +2342,7 @@ EOD;
 	 *
 	 * @return   mixed  email message or false
 	 */
-	public function getPHPTemplate($tmpl, $data = array(), $model = null)
+	public static function getPHPTemplate($tmpl, $data = array(), $model = null)
 	{
 		// Start capturing output into a buffer
 		ob_start();

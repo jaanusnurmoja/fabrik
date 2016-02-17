@@ -577,6 +577,40 @@ class FabrikWorker
 	}
 
 	/**
+	* 	Converts integers to romanic numbers
+	*	http://php.net/manual/en/function.base-convert.php#92960
+	* 
+	* @param   array 	$table  
+	* @param   string 	$rom    	Romanic number in array
+	* @param   int   	$arb 		Arabian number in array
+	* @param   int   	$integer	Convertable value using 
+									$w = new FabrikWorker; 
+									$integer = $w->romanicNumber($integer, true);
+
+	* @return $romanic
+	*/
+
+	 public static function romanicNumber($integer, $upcase = true) 
+	{ 
+		$table = array('M'=>1000, 'CM'=>900, 'D'=>500, 'CD'=>400, 'C'=>100, 'XC'=>90, 'L'=>50, 'XL'=>40, 'X'=>10, 'IX'=>9, 'V'=>5, 'IV'=>4, 'I'=>1); 
+		$romanic = ''; 
+		while($integer > 0) 
+		{ 
+			foreach($table as $rom=>$arb) 
+			{ 
+				if($integer >= $arb) 
+				{ 
+					$integer -= $arb; 
+					$romanic .= $rom; 
+					break; 
+				} 
+			} 
+		} 
+
+		return $romanic; 
+	} 	
+
+	/**
 	 * Check a string is not reserved by Fabrik
 	 *
 	 * @param   string $str    To check
@@ -725,7 +759,8 @@ class FabrikWorker
 	 *                                   message
 	 * @param   bool   $addSlashes       Add slashed to the text?
 	 * @param   object $theirUser        User to use in replaceWithUserData (defaults to logged in user)
-	 * @param   bool   $unsafe           If true (default) will not replace certain placeholders like $jConfig_secret must not be shown to users
+	 * @param   bool   $unsafe           If true (default) will not replace certain placeholders like $jConfig_secret
+	 *                                   must not be shown to users
 	 *
 	 * @return  string  parsed message
 	 */
@@ -922,11 +957,11 @@ class FabrikWorker
 	 */
 	public static function unsafeReplacements()
 	{
-		$config  = JFactory::getConfig();
+		$config = JFactory::getConfig();
 
 		$replacements = array(
-				'{$jConfig_absolute_path}' => JPATH_SITE,
-				'{$jConfig_secret}' => $config->get('secret')
+			'{$jConfig_absolute_path}' => JPATH_SITE,
+			'{$jConfig_secret}' => $config->get('secret')
 		);
 
 		return $replacements;
@@ -940,13 +975,13 @@ class FabrikWorker
 	 */
 	public static function globalReplacements()
 	{
-		$app     = JFactory::getApplication();
-		$itemId  = self::itemId();
-		$config  = JFactory::getConfig();
-		$session = JFactory::getSession();
-		$token   = $session->get('session.token');
-		$lang    = JFactory::getLanguage()->getTag();
-		$lang    = str_replace('-', '_', $lang);
+		$app       = JFactory::getApplication();
+		$itemId    = self::itemId();
+		$config    = JFactory::getConfig();
+		$session   = JFactory::getSession();
+		$token     = $session->get('session.token');
+		$lang      = JFactory::getLanguage()->getTag();
+		$lang      = str_replace('-', '_', $lang);
 		$shortlang = explode('_', $lang);
 		$shortlang = $shortlang[0];
 		$multilang = FabrikWorker::getMultiLangURLCode();
@@ -1714,9 +1749,10 @@ class FabrikWorker
 	 * Takes a string which may or may not be json and returns either string/array/object
 	 * will also turn valGROUPSPLITTERval2 to array
 	 *
-	 * @param   string $data       Json encoded string
-	 * @param   bool   $toArray    Force data to be an array
-	 * @param   bool   $emptyish   Set to false to return an empty array if $data is an empty string, instead of an emptyish (one empty string entry) array
+	 * @param   string $data     Json encoded string
+	 * @param   bool   $toArray  Force data to be an array
+	 * @param   bool   $emptyish Set to false to return an empty array if $data is an empty string, instead of an
+	 *                           emptyish (one empty string entry) array
 	 *
 	 * @return  mixed data
 	 */
@@ -1957,27 +1993,38 @@ class FabrikWorker
 	 * @param   bool   $mambot   If set to true menu params ignored
 	 * @param   string $priority Defaults that menu priorities override request - set to 'request' to inverse this
 	 *                           priority
+	 * @param   array  $opts     Options 'listid' -> if priority = menu then the menu list id must match this value to
+	 *                                               use the menu param.
 	 *
 	 * @return  string
 	 */
-	public static function getMenuOrRequestVar($name, $val = '', $mambot = false, $priority = 'menu')
+	public static function getMenuOrRequestVar($name, $val = '', $mambot = false, $priority = 'menu', $opts = array())
 	{
 		$app   = JFactory::getApplication();
 		$input = $app->input;
 
 		if ($priority === 'menu')
 		{
+
 			$val = $input->get($name, $val, 'string');
 
 			if (!$app->isAdmin())
 			{
-				$menus = $app->getMenu();
-				$menu  = $menus->getActive();
-
-				// If there is a menu item available AND the view is not rendered in a content plugin
-				if (is_object($menu) && !$mambot)
+				if (!$mambot)
 				{
-					$val = $menu->params->get($name, $val);
+					$menus = $app->getMenu();
+					$menu  = $menus->getActive();
+
+					if (is_object($menu))
+					{
+						$menuListId  = ArrayHelper::getValue($menu->query, 'listid', '');
+						$checkListId = ArrayHelper::getValue($opts, 'listid', $menuListId);
+
+						if ((int) $menuListId === (int) $checkListId)
+						{
+							$val = $menu->params->get($name, $val);
+						}
+					}
 				}
 			}
 		}
