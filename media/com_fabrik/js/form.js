@@ -140,6 +140,7 @@ FbForm = new Class({
 
 		this.watchPrintButton();
 		this.watchPdfButton();
+		this.watchTabs();
 	},
 
 	/**
@@ -510,6 +511,21 @@ FbForm = new Class({
 		if (tab !== false) {
 			tab.show();
 		}
+	},
+
+	/**
+	 * Convenience for custom code that needs to fire when a tab is changed
+	 */
+	watchTabs: function () {
+		var self = this;
+
+		jQuery(this.form).on('click', '*[data-role=fabrik_tab]', function(event) {
+			var groupId = event.target.id.match(/group(\d+)_tab/);
+			if (groupId.length > 1) {
+				groupId = groupId[1];
+			}
+			Fabrik.fireEvent('fabrik.form.tab.click', [self, groupId, event], 500);
+		});
 	},
 
 	watchClearSession: function () {
@@ -1162,11 +1178,12 @@ FbForm = new Class({
 
 	watchSubmit: function () {
 		var submit = this._getButton('Submit');
-		if (!submit) {
+		var apply = this._getButton('apply');
+
+		if (!submit && !apply) {
 			return;
 		}
-		var apply = this._getButton('apply'),
-			del = this._getButton('delete'),
+		var del = this._getButton('delete'),
 			copy = this._getButton('Copy');
 		if (del) {
 			del.addEvent('click', function (e) {
