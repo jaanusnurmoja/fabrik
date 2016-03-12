@@ -3489,7 +3489,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 		else
 		{
-			$selector          = '.advancedSeach_' . $listModel->getRenderContext() . ' .' . $id;
+			$selector          = '.advancedSearch_' . $listModel->getRenderContext() . ' .' . $id;
 			$opts['menuclass'] = 'auto-complete-container advanced';
 		}
 
@@ -6533,7 +6533,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	}
 
 	/**
-	 * Cache method to populate autocomplete options
+	 * Cache method to populate auto-complete options
 	 *
 	 * @param   plgFabrik_Element $elementModel element model
 	 * @param   string            $search       search string
@@ -7643,6 +7643,12 @@ class PlgFabrik_Element extends FabrikPlugin
 	{
 		$name = get_class($this);
 
+		if (strstr($name, '\\'))
+		{
+			$name = explode('\\', $name);
+			$name = array_pop($name);
+		}
+
 		return strtolower(JString::str_ireplace('PlgFabrik_Element', '', $name));
 	}
 
@@ -7721,5 +7727,14 @@ class PlgFabrik_Element extends FabrikPlugin
 	public function isPublished()
 	{
 		return $this->getElement()->published === '1';
+	}
+
+	/**
+	 * Add any jsJLayout templates to Fabrik.jLayouts js object.
+	 *
+	 * @return void
+	 */
+	public function jsJLayouts()
+	{
 	}
 }

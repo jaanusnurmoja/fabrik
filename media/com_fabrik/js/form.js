@@ -4,7 +4,7 @@
  * @copyright: Copyright (C) 2005-2013, fabrikar.com - All rights reserved.
  * @license:   GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
-
+console.log('load form js');
 /*jshint mootools: true */
 /*global Fabrik:true, fconsole:true, Joomla:true, CloneObject:true, $H:true,unescape:true */
 
@@ -147,7 +147,7 @@ FbForm = new Class({
 	 * Print button action - either open up the print preview window - or print if already opened
 	 */
 	watchPrintButton: function () {
-		document.getElements('a[data-fabrik-print]').addEvent('click', function (e) {
+		this.form.getElements('a[data-fabrik-print]').addEvent('click', function (e) {
 			e.stop();
 			if (this.options.print) {
 				window.print();
@@ -171,7 +171,7 @@ FbForm = new Class({
 	 * PDF button action.
 	 */
 	watchPdfButton: function () {
-		document.getElements('*[data-role="open-form-pdf"]').addEvent('click', function (e) {
+		this.form.getElements('*[data-role="open-form-pdf"]').addEvent('click', function (e) {
 			e.stop();
 			// Build URL as we could have changed the rowid via ajax pagination.
 			var url = e.event.currentTarget.href.replace(/(rowid=\d*)/, 'rowid=' + this.options.rowid);
@@ -436,12 +436,23 @@ FbForm = new Class({
 				break;
 			case 'readonly':
 				if (!groupfx) {
-					jQuery('#' + id).prop('readonly', true);
+					// can't "readonly" a select, so disable all but selected option instead
+					if (jQuery('#' + id).prop('tagName') === 'SELECT') {
+						jQuery('#' + id + ' option:not(:selected)').attr('disabled', true);
+					}
+					else {
+						jQuery('#' + id).prop('readonly', true);
+					}
 				}
 				break;
 			case 'notreadonly':
 				if (!groupfx) {
-					jQuery('#' + id).prop('readonly', false);
+					if (jQuery('#' + id).prop('tagName') === 'SELECT') {
+						jQuery('#' + id + ' option').attr('disabled', false);
+					}
+					else {
+						jQuery('#' + id).prop('readonly', false);
+					}
 				}
 				break;
 		}
@@ -467,7 +478,7 @@ FbForm = new Class({
 		return false;
 	},
 
-	/**
+    /**
 	 * Hide a group's tab, if it exists
 	 *
 	 * @param  {string}  groupId
@@ -568,17 +579,13 @@ FbForm = new Class({
 				submit.disabled = 'disabled';
 				submit.setStyle('opacity', 0.5);
 			}
-			if (typeOf(document.getElement('.fabrikPagePrevious')) !== 'null') {
-				this.form.getElement('.fabrikPagePrevious').disabled = 'disabled';
-				this.form.getElement('.fabrikPagePrevious').addEvent('click', function (e) {
-					this._doPageNav(e, -1);
-				}.bind(this));
-			}
-			if (typeOf(document.getElement('.fabrikPagePrevious')) !== 'null') {
-				this.form.getElement('.fabrikPageNext').addEvent('click', function (e) {
-					this._doPageNav(e, 1);
-				}.bind(this));
-			}
+			var self = this;
+			jQuery(this.form).on('click', '.fabrikPagePrevious', function(e) {
+				self._doPageNav(e, -1);
+			});
+			jQuery(this.form).on('click', '.fabrikPageNext', function(e) {
+				self._doPageNav(e, 1);
+			});
 			this.setPageButtons();
 			this.hideOtherPages();
 		}
@@ -743,9 +750,9 @@ FbForm = new Class({
 
 	setPageButtons: function () {
 		var submit = this._getButton('Submit');
-		var prev = this.form.getElement('.fabrikPagePrevious');
-		var next = this.form.getElement('.fabrikPageNext');
-		if (typeOf(next) !== 'null') {
+		var prevs = this.form.getElements('.fabrikPagePrevious');
+		var nexts = this.form.getElements('.fabrikPageNext');
+		nexts.each(function (next) {
 			if (this.currentPage === this.options.pages.getKeys().length - 1) {
 				if (typeOf(submit) !== 'null') {
 					submit.disabled = '';
@@ -761,8 +768,8 @@ FbForm = new Class({
 				next.disabled = '';
 				next.setStyle('opacity', 1);
 			}
-		}
-		if (typeOf(prev) !== 'null') {
+		}.bind(this));
+		prevs.each(function (prev) {
 			if (this.currentPage === 0) {
 				prev.disabled = 'disabled';
 				prev.setStyle('opacity', 0.5);
@@ -770,7 +777,7 @@ FbForm = new Class({
 				prev.disabled = '';
 				prev.setStyle('opacity', 1);
 			}
-		}
+		}.bind(this));
 	},
 
 	destroyElements: function () {
@@ -1185,7 +1192,7 @@ FbForm = new Class({
 			copy = this._getButton('Copy');
 		if (del) {
 			del.addEvent('click', function (e) {
-				if (confirm(Joomla.JText._('COM_FABRIK_CONFIRM_DELETE_1'))) {
+				if (window.confirm(Joomla.JText._('COM_FABRIK_CONFIRM_DELETE_1'))) {
 					var res = Fabrik.fireEvent('fabrik.form.delete', [this, this.options.rowid]).eventResults;
 					if (typeOf(res) === 'null' || res.length === 0 || !res.contains(false)) {
 						// Task value is the same for front and admin
@@ -1497,7 +1504,7 @@ FbForm = new Class({
 
 		var self = this;
 
-		jQuery(this.form).on('click', '.deleteGroup', jQuery.debounce(this.options.debounceDelay, true, function(e, target) {
+		jQuery(this.form).on('click', '.deleteGroup', Fabrik.debounce(this.options.debounceDelay, true, function(e, target) {
 			e.preventDefault();
 			if (!self.addingOrDeletingGroup) {
 				self.addingOrDeletingGroup = true;
@@ -1508,7 +1515,7 @@ FbForm = new Class({
 			}
 		}));
 
-		jQuery(this.form).on('click', '.addGroup', jQuery.debounce(this.options.debounceDelay, true, function(e, target) {
+		jQuery(this.form).on('click', '.addGroup', Fabrik.debounce(this.options.debounceDelay, true, function(e, target) {
 			e.preventDefault();
 			if (!self.addingOrDeletingGroup) {
 				self.addingOrDeletingGroup = true;
@@ -1959,7 +1966,7 @@ FbForm = new Class({
 		this.addElements(o);
 
 		// Only scroll the window if the new element is not visible
-		var win_size = window.getHeight(),
+		var win_size = jQuery(window).height(),
 			win_scroll = document.id(window).getScroll().y,
 			obj = clone.getCoordinates();
 		// If the bottom of the new repeat goes below the bottom of the visible

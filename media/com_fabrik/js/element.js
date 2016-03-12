@@ -385,7 +385,7 @@ var FbElement = new Class({
     },
 
     /**
-     * Run when the element is decloled from the form as part of a deleted repeat group
+     * Run when the element is de-cloned from the form as part of a deleted repeat group
      */
     decloned: function (groupid) {
     },
@@ -394,7 +394,13 @@ var FbElement = new Class({
      * get the wrapper dom element that contains all of the elements dom objects
      */
     getContainer: function () {
-        return typeOf(this.element) === 'null' ? false : this.element.getParent('.fabrikElementContainer');
+        var c = jQuery(this.element).closest('.fabrikElementContainer');
+        if (c.length === 0) {
+            c = false;
+        } else {
+            c = c[0];
+        }
+        return typeOf(this.element) === 'null' ? false : c;
     },
 
     /**
@@ -427,7 +433,7 @@ var FbElement = new Class({
      * @return array of tips
      */
     tips: function () {
-        return Fabrik.tips.elements.filter(function (t) {
+        return Fabrik.tips.elements.filter(function (index, t) {
             if (t === this.getContainer() || t.getParent() === this.getContainer()) {
                 return true;
             }

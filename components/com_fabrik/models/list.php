@@ -847,29 +847,8 @@ class FabrikFEModelList extends JModelForm
 	 */
 	public function setBigSelects()
 	{
-		$fbConfig = JComponentHelper::getParams('com_fabrik');
-		$bigSelects = $fbConfig->get('enable_big_selects', 0);
-		/*
-		 $fabrikDb = $this->getDb();
-		$params = $this->getParams();
-		if ($params->get('enable_big_selects', $bigSelects))
-		 */
-		if ($bigSelects)
-		{
-			$fabrikDb = $this->getDb();
-
-			// $$$ hugh - added bumping up GROUP_CONCAT_MAX_LEN here, rather than adding YAFO for it
-			//$fabrikDb->setQuery("SET OPTION SQL_BIG_SELECTS=1, GROUP_CONCAT_MAX_LEN=10240");
-			if (version_compare($fabrikDb->getVersion(), '5.1.0', '>='))
-			{
-			      $fabrikDb->setQuery("SET SQL_BIG_SELECTS=1, GROUP_CONCAT_MAX_LEN=10240");
-			}
-			else
-			{
-			      $fabrikDb->setQuery("SET OPTION SQL_BIG_SELECTS=1, GROUP_CONCAT_MAX_LEN=10240");
-			}
-			$fabrikDb->execute();
-		}
+		$fabrikDb = $this->getDb();
+		FabrikWorker::bigSelects($fabrikDb);
 	}
 
 	/**
@@ -2332,8 +2311,20 @@ class FabrikFEModelList extends JModelForm
 
 			$array['rowid'] = $this->getSlug($row);
 			$array['listid'] = $table->id;
+
 			$link = JRoute::_($this->parseMessageForRowHolder($customLink, $array));
 		}
+
+		// Allow creating custom links, default layout will just return $link unaltered
+		$layout                     = FabrikHelperHTML::getLayout('element.fabrik-element-details-link');
+		$displayData                = new stdClass;
+		$displayData->row           = $row;
+		$displayData->listModel     = $this;
+		$displayData->elementModel  = $elementModel;
+		$displayData->customLink    = $customLink;
+		$displayData->repeatCounter = $repeatCounter;
+		$displayData->link          = $link;
+		$link                       = $layout->render($displayData);
 
 		return $link;
 	}
@@ -3547,12 +3538,12 @@ class FabrikFEModelList extends JModelForm
 			}
 
 		}
-		// $$$rob ensure opening and closing parathethis for prefilters are equal
+		// $$$rob ensure opening and closing parenthesis for prefilters are equal
 		// Seems to occur if you have 3 prefilters with 2nd = grouped/AND and 3rd grouped/OR
 
 		if ($groupedCount > 0)
 		{
-			$sql[] = str_pad('', (int) $groupedCount, ")");
+			$sql[] = str_pad('', (int) $groupedCount, ')');
 		}
 		// Wrap in brackets
 		if (!empty($sql))
@@ -5439,7 +5430,6 @@ class FabrikFEModelList extends JModelForm
 		 * so first statement when rendering a module, 2nd when posting to the component from a module.
 		*/
 
-
 		if (isset($properties))
 		{
 			$prefilters = ArrayHelper::fromObject(json_decode($properties));
@@ -5506,7 +5496,7 @@ class FabrikFEModelList extends JModelForm
 		{
 			$elements = $this->getElements('filtername', false, false);
 			list($filterFields, $filterConditions, $filterValues, $filterAccess,
-				$filterEval, $filterJoins, $filterGrouped, $listSearchType) = $this->prefilterSetting();
+				$filterEvals, $filterJoins, $filterGrouped, $listSearchType) = $this->prefilterSetting();
 
 
 			for ($i = 0; $i < count($filterFields); $i++)
@@ -5527,7 +5517,7 @@ class FabrikFEModelList extends JModelForm
 				$condition = $filterConditions[$i];
 				$searchType = ArrayHelper::getValue($listSearchType, $i, 'prefilter');
 				$selValue = FArrayHelper::getValue($filterValues, $i, '');
-				$filterEval = FArrayHelper::getValue($filterEval, $i, false);
+				$filterEval = FArrayHelper::getValue($filterEvals, $i, false);
 				$filterGrouped = FArrayHelper::getValue($filterGrouped, $i, false);
 				$selAccess = $filterAccess[$i];
 
@@ -7247,9 +7237,8 @@ class FabrikFEModelList extends JModelForm
 					{
 						$element = $elementModel->getElement();
 						$key = $element->name;
-						$fullkey = $elementModel->getFullName(true, false);
 
-						// For radio buttons and dropdowns otherwise nothing is stored for them??
+						// For radio buttons and drop-downs otherwise nothing is stored for them??
 						$postKey = array_key_exists($key . '_raw', $data) ? $key . '_raw' : $key;
 
 						if ($elementModel->recordInDatabase($data))
@@ -7348,19 +7337,12 @@ class FabrikFEModelList extends JModelForm
 			 * set in the CSV import model.
 			 */
 			$task = strtolower($input->get('task'));
+
 			if (
-				(
-						$this->importingCSV
-						&&
-						!$this->csvOverwriting
-				)
+				($this->importingCSV && !$this->csvOverwriting)
 				||
 				(
-					(
-						$primaryKey !== ''
-						&&
-						$this->getTable()->auto_inc == true
-					)
+					($primaryKey !== '' && $table->auto_inc == true)
 					&&
 					$task !== 'doimport'
 				)
@@ -7506,13 +7488,7 @@ class FabrikFEModelList extends JModelForm
 		}
 
 		$db->setQuery(sprintf($fmtSql, implode(",", $fields), implode(",", $values)));
-
-		if (!$db->execute())
-		{
-			throw new Exception($db->getErrorMsg());
-
-			return false;
-		}
+		$db->execute();
 
 		$id = $db->insertid();
 
