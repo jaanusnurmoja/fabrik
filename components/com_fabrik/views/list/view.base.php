@@ -407,7 +407,8 @@ class FabrikViewListBase extends FabrikView
 				$o->cursor         = $num_rows + $nav->limitstart;
 				
 				// Jaanus: here we generate row ordering numbers for list and optionally convert numbers to romanic
-				
+				$o->rtag = array(null,null);
+				$o->rowNum = null;
 				if ($this->useRowNumber)
 				{
 					if ($this->useRomanicNumber)
