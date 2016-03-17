@@ -37,7 +37,14 @@ var FbList = new Class({
         'itemTemplate'       : '',
         'floatPos'           : 'left', // deprecated in 3.1
         'csvChoose'          : false,
-        'csvOpts'            : {},
+        'csvOpts'            : {
+            excel       : false,
+            incfilters  : false,
+            inctabledata: false,
+            incraw      : false,
+            inccalcs    : false
+
+        },
         'popup_width'        : 300,
         'popup_height'       : 300,
         'popup_offset_x'     : null,
@@ -103,13 +110,13 @@ var FbList = new Class({
          delete Fabrik.blocks['form_' + form.id];
          });*/
 
-		// Reload state only if reset filters is not on
-		if (!this.options.resetFilters && ((window.history && history.pushState) && history.state && this.options.ajax)) {
-			this._updateRows(history.state);
-		}
+        // Reload state only if reset filters is not on
+        if (!this.options.resetFilters && ((window.history && history.pushState) && history.state && this.options.ajax)) {
+            this._updateRows(history.state);
+        }
 
-		Fabrik.fireEvent('fabrik.list.loaded', [this]);
-	},
+        Fabrik.fireEvent('fabrik.list.loaded', [this]);
+    },
 
     setItemTemplate: function () {
         // $$$ rob mootools 1.2 has bug where we cant setHTML on table
@@ -171,14 +178,16 @@ var FbList = new Class({
 
     watchButtons: function () {
         this.exportWindowOpts = {
+            modalId    : 'exportcsv',
+            type       : 'modal',
             id         : 'exportcsv',
             title      : 'Export CSV',
             loadMethod : 'html',
             minimizable: false,
             width      : 360,
-            height     : 120,
+            height     : 240,
             content    : '',
-	        modal      : true,
+            modal      : true,
             bootstrap  : this.options.j3
         };
         if (this.options.view === 'csv') {
@@ -200,26 +209,43 @@ var FbList = new Class({
     },
 
     openCSVWindow: function () {
-        var thisc = this.makeCSVExportForm();
-        this.exportWindowOpts.content = thisc;
-        this.exportWindowOpts.onContentLoaded = function () {
-            this.fitToContent(false);
-        };
+        var self = this;
+        this.exportWindowOpts.content = this.makeCSVExportForm();
         this.csvWindow = Fabrik.getWindow(this.exportWindowOpts);
+
+        jQuery('.exportCSVButton').on('click', function (e) {
+            e.stopPropagation();
+            this.disabled = true;
+            var csvMsg = jQuery('#csvmsg');
+            if (csvMsg.length === 0) {
+                csvMsg = jQuery('<div />').attr({
+                    'id': 'csvmsg'
+                }).insertBefore(jQuery(this));
+            }
+            csvMsg.html(Joomla.JText._('COM_FABRIK_LOADING') +
+                ' <br /><span id="csvcount">0</span> / <span id="csvtotal"></span> ' +
+                Joomla.JText._('COM_FABRIK_RECORDS') + '.<br/>' + Joomla.JText._('COM_FABRIK_SAVING_TO') +
+                '<span id="csvfile"></span>');
+            self.triggerCSVExport(0);
+        });
     },
 
     makeCSVExportForm: function () {
         if (this.options.csvChoose) {
-            return this._csvExportForm();
+            this.csvExportForm = this._csvExportForm();
+            return this.csvExportForm;
         } else {
             return this._csvAutoStart();
         }
     },
 
     _csvAutoStart: function () {
-        var c = new Element('div', {
+        var c = jQuery('<div />').attr({
             'id': 'csvmsg'
-        }).set('html', Joomla.JText._('COM_FABRIK_LOADING') + ' <br /><span id="csvcount">0</span> / <span id="csvtotal"></span> ' + Joomla.JText._('COM_FABRIK_RECORDS') + '.<br/>' + Joomla.JText._('COM_FABRIK_SAVING_TO') + '<span id="csvfile"></span>');
+        }).html(Joomla.JText._('COM_FABRIK_LOADING') +
+            ' <br /><span id="csvcount">0</span> / <span id="csvtotal"></span> ' +
+            Joomla.JText._('COM_FABRIK_RECORDS') + '.<br/>' + Joomla.JText._('COM_FABRIK_SAVING_TO') +
+            '<span id="csvfile"></span>');
 
         this.csvopts = this.options.csvOpts;
         this.csvfields = this.options.csvFields;
@@ -228,190 +254,170 @@ var FbList = new Class({
         return c;
     },
 
+    /**
+     * Create a csv yes/no radio div.
+     * @param {string} name
+     * @param {boolean} yesValue
+     * @param {string} yesLabel
+     * @param {string} noLabel
+     * @param {string} title
+     * @returns {*}
+     * @private
+     */
+    _csvYesNo: function (name, yesValue, yesLabel, noLabel, title) {
+        var label = jQuery('<label />').css('float', 'left');
+
+        var yes = label.clone().append(
+            [jQuery('<input />').attr({
+                'type' : 'radio',
+                'name' : name,
+                'value': '1',
+                checked: yesValue
+            }),
+                jQuery('<span />').text(yesLabel)
+            ]),
+
+            no = label.clone().append(
+                [jQuery('<input />').attr({
+                    'type' : 'radio',
+                    'name' : name,
+                    'value': '0',
+                    checked: !yesValue
+                }),
+                    jQuery('<span />').text(noLabel)
+                ]),
+            titleLabel = jQuery('<div>').css({
+                'width': '200px',
+                'float': 'left'
+            }).text(title);
+
+        return jQuery('<div>').append([titleLabel, yes, no]);
+
+    },
+
+    /**
+     * Build the export csv form
+     * @returns {*}
+     * @private
+     */
     _csvExportForm: function () {
-        // Can't build via dom as ie7 doesn't accept checked status
-        var rad = "<input type='radio' value='1' name='incfilters' checked='checked' />" + Joomla.JText._('JYES');
-        var rad2 = "<input type='radio' value='1' name='incraw' checked='checked' />" + Joomla.JText._('JYES');
-        var rad3 = "<input type='radio' value='1' name='inccalcs' checked='checked' />" + Joomla.JText._('JYES');
-        var rad4 = "<input type='radio' value='1' name='inctabledata' checked='checked' />" + Joomla.JText._('JYES');
-        var rad5 = "<input type='radio' value='1' name='excel' checked='checked' />Excel CSV";
-        var url = 'index.php?option=com_fabrik&view=list&listid=' + this.id + '&format=csv&Itemid=' + this.options.Itemid;
+        var yes = Joomla.JText._('JYES'),
+            no = Joomla.JText._('JNO'),
+            self = this,
+            url = 'index.php?option=com_fabrik&view=list&listid=' +
+                this.id + '&format=csv&Itemid=' + this.options.Itemid,
+            label = jQuery('<label />').css('float', 'left');
 
-		var divopts = {
-			'styles': {
-				'width': '200px',
-				'float': 'left'
-			}
-		};
-		var c = new Element('form', {
-			'action': url,
-			'method': 'post'
-		}).adopt([new Element('div', divopts).set('text', Joomla.JText._('COM_FABRIK_FILE_TYPE')),
-			new Element('label').set('html', rad5), new Element('label').adopt([new Element('input', {
-			'type': 'radio',
-			'name': 'excel',
-			'value': '0'
-		}), new Element('span').set('text', 'CSV')]), new Element('br'), new Element('br'),
-			new Element('div', divopts).appendText(Joomla.JText._('COM_FABRIK_INCLUDE_FILTERS')),
-			new Element('label').set('html', rad), new Element('label').adopt([new Element('input', {
-			'type': 'radio',
-			'name': 'incfilters',
-			'value': '0'
-		}), new Element('span').set('text', Joomla.JText._('JNO'))]), new Element('br'),
-			new Element('div', divopts).appendText(Joomla.JText._('COM_FABRIK_INCLUDE_DATA')),
-			new Element('label').set('html', rad4), new Element('label').adopt([new Element('input', {
-			'type': 'radio',
-			'name': 'inctabledata',
-			'value': '0'
-		}), new Element('span').set('text', Joomla.JText._('JNO'))]), new Element('br'),
-			new Element('div', divopts).appendText(Joomla.JText._('COM_FABRIK_INCLUDE_RAW_DATA')),
-			new Element('label').set('html', rad2), new Element('label').adopt([new Element('input', {
-			'type': 'radio',
-			'name': 'incraw',
-			'value': '0'
-		}), new Element('span').set('text', Joomla.JText._('JNO'))]), new Element('br'),
-			new Element('div', divopts).appendText(Joomla.JText._('COM_FABRIK_INCLUDE_CALCULATIONS')),
-			new Element('label').set('html', rad3), new Element('label').adopt([new Element('input', {
-			'type': 'radio',
-			'name': 'inccalcs',
-			'value': '0'
-		}), new Element('span').set('text', Joomla.JText._('JNO'))])]);
-		new Element('h4').set('text', Joomla.JText._('COM_FABRIK_SELECT_COLUMNS_TO_EXPORT')).inject(c);
-		var g = '';
-		var i = 0;
-		$H(this.options.labels).each(function (label, k) {
-			if (k.substr(0, 7) !== 'fabrik_' && k !== '____form_heading') {
-				var newg = k.split('___')[0];
-				if (newg !== g) {
-					g = newg;
-					new Element('h5').set('text', g).inject(c);
-				}
-				var rad = "<input type='radio' value='1' name='fields[" + k + "]' checked='checked' />" + Joomla.JText._('JYES');
-				label = label.replace(/<\/?[^>]+(>|$)/g, "");
-				var r = new Element('div', divopts).appendText(label);
-				r.inject(c);
-				new Element('label').set('html', rad).inject(c);
-				new Element('label').adopt([new Element('input', {
-					'type': 'radio',
-					'name': 'fields[' + k + ']',
-					'value': '0'
-				}), new Element('span').appendText(Joomla.JText._('JNO'))]).inject(c);
-				new Element('br').inject(c);
-			}
-			i++;
-		}.bind(this));
+        var c = jQuery('<form />').attr({
+            'action': url,
+            'method': 'post'
+        }).append([
+            this._csvYesNo('excel', this.options.csvOpts.excel,
+                'Excel CSV', 'CSV', Joomla.JText._('COM_FABRIK_FILE_TYPE')),
+            this._csvYesNo('incfilters', this.options.csvOpts.incfilters,
+                yes, no, Joomla.JText._('COM_FABRIK_INCLUDE_FILTERS')),
+            this._csvYesNo('inctabledata', this.options.csvOpts.inctabledata,
+                yes, no, Joomla.JText._('COM_FABRIK_INCLUDE_DATA')),
+            this._csvYesNo('incraw', this.options.csvOpts.incraw,
+                yes, no, Joomla.JText._('COM_FABRIK_INCLUDE_RAW_DATA')),
+            this._csvYesNo('inccalcs', this.options.csvOpts.inccalcs,
+                yes, no, Joomla.JText._('COM_FABRIK_INCLUDE_CALCULATIONS')),
 
-		// elements not shown in table
-		if (this.options.formels.length > 0) {
-			new Element('h5').set('text', Joomla.JText._('COM_FABRIK_FORM_FIELDS')).inject(c);
-			this.options.formels.each(function (el) {
-				var rad = "<input type='radio' value='1' name='fields[" + el.name + "]' checked='checked' />" +
-					Joomla.JText._('JYES');
-				var r = new Element('div', divopts).appendText(el.label);
-				r.inject(c);
-				new Element('label').set('html', rad).inject(c);
-				new Element('label').adopt([new Element('input', {
-					'type': 'radio',
-					'name': 'fields[' + el.name + ']',
-					'value': '0'
-				}), new Element('span').set('text', Joomla.JText._('JNO'))]).inject(c);
-				new Element('br').inject(c);
-			}.bind(this));
-		}
+        ]);
+        jQuery('<h4 />').css('clear', 'left').text(Joomla.JText._('COM_FABRIK_SELECT_COLUMNS_TO_EXPORT')).appendTo(c);
+        var g = '';
+        var i = 0;
+        jQuery.each(this.options.labels, function (k, labelText) {
+            if (k.substr(0, 7) !== 'fabrik_' && k !== '____form_heading') {
+                var newg = k.split('___')[0];
+                if (newg !== g) {
+                    g = newg;
+                    jQuery('<h5 />').text(g).appendTo(c);
+                }
 
-        new Element('div', {
-            'styles': {
-                'text-align': 'right'
+                labelText = labelText.replace(/<\/?[^>]+(>|jQuery)/g, '');
+
+                self._csvYesNo('fields[' + k + ']', true,
+                    yes, no, labelText).appendTo(c);
             }
-        }).adopt(new Element('input', {
-            'type' : 'button',
-            'name' : 'submit',
-            'value': Joomla.JText._('COM_FABRIK_EXPORT'),
-            'class': 'button exportCSVButton',
-            events : {
-                'click': function (e) {
-                    e.stop();
-                    e.target.disabled = true;
-                    var csvMsg = document.id('csvmsg');
-                    if (typeOf(csvMsg) === 'null') {
-                        csvMsg = new Element('div', {
-                            'id': 'csvmsg'
-                        }).inject(e.target, 'before');
-                    }
-                    csvMsg.set('html', Joomla.JText._('COM_FABRIK_LOADING') + ' <br /><span id="csvcount">0</span> / <span id="csvtotal"></span> ' + Joomla.JText._('COM_FABRIK_RECORDS') + '.<br/>' + Joomla.JText._('COM_FABRIK_SAVING_TO') + '<span id="csvfile"></span>');
-                    this.triggerCSVExport(0);
-                }.bind(this)
+            i++;
+        });
 
-            }
-        })).inject(c);
-        new Element('input', {
+        // elements not shown in table
+        if (this.options.formels.length > 0) {
+            jQuery('<h5 />').css('clear', 'left').text(Joomla.JText._('COM_FABRIK_FORM_FIELDS')).appendTo(c);
+            this.options.formels.each(function (el) {
+                self._csvYesNo('fields[' + el.name + ']', false,
+                    yes, no, el.label).appendTo(c);
+            });
+        }
+
+        jQuery('<input />').attr({
             'type' : 'hidden',
             'name' : 'view',
             'value': 'table'
-        }).inject(c);
-        new Element('input', {
+        }).appendTo(c);
+        jQuery('<input />').attr({
             'type' : 'hidden',
             'name' : 'option',
             'value': 'com_fabrik'
-        }).inject(c);
-        new Element('input', {
+        }).appendTo(c);
+        jQuery('<input />').attr({
             'type' : 'hidden',
             'name' : 'listid',
-            'value': this.id
-        }).inject(c);
-        new Element('input', {
+            'value': self.id
+        }).appendTo(c);
+        jQuery('<input />').attr({
             'type' : 'hidden',
             'name' : 'format',
             'value': 'csv'
-        }).inject(c);
-        new Element('input', {
+        }).appendTo(c);
+        jQuery('<input />').attr({
             'type' : 'hidden',
             'name' : 'c',
             'value': 'table'
-        }).inject(c);
+        }).appendTo(c);
+
         return c;
     },
 
     triggerCSVExport: function (start, opts, fields) {
+        var self = this;
         if (start !== 0) {
             if (start === -1) {
                 // not triggered from front end selections
                 start = 0;
-                opts = this.csvopts;
-                opts.fields = this.csvfields;
+                opts = self.csvopts;
+                opts.fields = self.csvfields;
             } else {
-                opts = this.csvopts;
-                fields = this.csvfields;
+                opts = self.csvopts;
+                fields = self.csvfields;
             }
         } else {
             if (!opts) {
                 opts = {};
-                if (typeOf(document.id('exportcsv')) !== 'null') {
-                    ['incfilters', 'inctabledata', 'incraw', 'inccalcs', 'excel'].each(function (v) {
-                        var inputs = document.id('exportcsv').getElements('input[name=' + v + ']');
-                        if (inputs.length > 0) {
-                            opts[v] = inputs.filter(function (i) {
-                                return i.checked;
-                            })[0].value;
-                        }
-                    });
-                }
+                ['incfilters', 'inctabledata', 'incraw', 'inccalcs', 'excel'].each(function (v) {
+                    var inputs = self.csvExportForm.find('input[name=' + v + ']');
+                    if (inputs.length > 0) {
+                        opts[v] = inputs.filter(function () {
+                            return this.checked;
+                        })[0].value;
+                    }
+                });
             }
-            // selected fields
+            // Selected fields
             if (!fields) {
                 fields = {};
-                if (typeOf(document.id('exportcsv')) !== 'null') {
-                    document.id('exportcsv').getElements('input[name^=field]').each(function (i) {
-                        if (i.checked) {
-                            var k = i.name.replace('fields[', '').replace(']', '');
-                            fields[k] = i.get('value');
-                        }
-                    });
-                }
+                self.csvExportForm.find('input[name^=field]').each(function () {
+                    if (this.checked) {
+                        var k = this.name.replace('fields[', '').replace(']', '');
+                        fields[k] = jQuery(this).val();
+                    }
+                });
             }
             opts.fields = fields;
-            this.csvopts = opts;
-            this.csvfields = fields;
+            self.csvopts = opts;
+            self.csvfields = fields;
         }
 
         opts = this.csvExportFilterOpts(opts);
@@ -431,71 +437,71 @@ var FbList = new Class({
             opts[key[0]] = key[1];
         });
 
-		// Append the custom_qs to the URL to enable querystring filtering of the list data
-		var myAjax = new Request.JSON({
-			url: '?' + this.options.csvOpts.custom_qs,
-			method: 'post',
-			data: opts,
-			onError: function (text, error) {
-				fconsole(text, error);
-			},
-			onComplete: function (res) {
-				if (res.err) {
-					window.alert(res.err);
-					Fabrik.Windows.exportcsv.close();
-				} else {
-					if (typeOf(document.id('csvcount')) !== 'null') {
-						document.id('csvcount').set('text', res.count);
-					}
-					if (typeOf(document.id('csvtotal')) !== 'null') {
-						document.id('csvtotal').set('text', res.total);
-					}
-					if (typeOf(document.id('csvfile')) !== 'null') {
-						document.id('csvfile').set('text', res.file);
-					}
-					if (res.count < res.total) {
-						this.triggerCSVExport(res.count);
-					} else {
-						var finalurl = 'index.php?option=com_fabrik&view=list&format=csv&listid=' + this.id + '&start=' + res.count + '&Itemid=' + this.options.Itemid;
-						var msg = '<div class="alert alert-success"><h3>' + Joomla.JText._('COM_FABRIK_CSV_COMPLETE');
-						msg += '</h3><p><a class="btn btn-success" href="' + finalurl + '"><i class="icon-download"></i> ' + Joomla.JText._('COM_FABRIK_CSV_DOWNLOAD_HERE') + '</a></p></div>';
-						if (typeOf(document.id('csvmsg')) !== 'null') {
-							document.id('csvmsg').set('html', msg);
-						}
-						this.csvWindow.fitToContent(false);
-						document.getElements('input.exportCSVButton').removeProperty('disabled');
-					}
-				}
-			}.bind(this)
-		});
-		myAjax.send();
-	},
+        // Append the custom_qs to the URL to enable querystring filtering of the list data
+        var myAjax = new Request.JSON({
+            url       : '?' + this.options.csvOpts.custom_qs,
+            method    : 'post',
+            data      : opts,
+            onError   : function (text, error) {
+                fconsole(text, error);
+            },
+            onComplete: function (res) {
+                if (res.err) {
+                    window.alert(res.err);
+                    Fabrik.Windows.exportcsv.close();
+                } else {
+                    jQuery('#csvcount').text(res.count);
+                    jQuery('#csvtotal').text(res.total);
+                    jQuery('#csvfile').text(res.file);
+                    if (res.count < res.total) {
+                        this.triggerCSVExport(res.count);
+                    } else {
+                        var finalurl = 'index.php?option=com_fabrik&view=list&format=csv&listid=' + this.id +
+                            '&start=' + res.count + '&Itemid=' + this.options.Itemid;
+                        var msg = '<div class="alert alert-success"><h3>' + Joomla.JText._('COM_FABRIK_CSV_COMPLETE');
+                        msg += '</h3><p><a class="btn btn-success" href="' + finalurl + '">' +
+                            '<i class="icon-download"></i> ' +
+                            Joomla.JText._('COM_FABRIK_CSV_DOWNLOAD_HERE') + '</a></p></div>';
+                        jQuery('#csvmsg').html(msg);
+                        this.csvWindow.fitToContent(false);
+                        this.csvWindow.center();
+                        document.getElements('input.exportCSVButton').removeProperty('disabled');
 
-	/**
-	 * Add filter options to CSV export info
-	 *
-	 * @param   objet  opts
-	 *
-	 * @return  opts
-	 */
-	csvExportFilterOpts: function (opts) {
-		var ii = 0,
-		aa, bits, aName,
-		advancedPointer = 0,
-		testii,
-		usedAdvancedKeys = [
-			'value',
-			'condition',
-			'join',
-			'key',
-			'search_type',
-			'match',
-			'full_words_only',
-			'eval',
-			'grouped_to_previous',
-			'hidden',
-			'elementid'
-		];
+                        jQuery('#csvmsg a.btn-success').focusout(function () {
+                            Fabrik.Windows.exportcsv.close(true);
+                        });
+                    }
+                }
+            }.bind(this)
+        });
+        myAjax.send();
+    },
+
+    /**
+     * Add filter options to CSV export info
+     *
+     * @param   objet  opts
+     *
+     * @return  opts
+     */
+    csvExportFilterOpts: function (opts) {
+        var ii = 0,
+            aa, bits, aName,
+            advancedPointer = 0,
+            testii,
+            usedAdvancedKeys = [
+                'value',
+                'condition',
+                'join',
+                'key',
+                'search_type',
+                'match',
+                'full_words_only',
+                'eval',
+                'grouped_to_previous',
+                'hidden',
+                'elementid'
+            ];
 
         this.getFilters().each(function (f) {
             bits = f.name.split('[');
@@ -515,24 +521,24 @@ var FbList = new Class({
 
         ii++;
 
-		Object.each(this.options.advancedFilters, function (values, key) {
-			if (usedAdvancedKeys.contains(key)) {
-				advancedPointer = 0;
-				for (aa = 0; aa < values.length; aa ++) {
-					advancedPointer = aa + ii;
-					aName = 'fabrik___filter[list_' + this.options.listRef + '][' + key + '][' + advancedPointer + ']';
-					if (key === 'value') {
-						opts[aName] = this.options.advancedFilters.origvalue[aa];
-					}
-					else if (key === 'condition') {
-						opts[aName] = this.options.advancedFilters.orig_condition[aa];
-					}
-					else {
-						opts[aName] = values[aa];
-					}
-				}
-			}
-		}.bind(this));
+        Object.each(this.options.advancedFilters, function (values, key) {
+            if (usedAdvancedKeys.contains(key)) {
+                advancedPointer = 0;
+                for (aa = 0; aa < values.length; aa++) {
+                    advancedPointer = aa + ii;
+                    aName = 'fabrik___filter[list_' + this.options.listRef + '][' + key + '][' + advancedPointer + ']';
+                    if (key === 'value') {
+                        opts[aName] = this.options.advancedFilters.origvalue[aa];
+                    }
+                    else if (key === 'condition') {
+                        opts[aName] = this.options.advancedFilters.orig_condition[aa];
+                    }
+                    else {
+                        opts[aName] = values[aa];
+                    }
+                }
+            }
+        }.bind(this));
 
         return opts;
     },
@@ -766,73 +772,73 @@ var FbList = new Class({
         });
     },
 
-	submit: function (task) {
-		this.getForm();
-		var doAJAX = this.options.ajax;
-		if (task === 'list.doPlugin.noAJAX') {
-			task = 'list.doPlugin';
-			doAJAX = false;
-		}
-		if (task === 'list.delete') {
-			var ok = false;
-			var delCount = 0;
-			this.form.getElements('input[name^=ids]').each(function (c) {
-				if (c.checked) {
-					delCount ++;
-					ok = true;
-				}
-			});
-			if (!ok) {
-				window.alert(Joomla.JText._('COM_FABRIK_SELECT_ROWS_FOR_DELETION'));
-				Fabrik.loader.stop('listform_' + this.options.listRef);
-				return false;
-			}
-			var delMsg = delCount === 1 ? Joomla.JText._('COM_FABRIK_CONFIRM_DELETE_1') : Joomla.JText._('COM_FABRIK_CONFIRM_DELETE').replace('%s', delCount);
-			if (!window.confirm(delMsg)) {
-				Fabrik.loader.stop('listform_' + this.options.listRef);
-				this.uncheckAll();
-				return false;
-			}
-		}
-		// We may want to set this as an option - if long page loads feedback that list is doing something might be useful
-		// Fabrik.loader.start('listform_' + this.options.listRef);
-		if (task === 'list.filter') {
-			Fabrik['filter_listform_' + this.options.listRef].onSubmit();
-			this.form.task.value = task;
-			if (this.form['limitstart' + this.id]) {
-				this.form.getElement('#limitstart' + this.id).value = 0;
-			}
-		} else {
-			if (task !== '') {
-				this.form.task.value = task;
-			}
-		}
-		if (doAJAX) {
-			Fabrik.loader.start('listform_' + this.options.listRef);
-			// For module & mambot
-			// $$$ rob with modules only set view/option if ajax on
-			this.form.getElement('input[name=option]').value = 'com_fabrik';
-			this.form.getElement('input[name=view]').value = 'list';
-			this.form.getElement('input[name=format]').value = 'raw';
+    submit: function (task) {
+        this.getForm();
+        var doAJAX = this.options.ajax;
+        if (task === 'list.doPlugin.noAJAX') {
+            task = 'list.doPlugin';
+            doAJAX = false;
+        }
+        if (task === 'list.delete') {
+            var ok = false;
+            var delCount = 0;
+            this.form.getElements('input[name^=ids]').each(function (c) {
+                if (c.checked) {
+                    delCount++;
+                    ok = true;
+                }
+            });
+            if (!ok) {
+                window.alert(Joomla.JText._('COM_FABRIK_SELECT_ROWS_FOR_DELETION'));
+                Fabrik.loader.stop('listform_' + this.options.listRef);
+                return false;
+            }
+            var delMsg = delCount === 1 ? Joomla.JText._('COM_FABRIK_CONFIRM_DELETE_1') : Joomla.JText._('COM_FABRIK_CONFIRM_DELETE').replace('%s', delCount);
+            if (!window.confirm(delMsg)) {
+                Fabrik.loader.stop('listform_' + this.options.listRef);
+                this.uncheckAll();
+                return false;
+            }
+        }
+        // We may want to set this as an option - if long page loads feedback that list is doing something might be useful
+        // Fabrik.loader.start('listform_' + this.options.listRef);
+        if (task === 'list.filter') {
+            Fabrik['filter_listform_' + this.options.listRef].onSubmit();
+            this.form.task.value = task;
+            if (this.form['limitstart' + this.id]) {
+                this.form.getElement('#limitstart' + this.id).value = 0;
+            }
+        } else {
+            if (task !== '') {
+                this.form.task.value = task;
+            }
+        }
+        if (doAJAX) {
+            Fabrik.loader.start('listform_' + this.options.listRef);
+            // For module & mambot
+            // $$$ rob with modules only set view/option if ajax on
+            this.form.getElement('input[name=option]').value = 'com_fabrik';
+            this.form.getElement('input[name=view]').value = 'list';
+            this.form.getElement('input[name=format]').value = 'raw';
 
-			var data = this.form.toQueryString();
+            var data = this.form.toQueryString();
 
-			if (task === 'list.doPlugin') {
-				data += '&setListRefFromRequest=1';
-				data += '&listref=' + this.options.listRef;
-			}
+            if (task === 'list.doPlugin') {
+                data += '&setListRefFromRequest=1';
+                data += '&listref=' + this.options.listRef;
+            }
 
-			if (task === 'list.filter' && this.advancedSearch !== false) {
-				var advSearchForm = document.getElement('form.advancedSeach_' + this.options.listRef);
-				if (typeOf(advSearchForm) !== 'null') {
-					data += '&' + advSearchForm.toQueryString();
-					data += '&replacefilters=1';
-				}
-			}
-			// Pass the elements that are shown in the list - to ensure they are formatted
-			for (var i = 0; i < this.options.fabrik_show_in_list.length; i ++) {
-				data += '&fabrik_show_in_list[]=' + this.options.fabrik_show_in_list[i];
-			}
+            if (task === 'list.filter' && this.advancedSearch !== false) {
+                var advSearchForm = document.getElement('form.advancedSeach_' + this.options.listRef);
+                if (typeOf(advSearchForm) !== 'null') {
+                    data += '&' + advSearchForm.toQueryString();
+                    data += '&replacefilters=1';
+                }
+            }
+            // Pass the elements that are shown in the list - to ensure they are formatted
+            for (var i = 0; i < this.options.fabrik_show_in_list.length; i++) {
+                data += '&fabrik_show_in_list[]=' + this.options.fabrik_show_in_list[i];
+            }
 
             // Add in tmpl for custom nav in admin
             data += '&tmpl=' + this.options.tmpl;
@@ -847,7 +853,7 @@ var FbList = new Class({
                         Fabrik['filter_listform_' + this.options.listRef].onUpdateData();
                         Fabrik.fireEvent('fabrik.list.submit.ajax.complete', [this, json]);
                         if (json.msg) {
-                            alert(json.msg);
+                            window.alert(json.msg);
                         }
                     }.bind(this)
                 });
@@ -931,26 +937,26 @@ var FbList = new Class({
         this.submit('list.order');
     },
 
-	removeRows: function (rowids) {
-		// @TODO: try to do this with FX.Elements
-		var i;
-		for (i = 0; i < rowids.length; i++) {
-			var row = document.id('list_' + this.id + '_row_' + rowids[i]);
-			var highlight = new Fx.Morph(row, {
-				duration: 1000
-			});
-			highlight.start({
-				'backgroundColor': this.options.hightLight
-			}).chain(function () {
-				this.start({
-					'opacity': 0
-				});
-			}).chain(function () {
-				row.dispose();
-				this.checkEmpty();
-			}.bind(this));
-		}
-	},
+    removeRows: function (rowids) {
+        // @TODO: try to do this with FX.Elements
+        var i;
+        for (i = 0; i < rowids.length; i++) {
+            var row = document.id('list_' + this.id + '_row_' + rowids[i]);
+            var highlight = new Fx.Morph(row, {
+                duration: 1000
+            });
+            highlight.start({
+                'backgroundColor': this.options.hightLight
+            }).chain(function () {
+                this.start({
+                    'opacity': 0
+                });
+            }).chain(function () {
+                row.dispose();
+                this.checkEmpty();
+            }.bind(this));
+        }
+    },
 
     editRow: function () {
     },
@@ -1004,7 +1010,7 @@ var FbList = new Class({
      */
     _updateHeadings: function (data) {
         var header = jQuery('#' + this.options.form).find('.fabrik___heading').last(),
-        headings = new Hash(data.headings);
+            headings = new Hash(data.headings);
         headings.each(function (data, key) {
             key = '.' + key;
             try {
@@ -1023,12 +1029,12 @@ var FbList = new Class({
     _updateGroupByTables: function () {
         var tbodys = jQuery(this.list).find('tbody'), groupTbody;
         tbodys.css('display', '');
-        tbodys.each(function (tbody) {
+        tbodys.each(function (tkey, tbody) {
             if (!tbody.hasClass('fabrik_groupdata')) {
-                groupTbody = tbody.next();
-                if (groupTbody.find('.fabrik_row').length === 0) {
-                    tbody.hide();
-                    groupTbody.hide();
+                groupTbody = jQuery(tbody).next();
+                if (jQuery(groupTbody).find('.fabrik_row').length === 0) {
+                    jQuery(tbody).hide();
+                    jQuery(groupTbody).hide();
                 }
             }
         });
@@ -1041,7 +1047,7 @@ var FbList = new Class({
      */
     _updateRows: function (data) {
         var tbody, itemTemplate, i, groupHeading, columnCount, parent, items = [], item,
-           rowTemplate, cell, form = jQuery(this.form);
+            rowTemplate, cell, cells, form = jQuery(this.form), self = this, fullRow;
         if (typeOf(data) !== 'object') {
             return;
         }
@@ -1055,8 +1061,16 @@ var FbList = new Class({
         this.setItemTemplate();
 
         cell = jQuery(this.list).find('.fabrik_row').first();
-        parent = cell.parent();
-        columnCount = parent.children().length;
+
+        if (cell.prop('tagName') === 'TR') {
+            parent = cell;
+            columnCount = 1;
+        } else {
+            parent = cell.parent();
+            columnCount = form.find('.fabrikDataContainer').data('cols');
+        }
+
+        columnCount = columnCount === undefined ? 1 : columnCount;
         rowTemplate = parent.clone().empty();
         itemTemplate = cell.clone();
 
@@ -1066,19 +1080,19 @@ var FbList = new Class({
         if (data.calculations) {
             this.updateCals(data.calculations);
         }
-       form.find('.fabrikNav').html(data.htmlnav);
+        form.find('.fabrikNav').html(data.htmlnav);
         // $$$ rob was $H(data.data) but that wasnt working ????
         // testing with $H back in again for grouped by data? Yeah works for
         // grouped data!!
         var gdata = this.options.isGrouped || this.options.groupedBy !== '' ? $H(data.data) : data.data;
         var gcounter = 0;
         gdata.each(function (groupData, groupKey) {
-            tbody = this.options.isGrouped ? this.list.getElements('.fabrik_groupdata')[gcounter] : this.tbody;
+            tbody = self.options.isGrouped ? self.list.getElements('.fabrik_groupdata')[gcounter] : self.tbody;
             tbody = jQuery(tbody);
             tbody.empty();
 
             // Set the group by heading
-            if (this.options.isGrouped) {
+            if (self.options.isGrouped) {
                 groupHeading = tbody.prev();
                 groupHeading.find('.groupTitle').html(groupData[0].groupHeading);
             }
@@ -1086,16 +1100,22 @@ var FbList = new Class({
             gcounter++;
             for (i = 0; i < groupData.length; i++) {
                 var row = $H(groupData[i]);
-                item = this.injectItemData(itemTemplate, row);
+                item = self.injectItemData(itemTemplate, row);
                 items.push(item);
             }
 
             items = Fabrik.Array.chunk(items, columnCount);
-            for (i = 0; i < items.length; i ++) {
-                var fullRow = rowTemplate.clone().append(items[i]);
+            for (i = 0; i < items.length; i++) {
+                if (items[i].length > 0) {
+                    // We need to treat <tr>s differently from div templates
+                    cells = items[i][0].prop('tagName') === 'TR' ? items[i][0].children() : items[i];
+                } else {
+                    cells = items[i];
+                }
+                fullRow = rowTemplate.clone().append(cells);
                 tbody.append(fullRow);
             }
-        }.bind(this));
+        });
 
         this._updateGroupByTables();
         this._updateEmptyDataMsg(items.length === 0);
@@ -1140,7 +1160,7 @@ var FbList = new Class({
      */
     injectItemData: function (template, row) {
         var r, cell, c, j;
-        $H(row.data).each(function (val, key) {
+        jQuery.each(row.data, function (key, val) {
             cell = template.find('.' + key);
             if (cell.prop('tagName') !== 'A') {
                 cell.html(val);
@@ -1182,9 +1202,6 @@ var FbList = new Class({
         var r = new Element('tr', {
             'class': 'oddRow1'
         });
-        var x = {
-            test: 'hi'
-        };
         for (var i in obj) {
             if (this.options.headings.indexOf(i) !== -1) {
                 var td = new Element('td', {}).appendText(obj[i]);
@@ -1225,14 +1242,14 @@ var FbList = new Class({
     },
 
     watchCheckAll: function (e) {
-        var checkAll = this.form.getElement('input[name=checkAll]');
+        var checkAll = this.form.getElement('input[name=checkAll]'), c, i;
         if (typeOf(checkAll) !== 'null') {
             // IE wont fire an event on change until the checkbxo is blurred!
             checkAll.addEvent('click', function (e) {
                 var p = this.list.getParent('.fabrikList') ? this.list.getParent('.fabrikList') : this.list;
                 var chkBoxes = p.getElements('input[name^=ids]');
                 c = !e.target.checked ? '' : 'checked';
-                for (var i = 0; i < chkBoxes.length; i++) {
+                for (i = 0; i < chkBoxes.length; i++) {
                     chkBoxes[i].checked = c;
                     this.toggleJoinKeysChx(chkBoxes[i]);
                 }
@@ -1254,9 +1271,10 @@ var FbList = new Class({
     },
 
     watchNav: function (e) {
+        var limitBox, addRecord;
         if (this.form !== null) {
-            var limitBox = this.form.getElement('select[name*=limit]'),
-                addRecord = this.form.getElement('.addRecord');
+            limitBox = this.form.getElement('select[name*=limit]');
+            addRecord = this.form.getElement('.addRecord');
         } else {
             limitBox = null;
             addRecord = null;

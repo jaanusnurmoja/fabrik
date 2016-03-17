@@ -3954,7 +3954,26 @@ class FabrikFEModelList extends JModelForm
 			$groups = $this->user->getAuthorisedViewLevels();
 			$this->access->allow_drop = in_array($this->getParams()->get('allow_drop'), $groups);
 		}
-
+		
+		// Felixkat
+		// Retrieve session set in plugin-cron
+		$session = JFactory::getSession();
+		$fabrikCron = $session->get('fabrikCron', '');
+			
+		// If CSV import is running and Drop Data is set.....
+		if ($this->app->input->getString('cron_csvimport', '') || (is_object($fabrikCron) && $fabrikCron->dropData == 1))
+		{
+			$session = JFactory::getSession();
+			$fabrikCron = $session->get('fabrikCron', '');
+			
+			// If Secret is set, (this caters for external Wget), OR no querystring, i.e &fabrik_cron=1, (this caters for automatic cron)
+			if ($fabrikCron->requireJS == 1 && $fabrikCron->secret == 1 || ($this->app->input->getString('fabrik_cron') == ''))
+			{
+				$this->access->allow_drop = 1;
+			}
+		// Felixkat
+		}
+		
 		return $this->access->allow_drop;
 	}
 
@@ -4954,6 +4973,16 @@ class FabrikFEModelList extends JModelForm
 	}
 
 	/**
+	 * Sets isView
+	 *
+	 * @param  string   is view
+	 */
+	public function setIsView($isView = '0')
+	{
+		$this->isView = $isView;
+	}
+
+	/**
 	 * Tests if the table is in fact a view
 	 *
 	 * @return  bool	true if table is a view
@@ -4968,6 +4997,8 @@ class FabrikFEModelList extends JModelForm
 			return $isView;
 		}
 
+		return $this->isView;
+
 		/* $$$ hugh - because querying INFORMATION_SCHEMA can be very slow (like minutes!) on
 		 * a shared host, I made a small change.  The edit table view now adds a hidden 'isview'
 		* param, defaulting to -1 on new tables.  So the following code should only ever execute
@@ -4978,6 +5009,7 @@ class FabrikFEModelList extends JModelForm
 		* http://fabrikar.com/forums/showthread.php?t=16622&page=6
 		*/
 
+		/*
 		if (isset($this->isView))
 		{
 			return $this->isView;
@@ -5008,6 +5040,7 @@ class FabrikFEModelList extends JModelForm
 		$table->store();
 
 		return $this->isView;
+		*/
 	}
 
 	/**
@@ -5356,7 +5389,7 @@ class FabrikFEModelList extends JModelForm
 	}
 
 	/**
-	 * Get the module or then menu pre-filter settings
+	 * Get the module or the menu pre-filter settings
 	 *
 	 * @return string
 	 */
@@ -5365,6 +5398,7 @@ class FabrikFEModelList extends JModelForm
 		$input = $this->app->input;
 		$package = $this->app->getUserState('com_fabrik.package', 'fabrik');
 		$moduleId = 0;
+		$properties= '';
 		// Are we coming from a post request via a module?
 		$requestRef = $input->get('listref', '', 'string');
 
@@ -5430,7 +5464,7 @@ class FabrikFEModelList extends JModelForm
 		 * so first statement when rendering a module, 2nd when posting to the component from a module.
 		*/
 
-		if (isset($properties))
+		if ($properties !== '')
 		{
 			$prefilters = ArrayHelper::fromObject(json_decode($properties));
 			$conditions = (array) $prefilters['filter-conditions'];
