@@ -342,6 +342,22 @@ class FabrikViewListBase extends FabrikView
 				// $$$ rob moved merge wip code to FabrikModelTable::formatForJoins() - should contain fix for pagination
 				$o->data           = $data[$groupk][$i];
 				$o->cursor         = $num_rows + $nav->limitstart;
+				
+				// Jaanus: here we generate row ordering numbers for list and optionally convert numbers to romanic
+				$o->rtag = array(null,null);
+				$o->rowNum = null;
+				if ($this->useRowNumber)
+				{
+					if ($this->useRomanicNumber)
+					{
+						$w = new FabrikWorker;
+						$o->cursor = $w->romanicNumber($o->cursor, true);
+					}
+					
+					$o->rtag = array('<td id="rownumber">', '</td>');
+					$o->rowNum	= '<div class="rownumber">' . $o->cursor . '</div>';		
+				}
+				
 				$o->total          = $nav->total;
 				$o->id             = 'list_' . $model->getRenderContext() . '_row_' . @$o->data->__pk_val;
 				$o->class          = 'fabrik_row oddRow' . $c;
