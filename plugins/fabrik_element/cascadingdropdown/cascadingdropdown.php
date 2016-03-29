@@ -60,7 +60,6 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 			FabrikHelperHTML::autoComplete($id, $this->getElement()->id, $this->getFormModel()->getId(), 'cascadingdropdown', $autoOpts);
 		}
 
-		FabrikHelperHTML::script('media/com_fabrik/js/lib/Event.mock.js');
 		$opts = $this->getElementJSOptions($repeatCounter);
 		$opts->showPleaseSelect = $this->showPleaseSelect();
 		$opts->watch = $this->getWatchId($repeatCounter);
@@ -827,6 +826,11 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 
 		$filter = $params->get('cascadingdropdown_filter');
 
+		if (!empty($this->autocomplete_where))
+		{
+			$where .= $where !== '' ? ' AND ' . $this->autocomplete_where : $this->autocomplete_where;
+		}
+
 		/* $$$ hugh - temporary hack to work around this issue:
 		 * http://fabrikar.com/forums/showthread.php?p=71288#post71288
 		 * ... which is basically that if they are using {placeholders} in their
@@ -849,11 +853,6 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 		$placeholders = is_null($whereVal) ? array() : array('whereval' => $whereVal, 'wherekey' => $whereKey);
 		$join = $this->getJoin();
 		$where = $this->parseThisTable($where, $join);
-
-		if (!empty($this->autocomplete_where))
-		{
-			$where .= $where !== '' ? ' AND ' . $this->autocomplete_where : $this->autocomplete_where;
-		}
 
 		$data = array_merge($data, $placeholders);
 		$where = $w->parseMessageForRepeats($where, $data, $this, $repeatCounter);
@@ -1073,24 +1072,6 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 
 			return "Fabrik.filter_{$container}.addFilter('$element->plugin', new CascadeFilter('$observerId', $opts));\n";
 		}
-	}
-
-	/**
-	 * Get the class to manage the form element
-	 * to ensure that the file is loaded only once
-	 *
-	 * @param   array   &$srcs   Scripts previously loaded
-	 * @param   string  $script  Script to load once class has loaded
-	 * @param   array   &$shim   Dependant class names to load before loading the class - put in requirejs.config shim
-	 *
-	 * @return void
-	 */
-	public function formJavascriptClass(&$srcs, $script = '', &$shim = array())
-	{
-		$s = new stdClass;
-		$s->deps = array('fab/element', 'element/databasejoin/databasejoin', 'fab/encoder');
-		$shim['element/cascadingdropdown/cascadingdropdown'] = $s;
-		parent::formJavascriptClass($srcs, $script, $shim);
 	}
 
 	/**
