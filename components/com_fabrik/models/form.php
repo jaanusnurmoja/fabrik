@@ -1805,7 +1805,10 @@ class FabrikFEModelForm extends FabModelForm
 
 			foreach ($elementModels as $elementModel)
 			{
-				$elementModel->onFinalStoreRow($this->formData);
+				if ($elementModel->canUse())
+				{
+					$elementModel->onFinalStoreRow($this->formData);
+				}
 			}
 		}
 	}
