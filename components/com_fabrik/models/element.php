@@ -3423,6 +3423,12 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	protected function singleFilter($default, $v, $type = 'text')
 	{
+		// $$$ hugh - for "reasons", sometimes it's an array with one value.  No clue why.  Sod it.
+		if (is_array($default))
+		{
+			$default = array_shift($default);
+		}
+		
 		// $$$ rob - if searching on "O'Fallon" from querystring filter the string has slashes added regardless
 		$default = (string) $default;
 		$default = stripslashes($default);
@@ -3967,6 +3973,11 @@ class PlgFabrik_Element extends FabrikPlugin
 			// $$$ hugh - only replace the WHERE with AND if it's the first word, so we don't munge sub-queries
 			// $elementWhere = JString::str_ireplace('WHERE ', 'AND ', $elementWhere);
 			$elementWhere = preg_replace("#^(\s*)(WHERE)(.*)#i", "$1AND$3", $elementWhere);
+		}
+		else if (JString::stristr($sql, 'WHERE ') && !empty($elementWhere) && !JString::stristr($elementWhere, 'WHERE '))
+		{
+			// if we have a WHERE in the main query, and the element clause isn't empty but doesn't start with WHERE ...
+			$elementWhere = 'AND ' . $elementWhere;
 		}
 
 		$sql .= ' ' . $elementWhere;
@@ -6339,7 +6350,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	public function onAjax_getFolders()
 	{
 		$input   = $this->app->input;
-		$rDir    = $input->get('dir');
+		$rDir    = $input->getString('dir');
 		$folders = JFolder::folders($rDir);
 
 		if ($folders === false)

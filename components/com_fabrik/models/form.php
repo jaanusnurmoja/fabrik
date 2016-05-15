@@ -2555,9 +2555,9 @@ class FabrikFEModelForm extends FabModelForm
 		asort($aEls);
 
 		// Paul - Prepend rather than append "none" option.
-		array_unshift($aEls, JHTML::_('select.option', '', '-'));
+		array_unshift($aEls, JHtml::_('select.option', '', '-'));
 
-		return JHTML::_('select.genericlist', $aEls, $name, $attribs, 'value', 'text', $default);
+		return JHtml::_('select.genericlist', $aEls, $name, $attribs, 'value', 'text', $default);
 	}
 
 	/**
@@ -2702,12 +2702,12 @@ class FabrikFEModelForm extends FabModelForm
 								$rawVal = str_replace('`', '', $rawVal);
 							}
 
-							$aEls[$label . '(raw)'] = JHTML::_('select.option', $rawVal, $label . '(raw)');
+							$aEls[$label . '(raw)'] = JHtml::_('select.option', $rawVal, $label . '(raw)');
 						}
 					}
 				}
 
-				$aEls[] = JHTML::_('select.option', $val, $label);
+				$aEls[] = JHtml::_('select.option', $val, $label);
 			}
 		}
 		// Paul - Sort removed so that list is presented in group/id order regardless of whether $key is name or id
@@ -4050,12 +4050,7 @@ class FabrikFEModelForm extends FabModelForm
 			$remove = "/{edit:\s*.*?}/is";
 			$text = preg_replace($remove, '', $text);
 			$match = "/{details:\s*.*?}/is";
-
 			$text = preg_replace_callback($match, array($this, '_getIntroOutro'), $text);
-
-			// Was removing [rowid] from  {fabrik view=list id=2 countries___id=[rowid]} in details intro
-			//$text = str_replace('[', '{', $text);
-			//$text = str_replace(']', '}', $text);
 		}
 		else
 		{
@@ -4065,10 +4060,6 @@ class FabrikFEModelForm extends FabModelForm
 			$remove = "/{" . $remove . ":\s*.*?}/is";
 			$text = preg_replace_callback($match, array($this, '_getIntroOutro'), $text);
 			$text = preg_replace($remove, '', $text);
-
-			// Was removing [rowid] from  {fabrik view=list id=2 countries___id=[rowid]} in form intro
-			//$text = str_replace('[', '{', $text);
-			//$text = str_replace(']', '}', $text);
 			$text = preg_replace("/{details:\s*.*?}/is", '', $text);
 		}
 
@@ -4102,7 +4093,9 @@ class FabrikFEModelForm extends FabModelForm
 		$m = explode(":", $match[0]);
 		array_shift($m);
 		$m = implode(":", $m);
-		return FabrikString::rtrimword($m, "}");
+		$m = FabrikString::rtrimword($m, "}");
+		$m = preg_replace('/\[(\S+)\]/', '{${1}}', $m);
+		return $m;
 	}
 
 	/**

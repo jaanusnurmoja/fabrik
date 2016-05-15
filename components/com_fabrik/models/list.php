@@ -6856,13 +6856,15 @@ class FabrikFEModelList extends JModelForm
 	 */
 	protected function addCheckBox(&$aTableHeadings, &$headingClass, &$cellClass)
 	{
+		$params = $this->getParams();
+		$hidecheckbox = $params->get('hidecheckbox', '0');
+		$hidestyle = ($hidecheckbox == '1') ? 'display:none;' : '';
 		$id = 'list_' . $this->getId() . '_checkAll';
 		$select = '<input type="checkbox" name="checkAll" class="' . $id . '" id="' . $id . '" />';
 		$aTableHeadings['fabrik_select'] = $select;
-		$headingClass['fabrik_select'] = array('class' => 'fabrik_ordercell fabrik_select', 'style' => '');
-
+		$headingClass['fabrik_select'] = array('class' => 'fabrik_ordercell fabrik_select', 'style' => $hidestyle);
 		// Needed for ajax filter/nav
-		$cellClass['fabrik_select'] = array('class' => 'fabrik_select fabrik_element');
+		$cellClass['fabrik_select'] = array('class' => 'fabrik_select fabrik_element', 'style' => $hidestyle);
 	}
 
 	/**
@@ -10403,6 +10405,13 @@ class FabrikFEModelList extends JModelForm
 								array_push($data[$last_i]->$key, $val);
 								*/
 								$data[$first_pk_i[$next_pk]]->$key = (array) $data[$first_pk_i[$next_pk]]->$key;
+
+								// if first occurrence is null, casting to array will give empty array
+								if (count($data[$first_pk_i[$next_pk]]->$key) === 0)
+								{
+									array_push($data[$first_pk_i[$next_pk]]->$key, null);
+								}
+
 								array_push($data[$first_pk_i[$next_pk]]->$key, $val);
 
 								$rawKey = $key . '_raw';

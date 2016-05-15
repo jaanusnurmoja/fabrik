@@ -48,6 +48,8 @@ class FabrikViewListBase extends FabrikView
 		$csvOpts->inccalcs     = (int) $params->get('csv_include_calculations');
 		$csvOpts->custom_qs    = $params->get('csv_custom_qs', '');
 		$csvOpts->incfilters   = (int) $params->get('incfilters');
+		$csvOpts->popupwidth   = FabrikWorker::getMenuOrRequestVar('popup_width','340',false,'menu');
+		$csvOpts->optswidth    = FabrikWorker::getMenuOrRequestVar('popup_opts_width','200',false,'menu');		
 		$opts->csvOpts         = $csvOpts;
 
 		$opts->csvFields = $model->getCsvFields();
@@ -62,7 +64,7 @@ class FabrikViewListBase extends FabrikView
 		if ($opts->csvChoose)
 		{
 			$modalOpts['footer'] = 'export';
-			$layout              = FabrikHelperHTML::getLayout('fabrik-button');
+			$layout              = $model->getLayout('fabrik-button');
 			$layoutData          = (object) array(
 				'name' => 'submit',
 				'class' => 'exportCSVButton btn-primary',
