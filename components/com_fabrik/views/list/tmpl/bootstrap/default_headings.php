@@ -18,15 +18,17 @@ $layoutData = (object) array(
 	'label' => FabrikHelperHTML::icon('icon-filter', FText::_('COM_FABRIK_GO'))
 );
 ?>
-	<tr class="fabrik___heading">
-		<?php foreach ($this->headings as $key => $heading) :
-			$h = $this->headingClass[$key];
-			$style = empty($h['style']) ? '' : 'style="' . $h['style'] . '"'; ?>
-			<th class="heading <?php echo $h['class'] ?>" <?php echo $style ?>>
-				<span><?php echo $heading; ?></span>
-			</th>
-		<?php endforeach; ?>
-	</tr>
+<tr class="fabrik___heading">
+<?php 
+echo $this->rowNumHeader;
+foreach ($this->headings as $key => $heading) :
+	$h = $this->headingClass[$key];
+	$style = empty($h['style']) ? '' : 'style="' . $h['style'] . '"';?>
+	<th class="heading <?php echo $h['class']?>" <?php echo $style?>>
+			<?php echo  $heading; ?>
+	</th>
+<?php endforeach; ?>
+</tr>
 
 <?php if (($this->filterMode === 3 || $this->filterMode === 4) && count($this->filters) <> 0) : ?>
 	<tr class="fabrikFilterContainer">
