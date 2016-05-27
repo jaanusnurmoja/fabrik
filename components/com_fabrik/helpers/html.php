@@ -1022,6 +1022,7 @@ EOD;
 	 * then uses to inject scripts into document.
 	 *
 	 * @param   array $shim Shim js files
+	 * @param   array $paths Additional require js paths
 	 *
 	 * @since   3.1
 	 *
@@ -1087,7 +1088,7 @@ EOD;
 			return moment;
 		});";
 
-		$opts     = array(
+		$opts = array(
 			'baseUrl' => $requirejsBaseURI,
 			'paths' => $requirePaths,
 			'shim' => $newShim,
@@ -1815,7 +1816,7 @@ EOD;
 		}
 
 		$needed   = array();
-		$needed[] = 'fab/' . $jsFile ;
+		$needed[] = 'fab/' . $jsFile;
 		$needed[] = 'lib/Event.mock';
 		$needed   = implode("', '", $needed);
 		self::addScriptDeclaration(
