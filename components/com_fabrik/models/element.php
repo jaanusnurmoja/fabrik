@@ -1509,9 +1509,18 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function isHidden()
 	{
+		$app = JFactory::getApplication();
+		$input = $app->input;
+		$view = $input->get('view');
 		$element = $this->getElement();
+		$hidden = false;
 
-		return ($element->hidden == true) ? true : false;
+		if ($element->hidden == 1 || ($element->hidden == 2 && $view == 'form') || ($element->hidden == 3 && $view == 'details'))
+		{
+      $hidden = true;
+    }
+		
+		return $hidden;
 	}
 
 	/**
@@ -3423,6 +3432,12 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	protected function singleFilter($default, $v, $type = 'text')
 	{
+		// $$$ hugh - for "reasons", sometimes it's an array with one value.  No clue why.  Sod it.
+		if (is_array($default))
+		{
+			$default = array_shift($default);
+		}
+		
 		// $$$ rob - if searching on "O'Fallon" from querystring filter the string has slashes added regardless
 		$default = (string) $default;
 		$default = stripslashes($default);
