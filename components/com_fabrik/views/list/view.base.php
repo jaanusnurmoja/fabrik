@@ -610,7 +610,7 @@ class FabrikViewListBase extends FabrikView
 	/**
 	 * Model check for publish/access
 	 *
-	 * @param   JModel $model List model
+	 * @param   FabrikFEModelList $model List model
 	 *
 	 * @return boolean
 	 */
