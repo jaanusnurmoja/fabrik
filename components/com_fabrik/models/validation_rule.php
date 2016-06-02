@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use \Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
@@ -131,7 +130,9 @@ class PlgFabrik_Validationrule extends FabrikPlugin
 		}
 
 		$condition = trim($w->parseMessageForPlaceHolder($condition, $post));
+		FabrikWorker::clearEval();
 		$res = @eval($condition);
+		FabrikWorker::logEval($res, 'Caught exception on eval in validation condition : %s');
 
 		if (is_null($res))
 		{
@@ -139,6 +140,26 @@ class PlgFabrik_Validationrule extends FabrikPlugin
 		}
 
 		return $res;
+	}
+
+	/**
+	 * Checks in/on to see if this validation is applicable
+	 *
+	 * @return  bool	apply validation
+	 */
+	public function canValidate()
+	{
+		if (!$this->shouldValidateIn())
+		{
+			return false;
+		}
+
+		if (!$this->shouldValidateOn())
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -323,11 +344,11 @@ class PlgFabrik_Validationrule extends FabrikPlugin
 
 		if ($this->allowEmpty())
 		{
-			return FText::_('PLG_VALIDATIONRULE_' . String::strtoupper($this->pluginName) . '_ALLOWEMPTY_LABEL');
+			return FText::_('PLG_VALIDATIONRULE_' . JString::strtoupper($this->pluginName) . '_ALLOWEMPTY_LABEL');
 		}
 		else
 		{
-			return FText::_('PLG_VALIDATIONRULE_' . String::strtoupper($this->pluginName) . '_LABEL');
+			return FText::_('PLG_VALIDATIONRULE_' . JString::strtoupper($this->pluginName) . '_LABEL');
 		}
 	}
 

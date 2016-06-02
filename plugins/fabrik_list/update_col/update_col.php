@@ -23,7 +23,7 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-list.php';
  * @subpackage  Fabrik.list.updatecol
  * @since       3.0
  */
-class PlgFabrik_ListUpdate_Col extends PlgFabrik_List
+class PlgFabrik_ListUpdate_col extends PlgFabrik_List
 {
 	/**
 	 * Button prefix
@@ -207,7 +207,7 @@ class PlgFabrik_ListUpdate_Col extends PlgFabrik_List
 
 		// Array_unique for left joined table data
 		$ids = array_unique($input->get('ids', array(), 'array'));
-		ArrayHelper::toInteger($ids);
+		$ids = ArrayHelper::toInteger($ids);
 		$this->row_count = count($ids);
 		$ids = implode(',', $ids);
 		$model->reset();
@@ -444,7 +444,7 @@ class PlgFabrik_ListUpdate_Col extends PlgFabrik_List
 			$emailFieldRaw = $emailField . '_raw';
 			$userId = (int) $row->$emailFieldRaw;
 			$ids = array_unique($input->get('ids', array(), 'array'));
-			ArrayHelper::toInteger($ids);
+			$ids = ArrayHelper::toInteger($ids);
 			$ids = implode(',', $ids);
 			$userIdsEmails = $this->getEmailUserIds($ids);
 			$to = FArrayHelper::getValue($userIdsEmails, $userId);
@@ -511,7 +511,7 @@ class PlgFabrik_ListUpdate_Col extends PlgFabrik_List
 		$opts->form = $this->userSelectForm();
 		$opts->renderOrder = $this->renderOrder;
 		$opts = json_encode($opts);
-		$this->jsInstance = "new FbListUpdateCol($opts)";
+		$this->jsInstance = "new FbListUpdate_col($opts)";
 
 		return true;
 	}
@@ -586,4 +586,15 @@ class PlgFabrik_ListUpdate_Col extends PlgFabrik_List
 
 		return $col . '-' . $this->renderOrder;
 	}
+
+	/**
+	 * Load the AMD module class name
+	 * 
+	 * @return string
+	 */
+	public function loadJavascriptClassName_result()
+	{
+		return 'FbListUpdateCol';
+	}
+
 }

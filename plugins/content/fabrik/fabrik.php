@@ -23,23 +23,6 @@ jimport('joomla.plugin.plugin');
 class PlgContentFabrik extends JPlugin
 {
 	/**
-	 * Constructor
-	 *
-	 * For php4 compatibility we must not use the __constructor as a constructor for plugins
-	 * because func_get_args ( void ) returns a copy of all passed arguments NOT references.
-	 * This causes problems with cross-referencing necessary for the observer design pattern.
-	 *
-	 * @param   object &$subject The object to observe
-	 * @param   object $params   The object that holds the plugin parameters
-	 *
-	 * @since       1.5
-	 */
-	public function plgContentFabrik(&$subject, $params = null)
-	{
-		parent::__construct($subject, $params);
-	}
-
-	/**
 	 *  Prepare content method
 	 *
 	 * Method is called by the view
@@ -192,6 +175,7 @@ class PlgContentFabrik extends JPlugin
 		$rowId                 = '';
 		$useKey                = '';
 		$limit                 = false;
+		$ajax                  = true;
 		$session               = JFactory::getSession();
 		$usersConfig->set('rowid', 0);
 		$viewName = '';
@@ -258,7 +242,9 @@ class PlgContentFabrik extends JPlugin
 				case 'showfilters':
 					$showFilters = $m[1];
 					break;
-
+				case 'ajax':
+					$ajax = (bool) $m[1];
+					break;
 				// $$$ rob for these 2 grab the qs var in priority over the plugin settings
 				case 'clearfilters':
 					$clearFilters = $input->get('clearfilters', $m[1]);
@@ -388,7 +374,8 @@ class PlgContentFabrik extends JPlugin
 					$element = $element . '_raw';
 				}
 				// $$$ hugh - need to pass all row data, or calc elements that use {placeholders} won't work
-				$defaultData = is_object($row) ? get_object_vars($row) : $row;
+				//$defaultData = is_object($row) ? get_object_vars($row) : $row;
+				$defaultData = is_object($row) ? FArrayHelper::fromObject($row, true) : $row;
 
 				/* $$$ hugh - if we don't do this, our passed data gets blown away when render() merges the form data
 				 * not sure why, but apparently if you do $foo =& $bar and $bar is NULL ... $foo ends up NULL
@@ -399,6 +386,10 @@ class PlgContentFabrik extends JPlugin
 				// Set row id for things like user element
 				$origRowId = $input->get('rowid');
 				$input->set('rowid', $rowId);
+
+				// Set detail view for things like youtube element
+				$origView = $input->get('view');
+				$input->set('view', 'details');
 
 				$defaultData = (array) $defaultData;
 				unset($activeEl->defaults);
@@ -422,6 +413,7 @@ class PlgContentFabrik extends JPlugin
 				}
 
 				$input->set('rowid', $origRowId);
+				$input->set('view', $origView);
 				$this->resetRequest();
 			}
 
@@ -486,7 +478,7 @@ class PlgContentFabrik extends JPlugin
 					return;
 				}
 
-				$model->ajax = true;
+				$model->ajax = $ajax;
 				$model->setId($id);
 
 				unset($model->groups);
@@ -555,7 +547,7 @@ class PlgContentFabrik extends JPlugin
 				}
 
 				$input->set('fabrik_show_in_list', $show_in_list);
-				$model->ajax = 1;
+				$model->ajax = $ajax;
 				$task        = $input->get('task');
 
 				if (method_exists($controller, $task) && $input->getInt('activetableid') == $id)

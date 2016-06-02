@@ -193,14 +193,24 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 
 		if (!isset($this->avgs))
 		{
-			ArrayHelper::toInteger($ids);
+			$ids = ArrayHelper::toInteger($ids);
 			$db = FabrikWorker::getDbo(true);
 			$elementId = $this->getElement()->id;
 
 			$query = $db->getQuery(true);
 			$query->select('row_id, AVG(rating) AS r, COUNT(rating) AS total')->from(' #__{package}_ratings')
-				->where(array('rating <> -1', 'listid = ' . (int) $listId, 'formid = ' . (int) $formId, 'element_id = ' . (int) $elementId))
-				->where('row_id IN (' . implode(',', $ids) . ')')->group('row_id');
+				->where(array('rating <> -1', 'listid = ' . (int) $listId, 'formid = ' . (int) $formId, 'element_id = ' . (int) $elementId));
+
+			if (FArrayHelper::emptyIsh($ids))
+			{
+				$query->where('6 = -6');
+			}
+			else
+			{
+				$query->where('row_id IN (' . implode(',', $ids) . ')');
+			}
+
+			$query->group('row_id');
 
 			// Do this  query so that list view only needs one query to load up all ratings
 			$db->setQuery($query);
@@ -236,13 +246,23 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 				$ids[] = $rowId;
 			}
 
-			ArrayHelper::toInteger($ids);
+			$ids = ArrayHelper::toInteger($ids);
 			$db = FabrikWorker::getDbo(true);
 			$elementId = $this->getElement()->id;
 			$query = $db->getQuery(true);
 			$query->select('row_id, user_id')->from('#__{package}_ratings')
-				->where(array('rating <> -1', 'listid = ' . (int) $listId, 'formid = ' . (int) $formId, 'element_id = ' . (int) $elementId))
-				->where('row_id IN (' . implode(',', $ids) . ')')->group('row_id');
+				->where(array('rating <> -1', 'listid = ' . (int) $listId, 'formid = ' . (int) $formId, 'element_id = ' . (int) $elementId));
+
+			if (FArrayHelper::emptyIsh($ids))
+			{
+				$query->where('6 = -6');
+			}
+			else
+			{
+				$query->where('row_id IN (' . implode(',', $ids) . ')');
+			}
+
+			$query->group('row_id');
 
 			// Do this  query so that table view only needs one query to load up all ratings
 			$db->setQuery($query);
@@ -316,10 +336,12 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 
 		$rowId = $this->getFormModel()->getRowId();
 
+		/*
 		if (empty($rowId))
 		{
 			return FText::_('PLG_ELEMENT_RATING_NO_RATING_TILL_CREATED');
 		}
+		*/
 
 		$css = $this->canRate($rowId) ? 'cursor:pointer;' : '';
 		$value = $this->getValue($data, $repeatCounter);
@@ -366,20 +388,21 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 	 */
 	public function storeDatabaseFormat($val, $data)
 	{
-		$input = $this->app->input;
 		$params = $this->getParams();
-		$listId = $input->getInt('listid');
-		$formId = $input->getInt('formid');
-		$rowId = $input->get('rowid', '', 'string');
-
-		if (empty($listId))
-		{
-			$formModel = $this->getFormModel();
-			$listId = $formModel->getListModel()->getId();
-		}
 
 		if ($params->get('rating-mode') == 'user-rating')
 		{
+			$input = $this->app->input;
+			$listId = $input->getInt('listid');
+			$formId = $input->getInt('formid');
+			$rowId = $input->get('rowid', '', 'string');
+
+			if (empty($listId))
+			{
+				$formModel = $this->getFormModel();
+				$listId = $formModel->getListModel()->getId();
+			}
+
 			list($val, $total) = $this->getRatingAverage($val, $listId, $formId, $rowId);
 		}
 
@@ -406,6 +429,7 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 
 		$this->doRating($listId, $formId, $rowId, $rating);
 
+		/*
 		if ($params->get('rating-mode') == 'creator-rating')
 		{
 			// @todo FIX for joins as well
@@ -419,6 +443,8 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 			$db->setQuery($query);
 			$db->execute();
 		}
+		*/
+
 
 		$this->getRatingAverage('', $listId, $formId, $rowId);
 		echo $this->avg;
@@ -434,7 +460,7 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 	 */
 	private function getCookieName($listId, $rowId)
 	{
-		$cookieName = "rating-table_{$listId}_row_{$rowId}" . $_SERVER['REMOTE_ADDR'];
+		$cookieName = "rating-table_{$listId}_row_{$rowId}" . FabrikString::filteredIp();
 		jimport('joomla.utilities.utility');
 
 		return JApplication::getHash($cookieName);
@@ -570,6 +596,7 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 		$opts->formid = $formId;
 		$opts->canRate = (bool) $this->canRate();
 		$opts->mode = $params->get('rating-mode');
+		$opts->doAjax = $params->get('rating-mode') != 'creator-rating';
 		$opts->view = $input->get('view');
 		$opts->rating = $value;
 		$opts->listid = $listId;
@@ -604,6 +631,7 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 		}
 
 		$opts->canRate = $params->get('rating-mode') == 'creator-rating' ? true : $this->canRate();
+		$opts->doAjax = $params->get('rating-mode') != 'creator-rating';
 		$opts->ajaxloader = FabrikHelperHTML::image("ajax-loader.gif", 'list', @$this->tmpl, array(), true);
 		$opts->listRef = $listModel->getRenderContext();
 		$opts->formid = $listModel->getFormModel()->getId();
@@ -669,21 +697,4 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 		return $return;
 	}
 
-	/**
-	 * Get the class to manage the form element
-	 * to ensure that the file is loaded only once
-	 *
-	 * @param   array   &$srcs   Scripts previously loaded
-	 * @param   string  $script  Script to load once class has loaded
-	 * @param   array   &$shim   Dependant class names to load before loading the class - put in requirejs.config shim
-	 *
-	 * @return void
-	 */
-	public function formJavascriptClass(&$srcs, $script = '', &$shim = array())
-	{
-		$s = new stdClass;
-		$s->deps = array('fab/elementlist');
-		$shim['element/rating/rating'] = $s;
-		parent::formJavascriptClass($srcs, $script, $shim);
-	}
 }

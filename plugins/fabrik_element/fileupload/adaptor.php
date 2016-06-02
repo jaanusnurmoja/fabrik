@@ -11,8 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
-
 /**
  * Abstract Storage adaptor for Fabrik file upload element
  *
@@ -67,7 +65,7 @@ abstract class FabrikStorageAdaptor
 	 *
 	 * @return bool
 	 */
-	public abstract function exists($filepath, $prependRoot = false);
+	public abstract function exists($filepath, $prependRoot = true);
 
 	/**
 	 * Does a folder exist
@@ -278,7 +276,7 @@ abstract class FabrikStorageAdaptor
 
 			while ($i < $length)
 			{
-				$char = String::substr($possible, mt_rand(0, String::strlen($possible) - 1), 1);
+				$char = JString::substr($possible, mt_rand(0, JString::strlen($possible) - 1), 1);
 				$key .= $char;
 				$i++;
 			}

@@ -42,8 +42,7 @@ class PlgFabrik_Cronphp extends PlgFabrik_Cron
 	 * Do the plugin action
 	 *
 	 * @param   array   &$data       array data to process
-	 * @param   object  &$listModel  plugin's list model
-	 *
+	 * @param   object  &$listModel  List model
 	 * @return  int  number of records run, you can set this by setting the varaible $processed
 	 * in either your included script in php code.
 	 */
@@ -53,13 +52,27 @@ class PlgFabrik_Cronphp extends PlgFabrik_Cron
 		$params = $this->getParams();
 		$filter = JFilterInput::getInstance();
 		$file = $filter->clean($params->get('cronphp_file'), 'CMD');
-		eval($params->get('cronphp_params'));
+
+		$code = trim($params->get('cronphp_params', ''));
+
+		if (!(empty($code)))
+		{
+			eval($code);
+		}
+
 		$file = JPATH_ROOT . '/plugins/fabrik_cron/php/scripts/' . $file;
 
 		if (JFile::exists($file))
 		{
 			require_once $file;
 
+		}
+
+		$code = trim($params->get('cronphp_code', ''));
+
+		if (!(empty($code)))
+		{
+			eval($code);
 		}
 
 		if (isset($processed))

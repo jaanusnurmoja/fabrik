@@ -11,8 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
-
 /**
  * Image manipulation class
  *
@@ -350,7 +348,7 @@ class Fabimage
 	 */
 	public static function exifToNumber($value, $format)
 	{
-		$pos = String::strpos($value, '/');
+		$pos = JString::strpos($value, '/');
 
 		if ($pos === false)
 		{
@@ -454,7 +452,7 @@ class FabimageGD extends Fabimage
 	public function imageFromFile($file)
 	{
 		$img = false;
-		$ext = String::strtolower(end(explode('.', $file)));
+		$ext = JString::strtolower(end(explode('.', $file)));
 
 		if ($ext == 'jpg' || $ext == 'jpeg')
 		{
@@ -493,7 +491,7 @@ class FabimageGD extends Fabimage
 	 */
 	protected function imageCreateFrom($source)
 	{
-		$ext = String::strtolower(JFile::getExt($source));
+		$ext = JString::strtolower(JFile::getExt($source));
 
 		switch ($ext)
 		{
@@ -522,7 +520,7 @@ class FabimageGD extends Fabimage
 	 */
 	public function imageToFile($destCropFile, $image)
 	{
-		$ext = String::strtolower(JFile::getExt($destCropFile));
+		$ext = JString::strtolower(JFile::getExt($destCropFile));
 		ob_start();
 
 		switch ($ext)
@@ -675,7 +673,7 @@ class FabimageGD extends Fabimage
 			return $img;
 		}
 
-		$ext = String::strtolower(end(explode('.', $origFile)));
+		$ext = JString::strtolower(end(explode('.', $origFile)));
 
 		// If an image was successfully loaded, test the image for size
 		if ($img)
@@ -929,6 +927,13 @@ class FabimageGD2 extends FabimageGD
 				// Create a new temporary image
 				$tmp_img = imagecreatetruecolor($new_width, $new_height);
 
+				// handle transparency for tmp image
+				if (function_exists('imagealphablending'))
+				{
+					imagealphablending($tmp_img, false);
+					imagesavealpha($tmp_img, true);
+				}
+
 				// Copy and resize old image into new image
 				imagecopyresampled($tmp_img, $img, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
 				imagedestroy($img);
@@ -1017,7 +1022,7 @@ class FabimageIM extends Fabimage
 			// $$$ hugh - testing making thumbs for PDF's, so need a little tweak here
 			$origInfo = pathinfo($origFile);
 
-			if (String::strtolower($origInfo['extension']) != 'pdf')
+			if (JString::strtolower($origInfo['extension']) != 'pdf')
 			{
 				return;
 			}
@@ -1035,20 +1040,30 @@ class FabimageIM extends Fabimage
 
 			$origInfo = pathinfo($origFile);
 
-			if (String::strtolower($origInfo['extension']) == 'pdf')
+			if (JString::strtolower($origInfo['extension']) == 'pdf')
 			{
 				$pdfThumbType = 'png';
 
 				// OK, it's a PDF, so first we need to add the page number we want to the source filename
 				$pdfFile = $origFile . '[0]';
 
-				// Now just load it, set format, resize, save and garbage collect.
-				// Hopefully IM will call the right delegate (ghostscript) to load the PDF.
-				$im = new Imagick($pdfFile);
-				$im->setImageFormat($pdfThumbType);
-				$im->thumbnailImage($maxWidth, $maxHeight, true);
-				$im->writeImage($destFile);
-				$im->destroy();
+				if (is_callable('exec'))
+				{
+					$destFile = str_replace('.pdf', '.png', $destFile); // Output File
+					$convert    = "convert " . $pdfFile . "  -colorspace RGB -resize " . $maxWidth . " " . $destFile; // Command creating
+					exec($convert); // Execution of complete command.
+				}
+				else
+				{
+					// Now just load it, set format, resize, save and garbage collect.
+					// Hopefully IM will call the right delegate (ghostscript) to load the PDF.
+					$im = new Imagick($pdfFile);
+					$im->setImageFormat($pdfThumbType);
+					$im->thumbnailImage($maxWidth, $maxHeight, true);
+					$im->writeImage($destFile);
+					// as destroy() is deprecated
+					$im->clear();
+				}
 			}
 			else
 			{

@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use \Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
@@ -270,9 +269,9 @@ class FabrikFEModelForm extends FabModelForm
 	 *
 	 * @since 3.1b
 	 *
-	 * @var string
+	 * @var array
 	 */
-	public $formPluginJS = '';
+	public $formPluginJS = array();
 
 	/**
 	 * Form plugin files to load
@@ -338,6 +337,13 @@ class FabrikFEModelForm extends FabModelForm
 	 * @var mixed
 	 */
 	public $formErrorMsg = null;
+
+	/**
+	 * Form sessionData
+	 *
+	 * @var array
+	 */
+	public $sessionData = null;
 
 	/**
 	 * Constructor
@@ -468,18 +474,20 @@ class FabrikFEModelForm extends FabModelForm
 			$ret = 1;
 		}
 
-		$isUserRowId = $this->isUserRowId();
+		//$isUserRowId = $this->isUserRowId();
 
-		// New form can we add?
-		if ($this->getRowId() === '' || $isUserRowId)
+		/* New form can we add?
+		 *
+		 * NOTE - testing to see if $data exists rather than looking at rowid to decide if editing, as when using
+		 * rowid=-1, things get funky, as rowid is never empty, even for new form, as it's set to user id
+		 */
+		if (empty($data) || !array_key_exists('__pk_val', $data) || empty($data['__pk_val']))
 		{
-			// If they can edit can they also add
 			if ($listModel->canAdd())
 			{
 				$ret = 3;
 			}
-			// $$$ hugh - corner case for rowid=-1, where they DON'T have add perms, but DO have edit perms
-			elseif ($isUserRowId && $listModel->canEdit($data))
+			else if ($listModel->canEdit($data))
 			{
 				$ret = 2;
 			}
@@ -621,7 +629,16 @@ class FabrikFEModelForm extends FabModelForm
 
 			if (!FabrikHelperHTML::stylesheetFromPath($path))
 			{
-				FabrikHelperHTML::stylesheetFromPath('components/com_fabrik/views/' . $view . '/' . $jTmplFolder . '/' . $tmpl . '/custom_css.php' . $qs);
+				$displayData              = new stdClass;
+				$displayData->view        = $view;
+				$displayData->tmpl        = $tmpl;
+				$displayData->qs          = $qs;
+				$displayData->jTmplFolder = $jTmplFolder;
+				$displayData->formModel   = $this;
+				$layout = $this->getLayout('form.fabrik-custom-css-qs');
+				$path = $layout->render($displayData);
+
+				FabrikHelperHTML::stylesheetFromPath($path);
 			}
 		}
 
@@ -643,13 +660,19 @@ class FabrikFEModelForm extends FabModelForm
 		// $$$ hugh - added ability to use form_XX, as am adding custom list_XX
 		$view = $this->isEditable() ? 'form' : 'details';
 
+		/**
+		 * $$$ hugh - need to use an assoc key name for the scripts array, as it gets used in the requirejs
+		 * to pass in as a function arg, which then blows up with "unexpected number" if we don't use a key name
+		 */
+		$scriptsKey = $view . '_' . $this->getId();
+
 		if (JFile::exists(COM_FABRIK_FRONTEND . '/js/' . $this->getId() . '.js'))
 		{
-			$scripts[] = 'components/com_fabrik/js/' . $this->getId() . '.js';
+			$scripts[$scriptsKey] = 'components/com_fabrik/js/' . $this->getId() . '.js';
 		}
 		elseif (JFile::exists(COM_FABRIK_FRONTEND . '/js/' . $view . '_' . $this->getId() . '.js'))
 		{
-			$scripts[] = 'components/com_fabrik/js/' . $view . '_' . $this->getId() . '.js';
+			$scripts[$scriptsKey] = 'components/com_fabrik/js/' . $view . '_' . $this->getId() . '.js';
 		}
 	}
 
@@ -1384,7 +1407,7 @@ class FabrikFEModelForm extends FabModelForm
 
 				$nsRaw = $val;
 
-				$nsRawFull = $this->_fullFormData;
+				$nsRawFull = $this->fullFormData;
 
 				for ($i = 0; $i <= $pathNodes; $i++)
 				{
@@ -1408,9 +1431,9 @@ class FabrikFEModelForm extends FabModelForm
 				$this->formDataWithTableName[$key] = $val;
 			}
 			// Check if set - for case where you have a fileupload element & confirmation plugin - when plugin is trying to update non-existent data
-			if (isset($this->_fullFormData))
+			if (isset($this->fullFormData))
 			{
-				$this->_fullFormData[$key] = $val;
+				$this->fullFormData[$key] = $val;
 			}
 			/*
 			 * Need to allow RO (encrypted) elements to be updated.  Consensus is that
@@ -1446,9 +1469,9 @@ class FabrikFEModelForm extends FabModelForm
 				$this->formData[$key] = $val;
 				$this->formDataWithTableName[$key] = $val;
 
-				if (isset($this->_fullFormData))
+				if (isset($this->fullFormData))
 				{
-					$this->_fullFormData[$key] = $val;
+					$this->fullFormData[$key] = $val;
 				}
 
 				if ($override_ro)
@@ -1488,7 +1511,7 @@ class FabrikFEModelForm extends FabModelForm
 		}
 		/* Maybe we are being called from onAfterProcess hook, or somewhere else
 		 * running after store, when non-joined data names have been reduced to short
-		 * names in formData, so peek in _fullFormData
+		 * names in formData, so peek in fullFormData
 		 */
 		elseif (isset($this->fullFormData) && array_key_exists($fullName, $this->fullFormData))
 		{
@@ -2323,6 +2346,25 @@ class FabrikFEModelForm extends FabModelForm
 	}
 
 	/**
+	 * Helper method to get the session context - apply row id only if not '' as
+	 * accessing session data with a path '..' appears not to be possible
+	 *
+	 * @return string
+	 */
+	public function getSessionContext()
+	{
+		$context = 'com_' . $this->package . '.form.' . $this->getId() . '.';
+		$rowId = $this->getRowId();
+
+		if ($rowId !== '')
+		{
+			$context .= $rowId . '.';
+		}
+
+		return $context;
+	}
+
+	/**
 	 * Get form validation errors - if empty test session for errors
 	 * 31/01/13 - no longer restoring from session errors - see http://fabrikar.com/forums/showthread.php?t=31377
 	 * 19/02/13 - Changed from http_referer test to this->isMambot to restore session errors when redirecting from a non-ajax form
@@ -2332,8 +2374,6 @@ class FabrikFEModelForm extends FabModelForm
 	 */
 	public function getErrors()
 	{
-		$context = 'com_' . $this->package . '.form.' . $this->getId() . '.' . $this->getRowId() . '.';
-
 		// Store errors in local array as clearErrors() removes $this->errors
 		$errors = array();
 
@@ -2341,7 +2381,7 @@ class FabrikFEModelForm extends FabModelForm
 		{
 			if ($this->isMambot)
 			{
-				$errors = $this->session->get($context . 'errors', array());
+				$errors = $this->session->get($this->getSessionContext() . 'errors', array());
 			}
 		}
 		else
@@ -2362,7 +2402,7 @@ class FabrikFEModelForm extends FabModelForm
 	public function clearErrors()
 	{
 		$this->errors = array();
-		$context = 'com_' . $this->package . '.form.' . $this->getId() . '.' . $this->getRowId() . '.';
+		$context = $this->getSessionContext();
 		$this->session->clear($context . 'errors');
 		/* $$$ rob this was commented out, but putting back in to test issue that if we have ajax validations on
 		 * and a field is validated, then we don't submit the form, and go back to add the form, the previously validated
@@ -2380,7 +2420,7 @@ class FabrikFEModelForm extends FabModelForm
 	 */
 	public function setErrors($errors)
 	{
-		$context = 'com_' . $this->package . '.form.' . $this->getId() . '.' . $this->getRowId() . '.';
+		$context = $this->getSessionContext();
 		$this->session->set($context . 'errors', $errors);
 		$this->session->set($context . 'session.on', true);
 	}
@@ -2512,9 +2552,9 @@ class FabrikFEModelForm extends FabModelForm
 		asort($aEls);
 
 		// Paul - Prepend rather than append "none" option.
-		array_unshift($aEls, JHTML::_('select.option', '', '-'));
+		array_unshift($aEls, JHtml::_('select.option', '', '-'));
 
-		return JHTML::_('select.genericlist', $aEls, $name, $attribs, 'value', 'text', $default);
+		return JHtml::_('select.genericlist', $aEls, $name, $attribs, 'value', 'text', $default);
 	}
 
 	/**
@@ -2659,12 +2699,12 @@ class FabrikFEModelForm extends FabModelForm
 								$rawVal = str_replace('`', '', $rawVal);
 							}
 
-							$aEls[$label . '(raw)'] = JHTML::_('select.option', $rawVal, $label . '(raw)');
+							$aEls[$label . '(raw)'] = JHtml::_('select.option', $rawVal, $label . '(raw)');
 						}
 					}
 				}
 
-				$aEls[] = JHTML::_('select.option', $val, $label);
+				$aEls[] = JHtml::_('select.option', $val, $label);
 			}
 		}
 		// Paul - Sort removed so that list is presented in group/id order regardless of whether $key is name or id
@@ -2928,9 +2968,11 @@ class FabrikFEModelForm extends FabModelForm
 			$errorsFound = true;
 		}
 
-		foreach ($this->errors as $field => $errors)
+		$allErrors = $this->isMambot ? $this->session->get($this->getSessionContext() . 'errors', array()) : $this->errors;
+
+		foreach ($allErrors as $field => $errors)
 		{
-			if (!empty($errors))
+			if (!empty($errors) & is_array($errors))
 			{
 				foreach ($errors as $error)
 				{
@@ -3049,7 +3091,8 @@ class FabrikFEModelForm extends FabModelForm
 
 					if ($sessionRow->data != '')
 					{
-						$data = FArrayHelper::toObject(unserialize($sessionRow->data), 'stdClass', false);
+						$sData = unserialize($sessionRow->data);
+						$data = FArrayHelper::toObject($sData, 'stdClass', false);
 						JFilterOutput::objectHTMLSafe($data);
 						$data = array($data);
 						FabrikHelperHTML::debug($data, 'form:getData from session (form in Mambot and errors)');
@@ -3102,7 +3145,8 @@ class FabrikFEModelForm extends FabModelForm
 
 						$bits = $data;
 						$bits = array_merge($tmp_data, $bits);
-						$data = array(FArrayHelper::toObject($bits));
+						//$data = array(FArrayHelper::toObject($bits));
+						$data = $bits;
 						FabrikHelperHTML::debug($data, 'form:getData from session (form not in Mambot and no errors');
 					}
 				}
@@ -3128,9 +3172,12 @@ class FabrikFEModelForm extends FabModelForm
 						 * rendering a form with a content plugin in a list intro.  And I don't think we ever need to
 						 * apply ordering to a form's select, by definition it's only one row.  Leaving this here for
 						 * now just as a reminder in case there's any unforeseen side effects.
+						 *
+						 * $$$ hugh - 4/25/2016 - yes, there is an issue, as (duh!) ordering is needed for repeat groups.
+						 * Changing this back to original for now, will need to work out how to handle that corner case
 						 */
-						// $opts = $input->get('task') == 'form.inlineedit' ? array('ignoreOrder' => true) : array();
-						$opts = array('ignoreOrder' => true);
+						$opts = $input->get('task') == 'form.inlineedit' ? array('ignoreOrder' => true) : array();
+						// $opts = array('ignoreOrder' => true);
 						$sql = $this->buildQuery($opts);
 						$fabrikDb->setQuery($sql);
 						FabrikHelperHTML::debug((string) $fabrikDb->getQuery(), 'form:render');
@@ -3236,7 +3283,7 @@ class FabrikFEModelForm extends FabModelForm
 
 		if (in_array(true, $pluginManager->data))
 		{
-			if ($this->session->get('com_' . $this->package . '.form.' . $this->getId() . '.' . $this->getRowId() . '.session.on') == true && $useSessionOn)
+			if ($this->session->get($this->getSessionContext() . '.session.on') == true && $useSessionOn)
 			{
 				return true;
 			}
@@ -3416,6 +3463,11 @@ class FabrikFEModelForm extends FabModelForm
 	 */
 	protected function getSessionData()
 	{
+		if (isset($this->sessionData))
+		{
+			return $this->sessionData;
+		}
+
 		$params = $this->getParams();
 		$this->sessionModel = JModelLegacy::getInstance('Formsession', 'FabrikFEModel');
 		$this->sessionModel->setFormId($this->getId());
@@ -3430,7 +3482,9 @@ class FabrikFEModelForm extends FabModelForm
 
 		$this->sessionModel->useCookie($useCookie);
 
-		return $this->sessionModel->load();
+		$this->sessionData = $this->sessionModel->load();
+
+		return $this->sessionData;
 	}
 
 	/**
@@ -3560,11 +3614,11 @@ class FabrikFEModelForm extends FabModelForm
 		if (strstr($sql, 'WHERE'))
 		{
 			// Do it this way as queries may contain sub-queries which we want to keep the where
-			$firstWord = String::substr($where, 0, 5);
+			$firstWord = JString::substr($where, 0, 5);
 
 			if ($firstWord == 'WHERE')
 			{
-				$where = String::substr_replace($where, 'AND', 0, 5);
+				$where = JString::substr_replace($where, 'AND', 0, 5);
 			}
 		}
 		// Set rowId to -2 to indicate random record
@@ -3988,31 +4042,22 @@ class FabrikFEModelForm extends FabModelForm
 
 		if (!$this->isEditable())
 		{
-			$remove = "/{new:\s*.*?}/i";
+			$remove = "/{new:\s*.*?}/is";
 			$text = preg_replace($remove, '', $text);
-			$remove = "/{edit:\s*.*?}/i";
+			$remove = "/{edit:\s*.*?}/is";
 			$text = preg_replace($remove, '', $text);
-			$match = "/{details:\s*.*?}/i";
-
+			$match = "/{details:\s*.*?}/is";
 			$text = preg_replace_callback($match, array($this, '_getIntroOutro'), $text);
-
-			// Was removing [rowid] from  {fabrik view=list id=2 countries___id=[rowid]} in details intro
-			//$text = str_replace('[', '{', $text);
-			//$text = str_replace(']', '}', $text);
 		}
 		else
 		{
 			$match = $this->isNewRecord() ? 'new' : 'edit';
 			$remove = $this->isNewRecord()  ? 'edit' : 'new';
-			$match = "/{" . $match . ":\s*.*?}/i";
-			$remove = "/{" . $remove . ":\s*.*?}/i";
+			$match = "/{" . $match . ":\s*.*?}/is";
+			$remove = "/{" . $remove . ":\s*.*?}/is";
 			$text = preg_replace_callback($match, array($this, '_getIntroOutro'), $text);
 			$text = preg_replace($remove, '', $text);
-
-			// Was removing [rowid] from  {fabrik view=list id=2 countries___id=[rowid]} in form intro
-			//$text = str_replace('[', '{', $text);
-			//$text = str_replace(']', '}', $text);
-			$text = preg_replace("/{details:\s*.*?}/i", '', $text);
+			$text = preg_replace("/{details:\s*.*?}/is", '', $text);
 		}
 
 		$w = new FabrikWorker;
@@ -4045,7 +4090,9 @@ class FabrikFEModelForm extends FabModelForm
 		$m = explode(":", $match[0]);
 		array_shift($m);
 		$m = implode(":", $m);
-		return FabrikString::rtrimword($m, "}");
+		$m = FabrikString::rtrimword($m, "}");
+		$m = preg_replace('/\[(\S+)\]/', '{${1}}', $m);
+		return $m;
 	}
 
 	/**
@@ -4075,7 +4122,7 @@ class FabrikFEModelForm extends FabModelForm
 			return str_replace("{Add/Edit}", '', $label);
 		}
 
-		if (String::stristr($label, "{Add/Edit}"))
+		if (JString::stristr($label, "{Add/Edit}"))
 		{
 			$replace = $this->isNewRecord() ? FText::_('COM_FABRIK_ADD') : FText::_('COM_FABRIK_EDIT');
 			$label = str_replace("{Add/Edit}", $replace, $label);
@@ -4104,7 +4151,7 @@ class FabrikFEModelForm extends FabModelForm
 		// $$$ rob newFormLabel set in table copy
 		if ($input->get('newFormLabel', '') !== '')
 		{
-			$form->label = $input->get('newFormLabel', '', '', 'string');
+			$form->label = $input->get('newFormLabel', '', 'string');
 		}
 
 		$res = $form->store();
@@ -4333,7 +4380,7 @@ class FabrikFEModelForm extends FabModelForm
 
 		if ($this->app->isAdmin())
 		{
-			$action = FArrayHelper::getValue($_SERVER, 'REQUEST_URI', 'index.php');
+			$action = filter_var(ArrayHelper::getValue($_SERVER, 'REQUEST_URI', 'index.php'), FILTER_SANITIZE_URL);
 			$action = $this->stripElementsFromUrl($action);
 			$action = str_replace("&", "&amp;", $action);
 
@@ -4401,7 +4448,7 @@ class FabrikFEModelForm extends FabModelForm
 			{
 				// $$$ rob if embedding a form in a form, then the embedded form's url will contain
 				// the id of the main form - not sure if its an issue for now
-				$action = FArrayHelper::getValue($_SERVER, 'REQUEST_URI', 'index.php');
+				$action = filter_var(ArrayHelper::getValue($_SERVER, 'REQUEST_URI', 'index.php'), FILTER_SANITIZE_URL);
 			}
 			else
 			{
@@ -4429,6 +4476,7 @@ class FabrikFEModelForm extends FabModelForm
 
 		// Add in row id for join data
 		$element->label = '';
+		$element->labels = '';
 		$element->error = '';
 		$element->value = '';
 		$element->id = '';
@@ -4557,10 +4605,12 @@ class FabrikFEModelForm extends FabModelForm
 			$aElements = array();
 
 			// Check if group is actually a table join
+			/*
 			if (array_key_exists($groupTable->id, $this->aJoinGroupIds))
 			{
 				$aElements[] = $this->_makeJoinIdElement($groupTable);
 			}
+			*/
 
 			$repeatGroup = 1;
 			$foreignKey = null;
@@ -4951,7 +5001,7 @@ class FabrikFEModelForm extends FabModelForm
 				if ($isMambot)
 				{
 					// Return to the same page
-					$url = FArrayHelper::getValue($_SERVER, 'HTTP_REFERER', 'index.php');
+					$url = filter_var(ArrayHelper::getValue($_SERVER, 'HTTP_REFERER', 'index.php'), FILTER_SANITIZE_URL);
 				}
 				else
 				{
@@ -5219,6 +5269,27 @@ class FabrikFEModelForm extends FabModelForm
 	}
 
 	/**
+	 * Ask all elements to add their js Fabrik.jLayouts to the framework
+	 * This has to be done before we call FabrikHelperHTML::framework();
+	 *
+	 * @return void;
+	 */
+	public function elementJsJLayouts()
+	{
+		$groups = $this->getGroupsHiarachy();
+
+		foreach ($groups as $groupModel)
+		{
+			$elementModels = $groupModel->getPublishedElements();
+
+			foreach ($elementModels as $elementModel)
+			{
+				$elementModel->jsJLayouts();
+			}
+		}
+	}
+
+	/**
 	 * Get a subset of the model's data with non accessible values removed
 	 *
 	 * @param   string  $view  View
@@ -5261,5 +5332,24 @@ class FabrikFEModelForm extends FabModelForm
 		}
 
 		return $accessibleData;
+	}
+
+
+	/**
+	 * Get a form JLayout file
+	 *
+	 * @param   string  $name     layout name
+	 * @param   array   $paths    Optional paths to add as includes
+	 * @param   array   $options  Options
+	 *
+	 * @return FabrikLayoutFile
+	 */
+	public function getLayout($name, $paths = array(), $options = array())
+	{
+		$view = $this->isEditable() ? 'form' : 'details';
+		$paths[] = COM_FABRIK_FRONTEND . '/views/'. $view . '/tmpl/' . $this->getTmpl() . '/layouts';
+		$layout  = FabrikHelperHTML::getLayout($name, $paths, $options);
+
+		return $layout;
 	}
 }

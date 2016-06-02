@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
@@ -200,7 +199,7 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal')
 	{
 		$element = $this->getElement();
-		$condition = String::strtoupper($condition);
+		$condition = JString::strtoupper($condition);
 		$this->encryptFieldName($key);
 		$glue = 'OR';
 
@@ -316,7 +315,7 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 	{
 		$element = $this->getElement();
 
-		if ($element->filter_type === 'checkbox')
+		if ($element->filter_type === 'checkbox' || $element->filter_type == 'range')
 		{
 			$listModel = $this->getListModel();
 			$v = 'fabrik___filter[list_' . $listModel->getRenderContext() . '][value]';
@@ -656,6 +655,12 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 				{
 					$lis[] = $l;
 				}
+				else
+				{
+					// was trying to fix issue with empty merged repeat rows not having height but messes CSV export
+					//$lis[] = '&nbsp;';
+					$lis[] = '';
+				}
 			}
 
 			if (!empty($lis))
@@ -675,33 +680,16 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 			}
 		}
 
-		$condensed = array();
+		$layout = FabrikHelperHTML::getLayout('fabrik-element-elementlist-details',
+			array(COM_FABRIK_FRONTEND . '/layouts/element'));
 
-		if ($condense)
-		{
-			foreach ($uls as $ul)
-			{
-				$condensed[] = $ul[0];
-			}
+		$displayData = array(
+			'uls' => $uls,
+			'condense' => $condense,
+			'addHtml' => $addHtml
+		);
 
-			return $addHtml ? '<ul class="fabrikRepeatData"><li>' . implode('</li><li>', $condensed) . '</li></ul>' : implode(' ', $condensed);
-		}
-		else
-		{
-			$html = array();
-			$html[] = $addHtml ? '<ul class="fabrikRepeatData"><li>' : '';
-
-			foreach ($uls as $ul)
-			{
-				$html[] = $addHtml ? '<ul class="fabrikRepeatData"><li>' : '';
-				$html[] = $addHtml ? implode('</li><li>', $ul) : implode(' ', $ul);
-				$html[] = $addHtml ? '</li></ul>' : '';
-			}
-
-			$html[] = $addHtml ? '</li></ul>' : '';
-
-			return $addHtml ? implode('', $html) : implode(' ', $html);
-		}
+		return $layout->render((object) $displayData);
 	}
 
 	/**
@@ -1012,16 +1000,13 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 	 */
 	public function formJavascriptClass(&$srcs, $script = '', &$shim = array())
 	{
-		$ext = FabrikHelperHTML::isDebug() ? '.js' : '-min.js';
-		$files = array('media/com_fabrik/js/element' . $ext, 'media/com_fabrik/js/elementlist' . $ext);
+		$mediaFolder = FabrikHelperHTML::getMediaFolder();
+		$files = array(
+			'Element' => $mediaFolder . '/element.js',
+			'ElementList' => $mediaFolder . '/elementlist.js'
+		);
 
-		foreach ($files as $file)
-		{
-			if (!in_array($file, $srcs))
-			{
-				$srcs[] = $file;
-			}
-		}
+		$srcs = array_merge($srcs, $files);
 
 		parent::formJavascriptClass($srcs, $script, $shim);
 	}

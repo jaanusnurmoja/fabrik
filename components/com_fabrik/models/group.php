@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use \Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
@@ -332,7 +331,6 @@ class FabrikFEModelGroup extends FabModel
 			$query->select('form_id')->from('#__{package}_formgroup')->where('group_id = ' . (int) $this->getId());
 			$db->setQuery($query);
 			$this->formsIamIn = $db->loadColumn();
-			$db->execute();
 		}
 
 		return $this->formsIamIn;
@@ -365,7 +363,14 @@ class FabrikFEModelGroup extends FabModel
 				 * $$$ rob Using @ for now as in inline edit in podion you get multiple notices when
 				* saving the status element
 				*/
-				$this->elements = @$allGroups[$this->getId()]->elements;
+				/* Bauer note: this error prevents adding new elements 
+				 * in a new list (where Id is not yet known) in php 7 
+				 */
+				// $this->elements = @$allGroups[$this->getId()]->elements;
+				$thisId = $this->getId();
+				if(!empty($thisId)){
+					$this->elements = $allGroups[$thisId]->elements;
+				}
 			}
 		}
 
@@ -545,7 +550,7 @@ class FabrikFEModelGroup extends FabModel
 	/**
 	 * Get the groups form model
 	 *
-	 * @return object form model
+	 * @return FabrikFEModelForm form model
 	 */
 	public function getFormModel()
 	{
@@ -1017,7 +1022,7 @@ class FabrikFEModelGroup extends FabModel
 
 		$label = $input->getString('group' . $group->id . '_label', $groupTable->label);
 
-		if (String::stristr($label, "{Add/Edit}"))
+		if (JString::stristr($label, "{Add/Edit}"))
 		{
 			$replace = $formModel->isNewRecord() ? FText::_('COM_FABRIK_ADD') : FText::_('COM_FABRIK_EDIT');
 			$label = str_replace("{Add/Edit}", $replace, $label);
@@ -1197,9 +1202,12 @@ class FabrikFEModelGroup extends FabModel
 		 * has already called the element model's getValue(), the change we just made to formdata won't get picked up
 		 * during the row store processing, as getValue() will return the cached default.
 		 */
-
 		$elementModel = $formModel->getElement($fk_name);
-		$elementModel->clearDefaults();
+
+		if ($elementModel)
+		{
+			$elementModel->clearDefaults();
+		}
 	}
 
 	/**
@@ -1265,10 +1273,7 @@ class FabrikFEModelGroup extends FabModel
 		$repeats = $this->repeatTotals();
 		$joinModel = $this->getJoinModel();
 		$pkField = $joinModel->getForeignID();
-		$fk = $joinModel->getForeignKey();
-
 		$fkOnParent = $this->fkOnParent();
-
 		$listModel = $this->getListModel();
 		$item = $this->getGroup();
 		$formModel = $this->getFormModel();
@@ -1407,7 +1412,6 @@ class FabrikFEModelGroup extends FabModel
 				$listModel->updateRow($parentId, $fkField, $insertId);
 			}
 		}
-
 	}
 
 	/**

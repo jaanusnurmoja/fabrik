@@ -12,8 +12,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
-
 /**
  * Fabrik Component Helper
  *
@@ -27,12 +25,12 @@ class FabrikAdminHelper
 	 * Prepare the date for saving
 	 * DATES SHOULD BE SAVED AS UTC
 	 *
-	 * @param   string  &$strdate  publish down date
+	 * @param   string  $strdate  publish down date
 	 *
-	 * @return  null
+	 * @return  string
 	 */
 
-	public static function prepareSaveDate(&$strdate)
+	public static function prepareSaveDate($strdate)
 	{
 		$config = JFactory::getConfig();
 		$tzoffset = $config->get('offset');
@@ -45,7 +43,7 @@ class FabrikAdminHelper
 		}
 		else
 		{
-			if (String::strlen(trim($strdate)) <= 10)
+			if (JString::strlen(trim($strdate)) <= 10)
 			{
 				$strdate .= ' 00:00:00';
 			}
@@ -53,6 +51,8 @@ class FabrikAdminHelper
 			$date = JFactory::getDate($strdate, $tzoffset);
 			$strdate = $date->toSql();
 		}
+
+		return $strdate;
 	}
 
 	/**
@@ -169,7 +169,7 @@ class FabrikAdminHelper
 
 			// Each group the user is in could have different filtering properties.
 			$filterData = $filters->$groupId;
-			$filterType = String::strtoupper($filterData->filter_type);
+			$filterType = JString::strtoupper($filterData->filter_type);
 
 			if ($filterType == 'NH')
 			{

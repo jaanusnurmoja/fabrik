@@ -12,8 +12,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
-
 JHtml::addIncludePath(JPATH_COMPONENT . '/helpers/html');
 JHTML::stylesheet('administrator/components/com_fabrik/views/fabrikadmin.css');
 JHtml::_('behavior.tooltip');
@@ -24,16 +22,18 @@ JHtml::_('behavior.keepalive');
 
 <script type="text/javascript">
 	Joomla.submitbutton = function(task) {
-		if (task !== 'list.cancel'  && !Fabrik.controller.canSaveForm()) {
-			alert('Please wait - still loading');
-			return false;
-		}
-		if (task == 'list.cancel' || document.formvalidator.isValid(document.id('adminForm'))) {
-			window.fireEvent('form.save');
-			Joomla.submitform(task, document.getElementById('adminForm'));
-		} else {
-			alert('<?php echo $this->escape(FText::_('JGLOBAL_VALIDATION_FORM_FAILED'));?>');
-		}
+		requirejs(['fab/fabrik'], function (Fabrik) {
+			if (task !== 'list.cancel' && !Fabrik.controller.canSaveForm()) {
+				window.alert('Please wait - still loading');
+				return false;
+			}
+			if (task == 'list.cancel' || document.formvalidator.isValid(document.id('adminForm'))) {
+				window.fireEvent('form.save');
+				Joomla.submitform(task, document.getElementById('adminForm'));
+			} else {
+				window.alert('<?php echo $this->escape(FText::_('JGLOBAL_VALIDATION_FORM_FAILED'));?>');
+			}
+		});
 	}
 </script>
 <form action="<?php JRoute::_('index.php?option=com_fabrik'); ?>" method="post" name="adminForm" id="adminForm" class="form-validate">
@@ -82,7 +82,7 @@ foreach ($panels as $panel) {
 				<?php foreach ($panel['fieldset'] as $fieldset) :
 					foreach ($this->form->getFieldset($fieldset) as $field) :?>
 					<li>
-					<?php if (String::strtolower($field->type) != 'hidden') {
+					<?php if (JString::strtolower($field->type) != 'hidden') {
 							echo $field->label;
 						} ?>
 						<?php echo $field->input; ?>

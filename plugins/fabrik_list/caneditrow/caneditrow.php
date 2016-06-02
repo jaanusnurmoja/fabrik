@@ -158,8 +158,18 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 		$opts = $this->getElementJSOptions();
 		$opts->acl = $this->acl;
 		$opts = json_encode($opts);
-		$this->jsInstance = "new FbListCanEditRow($opts)";
+		$this->jsInstance = "new FbListCaneditrow($opts)";
 
 		return true;
+	}
+
+	/**
+	 * Load the AMD module class name
+	 *
+	 * @return string
+	 */
+	public function loadJavascriptClassName_result()
+	{
+		return 'FbListCaneditrow';
 	}
 }

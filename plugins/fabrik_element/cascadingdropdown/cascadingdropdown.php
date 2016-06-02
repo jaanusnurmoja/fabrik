@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use Joomla\Utilities\ArrayHelper;
 
 require_once JPATH_SITE . '/plugins/fabrik_element/databasejoin/databasejoin.php';
@@ -61,7 +60,6 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 			FabrikHelperHTML::autoComplete($id, $this->getElement()->id, $this->getFormModel()->getId(), 'cascadingdropdown', $autoOpts);
 		}
 
-		FabrikHelperHTML::script('media/com_fabrik/js/lib/Event.mock.js');
 		$opts = $this->getElementJSOptions($repeatCounter);
 		$opts->showPleaseSelect = $this->showPleaseSelect();
 		$opts->watch = $this->getWatchId($repeatCounter);
@@ -70,6 +68,7 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 		$opts->displayType = $params->get('cdd_display_type', 'dropdown');
 		$opts->id = $this->getId();
 		$opts->listName = $this->getListModel()->getTable()->db_table_name;
+		$opts->lang           = FabrikWorker::getMultiLangURLCode();
 
 		// This bizarre chunk of code handles the case of setting a CDD value on the QS on a new form
 		$rowId = $input->get('rowid', '', 'string');
@@ -105,6 +104,7 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 
 		// Was otherwise using the none-raw value.
 		$opts->value = $this->getValue($data, $repeatCounter, array('raw' => true));
+		$opts->optsPerRow = (int) $params->get('dbjoin_options_per_row', 1);
 
 		if (is_array($opts->value) && count($opts->value) > 0)
 		{
@@ -137,7 +137,7 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 			}
 
 			$w = new FabrikWorker;
-			$val = $w->parseMessageForPlaceHolder($val, array());
+			$val = $w->parseMessageForPlaceHolder($val, array(), false, false, null, false);
 
 			return 'CONCAT_WS(\'\', ' . $val . ')';
 		}
@@ -336,23 +336,6 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 		}
 
 		return '';
-	}
-
-	/**
-	 * Does the element store its data in a join table (1:n)
-	 *
-	 * @return	bool
-	 */
-	public function isJoin()
-	{
-		if (in_array($this->getDisplayType(), array('checkbox', 'multilist')))
-		{
-			return true;
-		}
-		else
-		{
-			return parent::isJoin();
-		}
 	}
 
 	/**
@@ -843,6 +826,11 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 
 		$filter = $params->get('cascadingdropdown_filter');
 
+		if (!empty($this->autocomplete_where))
+		{
+			$where .= $where !== '' ? ' AND ' . $this->autocomplete_where : $this->autocomplete_where;
+		}
+
 		/* $$$ hugh - temporary hack to work around this issue:
 		 * http://fabrikar.com/forums/showthread.php?p=71288#post71288
 		 * ... which is basically that if they are using {placeholders} in their
@@ -865,11 +853,6 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 		$placeholders = is_null($whereVal) ? array() : array('whereval' => $whereVal, 'wherekey' => $whereKey);
 		$join = $this->getJoin();
 		$where = $this->parseThisTable($where, $join);
-
-		if (!empty($this->autocomplete_where))
-		{
-			$where .= $where !== '' ? ' AND ' . $this->autocomplete_where : $this->autocomplete_where;
-		}
 
 		$data = array_merge($data, $placeholders);
 		$where = $w->parseMessageForRepeats($where, $data, $this, $repeatCounter);
@@ -938,7 +921,7 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 			$query->where($where);
 		}
 
-		if (!String::stristr($where, 'order by'))
+		if (!JString::stristr($where, 'order by'))
 		{
 			$query->order($orderBy . ' ASC');
 		}
@@ -1084,28 +1067,11 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 			$opts->advanced = $this->getAdvancedSelectClass();
 			$opts->noselectionvalue = $params->get('cascadingdropdown_noselectionvalue', '');
 			$opts->filterobj = 'Fabrik.filter_' . $container;
+			$opts->lang           = FabrikWorker::getMultiLangURLCode();
 			$opts = json_encode($opts);
 
 			return "Fabrik.filter_{$container}.addFilter('$element->plugin', new CascadeFilter('$observerId', $opts));\n";
 		}
-	}
-
-	/**
-	 * Get the class to manage the form element
-	 * to ensure that the file is loaded only once
-	 *
-	 * @param   array   &$srcs   Scripts previously loaded
-	 * @param   string  $script  Script to load once class has loaded
-	 * @param   array   &$shim   Dependant class names to load before loading the class - put in requirejs.config shim
-	 *
-	 * @return void
-	 */
-	public function formJavascriptClass(&$srcs, $script = '', &$shim = array())
-	{
-		$s = new stdClass;
-		$s->deps = array('fab/element', 'element/databasejoin/databasejoin', 'fab/encoder');
-		$shim['element/cascadingdropdown/cascadingdropdown'] = $s;
-		parent::formJavascriptClass($srcs, $script, $shim);
 	}
 
 	/**

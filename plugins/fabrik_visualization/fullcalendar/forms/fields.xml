@@ -55,6 +55,14 @@
 				description="PLG_VISUALIZATION_FULLCALENDAR_STATUS_ELEMENT_DESC"
 				label="PLG_VISUALIZATION_FULLCALENDAR_STATUS_ELEMENT_LABEL" />
 				
+			<field name="allday_element"
+				type="element"
+				table="params_fullcalendar_table"
+				connection="params_fullcalendar_connection"
+				connection_in_repeat="false"
+				description="PLG_VISUALIZATION_FULLCALENDAR_ALLDAY_ELEMENT_DESC"
+				label="PLG_VISUALIZATION_FULLCALENDAR_ALLDAY_ELEMENT_LABEL" />
+				
 			<field name="legendtext"
 				type="text"
 				description="PLG_VISUALIZATION_FULLCALENDAR_LEGEND_TEXT_DESC"
@@ -85,7 +93,7 @@
 			
 			<field name="fullcalendar_layout"
 				type="folderlist"
-				directory="plugins/fabrik_visualization/calendar/views/calendar/tmpl/"
+				directory="plugins/fabrik_visualization/fullcalendar/views/fullcalendar/tmpl/"
 				default="bootstrap"
 				label="PLG_VISUALIZATION_FULLCALENDAR_TEMPLATE_LABEL" />
 				

@@ -12,7 +12,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use Joomla\Utilities\ArrayHelper;
 
 require_once 'fabmodeladmin.php';
@@ -233,7 +232,7 @@ class FabrikAdminModelPackage extends FabModelAdmin
 
 		foreach ($blocks as $type => $values)
 		{
-			$tbl = String::ucfirst($type);
+			$tbl = JString::ucfirst($type);
 
 			foreach ($values as $id)
 			{
@@ -839,7 +838,7 @@ class FabrikAdminModelPackage extends FabModelAdmin
 
 		$lookups = $this->getInstallItems($row);
 		$lids    = $lookups->list;
-		ArrayHelper::toInteger($lids);
+		$lids    = ArrayHelper::toInteger($lids);
 		$plugins = array();
 
 		foreach ($lids as $lid)
@@ -1012,7 +1011,11 @@ class FabrikAdminModelPackage extends FabModelAdmin
 			}
 
 			$table = str_replace('{package}', $row->component_name, $table);
-			$sql[] = 'DROP TABLE IF EXISTS ' . $this->db->qn($table) . ';';
+
+			if ($table !== '')
+			{
+				$sql[] = 'DROP TABLE IF EXISTS ' . $this->db->qn($table) . ';';
+			}
 		}
 
 		$path = $this->outputPath . 'admin/sql/uninstall.mysql.uft8.sql';

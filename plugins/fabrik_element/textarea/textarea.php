@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use Joomla\Utilities\ArrayHelper;
 
 /**
@@ -124,7 +123,7 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 		}
 		else
 		{
-			if (!$this->useWysiwyg())
+			if (!$this->useWysiwyg(false))
 			{
 				if (is_array($data))
 				{
@@ -222,21 +221,23 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	/**
 	 * Should the element use the WYSIWYG editor
 	 *
+	 * @bool  checkFormat  check the formats (ajax, format=raw), or only check param setting
+	 *
 	 * @since   3.0.6.2
 	 *
 	 * @return  bool
 	 */
-	protected function useWysiwyg()
+	protected function useWysiwyg($checkFormat = true)
 	{
 		$params = $this->getParams();
 		$input = $this->app->input;
 
-		if ($input->get('format') == 'raw')
+		if ($checkFormat && $input->get('format') == 'raw')
 		{
 			return false;
 		}
 
-		if ($input->get('ajax') == '1')
+		if ($checkFormat && $input->get('ajax') == '1')
 		{
 			return false;
 		}
@@ -279,7 +280,7 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 			}
 			else
 			{
-				if (!$wysiwyg)
+				if (!$this->useWysiwyg(false))
 				{
 					$value = nl2br($value);
 				}
@@ -360,7 +361,7 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 			if ($params->get('textarea_limit_type', 'char') === 'char')
 			{
 				$label = FText::_('PLG_ELEMENT_TEXTAREA_CHARACTERS_LEFT');
-				$charsLeft = $params->get('textarea-maxlength') - String::strlen($value);
+				$charsLeft = $params->get('textarea-maxlength') - JString::strlen($value);
 			}
 			else
 			{
@@ -518,7 +519,7 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 			return true;
 		}
 
-		if (String::strlen($data) > (int) $params->get('textarea-maxlength'))
+		if (JString::strlen($data) > (int) $params->get('textarea-maxlength'))
 		{
 			return false;
 		}

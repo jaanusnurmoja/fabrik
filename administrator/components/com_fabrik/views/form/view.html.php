@@ -82,9 +82,10 @@ class FabrikAdminViewForm extends JViewLegacy
 		$shim['admin/pluginmanager'] = $dep;
 		FabrikHelperHTML::iniRequireJS($shim);
 
-		$srcs   = FabrikHelperHTML::framework();
-		$srcs[] = 'administrator/components/com_fabrik/views/namespace.js';
-		$srcs[] = 'administrator/components/com_fabrik/views/pluginmanager.js';
+		$srcs                  = FabrikHelperHTML::framework();
+		$srcs['Fabrik']        = FabrikHelperHTML::mediaFile('fabrik.js');
+		$srcs['Namespace']     = 'administrator/components/com_fabrik/views/namespace.js';
+		$srcs['PluginManager'] = 'administrator/components/com_fabrik/views/pluginmanager.js';
 
 		FabrikHelperHTML::script($srcs, $this->js);
 		parent::display($tpl);
@@ -119,7 +120,8 @@ class FabrikAdminViewForm extends JViewLegacy
 		$isNew      = ($this->item->id == 0);
 		$checkedOut = !($this->item->checked_out == 0 || $this->item->checked_out == $user->get('id'));
 		$canDo      = FabrikAdminHelper::getActions($this->state->get('filter.category_id'));
-		$title      = $isNew ? FText::_('COM_FABRIK_MANAGER_FORM_NEW') : FText::_('COM_FABRIK_MANAGER_FORM_EDIT') . ' "' . $this->item->label . '"';
+		$title      = $isNew ? FText::_('COM_FABRIK_MANAGER_FORM_NEW') : FText::_('COM_FABRIK_MANAGER_FORM_EDIT') . ' "'
+			. FText::_($this->item->label) . '"';
 		JToolBarHelper::title($title, 'file-2');
 
 		if ($isNew)
@@ -195,7 +197,7 @@ class FabrikAdminViewForm extends JViewLegacy
 		$input->set('hidemainmenu', true);
 		$canDo = FabrikAdminHelper::getActions($this->state->get('filter.category_id'));
 		JToolBarHelper::title(FText::_('COM_FABRIK_MANAGER_SELECT_CONTENT_TYPE'), 'puzzle');
-		
+
 		// For new records, check the create permission.
 		if ($canDo->get('core.create'))
 		{

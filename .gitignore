@@ -25,6 +25,7 @@ includes/*
 language/*
 libraries/*
 !libraries/dompdf/
+!libraries/fabrik/fabrik/*
 libraries/dompdf/lib/fonts/log.htm
 logs
 modules/*
@@ -43,12 +44,12 @@ plugins/search/*
 !plugins/search/fabrik
 plugins/system/*
 plugins/fabrik_list/sphera_php_events
+plugins/fabrik_list/download/libs
 !plugins/system/fabrik/
 !plugins/fabrik_element/
 plugins/fabrik_element/mytristate/
 !plugins/fabrik_form/
 plugins/fabrik_form/payments/
-
 plugins/fabrik_form/php/scripts/
 plugins/fabrik_form/caneditgroup/
 !plugins/fabrik_list/
@@ -99,3 +100,7 @@ custom.css
 /ZendFramework-1.12.3
 /mobiquo
 /node_modules
+
+components/com_fabrik/language/.DS_Store
+
+components/com_fabrik/models/.DS_Store

@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use Joomla\Utilities\ArrayHelper;
 
 /**
@@ -114,7 +113,7 @@ class FabrikWorker
 
 		if (array_key_exists('extension', $path_parts))
 		{
-			$image_extensions_eregi = 'bmp|gif|jpg|jpeg|png';
+			$image_extensions_eregi = 'bmp|gif|jpg|jpeg|png|pdf';
 
 			return preg_match('/' . $image_extensions_eregi . '/i', $path_parts['extension']) > 0;
 		}
@@ -600,12 +599,43 @@ class FabrikWorker
 			$reservedWords = array_merge($reservedWords, $strictWords);
 		}
 
-		if (in_array(String::strtolower($str), $reservedWords))
+		if (in_array(JString::strtolower($str), $reservedWords))
 		{
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Check a string is valid to use as an element name
+	 *
+	 * @param   string $str    To check
+	 * @param   bool   $strict Include things like rowid, listid in the reserved words, defaults to true
+	 *
+	 * @return bool
+	 */
+	public static function validElementName($str, $strict = true)
+	{
+		// check if it's a Fabrik reserved word
+		if (self::isReserved($str, $strict))
+		{
+			return false;
+		}
+
+		// check valid MySQL - start with letter or _, then only alphanumeric or underscore
+		if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $str))
+		{
+			return false;
+		}
+
+		// check for various other gotchas, like ending in _raw, starting with more than one _, etc.
+		if (preg_match('/^submit|^__|_raw$/', $str))
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -694,10 +724,12 @@ class FabrikWorker
 	 *                                   message
 	 * @param   bool   $addSlashes       Add slashed to the text?
 	 * @param   object $theirUser        User to use in replaceWithUserData (defaults to logged in user)
+	 * @param   bool   $unsafe           If true (default) will not replace certain placeholders like $jConfig_secret
+	 *                                   must not be shown to users
 	 *
 	 * @return  string  parsed message
 	 */
-	public function parseMessageForPlaceHolder($msg, $searchData = null, $keepPlaceholders = true, $addSlashes = false, $theirUser = null)
+	public function parseMessageForPlaceHolder($msg, $searchData = null, $keepPlaceholders = true, $addSlashes = false, $theirUser = null, $unsafe = true)
 	{
 		$returnType = is_array($msg) ? 'array' : 'string';
 		$messages   = (array) $msg;
@@ -706,7 +738,7 @@ class FabrikWorker
 		{
 			$this->parseAddSlashes = $addSlashes;
 
-			if (!($msg == '' || is_array($msg) || String::strpos($msg, '{') === false))
+			if (!($msg == '' || is_array($msg) || JString::strpos($msg, '{') === false))
 			{
 				$msg = str_replace(array('%7B', '%7D'), array('{', '}'), $msg);
 
@@ -732,6 +764,12 @@ class FabrikWorker
 				}
 
 				$msg = self::replaceWithGlobals($msg);
+
+				if (!$unsafe)
+				{
+					$msg = self::replaceWithUnsafe($msg);
+				}
+
 				$msg = preg_replace("/{}/", "", $msg);
 
 				// Replace {element name} with form data
@@ -856,6 +894,45 @@ class FabrikWorker
 	}
 
 	/**
+	 * Called from parseMessageForPlaceHolder to iterate through string to replace
+	 * {placeholder} with unsafe data
+	 *
+	 * @param   string $msg Message to parse
+	 *
+	 * @return    string    parsed message
+	 */
+	public static function replaceWithUnsafe($msg)
+	{
+		$replacements = self::unsafeReplacements();
+
+		foreach ($replacements as $key => $value)
+		{
+			$msg = str_replace($key, $value, $msg);
+		}
+
+		return $msg;
+	}
+
+	/**
+	 * Get an associative array of replacements for 'unsafe' value, like $jConfig_secret, which we
+	 * only want to use for stricty internal use that won't ever get shown to the user
+	 *
+	 * @return array
+	 * @throws Exception
+	 */
+	public static function unsafeReplacements()
+	{
+		$config = JFactory::getConfig();
+
+		$replacements = array(
+			'{$jConfig_absolute_path}' => JPATH_SITE,
+			'{$jConfig_secret}' => $config->get('secret')
+		);
+
+		return $replacements;
+	}
+
+	/**
 	 * Get an associative array of replacements strings and values
 	 *
 	 * @return array
@@ -863,28 +940,28 @@ class FabrikWorker
 	 */
 	public static function globalReplacements()
 	{
-		$app     = JFactory::getApplication();
-		$itemId  = self::itemId();
-		$config  = JFactory::getConfig();
-		$session = JFactory::getSession();
-		$token   = $session->get('session.token');
-		$lang    = JFactory::getLanguage()->getTag();
-		$lang    = str_replace('-', '_', $lang);
+		$app       = JFactory::getApplication();
+		$itemId    = self::itemId();
+		$config    = JFactory::getConfig();
+		$session   = JFactory::getSession();
+		$token     = $session->get('session.token');
+		$lang      = JFactory::getLanguage()->getTag();
+		$lang      = str_replace('-', '_', $lang);
 		$shortlang = explode('_', $lang);
 		$shortlang = $shortlang[0];
+		$multilang = FabrikWorker::getMultiLangURLCode();
 
 		$replacements = array(
-			'{$jConfig_absolute_path}' => JPATH_SITE,
 			'{$jConfig_live_site}' => COM_FABRIK_LIVESITE,
 			'{$jConfig_offset}' => $config->get('offset'),
 			'{$Itemid}' => $itemId,
 			'{$jConfig_sitename}' => $config->get('sitename'),
 			'{$jConfig_mailfrom}' => $config->get('mailfrom'),
-			'{$jConfig_secret}' => $config->get('secret'),
 			'{where_i_came_from}' => $app->input->server->get('HTTP_REFERER', '', 'string'),
 			'{date}' => date('Ymd'),
 			'{mysql_date}' => date('Y-m-d H:i:s'),
 			'{lang}' => $lang,
+			'{multilang}' => $multilang,
 			'{shortlang}' => $shortlang,
 			'{session.token}' => $token,
 		);
@@ -934,7 +1011,7 @@ class FabrikWorker
 		$orig  = $match;
 
 		// Strip the {}
-		$match = String::substr($match, 1, JString::strlen($match) - 2);
+		$match = JString::substr($match, 1, JString::strlen($match) - 2);
 
 		/* $$$ hugh - added dbprefix substitution
 		 * Not 100% if we should do this on $match before copying to $orig, but for now doing it
@@ -1013,7 +1090,7 @@ class FabrikWorker
 						}
 					}
 
-					$match = String::ltrim($newMatch, ',');
+					$match = JString::ltrim($newMatch, ',');
 				}
 			}
 			else
@@ -1086,7 +1163,7 @@ class FabrikWorker
 			elseif (preg_match('/bmp|gif|jpg|png/i', $file) && is_file($i_f))
 			{
 				// Leading / we don't need
-				$imageFile             = String::substr($ff, 1);
+				$imageFile             = JString::substr($ff, 1);
 				$images[$folderPath][] = $makeOptions ? JHTML::_('select.option', $imageFile, $file) : $file;
 			}
 		}
@@ -1172,15 +1249,45 @@ class FabrikWorker
 	 * so for ajax calls that need to use jf translated text we need to get the current lang and
 	 * send it to the js code which will then append the lang=XX to the ajax querystring
 	 *
+	 * Renamed to getShortLang as we don't support Joomfish any more
+	 *
 	 * @since 2.0.5
 	 *
 	 * @return    string    first two letters of lang code - e.g. nl from 'nl-NL'
 	 */
-	public static function getJoomfishLang()
+	public static function getShortLang()
 	{
 		$lang = JFactory::getLanguage();
+		$lang = explode('-', $lang->getTag());
 
-		return array_shift(explode('-', $lang->getTag()));
+		return array_shift($lang);
+	}
+
+	/**
+	 * If J! multiple languages is enabled, return the URL language code for the currently selected language, which is
+	 * set by the admin in the 'content languages'.  If not multi lang, return false;
+	 *
+	 * @return boolean || string
+	 */
+	public static function getMultiLangURLCode()
+	{
+		$multiLang = false;
+
+		if (JLanguageMultilang::isEnabled())
+		{
+			$lang      = JFactory::getLanguage()->getTag();
+			$languages = JLanguageHelper::getLanguages();
+			foreach ($languages as $language)
+			{
+				if ($language->lang_code === $lang)
+				{
+					$multiLang = $language->sef;
+					break;
+				}
+			}
+		}
+
+		return $multiLang;
 	}
 
 	/**
@@ -1232,7 +1339,7 @@ class FabrikWorker
 
 			// Each group the user is in could have different filtering properties.
 			$filterData = $filters->$groupId;
-			$filterType = String::strtoupper($filterData->filter_type);
+			$filterType = JString::strtoupper($filterData->filter_type);
 
 			if ($filterType == 'NH')
 			{
@@ -1507,40 +1614,54 @@ class FabrikWorker
 			$version              = new JVersion;
 			self::$database[$sig] = $version->RELEASE > 2.5 ? JDatabaseDriver::getInstance($options) : JDatabase::getInstance($options);
 
-			/*
-			 *  $$$ hugh - testing doing bigSelects stuff here
-			 *  Reason being, some folk on shared hosting plans with very restrictive MySQL
-			 *  setups are hitting the 'big selects' problem on Fabrik internal queries, not
-			 *  just on their List specific queries.  So we need to apply 'big selects' to our
-			 *  default connection as well, essentially enabling it for ALL queries we do.
-			 */
-			$fbConfig = JComponentHelper::getParams('com_fabrik');
+			FabrikWorker::bigSelects(self::$database[$sig]);
 
-			if ($fbConfig->get('enable_big_selects', 0) == '1')
-			{
-				$fabrikDb = self::$database[$sig];
-
-				/**
-				 * Use of OPTION in SET deprecated from MySQL 5.1. onward
-				 * http://www.fabrikar.com/forums/index.php?threads/enable-big-selects-error.39463/#post-198293
-				 * NOTE - technically, using verison_compare on MySQL version could fail, if it's a "gamma"
-				 * release, which PHP desn't grok!
-				 */
-
-				if (version_compare($fabrikDb->getVersion(), '5.1.0', '>='))
-				{
-					$fabrikDb->setQuery("SET SQL_BIG_SELECTS=1, GROUP_CONCAT_MAX_LEN=10240");
-				}
-				else
-				{
-					$fabrikDb->setQuery("SET OPTION SQL_BIG_SELECTS=1, GROUP_CONCAT_MAX_LEN=10240");
-				}
-
-				$fabrikDb->execute();
-			}
 		}
 
 		return self::$database[$sig];
+	}
+
+	/**
+	 *  $$$ hugh - testing doing bigSelects stuff here
+	 *  Reason being, some folk on shared hosting plans with very restrictive MySQL
+	 *  setups are hitting the 'big selects' problem on Fabrik internal queries, not
+	 *  just on their List specific queries.  So we need to apply 'big selects' to our
+	 *  default connection as well, essentially enabling it for ALL queries we do.
+	 *
+	 * @param  JDatabaseDriver $fabrikDb
+	 *
+	 * @return void
+	 */
+	public static function bigSelects($fabrikDb)
+	{
+		$fbConfig = JComponentHelper::getParams('com_fabrik');
+
+		if ($fbConfig->get('enable_big_selects', 0) == '1')
+		{
+			/**
+			 * Use of OPTION in SET deprecated from MySQL 5.1. onward
+			 * http://www.fabrikar.com/forums/index.php?threads/enable-big-selects-error.39463/#post-198293
+			 * NOTE - technically, using verison_compare on MySQL version could fail, if it's a "gamma"
+			 * release, which PHP desn't grok!
+			 */
+
+			if (version_compare($fabrikDb->getVersion(), '5.1.0', '>='))
+			{
+				$fabrikDb->setQuery("SET SQL_BIG_SELECTS=1, GROUP_CONCAT_MAX_LEN=10240");
+			}
+			else
+			{
+				$fabrikDb->setQuery("SET OPTION SQL_BIG_SELECTS=1, GROUP_CONCAT_MAX_LEN=10240");
+			}
+
+			try
+			{
+				$fabrikDb->execute();
+			} catch (Exception $e)
+			{
+				// Fail silently
+			}
+		}
 	}
 
 	/**
@@ -1610,12 +1731,14 @@ class FabrikWorker
 	 * Takes a string which may or may not be json and returns either string/array/object
 	 * will also turn valGROUPSPLITTERval2 to array
 	 *
-	 * @param   string $data    Json encoded string
-	 * @param   bool   $toArray Force data to be an array
+	 * @param   string $data     Json encoded string
+	 * @param   bool   $toArray  Force data to be an array
+	 * @param   bool   $emptyish Set to false to return an empty array if $data is an empty string, instead of an
+	 *                           emptyish (one empty string entry) array
 	 *
 	 * @return  mixed data
 	 */
-	public static function JSONtoData($data, $toArray = false)
+	public static function JSONtoData($data, $toArray = false, $emptyish = true)
 	{
 		if (is_string($data))
 		{
@@ -1649,6 +1772,12 @@ class FabrikWorker
 				}
 
 				$data = is_null($json) ? $data : $json;
+			}
+
+			// If $data was an empty string and "emptyish" is not set, we want an empty array, not an array with one empty string
+			if ($toArray && !$emptyish && $data === '')
+			{
+				$data = array();
 			}
 		}
 
@@ -1760,6 +1889,159 @@ class FabrikWorker
 	}
 
 	/**
+	 * Function to send an email
+	 *
+	 * @param   string   $from         From email address
+	 * @param   string   $fromName     From name
+	 * @param   mixed    $recipient    Recipient email address(es)
+	 * @param   string   $subject      email subject
+	 * @param   string   $body         Message body
+	 * @param   boolean  $mode         false = plain text, true = HTML
+	 * @param   mixed    $cc           CC email address(es)
+	 * @param   mixed    $bcc          BCC email address(es)
+	 * @param   mixed    $attachment   Attachment file name(s)
+	 * @param   mixed    $replyTo      Reply to email address(es)
+	 * @param   mixed    $replyToName  Reply to name(s)
+	 *
+	 * @return  boolean  True on success
+	 *
+	 * @since   11.1
+	 */
+	public static function sendMail($from, $fromName, $recipient, $subject, $body, $mode = false,
+		$cc = null, $bcc = null, $attachment = null, $replyTo = null, $replyToName = null)
+	{
+		// do a couple of tweaks to improve spam scores
+
+		// If html, make sure there's an <html> tag
+		if ($mode)
+		{
+			if (!stristr($body, '<html>'))
+			{
+				$body = '<html>' . $body . '</html>';
+			}
+		}
+
+		// if simple single email recipient with no name part, fake out name part to avoid TO_NO_BKRT hit in spam filters
+		$recipientName = '';
+		if (is_string($recipient) && !strstr($recipient, '<'))
+		{
+			$recipientName = $recipient;
+		}
+
+		// Get a JMail instance
+		$mailer = JFactory::getMailer();
+
+		$mailer->setSubject($subject);
+		$mailer->setBody($body);
+		$mailer->Encoding = 'base64';
+
+		// Are we sending the email as HTML?
+		$mailer->isHtml($mode);
+
+		try
+		{
+			$mailer->addRecipient($recipient, $recipientName);
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+
+		try
+		{
+			$mailer->addCc($cc);
+		}
+		catch (Exception $e)
+		{
+			// not sure if we should bail if Cc is bad, for now just soldier on
+		}
+
+		try
+		{
+			$mailer->addBcc($bcc);
+		}
+		catch (Exception $e)
+		{
+			// not sure if we should bail if Bcc is bad, for now just soldier on
+		}
+
+		try
+		{
+			$mailer->addAttachment($attachment);
+		}
+		catch (Exception $e)
+		{
+			// most likely file didn't exist, ignore
+		}
+
+		$autoReplyTo = false;
+
+		// Take care of reply email addresses
+		if (is_array($replyTo))
+		{
+			$numReplyTo = count($replyTo);
+
+			for ($i = 0; $i < $numReplyTo; $i++)
+			{
+				try
+				{
+					$mailer->addReplyTo($replyTo[$i], $replyToName[$i]);
+				}
+				catch (Exception $e)
+				{
+					// carry on
+				}
+			}
+		}
+		elseif (isset($replyTo))
+		{
+			try
+			{
+				$mailer->addReplyTo($replyTo, $replyToName);
+			}
+			catch (Exception $e)
+			{
+				// carry on
+			}
+		}
+		else
+		{
+			$autoReplyTo = true;
+		}
+
+		try
+		{
+			$mailer->setSender(array($from, $fromName, $autoReplyTo));
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+
+		/**
+		 * Set the plain text AltBody, which forces the PHP mailer class to make this
+		 * a multipart MIME type, with an alt body for plain text.  If we don't do this,
+		 * the default behavior is to send it as just text/html, which causes spam filters
+		 * to downgrade it.
+		 */
+		if ($mode)
+		{
+			$mailer->AltBody = JMailHelper::cleanText(strip_tags($body));
+		}
+
+		try
+		{
+			$ret = $mailer->Send();
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+
+		return $ret;
+	}
+
+	/**
 	 * Get a JS go back action e.g 'onclick="history.back()"
 	 *
 	 * @return string
@@ -1769,14 +2051,15 @@ class FabrikWorker
 		jimport('joomla.environment.browser');
 		$uri = JUri::getInstance();
 
+		$url = filter_var(ArrayHelper::getValue($_SERVER, 'HTTP_REFERER'), FILTER_SANITIZE_URL);
+
 		if ($uri->getScheme() === 'https')
 		{
-			$goBackAction = 'onclick="parent.location=\'' . FArrayHelper::getValue($_SERVER, 'HTTP_REFERER') . '\'"';
+			$goBackAction = 'onclick="parent.location=\'' . $url . '\'"';
 		}
 		else
 		{
-			//$goBackAction = 'onclick=\'history.back();\'';
-			$goBackAction = 'onclick="parent.location=\'' . FArrayHelper::getValue($_SERVER, 'HTTP_REFERER') . '\'"';
+			$goBackAction = 'onclick="parent.location=\'' . $url . '\'"';
 		}
 
 		return $goBackAction;
@@ -1840,32 +2123,43 @@ class FabrikWorker
 	/**
 	 * Attempt to get a variable first from the menu params (if they exists) if not from request
 	 *
-	 * @param   string $name     Param name
-	 * @param   mixed  $val      Default
-	 * @param   bool   $mambot   If set to true menu params ignored
-	 * @param   string $priority Defaults that menu priorities override request - set to 'request' to inverse this
-	 *                           priority
+	 * @param   string $name                         Param name
+	 * @param   mixed  $val                          Default
+	 * @param   bool   $mambot                       If set to true menu params ignored
+	 * @param   string $priority                     Defaults that menu priorities override request - set to 'request'
+	 *                                               to inverse this priority
+	 * @param   array  $opts                         Options 'listid' -> if priority = menu then the menu list id must
+	 *                                               match this value to use the menu param.
 	 *
 	 * @return  string
 	 */
-	public static function getMenuOrRequestVar($name, $val = '', $mambot = false, $priority = 'menu')
+	public static function getMenuOrRequestVar($name, $val = '', $mambot = false, $priority = 'menu', $opts = array())
 	{
 		$app   = JFactory::getApplication();
 		$input = $app->input;
 
 		if ($priority === 'menu')
 		{
+
 			$val = $input->get($name, $val, 'string');
 
 			if (!$app->isAdmin())
 			{
-				$menus = $app->getMenu();
-				$menu  = $menus->getActive();
-
-				// If there is a menu item available AND the view is not rendered in a content plugin
-				if (is_object($menu) && !$mambot)
+				if (!$mambot)
 				{
-					$val = $menu->params->get($name, $val);
+					$menus = $app->getMenu();
+					$menu  = $menus->getActive();
+
+					if (is_object($menu))
+					{
+						$menuListId  = ArrayHelper::getValue($menu->query, 'listid', '');
+						$checkListId = ArrayHelper::getValue($opts, 'listid', $menuListId);
+
+						if ((int) $menuListId === (int) $checkListId)
+						{
+							$val = $menu->params->get($name, $val);
+						}
+					}
 				}
 			}
 		}

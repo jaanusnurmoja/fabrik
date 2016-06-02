@@ -194,9 +194,9 @@ class PlgFabrik_FormComment extends PlgFabrik_Form
 		$this->formModel = $formModel;
 		$jsFiles = array();
 		JHTML::stylesheet('plugins/fabrik_form/comment/comments.css');
-		$jsFiles[] = 'media/com_fabrik/js/fabrik.js';
-		$jsFiles[] = 'plugins/fabrik_form/comment/comments.js';
-		$jsFiles[] = 'plugins/fabrik_form/comment/inlineedit.js';
+		$jsFiles['Fabrik'] = 'media/com_fabrik/js/fabrik.js';
+		$jsFiles['Comments'] = 'plugins/fabrik_form/comment/comments.js';
+		$jsFiles['InlineEdit'] = 'plugins/fabrik_form/comment/inlineedit.js';
 
 		$thumbOpts = $this->doThumbs() ? $thumbOpts = $this->loadThumbJsOpts() : "{}";
 		$rowId = $input->get('rowid', '', 'string');
@@ -250,7 +250,7 @@ class PlgFabrik_FormComment extends PlgFabrik_Form
 
 		if ($this->doThumbs())
 		{
-			$jsFiles[] = 'plugins/fabrik_element/thumbs/list-thumbs.js';
+			$jsFiles['FbThumbsList'] = 'plugins/fabrik_element/thumbs/list-thumbs.js';
 			$script .= "\n comments.thumbs = new FbThumbsList(" . $this->formModel->getId() . ", $thumbOpts);";
 		}
 
@@ -564,7 +564,7 @@ class PlgFabrik_FormComment extends PlgFabrik_Form
 		$filter = JFilterInput::getInstance();
 		$request = $filter->clean($_REQUEST, 'array');
 		$row->bind($request);
-		$row->ipaddress = $_SERVER['REMOTE_ADDR'];
+		$row->ipaddress = FabrikString::filteredIp();
 		$row->user_id = $this->user->get('id');
 		$row->approved = 1;
 
@@ -931,6 +931,14 @@ class PlgFabrik_FormComment extends PlgFabrik_Form
 	{
 		$formModel = $this->getModel();
 		$input = $this->app->input;
+
+		/*
+		 * 'Fix' for jcomments not loading languages? Means you have to copy:
+		 * components/com_jcomments/languages/yourfile.ini to
+		 * components/com_jcomments/language/xx-XX/yourfile.ini
+		 */
+		$lang = JFactory::getLanguage();
+		$lang->load('com_jcomments', JPATH_BASE . '/components/com_jcomments');
 		$jComments = JPATH_SITE . '/components/com_jcomments/jcomments.php';
 
 		if (JFile::exists($jComments))
@@ -951,5 +959,26 @@ class PlgFabrik_FormComment extends PlgFabrik_Form
 		{
 			throw new RuntimeException('JComment is not installed on your system');
 		}
+	}
+
+	/**
+	 * Run right at the end of the form processing
+	 * form needs to be set to record in database for this to hook to be called
+	 *
+	 * @return    bool
+	 */
+	public function onAfterProcess()
+	{
+		$params = $this->getParams();
+		$method = $params->get('comment_method', 'disqus');
+		$notification = (bool) $params->get('comment_jcomment_notify', false);
+
+		if ($method !== 'jcomment' || $notification === false)
+		{
+			return;
+		}
+
+		require_once JPATH_PLUGINS . '/fabrik_form/comment/helpers/jcomments.php';
+		FabrikJCommentHelper::subscribe($this);
 	}
 }

@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
@@ -345,8 +344,9 @@ class FabrikModelTimeline extends FabrikFEModelVisualization
 		jimport('string.normalise');
 
 		// The simile jQuery autodetect and load code is broken as it tests for $ (for which mootools gives a false positive) so include
-		$document->addScript('http://code.jquery.com/jquery-1.9.1.min.js');
-		$document->addScript('http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true');
+		$parsedUrl = parse_url(JUri::root());
+		$document->addScript($parsedUrl['scheme'] . '://code.jquery.com/jquery-1.9.1.min.js');
+		$document->addScript($parsedUrl['scheme'] . '://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true');
 		$c = 0;
 		$templates = (array) $params->get('timeline_detailtemplate', array());
 		$startdates = (array) $params->get('timeline_startdate', array());
@@ -409,11 +409,11 @@ class FabrikModelTimeline extends FabrikFEModelVisualization
 		$input = preg_replace('#^[\d\.]*#', '', $input);
 
 		// Lowercase the first character.
-		$first = String::substr($input, 0, 1);
-		$first = String::strtolower($first);
+		$first = JString::substr($input, 0, 1);
+		$first = JString::strtolower($first);
 
 		// Replace the first character with the lowercase character.
-		$input = String::substr_replace($input, $first, 0, 1);
+		$input = JString::substr_replace($input, $first, 0, 1);
 
 		return $input;
 	}

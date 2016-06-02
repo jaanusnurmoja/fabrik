@@ -110,9 +110,6 @@ class JFormFieldFabrikeditor extends JFormFieldTextArea
 		$aceId  = $this->id . '_' . sprintf("%06x", mt_rand(0, 0xffffff));
 		$script = '
 window.addEvent(\'domready\', function () {
-	if (Fabrik.debug) {
-		fconsole("Fabrik editor initialising: ' . $this->id . '");
-	}
 	var field = document.id("' . $this->id . '");
 	var FbEditor = ace.edit("' . $aceId . '-ace");
 	FbEditor.setTheme("ace/theme/' . $theme . '");
@@ -156,7 +153,9 @@ window.addEvent(\'domready\', function () {
 });
 		';
 
-		$src = array('media/com_fabrik/js/lib/ace/src-min-noconflict/ace.js', 'media/com_fabrik/js/fabrik.js');
+		$src = array(
+			'Ace' => 'media/com_fabrik/js/lib/ace/src-min-noconflict/ace.js',
+			'Fabrik' => 'media/com_fabrik/js/fabrik.js');
 		FabrikHelperHTML::script($src, $script);
 
 		echo '<style type="text/css" media="screen">

@@ -70,14 +70,24 @@ class PlgFabrik_ElementYesno extends PlgFabrik_ElementRadiobutton
 
 		// Check if the data is in csv format, if so then the element is a multi drop down
 		$raw = $this->getFullName(true, false) . '_raw';
-		$displayData = new stdClass;
-		$displayData->value = $thisRow->$raw;
-		$displayData->tmpl = @$this->tmpl;
-		$basePath = JPATH_ROOT . '/plugins/fabrik_element/yesno/layouts';
-		$layout = new FabrikLayoutFile('fabrik_element_yesno_list', $basePath);
+		$rawData = $thisRow->$raw;
+		$rawData = FabrikWorker::JSONtoData($rawData, true);
+		$displayData        = new stdClass;
+		$displayData->tmpl  = isset($this->tmpl) ? $this->tmpl : '';
+		$basePath           = JPATH_ROOT . '/plugins/fabrik_element/yesno/layouts';
+		$layout             = new FabrikLayoutFile('fabrik_element_yesno_list', $basePath);
 		$layout->addIncludePaths(JPATH_THEMES . '/' . $this->app->getTemplate() . '/html/layouts');
+		$labelData = array();
 
-		return $layout->render($displayData);
+		foreach ($rawData as $d)
+		{
+			$displayData->value = $d;
+			$labelData[] = $layout->render($displayData);
+		}
+
+		$data = json_encode($labelData);
+
+		return parent::renderListData($data, $thisRow, $opts);
 	}
 
 	/**
@@ -120,11 +130,26 @@ class PlgFabrik_ElementYesno extends PlgFabrik_ElementRadiobutton
 	 */
 	public function renderListData_csv($data, &$thisRow)
 	{
-	    $raw = $this->getFullName(true, false) . '_raw';
-	    $rawData = $thisRow->$raw;
-	    $data = (bool) $rawData ? FText::_('JYES') : FText::_('JNO');
+		$ret     = array();
+		$raw     = $this->getFullName(true, false) . '_raw';
+		$rawData = $thisRow->$raw;
+		$rawData = FabrikWorker::JSONtoData($rawData, true);
 
-	    return $data;
+		foreach ($rawData as $d)
+		{
+			$ret[]    = (bool) $d ? FText::_('JYES') : FText::_('JNO');
+		}
+
+		if (count($ret) > 1)
+		{
+			$ret = json_encode($ret);
+		}
+		else
+		{
+			$ret = implode('', $ret);
+		}
+
+	    return $ret;
 	}
 
 	/**
@@ -181,29 +206,6 @@ class PlgFabrik_ElementYesno extends PlgFabrik_ElementRadiobutton
 		}
 
 		$rows = array_values($rows);
-	}
-
-	/**
-	 * Get the class to manage the form element
-	 * to ensure that the file is loaded only once
-	 *
-	 * @param   array   &$srcs   Scripts previously loaded
-	 * @param   string  $script  Script to load once class has loaded
-	 * @param   array   &$shim   Dependant class names to load before loading the class - put in requirejs.config shim
-	 *
-	 * @return void
-	 */
-	public function formJavascriptClass(&$srcs, $script = '', &$shim = array())
-	{
-		$s = new stdClass;
-		$s->deps = array('fab/elementlist');
-		$shim['element/radiobutton/radiobutton'] = $s;
-
-		$s = new stdClass;
-		$s->deps = array('element/radiobutton/radiobutton');
-		$shim['element/yesno/yesno'] = $s;
-
-		parent::formJavascriptClass($srcs, $script, $shim);
 	}
 
 	/**

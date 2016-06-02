@@ -71,7 +71,7 @@ class PlgFabrik_FormUpsert extends PlgFabrik_Form
 		 * If row exists and "insert only", or row doesn't exist and "update only", bail out
 		 */
 		if (
-			($upsertRowExists && $params->get('upsert_insert_only', '0') === '1'))
+			($upsertRowExists && $params->get('upsert_insert_only', '0') === '1')
 			||
 			(!$upsertRowExists && $params->get('upsert_insert_only', '0') === '2')
 		)
@@ -161,6 +161,13 @@ class PlgFabrik_FormUpsert extends PlgFabrik_Form
 			$k = $upsertDb->qn($k);
 			$v = $upsert->upsert_value[$i];
 			$v = $w->parseMessageForPlaceholder($v, $this->data);
+
+			if ($upsert->upsert_eval_value[$i] === '1')
+			{
+				$res = FabrikHelperHTML::isDebug() ? eval($v) : @eval($v);
+				FabrikWorker::logEval($res, 'Eval exception : upsert : ' . $v . ' : %s');
+				$v = $res;
+			}
 
 			if ($v == '')
 			{

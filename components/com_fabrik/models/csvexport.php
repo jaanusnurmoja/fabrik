@@ -11,7 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
 use \Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
@@ -71,6 +70,7 @@ class FabrikFEModelCSVExport extends FabModel
 	 */
 	public function writeFile($total, $canDownload = false)
 	{
+		$params = $this->model->getParams();
 		$input = $this->app->input;
 
 		// F3 turn off error reporting as this is an ajax call
@@ -114,7 +114,20 @@ class FabrikFEModelCSVExport extends FabModel
 		$config             = JComponentHelper::getParams('com_fabrik');
 		$this->delimiter    = $this->outPutFormat == 'excel' ? COM_FABRIK_EXCEL_CSV_DELIMITER : COM_FABRIK_CSV_DELIMITER;
 		$this->delimiter    = $config->get('csv_delimiter', $this->delimiter);
-
+		$local_delimiter    = $this->model->getParams()->get('csv_local_delimiter');
+		if ($local_delimiter != '') {
+			$this->delimiter = $local_delimiter;
+		}
+		if ($this->delimiter === '\t') {
+			$this->delimiter = "\t";
+		}
+		$end_of_line		= $this->model->getParams()->get('csv_end_of_line');
+		if ($end_of_line == 'r') {
+			$end_of_line = "\r";
+		}
+		else {
+			$end_of_line = "\n";
+		}
 		if ($start === 0)
 		{
 			$headings = $this->getHeadings();
@@ -128,7 +141,7 @@ class FabrikFEModelCSVExport extends FabModel
 				return;
 			}
 
-			$str .= implode($headings, $this->delimiter) . "\n";
+			$str .= implode($headings, $this->delimiter) . $end_of_line;
 		}
 
 		$incRaw       = $input->get('incraw', true);
@@ -153,7 +166,7 @@ class FabrikFEModelCSVExport extends FabModel
 				{
 					foreach ($a as $key => $val)
 					{
-						if (substr($key, String::strlen($key) - 4, String::strlen($key)) == '_raw')
+						if (substr($key, JString::strlen($key) - 4, JString::strlen($key)) == '_raw')
 						{
 							unset($a[$key]);
 						}
@@ -164,7 +177,7 @@ class FabrikFEModelCSVExport extends FabModel
 				{
 					foreach ($a as $key => $val)
 					{
-						if (substr($key, String::strlen($key) - 4, String::strlen($key)) != '_raw')
+						if (substr($key, JString::strlen($key) - 4, JString::strlen($key)) != '_raw')
 						{
 							unset($a[$key]);
 						}
@@ -194,8 +207,14 @@ class FabrikFEModelCSVExport extends FabModel
 				}
 
 				$this->carriageReturnFix($a);
+
+				if ($params->get('csv_format_json', '1') === '1')
+				{
+					array_walk($a, array($this, 'implodeJSON'), $end_of_line);
+				}
+
 				$str .= implode($this->delimiter, array_map(array($this, 'quote'), array_values($a)));
-				$str .= "\n";
+				$str .= $end_of_line;
 			}
 		}
 
@@ -225,6 +244,18 @@ class FabrikFEModelCSVExport extends FabModel
 			{
 				echo json_encode($res);
 			}
+		}
+	}
+
+	/**
+	 * Format JSON data
+	 */
+	protected function implodeJSON(&$v, $k, $sepchar)
+	{
+		if (!FabrikString::isRawName($k) && FabrikWorker::isJSON($v))
+		{
+			$v = FabrikWorker::JSONtoData($v, true);
+			$v = implode($sepchar, $v);
 		}
 	}
 
@@ -300,8 +331,15 @@ class FabrikFEModelCSVExport extends FabModel
 	{
 		$this->model->setId($this->app->input->getInt('listid'));
 		$table    = $this->model->getTable();
-		$filename = $table->db_table_name . '-export.csv';
-
+		$filename = $this->model->getParams()->get('csv_filename');
+		if ($filename == '')
+		{
+			$filename = $table->db_table_name . '-export.csv';
+		}
+		else
+		{
+			$filename = sprintf($filename, date('Y-m-d'));
+		}
 		return $filename;
 	}
 
@@ -362,6 +400,13 @@ class FabrikFEModelCSVExport extends FabModel
 		jimport('joomla.filesystem.file');
 		$filename = $this->getFileName();
 		$filePath = $this->getFilePath();
+		// Do additional processing if post-processing php file exists
+		$listid = $this->app->input->getInt('listid');
+		// Allows for custom csv file processing. Included php file should kill php processing
+		// with die; or exit; to prevent continuation of this script (normal download). See Wiki.
+		if(file_exists(JPATH_PLUGINS.'/fabrik_list/listcsv/scripts/list_'.$listid.'_csv_export.php')){	
+   			require(JPATH_PLUGINS.'/fabrik_list/listcsv/scripts/list_'.$listid.'_csv_export.php');
+		}
 		$document = JFactory::getDocument();
 		$document->setMimeEncoding('application/zip');
 		$str = $this->getCSVContent();
@@ -382,7 +427,6 @@ class FabrikFEModelCSVExport extends FabModel
 		$this->app->setBody($str);
 		echo $this->app->toString(false);
 		JFile::delete($filePath);
-
 		// $$$ rob 21/02/2012 - need to exit otherwise Chrome give 349 download error
 		exit;
 	}
@@ -406,7 +450,7 @@ class FabrikFEModelCSVExport extends FabModel
 
 			foreach ($calKeys as $calKey)
 			{
-				$calculations[$calKey]    = array_fill(0, count($a) + 1, ' ');
+				$calculations[$calKey]    = FArrayHelper::array_fill(0, count($a) + 1, ' ');
 				$calculations[$calKey][0] = $calKey;
 				$calcs                    = $this->model->getCalculations();
 
@@ -440,7 +484,7 @@ class FabrikFEModelCSVExport extends FabModel
 
 					foreach ($a as $aKey => $aVal)
 					{
-						if ($aKey == String::substr($key, 0, String::strlen($key) - 4) && $x != 0)
+						if ($aKey == JString::substr($key, 0, JString::strlen($key) - 4) && $x != 0)
 						{
 							$found = true;
 							break;
@@ -487,7 +531,32 @@ class FabrikFEModelCSVExport extends FabModel
 	 */
 	protected function quote($n)
 	{
-		$n = '"' . str_replace('"', '""', $n) . '"';
+		$cleanhtml = $this->model->getParams()->get('csv_clean_html', 'leave');
+		
+		switch ($cleanhtml)
+		{
+			default:
+			case 'leave':
+				break;
+			
+			case 'remove':
+				$n = strip_tags($n);
+				$n =  html_entity_decode($n);
+				break;
+				
+			case 'replaceli':
+				$n = str_replace ('<li>', '', $n);
+				$n = str_replace ('</li>', "\n", $n);
+				$n = strip_tags($n);
+				$n =  html_entity_decode($n);
+				break;
+		}
+		
+		$doubleQuote  = $this->model->getParams()->get('csv_double_quote', '1') === '1';
+		if ($doubleQuote == true)
+		{
+			$n = '"' . str_replace('"', '""', $n) . '"';
+		}
 
 		$csvEncoding = $this->getEncoding();
 
@@ -497,15 +566,11 @@ class FabrikFEModelCSVExport extends FabModel
 			return $n;
 		}
 
-		if ($this->outPutFormat == 'excel')
+		if (function_exists('iconv'))
 		{
-			// Possible fix for Excel import of accents in csv file?
-			return mb_convert_encoding($n, $csvEncoding, 'UTF-8');
+			return iconv('UTF-8', $csvEncoding, $n);
 		}
-		else
-		{
-			return $n;
-		}
+		return mb_convert_encoding($n, $csvEncoding, 'UTF-8');
 	}
 
 	/**
@@ -605,7 +670,7 @@ class FabrikFEModelCSVExport extends FabModel
 							$n .= '_raw';
 						}
 
-						if ($incData && String::substr($n, String::strlen($n) - 4, String::strlen($n)) !== '_raw')
+						if ($incData && JString::substr($n, JString::strlen($n) - 4, JString::strlen($n)) !== '_raw')
 						{
 							if (!in_array($n, $h))
 							{
@@ -618,7 +683,7 @@ class FabrikFEModelCSVExport extends FabModel
 							}
 						}
 
-						if ($incRaw && String::substr($n, String::strlen($n) - 4, strlen($n)) == '_raw')
+						if ($incRaw && JString::substr($n, JString::strlen($n) - 4, strlen($n)) == '_raw')
 						{
 							if (!in_array($n, $h))
 							{
@@ -636,7 +701,7 @@ class FabrikFEModelCSVExport extends FabModel
 
 			if (!$found)
 			{
-				if (!(String::substr($heading, String::strlen($heading) - 4, String::strlen($heading)) == '_raw' && !$incRaw))
+				if (!(JString::substr($heading, JString::strlen($heading) - 4, JString::strlen($heading)) == '_raw' && !$incRaw))
 				{
 					// Stop id getting added to tables when exported with full element name key
 					if ($headingFormat != 1 && $heading != $shortKey)

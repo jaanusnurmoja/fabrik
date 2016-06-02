@@ -11,8 +11,6 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\String\String;
-
 require_once JPATH_ROOT . '/plugins/fabrik_element/fileupload/adaptor.php';
 
 /**
@@ -90,13 +88,15 @@ class Amazons3storage extends FabrikStorageAdaptor
 	 * @return  bool
 	 */
 
-	public function exists($filepath, $prependRoot = false)
+	public function exists($filepath, $prependRoot = true)
 	{
 		if (!$this->bucketExists())
 		{
 			return false;
 		}
 
+		$re = '/^' . preg_quote(COM_FABRIK_BASE) . '/';
+		$filepath = preg_replace($re, '', $filepath);
 		$bucket = $this->getBucketName();
 		$filepath = str_replace("%20", " ", $filepath);
 		$filepath = $this->urlToPath($filepath);
@@ -141,7 +141,7 @@ class Amazons3storage extends FabrikStorageAdaptor
 
 	private function removePrependedURL($filepath)
 	{
-		if (substr($filepath, 0, String::strlen(COM_FABRIK_BASE)) == COM_FABRIK_BASE)
+		if (substr($filepath, 0, JString::strlen(COM_FABRIK_BASE)) == COM_FABRIK_BASE)
 		{
 			$filepath = Fabrikstring::ltrimword($filepath, COM_FABRIK_BASE);
 		}
@@ -194,7 +194,7 @@ class Amazons3storage extends FabrikStorageAdaptor
 		}
 
 		// $$$ rob avoid urls like http://bucket.s3.amazonaws.com//home/users/path/to/file/Chrysanthemum.jpg
-		$filepath = String::ltrim($filepath, '/');
+		$filepath = JString::ltrim($filepath, '/');
 
 		// Move the file
 		if ($this->s3->putObjectFile($tmpFile, $bucket, $filepath, $acl))
@@ -578,7 +578,8 @@ class Amazons3storage extends FabrikStorageAdaptor
 			$file = str_replace("%20", " ", $file);
 			$file = str_replace("\\", '/', $file);
 			$bucket = trim($this->getBucketName());
-			$hostbucket = !$this->ssl;
+			//$hostbucket = !$this->ssl;
+			$hostbucket = false;
 			$filepath = $this->s3->getAuthenticatedURL($bucket, $file, $lifetime, $hostbucket, $this->ssl);
 		}
 

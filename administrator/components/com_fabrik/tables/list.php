@@ -23,7 +23,6 @@ require_once JPATH_ADMINISTRATOR . '/components/com_fabrik/tables/fabtable.php';
  * @subpackage  Fabrik
  * @since       3.0
  */
-
 class FabrikTableList extends FabTable
 {
 	/**
@@ -175,7 +174,7 @@ class FabrikTableList extends FabTable
 		}
 
 		$pk = (array) $pk;
-		ArrayHelper::toInteger($pk);
+		$pk = ArrayHelper::toInteger($pk);
 
 		if (empty($pk))
 		{
