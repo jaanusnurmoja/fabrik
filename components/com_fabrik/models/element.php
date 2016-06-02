@@ -3423,6 +3423,12 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	protected function singleFilter($default, $v, $type = 'text')
 	{
+		// $$$ hugh - for "reasons", sometimes it's an array with one value.  No clue why.  Sod it.
+		if (is_array($default))
+		{
+			$default = array_shift($default);
+		}
+		
 		// $$$ rob - if searching on "O'Fallon" from querystring filter the string has slashes added regardless
 		$default = (string) $default;
 		$default = stripslashes($default);
@@ -6721,6 +6727,10 @@ class PlgFabrik_Element extends FabrikPlugin
 		{
 			$thousandSep = ' ';
 		}
+		else if ($thousandSep == '#00')
+		{
+			$thousandSep = '';
+		}
 
 		return number_format((float) $data, $decimalLength, $decimalSep, $thousandSep);
 	}
@@ -6752,7 +6762,11 @@ class PlgFabrik_Element extends FabrikPlugin
 		{
 			$thousandSep = ' ';
 		}
-
+		else if ($thousandSep == '#00')
+		{
+			$thousandSep = '';
+		}
+		
 		$val = str_replace($thousandSep, '', $val);
 		$val = str_replace($decimalSep, '.', $val);
 

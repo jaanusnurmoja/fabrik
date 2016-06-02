@@ -177,6 +177,10 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 			$plupShim->deps = array($folder . 'plupload');
 			$s->deps[]      = $folder . 'plupload';
 
+			// MCL test
+			$mcl = FabrikHelperHTML::mcl();
+			$s->deps[] = array_merge($s->deps, $mcl);
+
 			if (strstr($runtimes, 'html5'))
 			{
 				$s->deps[]                        = $folder . 'plupload.html5';
@@ -1656,8 +1660,8 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 
 		$storage = $this->getStorage();
 		$file    = $storage->clean(JPATH_SITE . '/' . $filename);
-		$thumb   = $storage->clean($storage->_getThumb($filename));
-		$cropped = $storage->clean($storage->_getCropped($filename));
+		$thumb   = $storage->clean(JPATH_SITE . '/' . $storage->_getThumb($filename));
+		$cropped = $storage->clean(JPATH_SITE . '/' . $storage->_getCropped($filename));
 
 		$logMsg = 'Delete files: ' . $file . ' , ' . $thumb . ', ' . $cropped . '; user = ' . $this->user->get('id');
 		JLog::add($logMsg, JLog::WARNING, 'com_fabrik.element.fileupload');

@@ -1440,6 +1440,9 @@ class FabrikFEModelList extends JModelForm
 				$row->fabrik_view = '';
 				$row->fabrik_edit = '';
 
+				$rowId = $this->getSlug($row);
+				$isAjax = $this->isAjaxLinks() ? '1' : '0';
+				
 				$editLabel = $this->editLabel($data[$groupKey][$i]);
 				$editText = $buttonAction == 'dropdown' ? $editLabel : '<span class="hidden">' . $editLabel . '</span>';
 
@@ -1459,6 +1462,8 @@ class FabrikFEModelList extends JModelForm
 					$displayData->editLabel = $editLabel;
 					$displayData->editText = $editText;
 					$displayData->rowData = $row;
+					$displayData->rowId = $rowId;
+					$displayData->isAjax = $isAjax;
 					$layout = $this->getLayout('listactions.fabrik-edit-button');
 					$editLink = $layout->render($displayData);
 				}
@@ -1488,6 +1493,8 @@ class FabrikFEModelList extends JModelForm
 					$displayData->viewText = $viewText;
 					$displayData->dataList = $dataList;
 					$displayData->rowData = $row;
+					$displayData->rowId = $rowId;
+					$displayData->isAjax = $isAjax;
 					$displayData->list_detail_link_icon = $params->get('list_detail_link_icon', 'search.png');
 					$layout = $this->getLayout('listactions.fabrik-view-button');
 					$viewLink = $layout->render($displayData);
@@ -2236,9 +2243,17 @@ class FabrikFEModelList extends JModelForm
 		$loadMethod = $this->getLoadMethod('custom_link');
 		$class = 'fabrik___rowlink ' . $class;
 		$dataList = 'list_' . $this->getRenderContext();
+		$rowId = $this->getSlug($row);
+		$isAjax = $this->isAjaxLinks() ? '1' : '0';
 		if ($target !== '') $target = 'target="' . $target . '"';
-		$data = '<a data-loadmethod="' . $loadMethod . '" data-list="' . $dataList . '" class="' . $class . '" href="' . $link . '"' . $target . '>' . $data
-		. '</a>';
+		$data = '<a data-loadmethod="' . $loadMethod
+			. '" data-list="' . $dataList
+			. '" data-rowid="' . $rowId
+			. '" data-isajax="' . $isAjax
+			. '" class="' . $class
+			. '" href="' . $link
+			. '"' . $target . '>' . $data
+			. '</a>';
 
 		return $data;
 	}
@@ -2674,7 +2689,7 @@ class FabrikFEModelList extends JModelForm
 		$distinct = $params->get('distinct', true) ? 'DISTINCT' : '';
 
 		// $$$rob added raw as an option to fix issue in saving calendar data
-		if (trim($table->db_primary_key) != '' && (in_array($this->outputFormat, array('raw', 'html', 'feed', 'pdf', 'phocapdf', 'csv', 'word', 'yql', 'oai'))))
+		if (trim($table->db_primary_key) != '' && (in_array($this->outputFormat, array('partial', 'raw', 'html', 'feed', 'pdf', 'phocapdf', 'csv', 'word', 'yql', 'oai'))))
 		{
 			$sFields .= ', ';
 			$strPKey = $pk . ' AS ' . $db->qn('__pk_val') . "\n";

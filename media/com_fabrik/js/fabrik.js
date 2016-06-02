@@ -9,6 +9,9 @@
  * Create the Fabrik name space
  */
 define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, RequestQueue) {
+
+    var doc = jQuery(document);
+
     document.addEvent('click:relay(.popover button.close)', function (event, target) {
         var popover = '#' + target.get('data-popover'),
             pEl = document.getElement(popover);
@@ -18,8 +21,9 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
             pEl.checked = false;
         }
     });
-    var Fabrik = {};
-    Fabrik.events = {};
+    var Fabrik = {
+        events: {}
+    };
 
     /**
      * Get the bootstrap version. Returns either 2.x of 3.x
@@ -107,23 +111,23 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
         return Fabrik.blocks[foundBlockId];
     };
 
-    document.addEvent('click:relay(.fabrik_delete a, .fabrik_action a.delete, .btn.delete)', function (e, target) {
+    doc.on('click', '.fabrik_delete a, .fabrik_action a.delete, .btn.delete', function (e) {
         if (e.rightClick) {
             return;
         }
-        Fabrik.watchDelete(e, target);
+        Fabrik.watchDelete(e, this);
     });
-    document.addEvent('click:relay(.fabrik_edit a, a.fabrik_edit)', function (e, target) {
+    doc.on('click', '.fabrik_edit a, a.fabrik_edit', function (e) {
         if (e.rightClick) {
             return;
         }
-        Fabrik.watchEdit(e, target);
+        Fabrik.watchEdit(e, this);
     });
-    document.addEvent('click:relay(.fabrik_view a, a.fabrik_view)', function (e, target) {
+    doc.on('click', '.fabrik_view a, a.fabrik_view', function (e) {
         if (e.rightClick) {
             return;
         }
-        Fabrik.watchView(e, target);
+        Fabrik.watchView(e, this);
     });
 
     // Related data links
@@ -141,7 +145,8 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
 
         url = a.get('href');
         url += url.contains('?') ? '&tmpl=component&ajax=1' : '?tmpl=component&ajax=1';
-
+        url += '&format=partial';
+        
         // Only one edit window open at the same time.
         $H(Fabrik.Windows).each(function (win, key) {
             win.close();
@@ -373,16 +378,27 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
             listRef = jQuery(target).data('list'),
             list = Fabrik.blocks[listRef];
 
-        if (!list.options.ajax_links) {
+        if (jQuery(target).data('isajax') !== 1) {
             return;
         }
+
+        if (list) {
+            if (!list.options.ajax_links) {
+                return;
+            }
+
+            row = list.getActiveRow(e);
+            if (!row || row.length === 0) {
+                return;
+            }
+            list.setActive(row);
+            rowId = row.prop('id').split('_').pop();
+        }
+        else {
+            rowId = jQuery(target).data('rowid');
+        }
+
         e.preventDefault();
-        row = list.getActiveRow(e);
-        if (!row || row.length === 0) {
-            return;
-        }
-        list.setActive(row);
-        rowId = row.prop('id').split('_').pop();
 
         if (jQuery(e.target).prop('tagName') === 'A') {
             a = jQuery(e.target);
@@ -391,6 +407,7 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
         }
         url = a.prop('href');
         url += url.contains('?') ? '&tmpl=component&ajax=1' : '?tmpl=component&ajax=1';
+        url += '&format=partial';
         title = a.prop('title');
         loadMethod = a.data('loadmethod');
         if (loadMethod === undefined) {
@@ -423,19 +440,21 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
             }
         };
 
-        // Only set width/height if specified, otherwise default to window defaults
-        if (list.options.popup_width !== '') {
-            winOpts.width = list.options.popup_width;
-        }
-        if (list.options.popup_height !== '') {
-            winOpts.width = list.options.popup_height;
-        }
-        winOpts.id = view === 'details' ? 'view.' + winOpts.id : 'add.' + winOpts.id;
-        if (list.options.popup_offset_x !== null) {
-            winOpts.offset_x = list.options.popup_offset_x;
-        }
-        if (list.options.popup_offset_y !== null) {
-            winOpts.offset_y = list.options.popup_offset_y;
+        if (list) {
+            // Only set width/height if specified, otherwise default to window defaults
+            if (list.options.popup_width !== '') {
+                winOpts.width = list.options.popup_width;
+            }
+            if (list.options.popup_height !== '') {
+                winOpts.height = list.options.popup_height;
+            }
+            winOpts.id = view === 'details' ? 'view.' + winOpts.id : 'add.' + winOpts.id;
+            if (list.options.popup_offset_x !== null) {
+                winOpts.offset_x = list.options.popup_offset_x;
+            }
+            if (list.options.popup_offset_y !== null) {
+                winOpts.offset_y = list.options.popup_offset_y;
+            }
         }
         Fabrik.getWindow(winOpts);
     };
