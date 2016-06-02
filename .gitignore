@@ -106,3 +106,5 @@ components/com_fabrik/language/.DS_Store
 components/com_fabrik/models/.DS_Store
 /components/com_fabrik/views/details/tmpl/bt_repeat_table_union
 /components/com_fabrik/views/list/tmpl/bt_micro
+/*.log
+/php.ini
