@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.list.webservice
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -21,7 +21,6 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-list.php';
  * @subpackage  Fabrik.list.webservice
  * @since       3.0
  */
-
 class PlgFabrik_ListWebservice extends PlgFabrik_List
 {
 	/**
@@ -121,7 +120,6 @@ class PlgFabrik_ListWebservice extends PlgFabrik_List
 	 *
 	 * @return  bool
 	 */
-
 	public function process($opts = array())
 	{
 		JLoader::import('webservice', JPATH_SITE . '/components/com_fabrik/models/');
@@ -262,5 +260,15 @@ class PlgFabrik_ListWebservice extends PlgFabrik_List
 		$this->jsInstance = "new FbListWebservice($opts)";
 
 		return true;
+	}
+
+	/**
+	 * Load the AMD module class name
+	 *
+	 * @return string
+	 */
+	public function loadJavascriptClassName_result()
+	{
+		return 'FbListWebservice';
 	}
 }

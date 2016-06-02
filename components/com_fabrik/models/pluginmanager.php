@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -21,7 +21,7 @@ jimport('joomla.filesystem.file');
  * @since    3.0
  */
 
-class FabrikFEModelPluginmanager extends JModelLegacy
+class FabrikFEModelPluginmanager extends FabModel
 {
 	/**
 	 * plugins
@@ -66,31 +66,35 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	protected $formPlugins = array();
 
 	/**
+	 * @var array
+	 */
+	protected $_AbstractplugIns = array();
+
+	/**
 	 * Get a html drop down list of the element types with this objs element type selected as default
 	 *
 	 * @param   string  $default       Selected option
 	 * @param   string  $name          Html name for drop down
 	 * @param   string  $extra         Extra info for drop down
-	 * @param   string  $defaultlabel  Html element type list
+	 * @param   string  $defaultLabel  Html element type list
 	 *
 	 * @return  string
 	 */
-
-	public function getElementTypeDd($default, $name = 'plugin', $extra = 'class="inputbox elementtype"  size="1"', $defaultlabel = '')
+	public function getElementTypeDd($default, $name = 'plugin', $extra = 'class="inputbox elementtype"  size="1"', $defaultLabel = '')
 	{
-		$hash = $default . $name . $extra . $defaultlabel;
+		$hash = $default . $name . $extra . $defaultLabel;
 
 		if (!array_key_exists($hash, $this->elementLists))
 		{
-			if ($defaultlabel == '')
+			if ($defaultLabel == '')
 			{
-				$defaultlabel = FText::_('COM_FABRIK_PLEASE_SELECT');
+				$defaultLabel = FText::_('COM_FABRIK_PLEASE_SELECT');
 			}
 
-			$a = array(JHTML::_('select.option', '', $defaultlabel));
-			$elementstypes = $this->_getList();
-			$elementstypes = array_merge($a, $elementstypes);
-			$this->elementLists[$hash] = JHTML::_('select.genericlist', $elementstypes, $name, $extra, 'value', 'text', $default);
+			$a = array(JHTML::_('select.option', '', $defaultLabel));
+			$elementsTypes = $this->_getList();
+			$elementsTypes = array_merge($a, $elementsTypes);
+			$this->elementLists[$hash] = JHTML::_('select.genericlist', $elementsTypes, $name, $extra, 'value', 'text', $default);
 		}
 
 		return $this->elementLists[$hash];
@@ -103,7 +107,6 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  true
 	 */
-
 	public function canUse()
 	{
 		return true;
@@ -117,13 +120,12 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  string  <ul>
 	 */
-
 	public function getList($group, $id)
 	{
 		$str = '<ul id="' . $id . '">';
-		$elementstypes = $this->_getList();
+		$elementsTypes = $this->_getList();
 
-		foreach ($elementstypes as $plugin)
+		foreach ($elementsTypes as $plugin)
 		{
 			$str .= '<li>' . $plugin->text . '</li>';
 		}
@@ -143,7 +145,6 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  array	plugin list
 	 */
-
 	protected function _getList($query = null, $limitstart = 0, $limit = 0)
 	{
 		$db = FabrikWorker::getDbo(true);
@@ -154,12 +155,12 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 		}
 
 		$query = $db->getQuery(true);
-		$folder = $db->quote('fabrik_' . $this->group);
+		$folder = $db->q('fabrik_' . $this->group);
 		$query->select('element AS value, name AS text')->from('#__extensions')->where('folder =' . $folder);
 		$db->setQuery($query);
-		$elementstypes = $db->loadObjectList();
+		$elementsTypes = $db->loadObjectList();
 
-		return $elementstypes;
+		return $elementsTypes;
 	}
 
 	/**
@@ -169,7 +170,6 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  array	Plugins
 	 */
-
 	public function &getPlugInGroup($group)
 	{
 		if (array_key_exists($group, $this->plugIns))
@@ -188,10 +188,8 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return void
 	 */
-
 	public function loadJS()
 	{
-		// JHtml::_('script', 'media/com_fabrik/js/head/head.min.js');
 		$plugins = JFolder::folders(JPATH_SITE . '/plugins/fabrik_element', '.', false, false);
 		$files = array();
 
@@ -217,7 +215,6 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  array
 	 */
-
 	protected function &loadPlugInGroup($group)
 	{
 		// $$$ rob 16/12/2011 - this was setting $this->plugIns, but if you had 2 lists as admin modules
@@ -242,7 +239,6 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  object	Plugin
 	 */
-
 	public function getPlugIn($className = '', $group = '')
 	{
 		if ($className != '' && (array_key_exists($group, $this->plugIns) && array_key_exists($className, $this->plugIns[$group])))
@@ -266,7 +262,6 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  array	Plugins
 	 */
-
 	public function getPlugInGroupPlugins($group)
 	{
 		$plugins = $this->getPlugInGroup($group);
@@ -288,9 +283,8 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @throws RuntimeException
 	 *
-	 * @return  mixed	False if not loaded - otherwise plugin object
+	 * @return  FabrikPlugin Plugin object
 	 */
-
 	public function loadPlugIn($className = '', $group = '')
 	{
 		if ($group == 'table')
@@ -304,8 +298,8 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 		* Application 0.322 seconds (+0.081); 22.92 MB (+3.054) - pluginmanager: form email imported
 		* Application 0.242 seconds (+0.005); 20.13 MB (+0.268) - pluginmanager: form email imported
 		*/
-		$ok = JPluginHelper::importPlugin('fabrik_' . $group, $className);
-		$dispatcher = JDispatcher::getInstance();
+		JPluginHelper::importPlugin('fabrik_' . $group, $className);
+		$dispatcher = JEventDispatcher::getInstance();
 
 		if ($className != '')
 		{
@@ -334,11 +328,21 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 		$conf = array();
 		$conf['name'] = JString::strtolower($className);
 		$conf['type'] = JString::strtolower('fabrik_' . $group);
-		$plugIn = new $class($dispatcher, $conf);
+
+		if (class_exists($class))
+		{
+			$plugIn = new $class($dispatcher, $conf);
+		}
+		else
+		{
+			// Allow for namespaced plugins
+			$class = 'Fabrik\\Plugins\\' . JString::ucfirst($group) . '\\' . JString::ucfirst($className);
+			$plugIn = new $class($dispatcher, $conf);
+		}
 
 		// Needed for viz
 		$client = JApplicationHelper::getClientInfo(0);
-		$lang = JFactory::getLanguage();
+		$lang = $this->lang;
 		$folder = 'fabrik_' . $group;
 		$langFile = 'plg_' . $folder . '_' . $className;
 		$langPath = $client->path . '/plugins/' . $folder . '/' . $className;
@@ -366,12 +370,9 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  void
 	 */
-
 	public function clearFormPlugins($formModel)
 	{
-		$app = JFactory::getApplication();
-		$package = $app->getUserState('com_fabrik.package', 'fabrik');
-		$sig = $package . '.' . $formModel->get('id');
+		$sig = $this->package . '.' . $formModel->get('id');
 		unset($this->formPlugins[$sig]);
 	}
 
@@ -382,11 +383,8 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  array	Group objects with plugin objects loaded in group->elements
 	 */
-
 	public function getFormPlugins(&$form)
 	{
-		$app = JFactory::getApplication();
-		$package = $app->getUserState('com_fabrik.package', 'fabrik');
 		$profiler = JProfiler::getInstance('Application');
 
 		if (!isset($this->formPlugins))
@@ -395,13 +393,13 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 		}
 
 		// Ensure packages load their own form
-		$sig = $package . '.' . $form->get('id');
+		$sig = $this->package . '.' . $form->get('id');
 		JDEBUG ? $profiler->mark('pluginmanager:getFormPlugins:start - ' . $sig) : null;
 
 		if (!array_key_exists($sig, $this->formPlugins))
 		{
 			$this->formPlugins[$sig] = array();
-			$lang = JFactory::getLanguage();
+			$lang = $this->lang;
 			$folder = 'fabrik_element';
 			$client = JApplicationHelper::getClientInfo(0);
 			$groupIds = $form->getGroupIds();
@@ -412,15 +410,20 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 				return array();
 			}
 
+			/**
+			 * Changed this code to use two separate queries, rather than joining #__extensions on the
+			 * plugin name, as the J! 3.5 release changed collation of J! table, and this breaks the
+			 * for some sites with older MySQL or non-standard collation
+			 */
+
+			// build list of plugins used on this form ...
 			$db = FabrikWorker::getDbo(true);
 			$query = $db->getQuery(true);
 			$select = '*, e.name AS name, e.id AS id, e.published AS published, e.label AS label,'
-			. 'e.plugin, e.params AS params, e.access AS access, e.ordering AS ordering';
+				. 'e.plugin, e.params AS params, e.access AS access, e.ordering AS ordering';
 			$query->select($select);
 			$query->from('#__{package}_elements AS e');
-			$query->join('INNER', '#__extensions AS p ON p.element = e.plugin');
 			$query->where('group_id IN (' . implode(',', $groupIds) . ')');
-			$query->where('p.folder = "fabrik_element"');
 
 			// Ignore trashed elements
 			$query->where('e.published != -2');
@@ -429,6 +432,16 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 
 			$elements = $db->loadObjectList();
 
+			// now build list of all available Fabrik plugins ...
+			$query->clear();
+			$query
+				->select('element')
+				->from('#__extensions')
+				->where('folder = "fabrik_element"')
+				->where('enabled = "1"', 'AND');
+			$db->setQuery($query);
+			$extensions = $db->loadObjectList('element');
+
 			// Don't assign the elements into Joomla's main dispatcher as this causes out of memory errors in J1.6rc1
 			$dispatcher = new JDispatcher;
 			$groupModels = $form->getGroups();
@@ -436,10 +449,26 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 
 			foreach ($elements as $element)
 			{
+				// see if this plugin has been uninstalled or unpubished in J!
+				if (!array_key_exists($element->plugin, $extensions))
+				{
+					continue;
+				}
+
 				JDEBUG ? $profiler->mark('pluginmanager:getFormPlugins:' . $element->id . '' . $element->plugin) : null;
 				require_once JPATH_PLUGINS . '/fabrik_element/' . $element->plugin . '/' . $element->plugin . '.php';
 				$class = 'PlgFabrik_Element' . $element->plugin;
-				$pluginModel = new $class($dispatcher, array());
+
+				if (class_exists($class))
+				{
+					$pluginModel = new $class($dispatcher, array());
+				}
+				else
+				{
+					// Allow for namespaced plugins
+					$class = 'Fabrik\\Plugins\\' . JString::ucfirst($group) . '\\' . JString::ucfirst($element->plugin);
+					$pluginModel = new $class($dispatcher, array());
+				}
 
 				if (!is_object($pluginModel))
 				{
@@ -460,9 +489,9 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 				$groupModel->elements[$pluginModel->getId()] = $pluginModel;
 			}
 
-			foreach ($groupModels as $groupid => $g)
+			foreach ($groupModels as $groupId => $g)
 			{
-				$this->formPlugins[$sig][$groupid] = $g;
+				$this->formPlugins[$sig][$groupId] = $g;
 			}
 		}
 
@@ -474,9 +503,8 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @param   int  $id  Element id
 	 *
-	 * @return object  Element plugin
+	 * @return PlgFabrik_Element  Element plugin
 	 */
-
 	public function getElementPlugin($id)
 	{
 		return $this->getPluginFromId($id);
@@ -488,9 +516,8 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 * @param   int     $id    Plugin id
 	 * @param   string  $type  Plugin type
 	 *
-	 * @return object  plugin
+	 * @return PlgFabrik_Element|?  plugin
 	 */
-
 	public function getPluginFromId($id, $type = 'Element')
 	{
 		$el = FabTable::getInstance($type, 'FabrikTable');
@@ -522,7 +549,6 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  void
 	 */
-
 	protected function loadLists($group, $lists, &$elementModel)
 	{
 	}
@@ -536,17 +562,16 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  array	of bools: false if error found and processed, otherwise true
 	 */
-
 	public function runPlugins($method, &$parentModel, $type = 'form')
 	{
 		$profiler = JProfiler::getInstance('Application');
 		JDEBUG ? $profiler->mark("runPlugins: start: $method") : null;
-		
+
 		if ($type == 'form')
 		{
 			/**
-			 * $$$ rob allow for table plugins to hook into form plugin calls - methods are mapped as:
-			 * form method = 'onLoad' => table method => 'onFormLoad'
+			 * $$$ rob allow for list plugins to hook into form plugin calls - methods are mapped as:
+			 * form method = 'onLoad' => list method => 'onFormLoad'
 			 */
 			$tmethod = 'onForm' . FabrikString::ltrimword($method, 'on');
 			$listModel = $parentModel->getListModel();
@@ -591,7 +616,7 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 		 */
 		$runningAway = false;
 		$mainData = array();
-		
+
 		foreach ($usedPlugins as $usedPlugin)
 		{
 			if ($runningAway)
@@ -646,16 +671,28 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 							if ($ok === false)
 							{
 								$return[] = false;
+
+								// if we were processing and it errored out, we need to pick up any error messages
+								if ($method === 'process')
+								{
+									$m = $method . '_result';
+									if (method_exists($plugin, $m))
+									{
+										$this->data[] = $mainData[] = $plugin->$m($c);
+										$this->dataModels[] = $plugin;
+									}
+								}
 							}
 							else
 							{
-								$thisreturn = $plugin->customProcessResult($method);
-								$return[] = $thisreturn;
+								$thisReturn = $plugin->customProcessResult($method);
+								$return[] = $thisReturn;
 								$m = $method . '_result';
 
 								if (method_exists($plugin, $m))
 								{
-									$this->data[] = $plugin->$m($c);
+									$this->data[] = $mainData[] = $plugin->$m($c);
+									$this->dataModels[] = $plugin;
 								}
 							}
 
@@ -666,14 +703,14 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 								$runningAway = true;
 							}
 
-							$mainData = $this->data;
+							//$mainData = $this->data;
 
 							if ($type == 'list' && $method !== 'observe')
 							{
 								$this->runPlugins('observe', $parentModel, 'list', $plugin, $method);
 							}
 
-							$this->data = $mainData;
+							//$this->data = $mainData;
 						}
 					}
 				}
@@ -682,10 +719,11 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 			}
 		}
 
+		$this->data = $mainData;
 		$this->runPlugins = $runPlugins;
 
 		JDEBUG ? $profiler->mark("runPlugins: end: $method") : null;
-		
+
 		return array_unique($return);
 	}
 
@@ -697,7 +735,6 @@ class FabrikFEModelPluginmanager extends JModelLegacy
 	 *
 	 * @return  bool
 	 */
-
 	public function pluginExists($group, $plugin)
 	{
 		$plugins = $this->loadPlugInGroup($group);

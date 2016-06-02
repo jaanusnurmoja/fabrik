@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Administrator
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -45,8 +45,6 @@ class FabrikAdminViewHome extends JViewLegacy
 
 	public function display($tpl = null)
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
 		$srcs = FabrikHelperHTML::framework();
 		FabrikHelperHTML::script($srcs);
 		$db = FabrikWorker::getDbo(true);

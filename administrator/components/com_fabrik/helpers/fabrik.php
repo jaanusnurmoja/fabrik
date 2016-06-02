@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Administrator
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  * @since       1.6
  */
@@ -25,12 +25,12 @@ class FabrikAdminHelper
 	 * Prepare the date for saving
 	 * DATES SHOULD BE SAVED AS UTC
 	 *
-	 * @param   string  &$strdate  publish down date
+	 * @param   string  $strdate  publish down date
 	 *
-	 * @return  null
+	 * @return  string
 	 */
 
-	public static function prepareSaveDate(&$strdate)
+	public static function prepareSaveDate($strdate)
 	{
 		$config = JFactory::getConfig();
 		$tzoffset = $config->get('offset');
@@ -51,6 +51,8 @@ class FabrikAdminHelper
 			$date = JFactory::getDate($strdate, $tzoffset);
 			$strdate = $date->toSql();
 		}
+
+		return $strdate;
 	}
 
 	/**

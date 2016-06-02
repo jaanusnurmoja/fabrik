@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Form
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -38,7 +38,6 @@ class JFormFieldUploadsize extends JFormField
 	 *
 	 * @return  int  bytes
 	 */
-
 	protected function _return_bytes($val)
 	{
 		$val = trim($val);
@@ -65,7 +64,6 @@ class JFormFieldUploadsize extends JFormField
 	 *
 	 * @return  string  HTML markup
 	 */
-
 	protected function getInput()
 	{
 		$size = $this->element['size'] ? 'size="' . $this->element['size'] . '"' : '';
@@ -85,7 +83,6 @@ class JFormFieldUploadsize extends JFormField
 	 *
 	 * @return  string  The field label markup.
 	 */
-
 	protected function getLabel()
 	{
 		// Get the label text from the XML element, defaulting to the element name.
@@ -103,7 +100,6 @@ class JFormFieldUploadsize extends JFormField
 	 *
 	 * @return	int	kilobyte upload size
 	 */
-
 	protected function getMax()
 	{
 		$post_value = $this->_return_bytes(ini_get('post_max_size'));

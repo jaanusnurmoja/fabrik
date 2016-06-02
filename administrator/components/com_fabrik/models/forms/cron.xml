@@ -20,7 +20,11 @@
 		<field name="lastrun"
 			type="calendar"
 			class="input-medium"
-			label="COM_FABRIK_CRON_FIELD_LAST_RUN_LABEL" />
+			label="COM_FABRIK_CRON_FIELD_LAST_RUN_LABEL"
+			   format="%Y-%m-%d %H:%M:%S"
+			   size="22"
+			   filter="user_utc"
+		/>
 
 		<field name="published"
 			type="radio"
@@ -101,6 +105,22 @@
 				<option value="0">JNO</option>
 				<option value="1">JYES</option>
 			</field>
+			
+			<field name="require_qs_secret"
+				type="field"
+				default=""
+				description="COM_FABRIK_CRON_FIELD_REQUIRE_QS_SECRET_DESC"
+				label="COM_FABRIK_CRON_FIELD_REQUIRE_QS_SECRET_LABEL" />
+			
+			<field name="cron_rungate"
+				type="radio"
+				class="btn-group"
+				default="0"
+				description="COM_FABRIK_CRON_FIELD_RUNGATE_DESC"
+				label="COM_FABRIK_CRON_FIELD_RUNGATE_LABEL">
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
+			</field>
 
 		</fieldset>
 
@@ -116,6 +136,12 @@
 				connection_in_repeat="false"
 				label="COM_FABRIK_CRON_FIELD_TABLE_LABEL"
 				observe="params_connection" />
+
+			<field name="cron_row_limit"
+			       type="field"
+			       default="100"
+			       label="COM_FABRIK_CRON_FIELD_ROW_LIMIT_LABEL"
+			       DESCRIPTION="COM_FABRIK_CRON_FIELD_ROW_LIMIT_DESC" />
 
 		</fieldset>
 	</fields>

@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.radiolist
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -86,28 +86,10 @@ class PlgFabrik_ElementRadiobutton extends PlgFabrik_ElementList
 		$opts->defaultVal = $this->getDefaultValue($data);
 		$opts->data = empty($arVals) ? array() : array_combine($arVals, $arTxt);
 		$opts->allowadd = $params->get('allow_frontend_addtoradio', false) ? true : false;
+		$opts->changeEvent = $this->getChangeEvent();
 		JText::script('PLG_ELEMENT_RADIO_ENTER_VALUE_LABEL');
 
 		return array('FbRadio', $id, $opts);
-	}
-
-	/**
-	 * Get the class to manage the form element
-	 * to ensure that the file is loaded only once
-	 *
-	 * @param   array   &$srcs   Scripts previously loaded
-	 * @param   string  $script  Script to load once class has loaded
-	 * @param   array   &$shim   Dependant class names to load before loading the class - put in requirejs.config shim
-	 *
-	 * @return void
-	 */
-
-	public function formJavascriptClass(&$srcs, $script = '', &$shim = array())
-	{
-		$s = new stdClass;
-		$s->deps = array('fab/element', 'fab/elementlist');
-		$shim['element/radiobutton/radiobutton'] = $s;
-		parent::formJavascriptClass($srcs, $script, $shim);
 	}
 
 	/**
@@ -233,4 +215,56 @@ class PlgFabrik_ElementRadiobutton extends PlgFabrik_ElementList
 
 		return $v;
 	}
+
+	/**
+	 * Return JS event required to trigger a 'change', this is overriding default element model.
+	 * When in BS mode with button-grp, needs to be 'click'.
+	 *
+	 * @return  string
+	 */
+
+	public function getChangeEvent()
+	{
+		return $this->buttonGroup() ? 'click' : 'change';
+	}
+
+	/**
+	 * Get classes to assign to the grid
+	 * An array of arrays of class names, keyed as 'container', 'label' or 'input',
+	 *
+	 * @return  array
+	 */
+	protected function gridClasses()
+	{
+		if ($this->buttonGroup())
+		{
+			return array(
+				'label' => array('btn-default'),
+				'container' => array('btn-radio')
+			);
+		}
+		else
+		{
+			return array();
+		}
+	}
+
+	/**
+	 * Get data attributes to assign to the container
+	 *
+	 * @return  array
+	 */
+	protected function dataAttributes()
+	{
+		if ($this->buttonGroup())
+		{
+			return array('data-toggle="buttons"');
+		}
+		else
+		{
+			return array();
+		}
+	}
+
+
 }

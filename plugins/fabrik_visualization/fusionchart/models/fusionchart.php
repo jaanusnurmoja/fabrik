@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.visualization.fusionchart
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -22,7 +22,6 @@ require_once JPATH_SITE . '/components/com_fabrik/models/visualization.php';
  * @subpackage  Fabrik.visualization.fusionchart
  * @since       3.0
  */
-
 class FabrikModelFusionchart extends FabrikFEModelVisualization
 {
 	/**
@@ -30,7 +29,6 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 	 *
 	 * @return  string
 	 */
-
 	protected function getChartParams()
 	{
 		$params = $this->getParams();
@@ -360,7 +358,6 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 	 *
 	 * @return null
 	 */
-
 	protected function setChartMessages()
 	{
 		$params = $this->getParams();
@@ -389,10 +386,9 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 	 *
 	 * @return  string  replaced string
 	 */
-
 	private function _replaceRequest($msg)
 	{
-		$db = JFactory::getDbo();
+		$db = $this->_db;
 		$filter = JFilterInput::getInstance();
 		$request = $filter->clean($_REQUEST, 'array');
 
@@ -414,7 +410,6 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 	 *
 	 * @return  void
 	 */
-
 	protected function setAxisLabels()
 	{
 		$worker = new FabrikWorker;
@@ -432,7 +427,6 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 	 *
 	 * @return  string
 	 */
-
 	public function getFusionchart()
 	{
 		$this->cantTrendLine = array();
@@ -633,7 +627,7 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 						}
 
 						$tmpgdata[] = (trim($row->$column) == '') ? -1 : (float) $row->$column;
-						$tmpglabels[] = !empty($label) ? strip_tags($row->$label) : '';
+						$tmpglabels[] = !empty($label) ? html_entity_decode(strip_tags($row->$label)) : '';
 					}
 
 					if (!empty($tmpgdata))

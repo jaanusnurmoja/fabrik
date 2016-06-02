@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.list.email
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -20,31 +20,27 @@ jimport('joomla.application.component.view');
  * @subpackage  Fabrik.list.email
  * @since       3.0
  */
-
 class FabrikViewPopupwin extends JViewLegacy
 {
 	/**
 	 * Display the view
 	 *
-	 * @param   string  $tmpl  Template
+	 * @param   string $tmpl Template
 	 *
 	 * @return  JView  this
 	 */
-
 	public function display($tmpl = 'default')
 	{
-		$app = JFactory::getApplication();
-		$model = $this->getModel();
-		$input = $app->input;
+		$app         = JFactory::getApplication();
+		$model       = $this->getModel();
+		$input       = $app->input;
 		$renderOrder = $input->getInt('renderOrder');
-		$usersConfig = JComponentHelper::getParams('com_fabrik');
 
-		$tmplpath = JPATH_ROOT . '/plugins/fabrik_list/email/views/popupwin/tmpl/' . $tmpl;
-		$this->_setPath('template', $tmplpath);
+		$path = JPATH_ROOT . '/plugins/fabrik_list/email/views/popupwin/tmpl/' . $tmpl;
+		$this->_setPath('template', $path);
 
 		$this->showToField = $model->getShowToField();
-		$this->fieldList = $model->getToField();
-		$records = $model->getRecords();
+		$records           = $model->getRecords();
 
 		if (count($records) == 0)
 		{
@@ -53,17 +49,23 @@ class FabrikViewPopupwin extends JViewLegacy
 			return;
 		}
 
-		$this->recordcount = count($records);
-		$this->renderOrder = $renderOrder;
-		$this->recordids = implode(',', $records);
-		$this->listid = $this->get('id', 'list');
-		$this->showSubject = $model->getShowSubject();
-		$this->subject = $model->getSubject();
-		$this->message = $model->getMessage();
+		$this->recordcount     = count($records);
+		$this->renderOrder     = $renderOrder;
+		$this->recordids       = implode(',', $records);
+		$this->listid          = $this->get('id', 'list');
+		$this->showSubject     = $model->getShowSubject();
+		$this->subject         = $model->getSubject();
+		$this->message         = $model->getMessage();
 		$this->allowAttachment = $model->getAllowAttachment();
-		$this->editor = $model->getEditor();
+		$this->editor          = $model->getEditor();
+		$this->toType          = $model->_toType();
+		$this->emailTo        = $model->_emailTo();
+		$this->params          = $model->getParams();
+		$this->listEmailTo     = $model->formModel->getElementList('list_email_to');
+		$this->addressBook     = $model->addressBook();
 
 		$srcs = FabrikHelperHTML::framework();
+		FabrikHelperHTML::iniRequireJs();
 		FabrikHelperHTML::script($srcs);
 
 		return parent::display();

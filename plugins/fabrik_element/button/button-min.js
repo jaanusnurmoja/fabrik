@@ -1,1 +1,2 @@
-var FbButton=new Class({Extends:FbElement,initialize:function(b,a){this.plugin="fabrikButton";this.parent(b,a)},addNewEventAux:function(action,js){this.element.addEvent(action,function(e){e.stop();typeOf(js)==="function"?js.delay(0,this,this):eval(js)}.bind(this))}});
+/*! Fabrik */
+define(["jquery","fab/element"],function(jQuery,FbElement){return window.FbButton=new Class({Extends:FbElement,initialize:function(a,b){this.setPlugin("fabrikButton"),this.parent(a,b)},addNewEventAux:function(action,js){var self=this;jQuery(this.element).on(action,function(e){e&&e.stopPropagation(),"function"===jQuery.type(js)?js.delay(0,self,self):(js=js.replace(/\bthis\b/g,"self"),eval(js))})}}),window.FbButton});

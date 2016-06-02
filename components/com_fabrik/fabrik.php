@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -29,6 +29,7 @@ if (JDEBUG)
 
 require_once JPATH_COMPONENT . '/controller.php';
 $app = JFactory::getApplication();
+$app->set('jquery', true);
 $input = $app->input;
 
 /**
@@ -64,7 +65,7 @@ $controllerName = $input->getCmd('view');
 // Call a plugin controller via the url :
 // &controller=visualization.calendar
 
-$isplugin = false;
+$isPlugin = false;
 $cName = $input->getCmd('controller');
 
 if (JString::strpos($cName, '.') != false)
@@ -81,7 +82,7 @@ if (JString::strpos($cName, '.') != false)
 	if (JFile::exists($path))
 	{
 		require_once $path;
-		$isplugin = true;
+		$isPlugin = true;
 		$controller = $type . $name;
 	}
 	else
@@ -107,7 +108,7 @@ else
 	}
 	else
 	{
-		$controller = $controllerName;
+		$controller = $cName === 'oai' ? $cName : $controllerName;
 	}
 
 	$path = JPATH_COMPONENT . '/controllers/' . $controller . '.php';
@@ -131,7 +132,7 @@ if (strpos($input->getCmd('task'), '.') !== false)
 {
 	$controllerTask = explode('.', $input->getCmd('task'));
 	$controller = array_shift($controllerTask);
-	$classname = 'FabrikController' . JString::ucfirst($controller);
+	$className = 'FabrikController' . JString::ucfirst($controller);
 	$path = JPATH_COMPONENT . '/controllers/' . $controller . '.php';
 
 	if (JFile::exists($path))
@@ -141,7 +142,7 @@ if (strpos($input->getCmd('task'), '.') !== false)
 		// Needed to process J content plugin (form)
 		$input->set('view', $controller);
 		$task = array_pop($controllerTask);
-		$controller = new $classname;
+		$controller = new $className;
 	}
 	else
 	{
@@ -150,12 +151,12 @@ if (strpos($input->getCmd('task'), '.') !== false)
 }
 else
 {
-	$classname = 'FabrikController' . JString::ucfirst($controller);
-	$controller = new $classname;
+	$className = 'FabrikController' . JString::ucfirst($controller);
+	$controller = new $className;
 	$task = $input->getCmd('task');
 }
 
-if ($isplugin)
+if ($isPlugin)
 {
 	// Add in plugin view
 	$controller->addViewPath(JPATH_SITE . '/plugins/fabrik_' . $type . '/' . $name . '/views');

@@ -1,1 +1,2 @@
-var FbUsergroup=new Class({Extends:FbElement,initialize:function(b,a){this.plugin="fabrikusergroup";this.parent(b,a)}});
+/*! Fabrik */
+define(["jquery","fab/element"],function(a,b){return window.FbUsergroup=new Class({Extends:b,initialize:function(a,b){this.setPlugin("fabrikusergroup"),this.parent(a,b)}}),window.FbUsergroup});

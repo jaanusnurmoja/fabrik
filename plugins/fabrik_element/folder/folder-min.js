@@ -1,1 +1,2 @@
-var FbFolder=new Class({Extends:FbElement,initialize:function(b,a){this.plugin="fabrikfolder";this.parent(b,a)}});
+/*! Fabrik */
+define(["jquery","fab/element"],function(a,b){return window.FbFolder=new Class({Extends:b,initialize:function(a,b){this.setPlugin("fabrikfolder"),this.parent(a,b)}}),window.FbFolder});

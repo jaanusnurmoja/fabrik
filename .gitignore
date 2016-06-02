@@ -3,7 +3,6 @@
 .settings/
 .tx/
 *.txt
-*.php
 *.xml
 *.jpg
 .htaccess
@@ -13,7 +12,6 @@ cache/*
 administrator/*
 !administrator/components/com_fabrik/
 administrator/components/com_fabrik/update/
-cache/*
 components/*
 !components/com_fabrik
 components/com_fabrik/js/*
@@ -27,7 +25,9 @@ includes/*
 language/*
 libraries/*
 !libraries/dompdf/
+!libraries/fabrik/fabrik/*
 libraries/dompdf/lib/fonts/log.htm
+logs
 modules/*
 !modules/mod_fabrik_form
 !modules/mod_fabrik_form/*
@@ -38,16 +38,18 @@ modules/*
 media/*
 !media/com_fabrik/*
 media/com_fabrik/uploads/
-logs
+node_modules/*
 plugins/*
 plugins/search/*
 !plugins/search/fabrik
 plugins/system/*
 plugins/fabrik_list/sphera_php_events
+plugins/fabrik_list/download/libs
 !plugins/system/fabrik/
 !plugins/fabrik_element/
 plugins/fabrik_element/mytristate/
 !plugins/fabrik_form/
+plugins/fabrik_form/payments/
 plugins/fabrik_form/php/scripts/
 plugins/fabrik_form/caneditgroup/
 !plugins/fabrik_list/
@@ -57,6 +59,7 @@ plugins/fabrik_list/php/scripts/
 !plugins/fabrik_visualization/
 plugins/community/*
 !plugins/community/fabrik/
+premium/*
 !tttplugins/system/fabrikcron/
 robots.txt
 sql/*
@@ -81,7 +84,6 @@ fabrik_build/cli/
 /index.html
 /image
 /language
-libraries/dompdf/lib/fonts/log.htm
 /docs
 /uploads
 libraries/dompdf/lib/fonts/dompdf_font_family_cache.dist.php
@@ -97,3 +99,8 @@ custom.css
 !software_license.txt
 /ZendFramework-1.12.3
 /mobiquo
+/node_modules
+
+components/com_fabrik/language/.DS_Store
+
+components/com_fabrik/models/.DS_Store

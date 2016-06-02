@@ -4,12 +4,14 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.textarea
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Plugin element to render text area or wysiwyg editor
@@ -18,7 +20,6 @@ defined('_JEXEC') or die('Restricted access');
  * @subpackage  Fabrik.element.textarea
  * @since       3.0
  */
-
 class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 {
 	/**
@@ -35,59 +36,34 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  string	Tagified string
 	 */
-
 	protected function tagify($data)
 	{
 		$name = $this->getFullName(true, false);
 		$params = $this->getParams();
-		$listModel = $this->getlistModel();
-		$filters = $listModel->getFilterArray();
-		$fkeys = FArrayHelper::getValue($filters, 'key', array());
-		$data = explode(",", strip_tags($data));
-		$tags = array();
+		$data = explode(',', strip_tags($data));
 		$url = $params->get('textarea_tagifyurl');
+		$listId = $this->getListModel()->getId();
 
 		if ($url == '')
 		{
-			$url = $_SERVER['REQUEST_URI'];
-			$bits = explode('?', $url);
-			$root = FArrayHelper::getValue($bits, 0, '', 'string');
-			$bits = FArrayHelper::getValue($bits, 1, '', 'string');
-			$bits = explode("&", $bits);
-			$fullName = $this->getFullName(true, false);
-
-			for ($b = count($bits) - 1; $b >= 0; $b --)
+			if ($this->app->isAdmin())
 			{
-				$parts = explode("=", $bits[$b]);
-
-				if (count($parts) > 1)
-				{
-					$key = FabrikString::ltrimword(FabrikString::safeColNameToArrayKey($parts[0]), '&');
-
-					if ($key == $fullName)
-					{
-						unset($bits[$b]);
-					}
-
-					if ($key == $fullName . '[value]')
-					{
-						unset($bits[$b]);
-					}
-
-					if ($key == $fullName . '[condition]')
-					{
-						unset($bits[$b]);
-					}
-				}
+				$url = 'index.php?option=com_fabrik&amp;task=list.view&amp;listid=' . $listId;
+			}
+			else
+			{
+				$url = 'index.php?option=com_' . $this->package . '&view=list&listid=' . $listId;
 			}
 		}
 
-		$url = $root . '?' . implode('&', $bits);
-
 		// $$$ rob 24/02/2011 remove duplicates from tags
+		// $$$ hugh - strip spaces first, account for "foo,bar, baz, foo"
+		$data = array_map('trim', $data);
 		$data = array_unique($data);
 		$img = FabrikWorker::j3() ? 'bookmark.png' : 'tag.png';
 		$icon = FabrikHelperHTML::image($img, 'form', @$this->tmpl, array('alt' => 'tag'));
+		$tmplData = new stdClass;
+		$tmplData->tags = array();
 
 		foreach ($data as $d)
 		{
@@ -97,8 +73,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 			{
 				if (trim($params->get('textarea_tagifyurl')) == '')
 				{
-					$qs = strstr($url, '?');
-
 					if (substr($url, -1) === '?')
 					{
 						$thisurl = $url . $name . '[value]=' . $d;
@@ -116,11 +90,17 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 					$thisurl = str_replace('{tag}', urlencode($d), $url);
 				}
 
-				$tags[] = '<a href="' . $thisurl . '" class="fabrikTag">' . $icon . $d . '</a>';
+				$o = new stdClass;
+				$o->url = $thisurl;
+				$o->icon = $icon;
+				$o->label = $d;
+				$tmplData->tags[] = $o;
 			}
 		}
 
-		return implode(' ', $tags);
+		$layout = $this->getLayout('tags');
+
+		return $layout->render($tmplData);
 	}
 
 	/**
@@ -128,56 +108,74 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @param   string    $data      Elements data
 	 * @param   stdClass  &$thisRow  All the data in the lists current row
+	 * @param   array     $opts      Rendering options
 	 *
-	 * @return  string	Formatted value
+	 * @return  string	formatted value
 	 */
-
-	public function renderListData($data, stdClass &$thisRow)
+	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$data = parent::renderListData($data, $thisRow);
+		$data = parent::renderListData($data, $thisRow, $opts);
 		$params = $this->getParams();
 
 		if ($params->get('textarea-tagify') == true)
 		{
 			$data = $this->tagify($data);
 		}
-
-		// $$$rob don't strip slashes here - this is done when saving to db now
-		if (!$this->useWysiwyg())
+		else
 		{
-			if (is_array($data))
+			if (!$this->useWysiwyg(false))
 			{
-				for ($i = 0; $i < count($data); $i++)
+				if (is_array($data))
 				{
-					$data[$i] = nl2br($data[$i]);
+					for ($i = 0; $i < count($data); $i++)
+					{
+						$data[$i] = nl2br($data[$i]);
+					}
+				}
+				else
+				{
+					if (is_object($data))
+					{
+						$this->convertDataToString($data);
+					}
+
+					$data = nl2br($data);
 				}
 			}
-			else
+
+			$truncateWhere = (int) $params->get('textarea-truncate-where', 0);
+
+			if ($data !== '' && ($truncateWhere === 1 || $truncateWhere === 3))
 			{
-				if (is_object($data))
+				$opts = $this->truncateOpts();
+				$data = fabrikString::truncate($data, $opts);
+				$listModel = $this->getListModel();
+
+				if (ArrayHelper::getValue($opts, 'link', 1))
 				{
-					$this->convertDataToString($data);
+					$data = $listModel->_addLink($data, $this, $thisRow);
 				}
-
-				$data = nl2br($data);
 			}
-		}
-
-		if (!$params->get('textarea-tagify') && $data !== ''
-			&&
-			((int) $params->get('textarea-truncate-where', 0) === 1 || (int) $params->get('textarea-truncate-where', 0) === 3)
-		)
-		{
-			$opts = array();
-			$opts['wordcount'] = (int) $params->get('textarea-truncate', 0);
-			$opts['tip'] = $params->get('textarea-hover');
-			$opts['position'] = $params->get('textarea_hover_location', 'top');
-			$data = fabrikString::truncate($data, $opts);
-			$listModel = $this->getListModel();
-			$data = $listModel->_addLink($data, $this, $thisRow);
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Get the truncate text options. Can be used for both list and details views.
+	 *
+	 * @return array
+	 */
+	private function truncateOpts()
+	{
+		$opts = array();
+		$params = $this->getParams();
+		$opts['html_format'] = $params->get('textarea-truncate-html', '0') === '1';
+		$opts['wordcount'] = (int) $params->get('textarea-truncate', 0);
+		$opts['tip'] = $params->get('textarea-hover');
+		$opts['position'] = $params->get('textarea_hover_location', 'top');
+
+		return $opts;
 	}
 
 	/**
@@ -188,7 +186,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  string  label
 	 */
-
 	public function getLabel($repeatCounter = 0, $tmpl = '')
 	{
 		$params = $this->getParams();
@@ -207,12 +204,9 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  mixed	False if not using the wysiwyg editor. String (element name) if it is
 	 */
-
 	public function useEditor()
 	{
-		$params = $this->getParams();
 		$element = $this->getElement();
-		$app = JFactory::getApplication();
 
 		if ($this->useWysiwyg())
 		{
@@ -225,37 +219,25 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	}
 
 	/**
-	 * Determines if the element can contain data used in sending receipts,
-	 * e.g. fabrikfield returns true
-	 *
-	 * @return  bool
-	 */
-
-	public function isReceiptElement()
-	{
-		return true;
-	}
-
-	/**
 	 * Should the element use the WYSIWYG editor
+	 *
+	 * @bool  checkFormat  check the formats (ajax, format=raw), or only check param setting
 	 *
 	 * @since   3.0.6.2
 	 *
 	 * @return  bool
 	 */
-
-	protected function useWysiwyg()
+	protected function useWysiwyg($checkFormat = true)
 	{
 		$params = $this->getParams();
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$input = $this->app->input;
 
-		if ($input->get('format') == 'raw')
+		if ($checkFormat && $input->get('format') == 'raw')
 		{
 			return false;
 		}
 
-		if ($input->get('ajax') == '1')
+		if ($checkFormat && $input->get('ajax') == '1')
 		{
 			return false;
 		}
@@ -271,11 +253,8 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  string	Elements html
 	 */
-
 	public function render($data, $repeatCounter = 0)
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
 		$name = $this->getHTMLName($repeatCounter);
 		$id = $this->getHTMLId($repeatCounter);
 		$element = $this->getElement();
@@ -295,31 +274,32 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 
 		if (!$this->isEditable())
 		{
-			if (!$wysiwyg)
-			{
-				$value = nl2br($value);
-			}
-
 			if ($params->get('textarea-tagify') == true)
 			{
 				$value = $this->tagify($value);
 			}
-			if (!$params->get('textarea-tagify') && $value !== ''
-				&&
-				((int) $params->get('textarea-truncate-where', 0) === 2 || (int) $params->get('textarea-truncate-where', 0) === 3))
+			else
 			{
-				$opts = array();
-				$opts['wordcount'] = (int) $params->get('textarea-truncate', 0);
-				$opts['tip'] = $params->get('textarea-hover');
-				$opts['position'] = $params->get('textarea_hover_location', 'top');
-				$value = fabrikString::truncate($value, $opts);
+				if (!$this->useWysiwyg(false))
+				{
+					$value = nl2br($value);
+				}
+
+				if ($value !== ''
+					&&
+					((int) $params->get('textarea-truncate-where', 0) === 2 || (int) $params->get('textarea-truncate-where', 0) === 3))
+				{
+					$opts = $this->truncateOpts();
+					$value = fabrikString::truncate($value, $opts);
+				}
 			}
+
 			return $value;
 		}
 
 		if ($params->get('textarea_placeholder', '') !== '')
 		{
-			$bits['placeholder'] = $params->get('textarea_placeholder');
+			$bits['placeholder'] = FText::_($params->get('textarea_placeholder'));
 		}
 
 		if ($this->elementError != '')
@@ -327,11 +307,15 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 			$bits['class'] .= ' elementErrorHighlight';
 		}
 
+		$layoutData = new stdClass;
+		$this->charsLeft($value, $layoutData);
+
 		if ($wysiwyg)
 		{
-			$editor = JFactory::getEditor();
+			$editor = JEditor::getInstance($this->config->get('editor'));
 			$buttons = (bool) $params->get('wysiwyg_extra_buttons', true);
-			$str = $editor->display($name, $value, $cols * 10, $rows * 15, $cols, $rows, $buttons, $id);
+			$layoutData->editor = $editor->display($name, $value, $cols * 10, $rows * 15, $cols, $rows, $buttons, $id);
+			$layout = $this->getLayout('wysiwyg');
 		}
 		else
 		{
@@ -350,26 +334,27 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 			$bits['id'] = $id;
 			$bits['cols'] = $cols;
 			$bits['rows'] = $rows;
-			$bits['value'] = $value;
-			$str = $this->buildInput('textarea', $bits, false);
+			$layoutData->attributes = $bits;
+			$layoutData->value = $value;
+
+			$layout = $this->getLayout('form');
 		}
 
-		$str .= $this->charsLeft($value);
-
-		return $str;
+		return $layout->render($layoutData);
 	}
 
 	/**
 	 * Create the 'characters left' interface when the element is rendered in the form view
 	 *
-	 * @param   string  $value  Value
+	 * @param   string    $value  Value
+	 * @param   stdClass  &$data  Layout data
 	 *
-	 * @return  string  HTML
+	 * @return  array $data
 	 */
-	protected function charsLeft($value)
+	protected function charsLeft($value, stdClass &$data)
 	{
 		$params = $this->getParams();
-		$str = '';
+		$data->showCharsLeft = false;
 
 		if ($params->get('textarea-showmax'))
 		{
@@ -384,10 +369,12 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 				$charsLeft = $params->get('textarea-maxlength') - count(explode(' ', $value));
 			}
 
-			$str .= '<div class="fabrik_characters_left muted" style="clear:both"><span class="badge">' . $charsLeft . '</span> ' . $label . '</div>';
+			$data->showCharsLeft = true;
+			$data->charsLeft = $charsLeft;
+			$data->charsLeftLabel = $label;
 		}
 
-		return $str;
+		return $data;
 	}
 
 	/**
@@ -399,12 +386,11 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  string	formatted value
 	 */
-
 	public function getEmailValue($value, $data = array(), $repeatCounter = 0)
 	{
 		$groupModel = $this->getGroup();
 
-		if ($groupModel->isJoin() && $groupModel->canRepeat())
+		if (is_array($value) && $groupModel->isJoin() && $groupModel->canRepeat())
 		{
 			$value = $value[$repeatCounter];
 		}
@@ -424,7 +410,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  array  text/value objects
 	 */
-
 	public function filterValueList($normal, $tableName = '', $label = '', $id = '', $incjoin = true)
 	{
 		$params = $this->getParams();
@@ -446,7 +431,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return   array
 	 */
-
 	protected function getTags()
 	{
 		$listModel = $this->getListModel();
@@ -481,7 +465,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  array
 	 */
-
 	public function elementJavascript($repeatCounter)
 	{
 		$params = $this->getParams();
@@ -489,10 +472,10 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 		if ($this->useWysiwyg())
 		{
 			// $$$ rob need to use the NAME as the ID when wysiwyg end in joined group
-			$id = $this->getHTMLName($repeatCounter);
+			//$id = $this->getHTMLName($repeatCounter);
 
 			// Testing not using name as duplication of group does not trigger clone()
-			// $id = $this->getHTMLId($repeatCounter);
+			$id = $this->getHTMLId($repeatCounter);
 
 			if ($this->inDetailedView)
 			{
@@ -522,7 +505,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return bool
 	 */
-
 	public function validate($data, $repeatCounter = 0)
 	{
 		$params = $this->getParams();
@@ -550,7 +532,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  string
 	 */
-
 	public function getValidationErr()
 	{
 		return FText::_('PLG_ELEMENT_TEXTAREA_CONTENT_TOO_LONG');
@@ -563,7 +544,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  string	joomfish translation type e.g. text/textarea/referenceid/titletext
 	 */
-
 	public function getJoomfishTranslationType()
 	{
 		return 'textarea';
@@ -576,7 +556,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  array	Key=>value options
 	 */
-
 	public function getJoomfishOptions()
 	{
 		$params = $this->getParams();
@@ -595,7 +574,6 @@ class PlgFabrik_ElementTextarea extends PlgFabrik_Element
 	 *
 	 * @return  bool
 	 */
-
 	public function canEncrypt()
 	{
 		return true;

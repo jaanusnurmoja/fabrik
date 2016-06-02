@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -17,7 +17,7 @@ defined('_JEXEC') or die();
 $app = JFactory::getApplication();
 $input = $app->input;
 ?>
-<form method="post" action="<?php echo $this->action?>" class="advancedSeach_<?php echo $this->listref?>">
+<form method="post" action="<?php echo $this->action?>" class="advancedSearch_<?php echo $this->listref?>">
 	<a class="addbutton advanced-search-add btn-success btn" href="#">
 		<?php echo FabrikHelperHTML::image('plus.png', 'list', $this->tmpl);?>
 		<?php echo FText::_('COM_FABRIK_ADD')?>

@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.salesforce
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -52,14 +52,15 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 	/**
 	 * Sets up HTML to be injected into the form's bottom
 	 *
+	 * @throws Exception
+	 *
 	 * @return void
 	 */
-
 	public function getBottomContent()
 	{
 		if (!class_exists('SoapClient'))
 		{
-			JError::raiseWarning(E_WARNING, FText::_('PLG_FORM_SALESFORCE_ERR_SOAP_NOT_INSTALLED'));
+			throw new Exception(FText::_('PLG_FORM_SALESFORCE_ERR_SOAP_NOT_INSTALLED'));
 		}
 	}
 
@@ -69,16 +70,31 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 	 *
 	 * @return	bool
 	 */
-
 	public function onAfterProcess()
 	{
 		@ini_set("soap.wsdl_cache_enabled", "0");
+
+		/** @var FabrikFEModelForm $formModel */
 		$formModel = $this->getModel();
 		$client = $this->client();
 		$params = $this->getParams();
 		$userName = $params->get('salesforce_username');
 		$password = $params->get('salesforce_password');
 		$token = $params->get('salesforce_token');
+
+		if (empty($userName))
+		{
+			$config = JComponentHelper::getParams('com_fabrik');
+			$userName = $config->get('fabrik_salesforce_username', '');
+			$password = $config->get('fabrik_salesforce_password', '');
+			$token = $config->get('fabrik_salesforce_token', '');
+
+			if (empty($userName))
+			{
+				throw new Exception('No SalesForce credentials supplied!');
+			}
+		}
+
 		$updateObject = $params->get('salesforce_updateobject', 'Lead');
 		$loginResult = $client->login($userName, $password . $token);
 
@@ -115,12 +131,12 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 			}
 		}
 
-		$key = FabrikString::safeColNameToArrayKey($formModel->getlistModel()->getTable()->db_primary_key);
-		$customkey = $params->get('salesforce_customid') . '__c';
+		$key = $formModel->getlistModel()->getPrimaryKey(true);
+		$customKey = $params->get('salesforce_customid') . '__c';
 
 		if ($params->get('salesforce_allowupsert', 0))
 		{
-			$submission[$customkey] = $formModel->fullFormData[$key];
+			$submission[$customKey] = $formModel->fullFormData[$key];
 		}
 
 		$sObjects = array();
@@ -130,11 +146,10 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 		$sObject->type = $updateObject;
 		$sObject->fields = $submission;
 		array_push($sObjects, $sObject);
-		$app = JFactory::getApplication();
 
 		if ($params->get('salesforce_allowupsert', 0))
 		{
-			$result = $this->upsert($client, $sObjects, $customkey);
+			$result = $this->upsert($client, $sObjects, $customKey);
 		}
 		else
 		{
@@ -145,11 +160,11 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 		{
 			if ($result->created == '' && $params->get('salesforce_allowupsert', 0))
 			{
-				$app->enqueueMessage(JText::sprintf(SALESFORCE_UPDATED, $updateObject));
+				$this->app->enqueueMessage(JText::sprintf(SALESFORCE_UPDATED, $updateObject));
 			}
 			else
 			{
-				$app->enqueueMessage(JText::sprintf(SALESFORCE_CREATED, $updateObject));
+				$this->app->enqueueMessage(JText::sprintf(SALESFORCE_CREATED, $updateObject));
 			}
 		}
 		else
@@ -160,7 +175,7 @@ class PlgFabrik_FormSalesforce extends PlgFabrik_Form
 				{
 					foreach ($result->errors as $error)
 					{
-						JError::raiseWarning(500, FText::_('SALESFORCE_ERR') . $errors->message);
+						JError::raiseWarning(500, FText::_('SALESFORCE_ERR') . $error->message);
 					}
 				}
 				else

@@ -1,1 +1,2 @@
-var FbIp=new Class({Extends:FbElement,initialize:function(b,a){this.plugin="FbIp";this.parent(b,a)}});
+/*! Fabrik */
+define(["jquery","fab/element"],function(a,b){return window.FbIp=new Class({Extends:b,initialize:function(a,b){this.setPlugin("FbIp"),this.parent(a,b)}}),window.FbIp});

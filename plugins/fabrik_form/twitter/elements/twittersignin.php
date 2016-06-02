@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.twitter
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  *
  * NOTE - as we can only have one addpath file specified for the params group, this file has to be located
@@ -54,8 +54,9 @@ class JFormFieldTwittersignin extends JFormField
 
 		$c = isset($this->form->repeatCounter) ? (int) $this->form->repeatCounter : 0;
 
-		$href = COM_FABRIK_LIVESITE . 'index.php?option=com_fabrik&task=plugin.pluginAjax&plugin=twitter
-			&g=form&method=authenticateAdmin&tmpl=component&formid=' . $cid . '&repeatCounter=' . $c;
+
+		$href = COM_FABRIK_LIVESITE . 'index.php?option=com_fabrik&task=plugin.pluginAjax&plugin=twitter';
+		$href .= '&g=form&method=authenticateAdmin&tmpl=component&formid=' . $cid . '&repeatCounter=' . $c;
 
 		$clearjs = '$(\'jform_params_twitter_oauth_token-' . $c . '\').value = \'\';';
 		$clearjs .= '$(\'jform_params_twitter_oauth_token_secret-' . $c . '\').value = \'\';';
@@ -65,7 +66,25 @@ class JFormFieldTwittersignin extends JFormField
 		$src = COM_FABRIK_LIVESITE . 'components/com_fabrik/libs/abraham-twitteroauth/images/lighter.png';
 		$winOpts = 'width=800,height=460,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes';
 		$js = "window.open('$href', 'twitterwins', '" . $winOpts . "');return false;";
-		$str = '<a href="#" onclick="' . $js . '">';
+
+		$parsedUrl = parse_url(JUri::root());
+		$origin = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+
+		$str = "
+<script type='text/javascript'>
+window.addEventListener('message', function(event) {
+	if (~event.origin.indexOf('" . $origin . "')) {
+		jQuery(event.data).each(function (i, k) {
+			jQuery(k[0]).val(k[1]);
+		});
+	} else {
+		return;
+	}
+});
+</script>
+";
+
+		$str .= '<a href="#" onclick="' . $js . '">';
 		$str .= '<img src="' . $src . '" alt="Sign in with Twitter"/></a>';
 		$str .= " | <button class=\"button btn\" href=\"#\" onclick=\"$clearjs\">";
 		$str .= FText::_('PLG_FORM_TWITTER_CLEAR_CREDENTIALS') . "</button><br/>";

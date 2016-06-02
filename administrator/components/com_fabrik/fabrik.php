@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Administrator
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -14,7 +14,7 @@ defined('_JEXEC') or die('Restricted access');
 // Access check.
 if (!JFactory::getUser()->authorise('core.manage', 'com_fabrik'))
 {
-	return JError::raiseWarning(404, JText::_('JERROR_ALERTNOAUTHOR'));
+	throw new Exception(JText::_('JERROR_ALERTNOAUTHOR'), 404);
 }
 
 // Load front end language file as well
@@ -33,11 +33,6 @@ $input = $app->input;
 // Include dependencies
 jimport('joomla.application.component.controller');
 jimport('joomla.filesystem.file');
-
-if ($input->get('format', 'html') === 'html')
-{
-	FabrikHelperHTML::framework();
-}
 
 JHTML::stylesheet('administrator/components/com_fabrik/headings.css');
 
@@ -60,14 +55,14 @@ if (JString::strpos($cName, '.') != false)
 		require_once $path;
 		$controller = $type . $name;
 
-		$classname = 'FabrikController' . JString::ucfirst($controller);
-		$controller = new $classname;
+		$className = 'FabrikController' . JString::ucfirst($controller);
+		$controller = new $className;
 
 		// Add in plugin view
 		$controller->addViewPath(JPATH_SITE . '/plugins/fabrik_' . $type . '/' . $name . '/views');
 
 		// Add the model path
-		$modelpaths = JModelLegacy::addIncludePath(JPATH_SITE . '/plugins/fabrik_' . $type . '/' . $name . '/models');
+		JModelLegacy::addIncludePath(JPATH_SITE . '/plugins/fabrik_' . $type . '/' . $name . '/models');
 	}
 }
 else
@@ -78,7 +73,8 @@ else
 // Test that they've published some element plugins!
 $db = JFactory::getDbo();
 $query = $db->getQuery(true);
-$query->select('COUNT(extension_id)')->from('#__extensions')->where('enabled = 1 AND folder = "fabrik_element"');
+$query->select('COUNT(extension_id)')->from('#__extensions')
+		->where('enabled = 1 AND folder = ' . $db->q('fabrik_element'));
 $db->setQuery($query);
 
 if (count($db->loadResult()) === 0)
@@ -88,4 +84,10 @@ if (count($db->loadResult()) === 0)
 
 // Execute the task.
 $controller->execute($input->get('task', 'home.display'));
+
+if ($input->get('format', 'html') === 'html')
+{
+	FabrikHelperHTML::framework();
+}
+
 $controller->redirect();

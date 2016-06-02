@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.cron.gmail
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -36,8 +36,7 @@ class PlgFabrik_Crongmail extends PlgFabrik_Cron
 	public function process(&$data, &$listModel)
 	{
 		$params = $this->getParams();
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$input = $this->app->input;
 		$email = $params->get('plugin-options.email');
 		$pw = $params->get('plugin-options.password');
 

@@ -5,7 +5,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.cron.gcalsync
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -76,6 +76,7 @@ class PlgFabrik_CronGcalsync extends PlgFabrik_Cron
 		$params = $this->getParams();
 		$gcal_url = $params->get('gcal_sync_gcal_url');
 		$matches = array();
+		$listModel = $this->getModel();
 
 		/* This matches a standard GCal URL, found under the Google "Calender Details" tab, using the XML button.
 		 * It should match any form, for public or private ...
@@ -297,8 +298,7 @@ class PlgFabrik_CronGcalsync extends PlgFabrik_Cron
 			// If upload syncing (from us to gcal) is enabled ...
 			if ($gcal_sync_upload == 'both' || $gcal_sync_upload == 'to')
 			{
-				$config = JFactory::getConfig();
-				$tz = new DateTimeZone($config->get('offset'));
+				$tz = new DateTimeZone($this->config->get('offset'));
 
 				// Loop through the array we built earlier of events we have that aren't in gcal
 				foreach ($our_upload_ids as $id => $event)

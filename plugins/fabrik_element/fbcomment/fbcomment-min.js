@@ -1,1 +1,2 @@
-var FbComment=new Class({Extends:FbElement,initialize:function(b,a){this.plugin="fbComment";this.parent(b,a)}});
+/*! Fabrik */
+define(["jquery","fab/element"],function(a,b){return window.FbComment=new Class({Extends:b,initialize:function(a,b){this.setPlugin("fbComment"),this.parent(a,b)}}),window.FbComment});

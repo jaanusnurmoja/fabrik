@@ -1,1 +1,2 @@
-var FbListCopy=new Class({Extends:FbListPlugin,initialize:function(a){this.parent(a)}});
+/*! Fabrik */
+define(["jquery","fab/list-plugin"],function(a,b){var c=new Class({Extends:b,initialize:function(a){this.parent(a)}});return c});

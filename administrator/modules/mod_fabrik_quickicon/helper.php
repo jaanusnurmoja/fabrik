@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Administrator
  * @subpackage  mod_fabrik_quickicon
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -26,6 +26,28 @@ abstract class ModFabrik_QuickIconHelper
 	 * @since	1.6
 	 */
 	protected static $buttons = array();
+
+	/**
+	 * Get selected lists to add to dashboard
+	 * @return mixed
+	 */
+	public static function listIcons()
+	{
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('id, label, params')->from('#__fabrik_lists')
+			->where('params LIKE \'%"dashboard":"1"%\'');
+		$db->setQuery($query);
+		$lists = $db->loadObjectList();
+
+		foreach ($lists as $list)
+		{
+			$params = new Joomla\Registry\Registry($list->params);
+			$list->icon = $params->get('dashboard_icon', 'icon-list');
+		}
+
+		return $lists;
+	}
 
 	/**
 	 * Helper method to return button list.

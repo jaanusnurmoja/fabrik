@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -26,14 +26,15 @@ class Filesystemstorage extends FabrikStorageAdaptor
 	/**
 	 * Does a file exist
 	 *
-	 * @param   string  $filepath  File path to test
+	 * @param   string  $filepath     File path to test
+	 * @param   bool    $prependRoot  also test with root prepended
 	 *
 	 * @return bool
 	 */
 
-	public function exists($filepath)
+	public function exists($filepath, $prependRoot = true)
 	{
-		if ($filepath == '\\')
+		if (empty($filepath) || $filepath == '\\')
 		{
 			return false;
 		}
@@ -43,9 +44,14 @@ class Filesystemstorage extends FabrikStorageAdaptor
 		    return true;
 		}
 
-		$filepath = COM_FABRIK_BASE . '/' . FabrikString::ltrimword($filepath, COM_FABRIK_BASE . '/');
+		if ($prependRoot)
+		{
+			$filepath = COM_FABRIK_BASE . '/' . FabrikString::ltrimword($filepath, COM_FABRIK_BASE . '/');
 
-		return JFile::exists($filepath);
+			return JFile::exists($filepath);
+		}
+
+		return false;
 	}
 
 	/**
@@ -71,6 +77,12 @@ class Filesystemstorage extends FabrikStorageAdaptor
 
 	public function createIndexFile($path)
 	{
+		// Don't write a index.html in root
+		if ($path === '')
+		{
+			return true;
+		}
+
 		$index_file = $path . '/index.html';
 
 		if (!$this->exists($index_file))
@@ -207,7 +219,10 @@ class Filesystemstorage extends FabrikStorageAdaptor
 	{
 		$this->uploadedFilePath = $filepath;
 
-		if (JFile::upload($tmpFile, $filepath))
+		$params = $this->getParams();
+		$allowUnsafe = $params->get('allow_unsafe', '0') === '1';
+
+		if (JFile::upload($tmpFile, $filepath, false, $allowUnsafe))
 		{
 			return $this->createIndexFile(dirname($filepath));
 		}

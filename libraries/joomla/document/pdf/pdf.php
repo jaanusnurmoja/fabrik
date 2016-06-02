@@ -14,7 +14,7 @@
 // Check to ensure this file is within the rest of the framework
 defined('JPATH_BASE') or die();
 
-require_once JPATH_LIBRARIES . '/joomla/document/html/html.php';
+file_exists(JPATH_LIBRARIES . '/joomla/document/html/html.php') && require_once JPATH_LIBRARIES . '/joomla/document/html/html.php';
 require_once JPATH_SITE . '/components/com_fabrik/helpers/pdf.php';
 
 /**
@@ -35,7 +35,6 @@ class JDocumentpdf extends JDocumentHTML
 	 *
 	 * @param   array  $options  Associative array of options
 	 */
-
 	public function __construct($options = array())
 	{
 		parent::__construct($options);
@@ -44,7 +43,7 @@ class JDocumentpdf extends JDocumentHTML
 		if ($config->get('pdf_debug', false))
 		{
 			$this->setMimeEncoding('text/html');
-			$this->_type = 'html';
+			$this->_type = 'pdf';
 		}
 		else
 		{
@@ -65,7 +64,6 @@ class JDocumentpdf extends JDocumentHTML
 	 *
 	 * @return  bool
 	 */
-
 	protected function iniDomPdf()
 	{
 		if (FabrikPDFHelper::iniDomPdf())
@@ -82,7 +80,7 @@ class JDocumentpdf extends JDocumentHTML
 	/**
 	 * Set the paper size and orientation
 	 * Note if too small for content then the pdf renderer will bomb out in an infinite loop
-	 * Legal seems to be more leiniant than a4 for example
+	 * Legal seems to be more lenient than a4 for example
 	 * If doing landscape set large paper size
 	 *
 	 * @param   string  $size         Paper size E.g A4,legal
@@ -92,7 +90,6 @@ class JDocumentpdf extends JDocumentHTML
 	 *
 	 * @return  void
 	 */
-
 	public function setPaper($size = 'A4', $orientation = 'landscape')
 	{
 		$size = strtoupper($size);
@@ -106,7 +103,6 @@ class JDocumentpdf extends JDocumentHTML
 	 *
 	 * @return  void
 	 */
-
 	public function setName($name = 'joomla')
 	{
 		$this->name = $name;
@@ -117,7 +113,6 @@ class JDocumentpdf extends JDocumentHTML
 	 *
 	 * @return	string
 	 */
-
 	public function getName()
 	{
 		return $this->name;
@@ -131,7 +126,6 @@ class JDocumentpdf extends JDocumentHTML
 	 *
 	 * @return	string
 	 */
-
 	public function render($cache = false, $params = array())
 	{
 		// mb_encoding foo when content-type had been set to text/html; uft-8;
@@ -143,6 +137,13 @@ class JDocumentpdf extends JDocumentHTML
 		$pdf = $this->engine;
 		$data = parent::render();
 		FabrikPDFHelper::fullPaths($data);
+
+		/**
+		 * I think we need this to handle some HTML entities when rendering otherlanguages (like Polish),
+		 * but haven't tested it much
+		 */
+		$data = mb_convert_encoding($data,'HTML-ENTITIES','UTF-8');
+
 		$pdf->load_html($data);
 		$config = JComponentHelper::getParams('com_fabrik');
 
@@ -168,7 +169,6 @@ class JDocumentpdf extends JDocumentHTML
 	 *
 	 * @return  The output of the renderer
 	 */
-
 	public function getBuffer($type = null, $name = null, $attribs = array())
 	{
 		if ($type == 'head' || $type == 'component')

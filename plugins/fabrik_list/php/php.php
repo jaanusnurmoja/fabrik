@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.list.php
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -70,7 +70,7 @@ class PlgFabrik_ListPhp extends plgFabrik_List
 
 		if (FabrikWorker::j3() && $img === 'php.png')
 		{
-			$img = 'lightning.png';
+			$img = 'lightning';
 		}
 
 		return $img;
@@ -180,9 +180,20 @@ class PlgFabrik_ListPhp extends plgFabrik_List
 		$opts = $this->getElementJSOptions();
 		$params = $this->getParams();
 		$opts->js_code = $params->get('table_php_js_code', '');
+		$opts->requireChecked = (bool) $params->get('table_php_require_checked', '1');
 		$opts = json_encode($opts);
-		$this->jsInstance = "new FbListPHP($opts)";
+		$this->jsInstance = "new FbListPhp($opts)";
 
 		return true;
+	}
+
+	/**
+	 * Load the AMD module class name
+	 *
+	 * @return string
+	 */
+	public function loadJavascriptClassName_result()
+	{
+		return 'FbListPHP';
 	}
 }

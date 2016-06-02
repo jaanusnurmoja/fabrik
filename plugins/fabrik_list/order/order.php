@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.list.order
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -21,7 +21,6 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-list.php';
  * @subpackage  Fabrik.list.order
  * @since       3.0
  */
-
 class PlgFabrik_ListOrder extends PlgFabrik_List
 {
 	/**
@@ -29,7 +28,6 @@ class PlgFabrik_ListOrder extends PlgFabrik_List
 	 *
 	 * @return  string
 	 */
-
 	protected function getAclParam()
 	{
 		return 'order_access';
@@ -40,7 +38,6 @@ class PlgFabrik_ListOrder extends PlgFabrik_List
 	 *
 	 * @return  bool
 	 */
-
 	public function canSelectRows()
 	{
 		return false;
@@ -51,13 +48,12 @@ class PlgFabrik_ListOrder extends PlgFabrik_List
 	 *
 	 * @return  mixed  string or array
 	 */
-
 	public function loadJavascriptClass_result()
 	{
-		$ext = FabrikHelperHTML::isDebug() ? '.js' : '-min.js';
+		$mediaFolder = FabrikHelperHTML::getMediaFolder();
 		$src = parent::loadJavascriptClass_result();
-
-		return array($src, 'media/com_fabrik/js/element' . $ext);
+		$src['element'] = $mediaFolder . '/element.js';
+		return $src;
 	}
 
 	/**
@@ -67,7 +63,6 @@ class PlgFabrik_ListOrder extends PlgFabrik_List
 	 *
 	 * @return bool
 	 */
-
 	public function onLoadJavascriptInstance($args)
 	{
 		if (!$this->canUse())
@@ -75,12 +70,13 @@ class PlgFabrik_ListOrder extends PlgFabrik_List
 			return;
 		}
 
+		/** @var FabrikFEModelList $model */
 		$model = $this->getModel();
 		$params = $this->getParams();
 		$orderEl = $model->getFormModel()->getElement($params->get('order_element'), true);
-		$form_id = $model->getFormModel()->getId();
 		$opts = $this->getElementJSOptions();
-		$opts->enabled = (FabrikString::safeColNameToArrayKey($model->orderEls[0]) == FabrikString::safeColNameToArrayKey($orderEl->getOrderByName())) ? true
+		$orderElName = FabrikString::safeColNameToArrayKey(FArrayHelper::getValue($model->orderEls, 0, ''));
+		$opts->enabled = $orderElName == FabrikString::safeColNameToArrayKey($orderEl->getOrderByName()) ? true
 			: false;
 		$opts->listid = $model->getId();
 		$opts->orderElementId = $params->get('order_element');
@@ -99,17 +95,26 @@ class PlgFabrik_ListOrder extends PlgFabrik_List
 	}
 
 	/**
+	 * Load the AMD module class name
+	 *
+	 * @return string
+	 */
+	public function loadJavascriptClassName_result()
+	{
+		return 'FbListOrder';
+	}
+
+	/**
 	 * Called via ajax when dragged row is dropped. Reorders records
 	 *
 	 * @return  void
 	 */
-
 	public function onAjaxReorder()
 	{
 		// Get list model
+		/** @var FabrikFEModelList $model */
 		$model = JModelLegacy::getInstance('list', 'FabrikFEModel');
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$input = $this->app->input;
 		$model->setId($input->getInt('listid'));
 		$db = $model->getDb();
 		$direction = $input->get('direction');
@@ -187,11 +192,7 @@ class PlgFabrik_ListOrder extends PlgFabrik_List
 
 			$db->setQuery($query);
 
-			if (!$db->execute())
-			{
-				echo $db->getErrorMsg();
-			}
-			else
+			if ($db->execute())
 			{
 				// Change the order of the moved record
 				$query = "UPDATE " . $table->db_table_name . " SET " . $orderBy . ' = ' . $o;

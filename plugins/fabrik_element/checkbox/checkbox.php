@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.checkbox
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -18,7 +18,6 @@ defined('_JEXEC') or die('Restricted access');
  * @subpackage  Fabrik.element.checkbox
  * @since       3.0
  */
-
 class PlgFabrik_ElementCheckbox extends PlgFabrik_ElementList
 {
 	protected $inputType = 'checkbox';
@@ -27,11 +26,10 @@ class PlgFabrik_ElementCheckbox extends PlgFabrik_ElementList
 	 * Set the element id
 	 * and maps parameter names for common ElementList options
 	 *
-	 * @param   int  $id  element id
+	 * @param   int $id element id
 	 *
 	 * @return  void
 	 */
-
 	public function setId($id)
 	{
 		parent::setId($id);
@@ -47,12 +45,11 @@ class PlgFabrik_ElementCheckbox extends PlgFabrik_ElementList
 	/**
 	 * Shows the RAW list data - can be overwritten in plugin class
 	 *
-	 * @param   string  $data     element data
-	 * @param   object  $thisRow  all the data in the tables current row
+	 * @param   string $data    element data
+	 * @param   object $thisRow all the data in the tables current row
 	 *
-	 * @return  string	formatted value
+	 * @return  string    formatted value
 	 */
-
 	public function renderRawListData($data, $thisRow)
 	{
 		return json_encode($data);
@@ -61,11 +58,10 @@ class PlgFabrik_ElementCheckbox extends PlgFabrik_ElementList
 	/**
 	 * Will the element allow for multiple selections
 	 *
-	 * @since	3.0.6
+	 * @since    3.0.6
 	 *
 	 * @return  bool
 	 */
-
 	protected function isMultiple()
 	{
 		return true;
@@ -74,67 +70,45 @@ class PlgFabrik_ElementCheckbox extends PlgFabrik_ElementList
 	/**
 	 * Returns javascript which creates an instance of the class defined in formJavascriptClass()
 	 *
-	 * @param   int  $repeatCounter  Repeat group counter
+	 * @param   int $repeatCounter Repeat group counter
 	 *
 	 * @return  array
 	 */
-
 	public function elementJavascript($repeatCounter)
 	{
-		$params = $this->getParams();
-		$id = $this->getHTMLId($repeatCounter);
-		$element = $this->getElement();
-		$values = (array) $this->getSubOptionValues();
-		$labels = (array) $this->getSubOptionLabels();
-		$data = $this->getFormModel()->data;
-		$opts = $this->getElementJSOptions($repeatCounter);
-		$opts->value = $this->getValue($data, $repeatCounter);
+		$params           = $this->getParams();
+		$id               = $this->getHTMLId($repeatCounter);
+		$values           = (array) $this->getSubOptionValues();
+		$labels           = (array) $this->getSubOptionLabels();
+		$data             = $this->getFormModel()->data;
+		$opts             = $this->getElementJSOptions($repeatCounter);
+		$opts->value      = $this->getValue($data, $repeatCounter);
 		$opts->defaultVal = $this->getDefaultValue($data);
-		$opts->data = (empty($values) && empty($labels)) ? array() : array_combine($values, $labels);
-		$opts->allowadd = (bool) $params->get('allow_frontend_addtocheckbox', false);
+		$opts->data       = (empty($values) && empty($labels)) ? array() : array_combine($values, $labels);
+		$opts->allowadd   = (bool) $params->get('allow_frontend_addtocheckbox', false);
 		JText::script('PLG_ELEMENT_CHECKBOX_ENTER_VALUE_LABEL');
 
 		return array('FbCheckBox', $id, $opts);
 	}
 
 	/**
-	 * Get the class to manage the form element
-	 * to ensure that the file is loaded only once
-	 *
-	 * @param   array   &$srcs   Scripts previously loaded
-	 * @param   string  $script  Script to load once class has loaded
-	 * @param   array   &$shim   Dependant class names to load before loading the class - put in requirejs.config shim
-	 *
-	 * @return void
-	 */
-
-	public function formJavascriptClass(&$srcs, $script = '', &$shim = array())
-	{
-		$s = new stdClass;
-		$s->deps = array('fab/element', 'fab/elementlist');
-		$shim['element/checkbox/checkbox'] = $s;
-		parent::formJavascriptClass($srcs, $script, $shim);
-	}
-
-	/**
 	 * If your element risks not to post anything in the form (e.g. check boxes with none checked)
 	 * the this function will insert a default value into the database
 	 *
-	 * @param   array  &$data  form data
+	 * @param   array &$data form data
 	 *
 	 * @return  array  form data
 	 */
-
 	public function getEmptyDataValue(&$data)
 	{
-		$params = $this->getParams();
+		$params  = $this->getParams();
 		$element = $this->getElement();
 
 		$value = FArrayHelper::getValue($data, $element->name, '');
-		
+
 		if ($value === '')
 		{
-			$data[$element->name] = $params->get('sub_default_value');
+			$data[$element->name]          = $params->get('sub_default_value');
 			$data[$element->name . '_raw'] = array($params->get('sub_default_value'));
 		}
 	}
@@ -144,11 +118,10 @@ class PlgFabrik_ElementCheckbox extends PlgFabrik_ElementList
 	 * sees then switch from the search string to the db value here
 	 * overwritten in things like checkbox and radio plugins
 	 *
-	 * @param   string  $value  filterVal
+	 * @param   string $value filterVal
 	 *
 	 * @return  string
 	 */
-
 	protected function prepareFilterVal($value)
 	{
 		$values = $this->getSubOptionValues();
@@ -169,9 +142,8 @@ class PlgFabrik_ElementCheckbox extends PlgFabrik_ElementList
 	 * If no filter condition supplied (either via querystring or in posted filter data
 	 * return the most appropriate filter option for the element.
 	 *
-	 * @return  string	default filter condition ('=', 'REGEXP' etc.)
+	 * @return  string    default filter condition ('=', 'REGEXP' etc.)
 	 */
-
 	public function getDefaultFilterCondition()
 	{
 		return '=';
@@ -180,12 +152,11 @@ class PlgFabrik_ElementCheckbox extends PlgFabrik_ElementList
 	/**
 	 * Manipulates posted form data for insertion into database
 	 *
-	 * @param   mixed  $val   this elements posted form data
-	 * @param   array  $data  posted form data
+	 * @param   mixed $val  this elements posted form data
+	 * @param   array $data posted form data
 	 *
 	 * @return  mixed
 	 */
-
 	public function storeDatabaseFormat($val, $data)
 	{
 		if (is_array($val))
