@@ -1450,6 +1450,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$displayData                   = new stdClass;
 			$displayData->opts             = $options;
 			$displayData->default          = FArrayHelper::getValue($default, 0);
+			$displayData->editable         = $this->isEditable();
 			$displayData->showPleaseSelect = $this->showPleaseSelect();
 
 			return $layout->render($displayData);
@@ -3213,7 +3214,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				$trigger = 'change';
 				break;
 			case 'auto-complete':
-				$trigger = '';
+				$trigger = 'blur';
 				$id      = str_replace('[]', '', $id) . '-auto-complete';
 				break;
 			default:
@@ -3227,8 +3228,6 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		{
 			$ar[] = array('id' => $id, 'triggerEvent' => $trigger);
 		}
-
-		$ar[] = array('id' => $id, 'triggerEvent' => 'blur');
 
 		return $ar;
 	}
