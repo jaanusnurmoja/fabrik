@@ -145,7 +145,7 @@ class PlgFabrik_ElementTags extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return string|JDatabaseQuery
 	 */
-	protected function buildQueryWhere($data = array(), $incWhere = true, $thisTableAlias = null, $opts = array(), $query = false)
+	protected function buildQueryWhere($data = array(), $repeatCounter = 0, $incWhere = true, $thisTableAlias = null, $opts = array(), $query = false)
 	{
 		$rowId = $this->actualPKvalue($repeatCounter);
 		$db = $this->getDb();
@@ -190,7 +190,7 @@ class PlgFabrik_ElementTags extends PlgFabrik_ElementDatabasejoin
 
 		$params->set('database_join_where_sql',  $where);
 
-		$where = parent::buildQueryWhere($data, $incWhere, $thisTableAlias, $opts, $query);
+		$where = parent::buildQueryWhere($data, $repeatCounter, $incWhere, $thisTableAlias, $opts, $query);
 
 		return $where;
 	}
@@ -326,12 +326,12 @@ class PlgFabrik_ElementTags extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return  mixed	JDatabaseQuery or false if query can't be built
 	 */
-	protected function buildQuery($data = array(), $incWhere = true, $opts = array())
+	protected function buildQuery($data = array(), $repeatCounter = 0, $incWhere = true, $opts = array())
 	{
 		$db = $this->getDb();
 		$query = $db->getQuery(true);
 		$join = $this->getJoin();
-		$query = $this->buildQueryWhere($data, $incWhere, null, $opts, $query);
+		$query = $this->buildQueryWhere($data, $repeatCounter, $incWhere, null, $opts, $query);
 		$query->select('DISTINCT(t.id) AS value,' . $db->qn('title') . ' AS text')
 		->from($db->qn($join->table_join) . ' AS ' . $db->qn($join->table_join_alias))
 		->join('LEFT', $this->getDbName() . ' AS t ON t.id = ' . $db->qn($join->table_join_alias . '.' . $join->table_key));
