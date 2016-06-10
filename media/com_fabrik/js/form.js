@@ -72,7 +72,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             this.events = {};
 
             this.submitBroker = new FbFormSubmit();
-
+            this.scrollTips();
             Fabrik.fireEvent('fabrik.form.loaded', [this]);
         },
 
@@ -1022,6 +1022,13 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             }).send();
         },
 
+        /**
+         * Run once a validation is completed
+         * @param {string} r
+         * @param {string} id
+         * @param {string} origid
+         * @private
+         */
         _completeValidaton: function (r, id, origid) {
             r = JSON.decode(r);
             if (typeOf(r) === 'null') {
@@ -1120,6 +1127,13 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             return err;
         },
 
+        /**
+         * Show element error
+         * @param {array} r
+         * @param {string} id
+         * @returns {boolean}
+         * @private
+         */
         _showElementError: function (r, id) {
             // r should be the errors for the specific element, down to its repeat group
             // id.
@@ -2162,7 +2176,43 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
         hideTips: function () {
           this.elements.each(function(element) {
               element.removeTipMsg();
-          })
+          });
+        },
+
+        /**
+         * If the form is in a modal and the modal scrolls we should update the
+         * elements tips to keep the tip attached to the element.
+         */
+        scrollTips: function () {
+            var self = this, top, left,
+                match = jQuery(self.form).closest('.fabrikWindow'),
+                modal = match.find('.itemContent'),
+                currentPos;
+
+            var pos = function () {
+                var origPos = match.data('origPosition');
+                if (origPos === undefined) {
+                    origPos = match.position();
+                    match.data('origPosition', origPos);
+                }
+
+                currentPos = match.position();
+                top = origPos.top - currentPos.top + modal.scrollTop();
+                left = origPos.left - currentPos.left + modal.scrollLeft();
+                self.elements.each(function(element) {
+                    element.moveTip(top, left);
+                });
+            };
+
+            modal.on('scroll', function () {
+                pos();
+            });
+
+            Fabrik.on('fabrik.window.resized', function (window) {
+                if (match.length > 0 && window === match[0]) {
+                    pos();
+                }
+            });
         },
 
         stopEnterSubmitting: function () {
