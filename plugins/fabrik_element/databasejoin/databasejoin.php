@@ -842,7 +842,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		}
 
 		$params = $this->getParams();
-		$query  = $this->buildQueryWhere($data, array(), $incWhere, null, $opts, $query);
+		$query  = $this->buildQueryWhere($data, $repeatCounter, $incWhere, null, $opts, $query);
 
 		// $$$rob not sure these should be used anyway?
 		$table = $params->get('join_db_name');
@@ -2323,7 +2323,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		// $$$ hugh - select all values for performance gain over selecting distinct records from recorded data
 		$sql   = "SELECT DISTINCT( $joinVal ) AS text, $joinKey AS value \n FROM " . $fabrikDb->qn($joinTable) . ' AS '
 			. $fabrikDb->qn($joinTableName) . " \n ";
-		$where = $this->buildQueryWhere(array(), array(), true, null, array('mode' => 'filter'));
+		$where = $this->buildQueryWhere(array(), $repeatCounter, true, null, array('mode' => 'filter'));
 
 		// Ensure table pre-filter is applied to query
 		$preFilterWhere = $listModel->buildQueryPrefilterWhere($this);
@@ -2678,7 +2678,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$query->select($joinTable . '.parent_id, ' . $v . ' AS value, ' . $label . ' AS text')->from($joinTable)
 			->join('LEFT', $to . ' ON ' . $key . ' = ' . $joinTable . '.' . $shortName);
 
-		$this->buildQueryWhere(array(), array(), true, null, array('mode' => 'filter'), $query);
+		$this->buildQueryWhere(array(), $repeatCounter, true, null, array('mode' => 'filter'), $query);
 
 		if (!is_null($condition) && !is_null($value))
 		{
@@ -3543,7 +3543,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$joinTable = $join->table_join;
 		$params    = $this->getParams();
 		$jKey      = $this->getLabelOrConcatVal();
-		$where     = $this->buildQueryWhere(array(), array(), true, $params->get('join_db_name'));
+		$where     = $this->buildQueryWhere(array(), $repeatCounter, true, $params->get('join_db_name'));
 		$where     = JString::stristr($where, 'order by') ? $where : '';
 		$dbName    = $this->getDbName();
 		/**
