@@ -1756,8 +1756,11 @@ EOD;
 
 		foreach ($path as $p)
 		{
-			$str[] = '<a href="#" class="crumb' . $i . '">' . $p . '</a><span> / </span>';
-			$i++;
+			if (!empty($p))
+			{
+				$str[] = '<a href="#" class="crumb' . $i . '">' . $p . '</a><span> / </span>';
+				$i++;
+			}
 		}
 
 		$str[] = '</span>';
