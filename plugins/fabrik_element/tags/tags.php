@@ -207,7 +207,10 @@ class PlgFabrik_ElementTags extends PlgFabrik_ElementDatabasejoin
 	protected function buildQueryJoin($query = false)
 	{
 		$db = $this->getDb();
-		$f = $db->qn($this->getJoin()->table_join_alias . '.tags');
+		
+		// Jaanus: not sure where it was needed but .tags seems obsolete as field names are built dynamically
+		
+		$f = $db->qn($this->getJoin()->table_join_alias . '.' . $join->table_key);
 
 		if ($query !== false)
 		{
