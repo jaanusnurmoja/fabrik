@@ -3290,7 +3290,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		}
 
 		$db    = $this->getDb();
-		$query = $this->buildQuery(array(), $repeatCounter, false);
+		$query = $this->buildQuery(array(), $repeatCounter = 0, false);
 
 		if (!$query)
 		{
