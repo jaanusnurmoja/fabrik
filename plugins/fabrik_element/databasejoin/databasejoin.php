@@ -3544,7 +3544,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$joinTable = $join->table_join;
 		$params    = $this->getParams();
 		$jKey      = $this->getLabelOrConcatVal();
-		$where     = $this->buildQueryWhere(array(), $repeatCounter, true, $params->get('join_db_name'));
+		$where     = $this->buildQueryWhere(array(), $repeatCounter = 0, true, $params->get('join_db_name'));
 		$where     = JString::stristr($where, 'order by') ? $where : '';
 		$dbName    = $this->getDbName();
 		/**
