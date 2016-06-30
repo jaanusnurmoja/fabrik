@@ -167,7 +167,7 @@ class PlgFabrik_List extends FabrikPlugin
 				$layoutData = (object) array(
 					'tag' => 'a',
 					'attributes' => 'data-list="' . $this->context . '" title="' . $title . '"',
-					'class' => $name . ' listplugin btn-default',
+					'class' => 'listplugin btn-default ' . $name,
 					'label' => $img . ' ' . $text
 				);
 
