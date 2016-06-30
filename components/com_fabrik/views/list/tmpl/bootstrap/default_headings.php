@@ -28,17 +28,6 @@ foreach ($this->headings as $key => $heading) :
 <?php endif; ?>
 <?php endforeach; ?>
 
-<?php 
-foreach ($this->headings as $key => $heading) :
-	$h = $this->headingClass[$key];
-	
-	if (strstr($heading, 'listplugin') && $this->pluginsAbove): ?>
-	<div style="text-align: right;">
-	<?php echo $heading;?>
-	</div>
-<?php endif; ?>
-<?php endforeach; ?>
-
 <tr class="fabrik___heading">
 <?php 
 echo $this->rowNumHeader;
@@ -47,7 +36,7 @@ foreach ($this->headings as $key => $heading) :
 	$style = empty($h['style']) ? '' : 'style="' . $h['style'] . '"';?>
 	<th class="heading <?php echo $h['class']?>" <?php echo $style?>>
 			<?php 	
-			if ((!strstr($heading, 'listplugin') && $this->pluginsAbove) || !$this->pluginsAbove):
+			if ((!strstr($heading, 'class="btn listplugin') && $this->pluginsAbove) || !$this->pluginsAbove):
 				echo $heading; 
 				endif; 
 			?>
