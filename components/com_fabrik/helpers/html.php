@@ -1180,6 +1180,8 @@ EOD;
 		$r->adminfields = 'administrator/components/com_fabrik/models/fields';
 
 		$r->jQueryUI = 'media/com_fabrik/js/lib/jquery-ui/jquery-ui';
+		$r->chosen   = 'media/jui/js/chosen.jquery.min';		
+		$r->ajaxChosen   = 'media/jui/js/ajax-chosen.min';
 
 		// We are now loading compressed js fabrik files from the media/com_fabrik/js/dist folder
 		// This avoids AMD issues where we were loading fab/form or fab/form-min.
