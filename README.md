@@ -7,7 +7,9 @@ Fabrik is the Joomla application builder. This fork has some enhancements that a
 
 This code is updated quite frequently (changed in original code are merged also here). 
 However, there is no guarantee that this version of code works without issues.
+
 Enjoy!
+
 Jaanus Nurmoja
 
 Installation
