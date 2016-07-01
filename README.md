@@ -1,4 +1,14 @@
-Fabrik is the Joomla application builder
+Fabrik is the Joomla application builder. This fork has some enhancements that are not yet implemented in original code (7 July 2016)
+
+- elements can be made hidden also in form view only or details view only
+- tags element is displayed correctly also in joined group (however, only in non repeating one)
+- ordered numbering can be added to the list view
+- list plugin buttons can be shown above the list view's table
+
+This code is updated quite frequently (changed in original code are merged also here). 
+However, there is no guarantee that this version of code works without issues.
+Enjoy!
+Jaanus Nurmoja
 
 Installation
 ================
