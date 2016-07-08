@@ -1024,9 +1024,11 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 	/**
 	 * Get an array of allowed file extensions
 	 *
+	 * @param  stripDot  bool  strip the dot prefix
+	 *
 	 * @return array
 	 */
-	protected function _getAllowedExtension()
+	protected function _getAllowedExtension($stripDot = true)
 	{
 		$params       = $this->getParams();
 		$allowedFiles = $params->get('ul_file_types');
@@ -1036,13 +1038,24 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 			// $$$ hugh - strip spaces and leading ., as folk often do ".bmp, .jpg"
 			// preg_replace('#(\s*|^)\.?#', '', trim($allowedFiles));
 			$allowedFiles = str_replace(' ', '', $allowedFiles);
-			$allowedFiles = str_replace('.', '', $allowedFiles);
+			if ($stripDot)
+			{
+				$allowedFiles = str_replace('.', '', $allowedFiles);
+			}
 			$aFileTypes   = explode(",", $allowedFiles);
 		}
 		else
 		{
 			$mediaParams = JComponentHelper::getParams('com_media');
 			$aFileTypes  = explode(',', $mediaParams->get('upload_extensions'));
+		}
+
+		if (!$stripDot)
+		{
+			foreach ($aFileTypes as &$type)
+			{
+				$type = '.' . $type;
+			}
 		}
 
 		return $aFileTypes;
@@ -2288,6 +2301,8 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		$allRenders = implode('<br/>', $allRenders);
 		$allRenders .= ($allRenders == '') ? '' : '<br/>';
 		$capture = '';
+		$fileTypes = implode(',', $this->_getAllowedExtension(false));
+
 		switch ($device_capture)
 		{
 			case 1:
@@ -2306,12 +2321,14 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 				$capture = ' accept="video/*"' . $capture;
 				break;
 			default:
-				$capture = implode(",.", $this->_getAllowedExtension());
+				$capture = $fileTypes;
 				$capture = $capture ? ' accept=".' . $capture . '"' : '';
 				break;
 		}
 
-		$str[] = $allRenders . '<input class="fabrikinput" name="' . $name . '" type="file" id="' . $id . '"' . $capture . ' />' . "\n";
+		$accept = !empty($fileTypes) ? ' accept="' . $fileTypes . '" ' : ' ';
+
+		$str[] = $allRenders . '<input class="fabrikinput" name="' . $name . '" type="file" ' . $accept . ' id="' . $id . '" ' . $capture . ' />' . "\n";
 
 		if ($params->get('fileupload_storage_type', 'filesystemstorage') == 'filesystemstorage' && $params->get('upload_allow_folderselect') == '1')
 		{
@@ -3074,10 +3091,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		$filePath = FabrikWorker::JSONtoData($filePath, false);
 		$filePath = is_object($filePath) ? FArrayHelper::fromObject($filePath) : (array) $filePath;
 
-		if ($this->getGroupModel()->canRepeat())
-		{
-			$filePath = FArrayHelper::getValue($filePath, $repeatCount);
-		}
+		$filePath = FArrayHelper::getValue($filePath, $repeatCount);
 
 		if ($ajaxIndex !== '')
 		{
