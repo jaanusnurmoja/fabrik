@@ -141,6 +141,8 @@ define(['jquery', 'fab/fabrik', 'fullcalendar'], function (jQuery, Fabrik, fc) {
                 maxTime                  : this.options.close, // an end time (6pm in this example)
 				weekends				 : this.options.showweekends,
                 eventClick               : function (calEvent, jsEvent, view) {
+                    jsEvent.stopPropagation();
+                    jsEvent.preventDefault();
                     self.clickEntry(calEvent);
                     return false;
                 },
