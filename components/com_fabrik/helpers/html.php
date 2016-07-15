@@ -1825,10 +1825,12 @@ EOD;
 		JText::script('COM_FABRIK_NO_RECORDS');
 		JText::script('COM_FABRIK_AUTOCOMPLETE_AJAX_ERROR');
 		$jsFile = 'autocomplete';
+		$className = 'AutoComplete';
 
 		if (FabrikWorker::j3())
 		{
 			$jsFile = $plugin === 'cascadingdropdown' ? 'autocomplete-bootstrap-cdd' : 'autocomplete-bootstrap';
+			$className = $plugin === 'cascadingdropdown' ? 'FabCddAutocomplete' : 'AutoComplete';
 		}
 
 		$needed   = array();
@@ -1836,8 +1838,8 @@ EOD;
 		$needed[] = 'lib/Event.mock';
 		$needed   = implode("', '", $needed);
 		self::addScriptDeclaration(
-			"require(['$needed'], function (AutoComplete) {
-	new AutoComplete('$htmlId', $str);
+			"require(['$needed'], function ($className) {
+	new $className('$htmlId', $str);
 });"
 		);
 	}
