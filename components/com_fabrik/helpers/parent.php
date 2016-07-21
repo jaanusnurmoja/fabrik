@@ -1999,13 +1999,16 @@ class FabrikWorker
 			// not sure if we should bail if Bcc is bad, for now just soldier on
 		}
 
-		try
+		if (!empty($attachment))
 		{
-			$mailer->addAttachment($attachment);
-		}
-		catch (Exception $e)
-		{
-			// most likely file didn't exist, ignore
+			try
+			{
+				$mailer->addAttachment($attachment);
+			}
+			catch (Exception $e)
+			{
+				// most likely file didn't exist, ignore
+			}
 		}
 
 		$autoReplyTo = false;
