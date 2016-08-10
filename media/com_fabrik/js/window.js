@@ -190,11 +190,17 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
                 this.window = this.buildWinViaJS();
             }
 
+            // use fabrikHide to prevent the window displaying momentarily as page loads
+            if (!this.options.visible) {
+                this.window.addClass('fabrikHide');
+            }
+
             jQuery(document.body).append(this.window);
             this.loadContent();
 
             if (!this.options.visible) {
-                this.window.fadeOut();
+                this.window.hide();
+                this.window.removeClass('fabrikHide');
             }
 
             jQuery(this.window).find('*[data-role="close"]').on('click', function (e) {
@@ -317,13 +323,17 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
                 hclass += ' draggable';
                 draggerC = jQuery('<div />').addClass('bottomBar modal-footer');
                 dragger = jQuery('<div />').addClass('dragger');
-                resizeIcon = jQuery(Fabrik.jLayouts['icon-expand']);
-                resizeIcon.prependTo(dragger);
+                // not really compatible with using jQuery resizeable()
+                //resizeIcon = jQuery(Fabrik.jLayouts['icon-expand']);
+                //resizeIcon.prependTo(dragger);
                 draggerC.append(dragger);
             }
 
             expandIcon = jQuery(Fabrik.jLayouts['icon-full-screen']);
             label = jQuery('<h3 />').addClass(hclass).text(this.options.title);
+            jQuery(label).data('role', 'title');
+            // turns out you can find() data attrs added with data()
+            jQuery(label).attr('data-role', 'title');
 
             handleParts.push(label);
             if (this.options.expandable && this.options.modal === false) {
@@ -588,7 +598,8 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
             if (e) {
                 e.stopPropagation();
             }
-            this.window.fadeIn({duration: 0});
+            //this.window.fadeIn({duration: 0});
+            this.window.show();
             this.fireEvent('onOpen', [this]);
         }
 

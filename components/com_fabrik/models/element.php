@@ -2190,6 +2190,11 @@ class PlgFabrik_Element extends FabrikPlugin
 		if ($this->dataConsideredEmpty($element->element_ro, $c))
 		{
 			$element->containerClass .= ' fabrikDataEmpty';
+			$element->dataEmpty = true;
+		}
+		else
+		{
+			$element->dataEmpty = false;
 		}
 
 		// Tips (if not rendered as hovers)
