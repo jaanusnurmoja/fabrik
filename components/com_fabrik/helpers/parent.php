@@ -1947,6 +1947,9 @@ class FabrikWorker
 	{
 		// do a couple of tweaks to improve spam scores
 
+		// Get a JMail instance
+		$mailer = JFactory::getMailer();
+
 		// If html, make sure there's an <html> tag
 		if ($mode)
 		{
@@ -1956,15 +1959,15 @@ class FabrikWorker
 			}
 		}
 
-		// if simple single email recipient with no name part, fake out name part to avoid TO_NO_BKRT hit in spam filters
+		/**
+		 * if simple single email recipient with no name part, fake out name part to avoid TO_NO_BKRT hit in spam filters
+		 * (don't do it for sendmail, as sendmail only groks simple emails in To header!)
+		 */
 		$recipientName = '';
-		if (is_string($recipient) && !strstr($recipient, '<'))
+		if ($mailer->Mailer !== 'sendmail' && is_string($recipient) && !strstr($recipient, '<'))
 		{
 			$recipientName = $recipient;
 		}
-
-		// Get a JMail instance
-		$mailer = JFactory::getMailer();
 
 		$mailer->setSubject($subject);
 		$mailer->setBody($body);
@@ -2069,6 +2072,20 @@ class FabrikWorker
 
 		foreach ($headers as $headerName => $headerValue) {
 			$mailer->addCustomHeader($headerName, $headerValue);
+		}
+
+		$config = JComponentHelper::getParams('com_fabrik');
+
+		if ($config->get('verify_peer', '1') === '0')
+		{
+			$mailer->SMTPOptions = array(
+				'ssl' =>
+					array(
+						'verify_peer' => false,
+						'verify_peer_name' => false,
+						'allow_self_signed' => true
+					)
+			);
 		}
 
 		try
