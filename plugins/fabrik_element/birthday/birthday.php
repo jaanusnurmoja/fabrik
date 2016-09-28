@@ -392,7 +392,7 @@ class PlgFabrik_ElementBirthday extends PlgFabrik_Element
 			}
 		}
 
-		return '';
+		// Jaanus: removed return ''; as it forced to save empty dates as '0000-00-00' in database regardless of 'empty_is_null' param
 	}
 
 	/**
