@@ -327,6 +327,11 @@ class FabrikFEModelList extends JModelForm
 	public $csvOverwriting = false;
 
 	/**
+	 * CSV export row (for modifying in csvlist plugins)
+	 */
+	public $csvExportRow = null;
+
+	/**
 	 * Element names to encrypt
 	 *
 	 * @var array
@@ -1054,7 +1059,7 @@ class FabrikFEModelList extends JModelForm
 			 * then merge that with the getPublishedListElements.  This is to work around issues
 			 * where things like plugin bubble templates use placeholders for elements not shown in the list.
 			 */
-			$alwaysRenderElements = $this->getAlwaysRenderElements(true);
+			$alwaysRenderElements = $this->getAlwaysRenderElements(true, $groupModel->getId());
 			$showInList = $this->showInList();
 			$elementModels = $groupModel->getPublishedListElements();
 			$elementModels = array_merge($elementModels, $alwaysRenderElements);
@@ -4011,8 +4016,35 @@ class FabrikFEModelList extends JModelForm
 	{
 		if (!array_key_exists('viewdetails', $this->access))
 		{
-			$groups = $this->user->getAuthorisedViewLevels();
-			$this->access->viewdetails = in_array($this->getParams()->get('allow_view_details'), $groups);
+			$allowPDF = false;
+
+			if ($this->app->input->get('format', 'html') === 'pdf')
+			{
+				$config = JComponentHelper::getParams('com_fabrik');
+
+				if ($config->get('allow_pdf_localhost_view', '0') === '1')
+				{
+					$whitelist = array(
+						'127.0.0.1',
+						'::1'
+					);
+
+					if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+						$allowPDF = true;
+					}
+				}
+
+			}
+
+			if ($allowPDF)
+			{
+				$this->access->viewdetails = true;
+			}
+			else
+			{
+				$groups                    = $this->user->getAuthorisedViewLevels();
+				$this->access->viewdetails = in_array($this->getParams()->get('allow_view_details'), $groups);
+			}
 		}
 
 		return $this->access->viewdetails;
@@ -5227,7 +5259,9 @@ class FabrikFEModelList extends JModelForm
 			// $$ hugh - testing allowing {QS} replacements in pre-filter values
 			$w->replaceRequest($value);
 			$value = $this->prefilterParse($value);
-			$value = $w->parseMessageForPlaceHolder($value);
+
+			// add false for 'safe' so we include things like session data
+			$value = $w->parseMessageForPlaceHolder($value, null, true, false, null, false);
 
 			if (!is_a($elementModel, 'PlgFabrik_Element'))
 			{
@@ -11447,10 +11481,11 @@ class FabrikFEModelList extends JModelForm
 	 * Return an array of elements which are set to always render
 	 *
 	 * @param   bool  $not_shown_only  Only return elements which have 'always render' enabled, AND are not displayed in the list
+	 * @param   int   $groupid         Only return elements in this group
 	 *
 	 * @return  bool  array of element models
 	 */
-	public function getAlwaysRenderElements($not_shown_only = true)
+	public function getAlwaysRenderElements($not_shown_only = true, $groupId = 0)
 	{
 		$form = $this->getFormModel();
 		$alwaysRender = array();
@@ -11458,6 +11493,14 @@ class FabrikFEModelList extends JModelForm
 
 		foreach ($groups as $groupModel)
 		{
+			if ($groupId)
+			{
+				if ($groupModel->getId() !== $groupId)
+				{
+					continue;
+				}
+			}
+
 			$elementModels = $groupModel->getPublishedElements();
 
 			foreach ($elementModels as $elementModel)
@@ -11699,12 +11742,12 @@ class FabrikFEModelList extends JModelForm
 			}
 			elseif (!is_array($range))
 			{
-				$row->href = sprintf($urlEquals, $range);
+				$row->href = sprintf($urlEquals, urlencode($range));
 			}
 			else
 			{
 				list($low, $high) = $range;
-				$row->href = sprintf($urlEquals, sprintf($urlRange, $low, $high));
+				$row->href = sprintf($urlEquals, sprintf($urlRange, urlencode($low), urlencode($high)));
 			}
 
 			if ($itemId)

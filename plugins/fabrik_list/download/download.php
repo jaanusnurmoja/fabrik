@@ -142,6 +142,11 @@ class PlgFabrik_ListDownload extends PlgFabrik_List
 			{
 				$row = $model->getRow($id);
 
+				if (!$model->canView($row))
+				{
+					continue;
+				}
+
 				foreach ($downloadFiles as $dl)
 				{
 					$dl = trim($dl);
@@ -366,6 +371,13 @@ class PlgFabrik_ListDownload extends PlgFabrik_List
 
 		foreach ($ids as $rowId)
 		{
+			$row = $model->getRow($rowId);
+
+			if (!$model->canView($row))
+			{
+				continue;
+			}
+
 			$p = tempnam($this->config->get('tmp_path'), 'download_');
 
 			if (empty($p))
