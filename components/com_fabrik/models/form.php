@@ -5369,4 +5369,11 @@ class FabrikFEModelForm extends FabModelForm
 
 		return $layout;
 	}
+
+	public function recordInDatabase()
+	{
+		$form = $this->getForm();
+
+		return $form->record_in_database === '1';
+	}
 }

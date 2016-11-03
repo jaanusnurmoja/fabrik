@@ -208,24 +208,43 @@ class FabrikControllerForm extends JControllerLegacy
 		$model->rowId     = $input->get('rowid', '', 'string');
 		$listModel        = $model->getListModel();
 
-		// Do some ACL sanity checks
-
-		$aclOK            = false;
-
-		if ($model->isNewRecord() && $listModel->canAdd())
+		/**
+		 * Do some ACL sanity checks.  Without this check, if spoof checking is disabled, a form can be submitted
+		 * with no ACL checks being performed.  With spoof checking, we do the ACL checks on form load, so can't get the
+		 * token without having access.
+		 *
+		 * Don't bother checking if not recording to database, as no list or list ACLs.
+		 */
+		if ($model->recordInDatabase())
 		{
-			$aclOK = true;
-		}
-		else if (!$model->isNewRecord() && $listModel->canEdit(new stdClass()))
-		{
-			$aclOK = true;
-		}
+			$aclOK    = false;
 
-		if (!$aclOK)
-		{
-			$msg = $model->aclMessage(true);
-			$app->enqueueMessage($msg);
-			return;
+			if ($model->isNewRecord() && $listModel->canAdd())
+			{
+				$aclOK = true;
+			}
+			else
+			{
+				/*
+				 * Need to set up form data here so we can pass it to canEdit()
+				 *
+				 * Note that canEdit() expects form data as an object, and $formData is an array,
+				 * but the actual canUserDo() helper func it calls with the data will accept either.
+				 */
+				$formData = $model->setFormData();
+				if (!$model->isNewRecord() && $listModel->canEdit($formData))
+				{
+					$aclOK = true;
+				}
+			}
+
+			if (!$aclOK)
+			{
+				$msg = $model->aclMessage(true);
+				$app->enqueueMessage($msg);
+
+				return;
+			}
 		}
 
 		/**
