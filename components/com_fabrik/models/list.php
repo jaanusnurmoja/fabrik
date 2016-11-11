@@ -1257,6 +1257,8 @@ class FabrikFEModelList extends JModelForm
 		{
 			$w = new FabrikWorker;
 
+			$groupBy = FabrikString::safeColNameToArrayKey($groupBy);
+
 			// 3.0 if not group by template spec'd by group but assigned in qs then use that as the group by tmpl
 			$requestGroupBy = $input->get('group_by', '');
 
@@ -1274,13 +1276,12 @@ class FabrikFEModelList extends JModelForm
 				$groupTemplate = '{' . $requestGroupBy . '}';
 			}
 
-			$groupedData = array();
-			$groupBy = FabrikString::safeColNameToArrayKey($groupBy);
-
 			if ($tableParams->get('group_by_raw', '1') === '1')
 			{
 				$groupBy .= '_raw';
 			}
+
+			$groupedData = array();
 
 			$groupTitle = null;
 			$aGroupTitles = array();
@@ -1305,8 +1306,7 @@ class FabrikFEModelList extends JModelForm
 				if (!in_array($sData, $aGroupTitles))
 				{
 					$aGroupTitles[] = $sData;
-					$tmpGroupTemplate = ($w->parseMessageForPlaceHolder($groupTemplate, ArrayHelper::fromObject($data[$i])));
-					$this->groupTemplates[$sData] = nl2br($tmpGroupTemplate);
+					$this->groupTemplates[$sData] = $w->parseMessageForPlaceHolder($groupTemplate, ArrayHelper::fromObject($data[$i]));
 					$groupedData[$sData] = array();
 				}
 
@@ -2261,17 +2261,25 @@ class FabrikFEModelList extends JModelForm
 		$dataList = 'list_' . $this->getRenderContext();
 		$rowId = $this->getSlug($row);
 		$isAjax = $this->isAjaxLinks() ? '1' : '0';
-		$isCustom = $customLink === '' ? '0' : '1';
-		if ($target !== '') $target = 'target="' . $target . '"';
-		$data = '<a data-loadmethod="' . $loadMethod
-			. '" data-list="' . $dataList
-			. '" data-rowid="' . $rowId
-			. '" data-isajax="' . $isAjax
-			. '" data-iscustom="' . $isCustom
-			. '" class="' . $class
-			. '" href="' . $link
-			. '"' . $target . '>' . $data
-			. '</a>';
+		$isCustom = $customLink !== '';
+
+		$paths = array(
+			COM_FABRIK_FRONTEND . '/views/list/tmpl/' . $this->getTmpl() . '/layouts/element/' . $elementModel->getFullName(true, false)
+		);
+
+		$layout                  = $this->getLayout('element.fabrik-element-custom-link', $paths);
+		$displayData             = new stdClass;
+		$displayData->loadMethod = $loadMethod;
+		$displayData->dataList   = $dataList;
+		$displayData->isAjax     = $isAjax;
+		$displayData->customLink = $customLink;
+		$displayData->isCustom   = $isCustom;
+		$displayData->class      = $class;
+		$displayData->link       = $link;
+		$displayData->rowId      = $rowId;
+		$displayData->data       = $data;
+		$displayData->target     = $target;
+		$data                    = $layout->render($displayData);
 
 		return $data;
 	}
@@ -2646,7 +2654,7 @@ class FabrikFEModelList extends JModelForm
 		$pk = FabrikString::safeColName($item->db_primary_key);
 		$params = $this->getParams();
 
-		if (in_array($this->outputFormat, array('raw', 'html', 'feed', 'pdf', 'phocapdf')))
+		if (in_array($this->outputFormat, array('raw', 'html', 'partial', 'feed', 'pdf', 'phocapdf')))
 		{
 			$slug = $params->get('sef-slug');
 			$raw = JString::substr($slug, JString::strlen($slug) - 4, 4) == '_raw' ? true : false;
@@ -4033,6 +4041,12 @@ class FabrikFEModelList extends JModelForm
 						'127.0.0.1',
 						'::1'
 					);
+					$pdfLocalhostIP = $config->get('allow_pdf_localhost_ip', '');
+
+					if (!empty($pdfLocalhostIP))
+					{
+						$whitelist[] = $pdfLocalhostIP;
+					}
 
 					if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
 						$allowPDF = true;
