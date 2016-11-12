@@ -700,8 +700,9 @@ class PlgFabrik_Element extends FabrikPlugin
 		$dbTable   = $this->actualTableName();
 		// Jaanus: joined group pk? set in groupConcactJoinKey()
 		$pkField    = $this->groupConcactJoinKey();
+		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 		$fullElName = $this->_db->qn($dbTable . '___' . $this->element->name);
-		$sql        = '(SELECT GROUP_CONCAT(' . $jKey . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE parent_id = '
+		$sql        = '(SELECT GROUP_CONCAT(' . $jKey . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' .$parentID . ' = '
 			. $pkField . ')';
 
 		if ($addAs)
@@ -728,8 +729,9 @@ class PlgFabrik_Element extends FabrikPlugin
 		$dbTable    = $this->actualTableName();
 		$fullElName = $this->_db->qn($dbTable . '___' . $this->element->name . '_raw');
 		$pkField    = $this->groupConcactJoinKey();
+		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 
-		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE parent_id = ' . $pkField
+		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField
 		. ') AS ' . $fullElName;
 	}
 
@@ -822,9 +824,10 @@ class PlgFabrik_Element extends FabrikPlugin
 				$str         = $this->buildQueryElementConcatId();
 				$aFields[]   = $str;
 				$aAsFields[] = $fullElName;
+				$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 
 				$as  = $db->qn($dbTable . '___' . $this->element->name . '___params');
-				$str = '(SELECT GROUP_CONCAT(params SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE parent_id = '
+				$str = '(SELECT GROUP_CONCAT(params SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = '
 					. $pkField . ') AS ' . $as;
 				// Jaanus: joined group pk set in groupConcactJoinKey()
 				$aFields[]   = $str;
@@ -4517,10 +4520,11 @@ class PlgFabrik_Element extends FabrikPlugin
 				{
 					// Query the joined table concatenating into one field
 					$joinTable = $this->getJoinModel()->getJoin()->table_join;
+					$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 
 					// Jaanus: joined group pk set in groupConcactJoinKey()
 					$pk    = $this->groupConcactJoinKey();
-					$key   = "(SELECT GROUP_CONCAT(id SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE parent_id = $pk)";
+					$key   = "(SELECT GROUP_CONCAT(id SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE $parentID = $pk)";
 					$value = str_replace("'", '', $value);
 					$query = "($key = '$value' OR $key LIKE '$value" . GROUPSPLITTER . "%' OR
 					$key LIKE '" . GROUPSPLITTER . "$value" . GROUPSPLITTER . "%' OR
@@ -7359,12 +7363,13 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db         = $listModel->getDb();
 		$query      = $db->getQuery(true);
 		$formData   =& $this->getFormModel()->formDataWithTableName;
+		$pID 		= $this->getParams()->get('repeat_parent_id', 'parent_id');
 
 		// I set this to raw for cdd.
 		$name       = $this->getFullName(true, false);
 		$ajaxSubmit = $this->app->input->get('fabrik_ajax');
 		$rawName    = $name . '_raw';
-		$shortName  = $this->getElement()->name;
+		$shortName  = $this->getParams()->get('repeat_element', $this->getElement()->name);
 
 		$join = $this->getJoin();
 
@@ -7417,7 +7422,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			else
 			{
 				$query->clear();
-				$query->select('id, ' . $shortName)->from($join->table_join)->where('parent_id = ' . $parentId);
+				$query->select('id, ' . $shortName)->from($join->table_join)->where($pID . ' = ' . $parentId);
 				$db->setQuery($query);
 				$ids = (array) $db->loadObjectList($shortName);
 			}
@@ -7432,7 +7437,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			foreach ($joinValues as $jIndex => $jid)
 			{
 				$record             = new stdClass;
-				$record->parent_id  = $parentId;
+				$record->$pID  = $parentId;
 				$fkVal              = FArrayHelper::getValue($joinValues, $jIndex);
 				$record->$shortName = $fkVal;
 				$record->params     = FArrayHelper::getValue($allParams, $jIndex);
@@ -7551,6 +7556,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$join      = $this->getJoin();
 		$db        = $listModel->getDb();
 		$query     = $db->getQuery(true);
+		$pID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 
 		if (empty($idsToKeep))
 		{
@@ -7558,7 +7564,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			$parentId = $formData[$k];
 			if (!empty($parentId))
 			{
-				$query->delete($join->table_join)->where('parent_id = ' . $db->q($parentId));
+				$query->delete($join->table_join)->where($pID . ' = ' . $db->q($parentId));
 				$db->setQuery($query);
 				$db->execute();
 			}
@@ -7568,7 +7574,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			foreach ($idsToKeep as $parentId => $ids)
 			{
 				$query->clear();
-				$query->delete($join->table_join)->where('parent_id = ' . $parentId);
+				$query->delete($join->table_join)->where($pID . ' = ' . $parentId);
 
 				if (!empty($ids))
 				{
