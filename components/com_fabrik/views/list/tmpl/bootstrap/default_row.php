@@ -11,9 +11,20 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-?>
+$rowintro = $this->rowintro;
+
+if ($rowintro != '' && $this->_row->data->$rowintro != '')
+{ ?>
+	<tr id="<?php echo $this->_row->id . '_intro';?>" class="<?php echo $this->_row->class;?>">
+	<td colspan="<?php echo count($this->headings);?>"><?php echo $this->_row->data->$rowintro;?></td>
+	</tr>
+<?php } ?>
+
 <tr id="<?php echo $this->_row->id;?>" class="<?php echo $this->_row->class;?>">
-	<?php foreach ($this->headings as $heading => $label) {
+	<?php 
+	echo $this->_row->rtag[0] . $this->_row->rowNum . $this->_row->rtag[1]; 
+	foreach ($this->headings as $heading => $label) 
+	{
 		$style = empty($this->cellClass[$heading]['style']) ? '' : 'style="'.$this->cellClass[$heading]['style'].'"';
 		?>
 		<td class="<?php echo $this->cellClass[$heading]['class']?>" <?php echo $style?>>

@@ -587,6 +587,27 @@
 				<option value="1">JYES</option>
 			</field>
 
+			<field name="list_row_number"
+				type="radio"
+				class="btn-group"
+				default="0"
+				description="COM_FABRIK_FIELD_USE_ROW_NUM_DESC"
+				label="COM_FABRIK_FIELD_USE_ROW_NUM_LABEL"
+			>
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
+			</field>
+			
+			<field name="list_romanic_number"
+				type="radio"
+				class="btn-group"
+				default="0"
+				description="COM_FABRIK_FIELD_USE_ROMANIC_DESC"
+				label="COM_FABRIK_FIELD_USE_ROMANIC_LABEL"
+			>
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
+			</field>
 
 		</fieldset>
 
@@ -1023,6 +1044,24 @@
 				<option value="0">JNO</option>
 				<option value="1">JYES</option>
 			</field>
+
+			<field name="plugins-above"
+			       type="radio"
+			       class="btn-group"
+			       default="0"
+			       label="COM_FABRIK_PLUGINS_ABOVE_LABEL"
+			       description="COM_FABRIK_PLUGINS_ABOVE_DESC"
+			>
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
+			</field>
+
+			<field name="rowintro"
+			       type="listfields"
+			       valueformat="tableelement"
+			       label="COM_FABRIK_LIST_ROWINTRO_FIELD_LABEL"
+			       description="COM_FABRIK_LIST_ROWINTRO_FIELD_DESC"
+			/>
 
 		</fieldset>
 

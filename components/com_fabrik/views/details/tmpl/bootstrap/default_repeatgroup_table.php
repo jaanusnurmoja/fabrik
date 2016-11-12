@@ -13,6 +13,7 @@
 defined('_JEXEC') or die('Restricted access');
 
 $group = $this->group;
+	if ($group->start) : 
 ?>
 <table class="table table-striped repeatGroupTable">
 	<thead>
@@ -39,6 +40,7 @@ $group = $this->group;
 	</thead>
 	<tbody>
 		<?php
+	endif;
 
 		if (!$group->newGroup) :
 			// Load each repeated group in a <tr>
@@ -49,6 +51,10 @@ $group = $this->group;
 				$this->i ++;
 			endforeach;
 		endif;
+	if ($group->end) : 
 		?>
 	</tbody>
 </table>
+		<?php
+	endif;
+?>
