@@ -1143,7 +1143,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$formModel = $elementModel->getForm();
 		$db        = $listModel->getDb();
 		$desc      = $elementModel->getFieldDescription();
-		$name      = $db->qn($row->name);
+		$name      = $db->qn($params->get('repeat_element', $row->name));
 		$db
 			->setQuery(
 				'CREATE TABLE IF NOT EXISTS ' . $db->qn($tableName) . ' ( id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, ' . $parentID . ' INT(11), '
@@ -1170,7 +1170,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 		}
 
 		$data = array('list_id' => $listModel->getTable()->id, 'element_id' => $row->id, 'join_from_table' => $joinFromTable,
-			'table_join' => $tableName, 'table_key' => $row->name, 'table_join_key' => $parentID, 'join_type' => 'left');
+			'table_join' => $tableName, 'table_key' => $name, 'table_join_key' => $parentID, 'join_type' => 'left');
 		$join = $this->getTable('join');
 		$join->load(array('element_id' => $data['element_id']));
 		$opts           = new stdClass;
@@ -1228,9 +1228,11 @@ class FabrikAdminModelElement extends FabModelAdmin
 		{
 			$origTableName = $listModel->getTable()->db_table_name;
 		}
-		
 		$defaultName = $origTableName . '_repeat_' . str_replace('`', '', $row->name);
 		$tableName = $params->get('repeat_db_name', $defaultName);
+		echo '<pre>';
+		print_r($elementModel->getElement());
+		echo '</pre>';
 
 		return $tableName;
 	}

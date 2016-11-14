@@ -122,10 +122,10 @@ class JFormFieldListfields extends JFormFieldList
 				}
 			}
 
-			if ($mode === 'gui')
+			if ($mode === 'gui' || $mode === 'guireplace')
 			{
 				$this->js($aEls);
-				$return = $this->gui();
+				$return = $mode === 'gui' ? $this->gui() : $this->guiReplace();
 			}
 			else
 			{
@@ -428,6 +428,24 @@ class JFormFieldListfields extends JFormFieldList
 		$str[] = '<button class="button btn"><span class="icon-arrow-left"></span> ' . FText::_('COM_FABRIK_ADD') . '</button>';
 		$str[] = '<select class="elements"></select>';
 		$str[] = $at === 'true' ? '</div>' : '';
+
+		return implode("\n", $str);
+	}
+
+	/**
+	 * Build GUI for adding in elements
+	 *
+	 * @return  string  Textarea GUI
+	 */
+	private function guiReplace()
+	{
+		$str         = array();
+		$modeField   = 'text';
+		$class       = $this->element['class'] ? ' class="' . (string) $this->element['class'] . '"' : '';
+		$rows = $this->element['rows'] ? $this->element['rows'] : 3;
+		$str[] = '<input ' . $class . ' id="' . $this->id . '" name="' . $this->name . '" value="' . $this->value . '" />';
+		$str[] = '<button class="button btn"><span class="icon-arrow-left"></span> ' . FText::_('COM_FABRIK_ADD') . '</button>';
+		$str[] = '<select class="elements"></select>';
 
 		return implode("\n", $str);
 	}
