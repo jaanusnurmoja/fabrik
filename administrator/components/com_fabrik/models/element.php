@@ -1230,9 +1230,6 @@ class FabrikAdminModelElement extends FabModelAdmin
 		}
 		$defaultName = $origTableName . '_repeat_' . str_replace('`', '', $row->name);
 		$tableName = $params->get('repeat_db_name', $defaultName);
-		echo '<pre>';
-		print_r($elementModel->getElement());
-		echo '</pre>';
 
 		return $tableName;
 	}
