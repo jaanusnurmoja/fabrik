@@ -57,13 +57,13 @@ class JFormFieldTables extends JFormFieldList
 			$connId         = (int) $this->form->getValue($connectionName);
 		}
 
-		if ($connectionDd == '' || $mode === 'combo')
+		if ($connectionDd == '')
 		{
 			// We are not monitoring a connection drop down so load in all tables
 			$query = "SHOW TABLES";
 			$db->setQuery($query);
 			$items     = $db->loadColumn();
-			if (!($mode === 'combo')) 
+			if ($mode !== 'combo') 
 			{
 				$options[] = JHTML::_('select.option', null, null);
 			}
@@ -75,6 +75,17 @@ class JFormFieldTables extends JFormFieldList
 		}
 		else
 		{
+			if ($mode === 'combo')
+			{
+				// We are not monitoring a connection drop down so load in all tables
+				$query = "SHOW TABLES";
+				$db->setQuery($query);
+				$items     = $db->loadColumn();
+				foreach ($items as $l)
+				{
+					$options[] = '<li><a href="#">' . $l . '</a></li>';
+				}
+			}
 			// Delay for the connection to trigger an update via js.
 		}
 
