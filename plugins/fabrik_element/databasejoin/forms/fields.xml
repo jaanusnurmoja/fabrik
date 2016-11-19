@@ -90,7 +90,8 @@
 			       rows="6"/>
 
 			<field name="repeat_db_name"
-			       label="PLG_ELEMENT_DBJOIN_TABLE_LABEL"
+			       label="PLG_ELEMENT_DBJOIN_REPEAT_TABLE_LABEL"
+			       description="PLG_ELEMENT_DBJOIN_REPEAT_TABLE_DESC"
 			       observe="params_join_conn_id"
 			       key="name"
 			       type="tables"
