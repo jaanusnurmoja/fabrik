@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.cron.email
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -50,7 +50,7 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 		jimport('joomla.mail.helper');
 		$params = $this->getParams();
 		$msg    = $params->get('message');
-		FabrikHelperHTML::runContentPlugins($msg);
+		FabrikHelperHTML::runContentPlugins($msg, false);
 		$to = explode(',', $params->get('to'));
 
 		$w = new FabrikWorker;
@@ -68,6 +68,8 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 			{
 				foreach ($group as $row)
 				{
+					$row = ArrayHelper::fromObject($row);
+
 					if (!empty($condition))
 					{
 						$this_condition = $w->parseMessageForPlaceHolder($condition, $row);
@@ -77,8 +79,6 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 							continue;
 						}
 					}
-
-					$row = ArrayHelper::fromObject($row);
 
 					foreach ($to as $thisTo)
 					{

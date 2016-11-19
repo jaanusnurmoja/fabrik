@@ -1,7 +1,7 @@
 /**
  * List Filter
  *
- * @copyright: Copyright (C) 2005-2015, fabrikar.com - All rights reserved.
+ * @copyright: Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license:   GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -32,7 +32,7 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
             this.filtersInHeadings = this.container.find('.listfilter');
             var b = this.container.find('.toggleFilters');
             b.on('click', function (e) {
-                e.stopPropagation();
+                e.preventDefault();
                 self.filterContainer.toggle();
                 self.filtersInHeadings.toggle();
             });

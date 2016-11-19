@@ -1,7 +1,7 @@
 /**
  * File Upload Element
  *
- * @copyright: Copyright (C) 2005-2015, fabrikar.com - All rights reserved.
+ * @copyright: Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license: GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -44,7 +44,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                             response: JSON.encode(response)
                         });
 
-                        newBar.replaces(bar);
+                        jQuery(bar).replaceWith(newBar);
                     });
                 }
                 this.redraw();
@@ -155,7 +155,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 self = this,
                 b = c.find('[data-file]');
             if (window.confirm(Joomla.JText._('PLG_ELEMENT_FILEUPLOAD_CONFIRM_SOFT_DELETE'))) {
-                var joinPkVal = b.data('data-join-pk-val');
+                var joinPkVal = b.data('join-pk-val');
                 new jQuery.ajax({
                     url : '',
                     data: {
@@ -174,11 +174,14 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 });
 
                 if (window.confirm(Joomla.JText._('PLG_ELEMENT_FILEUPLOAD_CONFIRM_HARD_DELETE'))) {
-                    this.makeDeletedImageField(this.groupid, b.get('data-file')).appendTo(c);
+                    this.makeDeletedImageField(this.groupid, b.data('file')).appendTo(c);
                     Fabrik.fireEvent('fabrik.fileupload.delete.complete', this);
                 }
 
                 b.remove();
+	            var el = jQuery(this.element);
+	            var i = el.closest('.fabrikElement').find('img');
+	            i.attr('src', this.options.defaultImage !== '' ? Fabrik.liveSite + this.options.defaultImage : '');
             }
         },
 
@@ -272,7 +275,10 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                         el.val('');
                     }
                 } else {
-                    el.find('img').prop('src', val);
+                    var img = el.closest('div.fabrikSubElementContainer').find('img');
+                    if (img) {
+                        img.prop('src', val);
+                    }
                 }
             }
         },
@@ -399,7 +405,8 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                             } else {
                                 a = jQuery(document.createElement('span'));
                                 title = jQuery(document.createElement('a')).attr({
-                                    'href': file.url
+                                    'href': file.url,
+			      'target': '_blank'
                                 }).text(file.name);
                             }
 
@@ -678,7 +685,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                     'repeatCounter': this.options.repeatCounter
                 }
             });
-            var li = e.target.closest('.plupload_delete');
+            var li = jQuery(e.target).closest('.plupload_delete');
             li.remove();
 
             // Remove hidden fields as well

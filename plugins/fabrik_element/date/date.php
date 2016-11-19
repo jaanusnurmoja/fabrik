@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.date
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -90,8 +90,9 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 			if (FabrikWorker::isDate($d))
 			{
 				$date = JFactory::getDate($d);
+				$view = FArrayHelper::getValue($opts, 'view', 'list');
 
-				if ($this->shouldApplyTz('list'))
+				if ($this->shouldApplyTz($view))
 				{
 					$date->setTimeZone($timeZone);
 				}
@@ -400,6 +401,12 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 	 */
 	protected function shouldApplyTz($view = 'form')
 	{
+		// if formatting for plugins (getProcessData), TZ has already been dealt with
+		if ($view == 'email')
+		{
+			return false;
+		}
+
 		$formModel    = $this->getFormModel();
 		$params       = $this->getParams();
 		$storeAsLocal = (bool) $params->get('date_store_as_local', 0);
@@ -635,7 +642,11 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		}
 
 		// $$$ hugh - need to convert to database format so we GMT-ified date
-		return $this->renderListData($value, new stdClass);
+		$dummy = new stdClass;
+		$opts  = array(
+			'view' => 'email'
+		);
+		return $this->renderListData($value, $dummy, $opts);
 		/* $$$ rob - no need to covert to db format now as its posted as db format already.
 		 *return $this->renderListData($this->storeDatabaseFormat($value, $data), new stdClass);
 		 */
@@ -1743,8 +1754,9 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 	{
 		$input   = $this->app->input;
 		$counter = $input->get('counter', 0);
+		$listRef = $this->getListModel()->getRenderContext();
 
-		return $this->getHTMLId() . '_filter_range_' . $range . '_' . $input->get('task') . '.' . $counter;
+		return $this->getHTMLId() . '_' . $listRef . '_filter_range_' . $range . '_' . $input->get('task') . '.' . $counter;
 	}
 
 	/**
@@ -2094,10 +2106,11 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 	 * @param   string $value         Search string - already quoted if specified in filter array options
 	 * @param   string $originalValue Original filter value without quotes or %'s applied
 	 * @param   string $type          Filter type advanced/normal/prefilter/search/querystring/searchall
-	 *
+	 * @param   string  $evalFilter     evaled
+	 *                                  
 	 * @return  string    sql query part e,g, "key = value"
 	 */
-	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal')
+	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal', $evalFilter = '0')
 	{
 		$this->encryptFieldName($key);
 
@@ -2129,6 +2142,9 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 			case 'nextmonth':
 				$query = ' (' . $key . ' >= DATE_ADD(LAST_DAY(now()), INTERVAL 1 DAY)  AND ' . $key
 					. ' <= DATE_ADD(LAST_DAY(NOW()), INTERVAL 1 MONTH) ) ';
+				break;
+			case 'nextweek1':
+				$query = ' (YEARWEEK(' . $key . ',1) = YEARWEEK(DATE_ADD(NOW(), INTERVAL 1 WEEK), 1))';
 				break;
 			case 'birthday':
 				$query = '(MONTH(' . $key . ') = MONTH(CURDATE()) AND  DAY(' . $key . ') = DAY(CURDATE())) ';

@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.thumbs
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -252,7 +252,7 @@ class PlgFabrik_ElementThumbs extends PlgFabrik_Element
 			return '';
 		}
 
-		$listId = $this->getlistModel()->getTable()->id;
+		$listId = $this->getListModel()->getTable()->id;
 		$formModel = $this->getFormModel();
 		$formId = isset($this->formid) ? $this->formid : $formModel->getId();
 		$rowId = $input->getInt('commentId', $formModel->getRowId());

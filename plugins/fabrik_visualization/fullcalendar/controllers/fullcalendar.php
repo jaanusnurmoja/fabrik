@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.visualization.calendar
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -60,6 +60,7 @@ class FabrikControllerVisualizationfullcalendar extends FabrikControllerVisualiz
 	{
 		// Set the default view name
 		$view      = $this->getView('fullcalendar', $this->doc->getType());
+		//$view      = $this->getView('fullcalendar');
 		$formModel = $this->getModel('Form', 'FabrikFEModel');
 		$view->setModel($formModel);
 
@@ -112,7 +113,7 @@ class FabrikControllerVisualizationfullcalendar extends FabrikControllerVisualiz
 		$input->set('ajax', '1');
 		$nextView = $input->get('nextview', 'form');
 		$link     = 'index.php?option=com_' . $package . '&view=' . $nextView . '&formid=' . $table->form_id . '&rowid=' . $rowId . '&tmpl=component&ajax=1';
-		$link .= '&fabrik_window_id=' . $input->get('fabrik_window_id');
+		$link .= '&format=partial&fabrik_window_id=' . $input->get('fabrik_window_id');
 
 		$startDate = $input->getString('start_date', '');
 		$endDate   = $input->getString('end_date', '');

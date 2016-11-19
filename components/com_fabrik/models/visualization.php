@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -600,5 +600,29 @@ class FabrikFEModelVisualization extends FabModel
 		}
 
 		return in_array($row->access, $groups);
+	}
+
+	/**
+	 * Load the JS files into the document
+	 *
+	 * @param   array  &$scripts  Js script sources to load in the head
+	 *
+	 * @return null
+	 */
+	public function getCustomJsAction(&$scripts)
+	{
+		$views = array(
+			'visualization',
+			'viz'
+		);
+		$scriptsKey = 'viz_' . $this->getId();
+
+		foreach ($views as $view)
+		{
+			if (JFile::exists(COM_FABRIK_FRONTEND . '/js/' . $view . '_' . $this->getId() . '.js'))
+			{
+				$scripts[$scriptsKey] = 'components/com_fabrik/js/' . $view . '_' . $this->getId() . '.js';
+			}
+		}
 	}
 }

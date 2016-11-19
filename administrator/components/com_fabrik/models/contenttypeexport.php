@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Administrator
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  * @since       3.4
  */
@@ -370,11 +370,27 @@ class FabrikAdminModelContentTypeExport extends FabModelAdmin
 
 		self::$exportedTables[] = $tableName;
 		//$exporter    = $this->db->getExporter();
+
+
+		// Until the J! exporters are fixed, we only handle Mysqli (with out extended class)
+		if (!($this->db instanceof JDatabaseDriverMysqli))
+		{
+			throw new Exception('Sorry, we currently only support the Mysqli database driver for export');
+		}
+
 		$exporter = new JDatabaseExporterMysqli2;
 		$exporter->setDbo($this->db);
 		$exporter->from($tableName);
 		$tableDoc = new DOMDocument();
-		$tableDoc->loadXML((string) $exporter);
+		$xml = (string) $exporter;
+
+		// magic __toString can't throw exceptions, so we've overridden it, and store the exception
+		if (empty($xml) && $exporter->exception !== null)
+		{
+			throw new Exception('An error occured in XML export: ' . $exporter->exception->getMessage());
+		}
+
+		$tableDoc->loadXML($xml);
 		$structures = $tableDoc->getElementsByTagName('table_structure');
 
 		foreach ($structures as $table)

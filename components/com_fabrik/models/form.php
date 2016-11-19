@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -2634,11 +2634,12 @@ class FabrikFEModelForm extends FabModelForm
 	 * @param   string  $labelMethod           An element method that if set can alter the option's label
 	 *                                         Used to only show elements that can be selected for search all
 	 * @param   bool    $noJoins               do not include elements in joined tables (default false)
+	 * @param   bool    $translate             run label through translation (default true)
 	 *
 	 * @return	array	html options
 	 */
 	public function getElementOptions($useStep = false, $key = 'name', $show_in_list_summary = false, $incRaw = false,
-		$filter = array(), $labelMethod = '', $noJoins = false)
+		$filter = array(), $labelMethod = '', $noJoins = false, $translate = true)
 	{
 		$groups = $this->getGroupsHiarachy();
 		$aEls = array();
@@ -2669,6 +2670,11 @@ class FabrikFEModelForm extends FabModelForm
 
 				$val = $el->$key;
 				$label = strip_tags($prefix . $el->label);
+
+				if ($translate)
+				{
+					$label = FText::_($label);
+				}
 
 				if ($labelMethod !== '')
 				{
@@ -3130,6 +3136,8 @@ class FabrikFEModelForm extends FabModelForm
 						 * but from this point on, code is expecting even non-repeat join data to be arrays.
 						 */
 						$tmp_data = unserialize($sessionRow->data);
+
+						/*
 						$groups = $this->getGroupsHiarachy();
 
 						foreach ($groups as $groupModel)
@@ -3142,6 +3150,7 @@ class FabrikFEModelForm extends FabModelForm
 								}
 							}
 						}
+						*/
 
 						$bits = $data;
 						$bits = array_merge($tmp_data, $bits);
@@ -3247,12 +3256,14 @@ class FabrikFEModelForm extends FabModelForm
 							}
 						}
 					}
+
+					// No need to setJoinData if you are correcting a failed validation
+					if (!empty($data))
+					{
+						$this->setJoinData($data);
+					}
 				}
-				// No need to setJoinData if you are correcting a failed validation
-				if (!empty($data))
-				{
-					$this->setJoinData($data);
-				}
+
 			}
 		}
 
@@ -4771,6 +4782,7 @@ class FabrikFEModelForm extends FabModelForm
 			}
 
 			$group->class = implode(' ', $group->class);
+			$group->newGroup = $newGroup;
 
 			// Only create the group if there are some element inside it
 			if (count($aElements) != 0 && $groupModel->canView() !== false)
@@ -5127,13 +5139,15 @@ class FabrikFEModelForm extends FabModelForm
 	 * If trying to add/edit a record when the user doesn't have rights to do so,
 	 * what message, if any should we show.
 	 *
+	 * @param  bool  $force  if true don't check if messages suppressed
+	 *
 	 * @since  3.0.7
 	 *
 	 * @return string
 	 */
-	public function aclMessage()
+	public function aclMessage($force = false)
 	{
-		if (!$this->showACLMsg())
+		if (!$force && !$this->showACLMsg())
 		{
 			return '';
 		}
@@ -5351,5 +5365,12 @@ class FabrikFEModelForm extends FabModelForm
 		$layout  = FabrikHelperHTML::getLayout($name, $paths, $options);
 
 		return $layout;
+	}
+
+	public function recordInDatabase()
+	{
+		$form = $this->getForm();
+
+		return $form->record_in_database === '1';
 	}
 }

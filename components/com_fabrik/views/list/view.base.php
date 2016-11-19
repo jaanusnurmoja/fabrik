@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -40,6 +40,7 @@ class FabrikViewListBase extends FabrikView
 	protected function csvJS(&$opts, $model)
 	{
 		$params                = $model->getParams();
+		$w                     = new FabrikWorker;
 		$opts->csvChoose       = (bool) $params->get('csv_frontend_selection');
 		$csvOpts               = new stdClass;
 		$csvOpts->excel        = (int) $params->get('csv_format');
@@ -47,13 +48,13 @@ class FabrikViewListBase extends FabrikView
 		$csvOpts->incraw       = (int) $params->get('csv_include_raw_data');
 		$csvOpts->inccalcs     = (int) $params->get('csv_include_calculations');
 		$csvOpts->custom_qs    = $params->get('csv_custom_qs', '');
+		$w->replaceRequest($csvOpts->custom_qs);
 		$csvOpts->incfilters   = (int) $params->get('incfilters');
 		$csvOpts->popupwidth   = FabrikWorker::getMenuOrRequestVar('popup_width','340',false,'menu');
 		$csvOpts->optswidth    = FabrikWorker::getMenuOrRequestVar('popup_opts_width','200',false,'menu');
 		$opts->csvOpts         = $csvOpts;
-
-		$opts->csvFields = $model->getCsvFields();
-		$modalOpts       = array(
+		$opts->csvFields       = $model->getCsvFields();
+		$modalOpts             = array(
 			'content' => '',
 			'id' => 'ajax_links',
 			'title' => 'Export csv jlayout',
@@ -124,6 +125,7 @@ class FabrikViewListBase extends FabrikView
 			$modalOpts = array(
 				'content' => '',
 				'id' => 'advanced-filter',
+				'title' => JText::_('COM_FABRIK_FIELD_ADVANCED_SEARCH_LABEL'),
 				'modal' => false,
 				'expandable' => true
 			);
@@ -486,8 +488,7 @@ class FabrikViewListBase extends FabrikView
 		$this->showToggleCols = (bool) $params->get('toggle_cols', false);
 		$this->canGroupBy     = $model->canGroupBy();
 		$this->navigation     = $nav;
-		$this->nav            = $input->getInt('fabrik_show_nav', $params->get('show-table-nav', 1))
-			? $nav->getListFooter($this->renderContext, $model->getTmpl()) : '';
+		$this->nav            = $nav->getListFooter($this->renderContext, $model->getTmpl());
 		$this->nav            = '<div class="fabrikNav">' . $this->nav . '</div>';
 		$this->fabrik_userid  = $this->user->get('id');
 		$this->canDelete      = $model->deletePossible() ? true : false;
@@ -526,7 +527,7 @@ class FabrikViewListBase extends FabrikView
 		{
 			$this->rssLink = $model->getRSSFeedLink();
 
-			if ($this->rssLink != '')
+			if ($this->rssLink != '' && $this->app->input->get('format') === 'html')
 			{
 				$attribs = array('type' => 'application/rss+xml', 'title' => 'RSS 2.0');
 				$this->doc->addHeadLink($this->rssLink, 'alternate', 'rel', $attribs);
@@ -678,7 +679,8 @@ class FabrikViewListBase extends FabrikView
 
 		if ($params->get('process-jplugins'))
 		{
-			FabrikHelperHTML::runContentPlugins($text);
+			$cloak = $params->get('cloak_emails', '0') === '1';
+			FabrikHelperHTML::runContentPlugins($text, $cloak);
 		}
 
 		JDEBUG ? $profiler->mark('end fabrik display') : null;

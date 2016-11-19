@@ -2,7 +2,7 @@
 /**
  * @package     Joomla.Administrator
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  * @since       3.0.5
  */
@@ -40,6 +40,7 @@ class FabrikViewList extends FabrikViewListBase
 
 		if (parent::display($tpl) !== false)
 		{
+			FabrikhelperHTML::loadBootstrapCSS(true);
 			$model = $this->getModel();
 			$params = $model->getParams();
 			$size = $params->get('pdf_size', 'A4');
@@ -49,7 +50,7 @@ class FabrikViewList extends FabrikViewListBase
 			$this->showPDF = false;
 			$this->showRSS = false;
 			$this->emptyLink = false;
-			$this->filters = array();
+			//$this->filters = array();
 			$this->showFilters = false;
 			$this->hasButtons = false;
 			$this->output();

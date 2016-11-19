@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -2024,7 +2024,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		// $$$ rob - if its a joined group then it can have the same element names
 		if ((int) $groupModel->getGroup()->is_join === 0)
 		{
-			if ($groupListModel->fieldExists($rule->name))
+			if ($groupListModel->fieldExists($rule->name, array(), $groupModel))
 			{
 				$this->app->enqueueMessage(FText::_('COM_FABRIK_ELEMENT_NAME_IN_USE'), 'error');
 
@@ -2181,6 +2181,11 @@ class PlgFabrik_Element extends FabrikPlugin
 		if ($this->dataConsideredEmpty($element->element_ro, $c))
 		{
 			$element->containerClass .= ' fabrikDataEmpty';
+			$element->dataEmpty = true;
+		}
+		else
+		{
+			$element->dataEmpty = false;
 		}
 
 		// Tips (if not rendered as hovers)
@@ -2423,7 +2428,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 			if (trim($customLink) !== '')
 			{
-				$v = '<a href="' . $customLink . '">' . $v . '</a>';
+				$v = '<a href="' . $customLink . '" data-iscustom="1">' . $v . '</a>';
 			}
 		}
 
@@ -2881,12 +2886,15 @@ class PlgFabrik_Element extends FabrikPlugin
 				$js = $jsAct->code;
 				$js = str_replace(array("\n", "\r"), "", $js);
 
+				// Don't think we need to do this any more, although removing it will break bc
+				/*
 				if ($jsAct->action == 'load')
 				{
 					// JS code is already stored in the db as htmlspecialchars() 09/08/2013
 					$quote = '&#039;';
 					$js    = preg_replace('#\bthis\b#', 'document.id(' . $quote . $elId . $quote . ')', $js);
 				}
+				*/
 
 				if ($jsAct->action != '' && $js !== '')
 				{
@@ -2902,7 +2910,7 @@ class PlgFabrik_Element extends FabrikPlugin
 						$triggerEl = $this->getFormModel()->getElement(str_replace('fabrik_trigger_element_', '', $jsAct->js_e_trigger));
 						$triggerid = is_object($triggerEl) ? 'element_' . $triggerEl->getHTMLId($repeatCount) : $jsAct->js_e_trigger;
 
-						$key = serialize($jsAct);
+						$key = $elId . serialize($jsAct);
 
 						if (array_key_exists($key, self::$fxAdded))
 						{
@@ -3358,8 +3366,10 @@ class PlgFabrik_Element extends FabrikPlugin
 		// If no custom list layout found revert to the default list.filter.fabrik-filter-checkbox renderer
 		if ($res === '')
 		{
-			$basePath = COM_FABRIK_FRONTEND . '/layouts/';
-			$layout   = new JLayoutFile('list.filter.fabrik-filter-checkbox', $basePath, array('debug' => false, 'component' => 'com_fabrik', 'client' => 'site'));
+			//$basePath = COM_FABRIK_FRONTEND . '/layouts/';
+			//$layout   = new JLayoutFile('list.filter.fabrik-filter-checkbox', $basePath, array('debug' => false, 'component' => 'com_fabrik', 'client' => 'site'));
+			//$layout = $this->getLayout('list.filter.fabrik-filter-checkbox');
+			$layout = $this->getListModel()->getLayout('list.filter.fabrik-filter-checkbox');
 			$res      = $layout->render($displayData);
 		}
 
@@ -4450,11 +4460,11 @@ class PlgFabrik_Element extends FabrikPlugin
 	 * @param   string $condition     =/like etc.
 	 * @param   string $value         search string - already quoted if specified in filter array options
 	 * @param   string $originalValue original filter value without quotes or %'s applied
-	 * @param   string $type          filter type advanced/normal/prefilter/search/querystring/searchall
-	 *
+	 * @param   string $type          filter type advanced/normal/prefilter/search/querystring/sea* @
+	 * @param   string $filterEval    eval the filter value
 	 * @return  string    sql query part e,g, "key = value"
 	 */
-	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal')
+	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal', $filterEval = '0')
 	{
 		$this->encryptFieldName($key);
 
@@ -4486,6 +4496,9 @@ class PlgFabrik_Element extends FabrikPlugin
 			case 'nextmonth':
 				$query = ' (' . $key . ' >= DATE_ADD(LAST_DAY(now()), INTERVAL 1 DAY)  AND ' . $key
 					. ' <= DATE_ADD(LAST_DAY(NOW()), INTERVAL 1 MONTH) ) ';
+				break;
+			case 'nextweek1':
+				$query = ' (YEARWEEK(' . $key . ',1) = YEARWEEK(DATE_ADD(NOW(), INTERVAL 1 WEEK), 1))';
 				break;
 			case 'birthday':
 				$query = '(MONTH(' . $key . ') = MONTH(CURDATE()) AND  DAY(' . $key . ') = DAY(CURDATE())) ';
@@ -6164,6 +6177,8 @@ class PlgFabrik_Element extends FabrikPlugin
 	 * Store the element params
 	 *
 	 * @return  bool
+	 *
+	 * @throws  RuntimeException
 	 */
 	public function storeAttribs()
 	{
@@ -6176,6 +6191,12 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		$db              = FabrikWorker::getDbo(true);
 		$element->params = $this->getParams()->toString();
+
+		if (strlen($element->params) > 65535)
+		{
+			throw new RuntimeException(sprintf(FText::_('COM_FABRIK_ELEMENT_PARAMS_TOO_BIG'), $this->getId()));
+		}
+
 		$query           = $db->getQuery(true);
 		$query->update('#__{package}_elements')->set('params = ' . $db->q($element->params))->where('id = ' . (int) $element->id);
 		$db->setQuery($query);
@@ -6529,7 +6550,15 @@ class PlgFabrik_Element extends FabrikPlugin
 		$this->loadMeForAjax();
 		$cache  = FabrikWorker::getCache();
 		$search = $input->get('value', '', 'string');
-		echo $cache->call(array(get_class($this), 'cacheAutoCompleteOptions'), $this, $search);
+		// uh oh, can't serialize PDO db objects so no can cache, as J! serializes the args
+		if ($this->config->get('dbtype') === 'pdomysql')
+		{
+			echo $this->cacheAutoCompleteOptions($this, $search);
+		}
+		else
+		{
+			echo $cache->call(array(get_class($this), 'cacheAutoCompleteOptions'), $this, $search);
+		}
 	}
 
 	/**

@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.databasejoin
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -284,7 +284,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		 */
 		if (is_object($join) && ($params->get($this->concatLabelParam) != ''))
 		{
-			if ($this->app->input->get('override_join_val_column_concat') != 1)
+			if ($this->app->input->get('override_join_val_column_concat', '0') !== '1')
 			{
 				$val                                 = $this->parseThisTable($params->get($this->concatLabelParam), $join);
 				$w                                   = new FabrikWorker;
@@ -1045,7 +1045,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$thisTableAlias = is_null($thisTableAlias) ? $join->table_join_alias : $thisTableAlias;
 
 		// $$$rob 11/10/2011  remove order by statements which will be re-inserted at the end of buildQuery()
-		if (preg_match('/(ORDER\s+BY)(.*)/i', $where, $matches))
+		if (preg_match('/(ORDER\s+BY)(.*)/is', $where, $matches))
 		{
 			$this->orderBy = $this->parseThisTable($matches[0], $join);
 			$where         = str_replace($this->orderBy, '', $where);
@@ -1075,7 +1075,14 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$filterWhere = trim($params->get('database_join_filter_where_sql', ''));
 		if (FArrayHelper::getValue($opts, 'mode', '') === 'filter' && !empty($filterWhere))
 		{
-			$where .= JString::stristr($where, 'WHERE') ? ' AND ' . $filterWhere : ' WHERE ' . $filterWhere;
+			if (preg_match('/(ORDER\s+BY)(.*)/is', $filterWhere, $matches))
+			{
+				$this->orderBy = $this->parseThisTable($matches[0], $join);
+				$filterWhere         = str_replace($this->orderBy, '', $filterWhere);
+				$filterWhere         = str_replace($matches[0], '', $filterWhere);
+			}
+			//$where .= JString::stristr($where, 'WHERE') ? ' AND ' . $filterWhere : ' WHERE ' . $filterWhere;
+			$where .= !empty($where) ? ' AND ' . $filterWhere : ' WHERE ' . $filterWhere;
 		}
 
 		if ($where == '')
@@ -1138,7 +1145,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$params = $this->getParams();
 		$join   = $this->getJoin();
 
-		if ($params->get($this->concatLabelParam) == '')
+		if ($params->get($this->concatLabelParam) == '' || $this->app->input->get('override_join_val_column_concat', '0') === '1')
 		{
 			return $this->getLabelParamVal();
 		}
@@ -1450,6 +1457,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$displayData                   = new stdClass;
 			$displayData->opts             = $options;
 			$displayData->default          = FArrayHelper::getValue($default, 0);
+			$displayData->editable         = $this->isEditable();
 			$displayData->showPleaseSelect = $this->showPleaseSelect();
 
 			return $layout->render($displayData);
@@ -1471,7 +1479,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	{
 		$params = $this->getParams();
 
-		if ($params->get('databasejoin_readonly_link') == 1)
+		if ($this->app->input->get('print', '') !== '1' && $params->get('databasejoin_readonly_link') == 1)
 		{
 			if ($popUrl = $this->popUpFormUrl())
 			{
@@ -2334,6 +2342,13 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			/* $$$ hugh - Sanity check - won't this screw things up if we have a complex preFilter with multiple filters using AND grouping? */
 			$preFilterWhere = str_replace('AND', 'WHERE', $preFilterWhere);
 		}
+		else
+		{
+			if (!preg_match('/^WHERE\s+/i', $where))
+			{
+				$where = 'WHERE ' . $where;
+			}
+		}
 
 		$where .= $preFilterWhere;
 		$sql .= $where;
@@ -2370,13 +2385,24 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			switch ($params->get('filter_groupby', 'text'))
 			{
 				case 'text':
-					$order = $joinLabel . 'ASC ';
+					// If rendering as multi/checkbox then {thistable} should not refer to the joining repeat table, but the end table.
+					if ($this->isJoin())
+					{
+						if (stristr($joinLabel, "CONCAT"))
+						{
+							$join = $this->getJoinModel()->getJoin();
+							$to        = $this->getDbName();
+							$joinLabel = str_replace($join->table_join, $to, $joinLabel);
+						}
+					}
+					$order = $joinLabel . ' ASC ';
 					break;
 				case 'value':
-					$order = $joinKey . 'ASC ';
+					$order = $joinKey . ' ASC ';
 					break;
 				case '-1':
 				default:
+					$orders = array();
 					// Check if the 'Joins where and/or order by statement' has an order by
 					$joinWhere = $params->get('database_join_where_sql');
 
@@ -2387,9 +2413,25 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 						if (count($joinWhere) > 1)
 						{
-							$order = $joinWhere[count($joinWhere) - 1];
+							$orders[] = $joinWhere[count($joinWhere) - 1];
 						}
 					}
+
+					$filterWhere = trim($params->get('database_join_filter_where_sql', ''));
+
+					if (JString::stristr($filterWhere, 'ORDER BY'))
+					{
+						$filterWhere = str_replace('order by', 'ORDER BY', $filterWhere);
+						$filterWhere = explode('ORDER BY', $filterWhere);
+
+						if (count($filterWhere) > 1)
+						{
+							$orders[] = $filterWhere[count($filterWhere) - 1];
+						}
+					}
+
+					$order = implode(', ', $orders);
+
 					break;
 			}
 
@@ -2509,10 +2551,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 * @param   string $value         search string - already quoted if specified in filter array options
 	 * @param   string $originalValue original filter value without quotes or %'s applied
 	 * @param   string $type          filter type advanced/normal/prefilter/search/querystring/searchall
-	 *
+	 * @param   string  $evalFilter     evaled
+	 *                                  
 	 * @return  string    sql query part e,g, "key = value"
 	 */
-	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal')
+	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal', $evalFilter = '0')
 	{
 		/* $$$ rob $this->_rawFilter set in tableModel::getFilterArray()
 		 used in pre-filter drop-down in admin to allow users to pre-filter on raw db join value */
@@ -2606,10 +2649,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 					if (!empty($rows))
 					{
-						// Either look for the parent_ids in the main fabrik list or the group's list.
+						// Either look for the ids in the main fabrik list or the group's list.
 						$groupJoinModel = $group->getJoinModel();
-						$groupFk        = $groupJoinModel->getForeignKey('.');
-						$lookupTable    = $group->isJoin() ? $groupFk : $this->getListModel()->getPrimaryKey();
+						$groupPk        = $groupJoinModel->getForeignID('.');
+						$lookupTable    = $group->isJoin() ? $groupPk : $this->getListModel()->getPrimaryKey();
 						$str            = $lookupTable . ' IN (' . implode(', ', $joinIds) . ')';
 					}
 					else
@@ -2689,11 +2732,13 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$query->where($where . ' ' . $condition . ' ' . $value);
 		}
 
+		$this->getOrderBy('filter', $query);
+
 		$db->setQuery($query, $offset, $limit);
 		$sql     = (string) $query;
 		$groupBy = FabrikString::shortColName($groupBy);
 		$rows    = $db->loadObjectList($groupBy);
-		ksort($rows);
+		//ksort($rows);
 
 		return $rows;
 	}
@@ -2881,6 +2926,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$modalOpts = array(
 				'content' => '',
 				'id' => $opts->modalId,
+				'title' => '',
 				'modal' => false,
 				'expandable' => true
 			);
@@ -2892,6 +2938,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$modalOpts = array(
 				'content' => '',
 				'id' => 'db_join_select',
+				'title' => '',
 				'modal' => false,
 				'expandable' => true
 			);
@@ -3213,7 +3260,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				$trigger = 'change';
 				break;
 			case 'auto-complete':
-				$trigger = '';
+				$trigger = 'blur';
 				$id      = str_replace('[]', '', $id) . '-auto-complete';
 				break;
 			default:
@@ -3227,8 +3274,6 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		{
 			$ar[] = array('id' => $id, 'triggerEvent' => $trigger);
 		}
-
-		$ar[] = array('id' => $id, 'triggerEvent' => 'blur');
 
 		return $ar;
 	}

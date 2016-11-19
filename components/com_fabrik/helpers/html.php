@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik.helpers
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -71,6 +71,14 @@ class FabrikHelperHTML
 	 * @var array
 	 */
 	protected static $jLayoutsJs = array();
+
+	/**
+	 * Array of paths for requirejs
+	 *
+	 * @var object
+	 */
+
+	protected static $allRequirePaths = null;
 
 	/**
 	 * CSS files loaded via AJAX
@@ -418,10 +426,19 @@ EOD;
 		$package = $app->getUserState('com_fabrik.package', 'fabrik');
 		$table   = $formModel->getTable();
 
-		$url = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $package . '&view=details&tmpl=component&formid=' . $form->id . '&listid=' . $table->id
-			. '&rowid=' . $formModel->getRowId() . '&iframe=1&print=1';
+		if ($app->isAdmin())
+		{
+			$url = 'index.php?option=com_' . $package . '&task=details.view&tmpl=component&formid=' . $form->id . '&listid=' . $table->id
+				. '&rowid=' . $formModel->getRowId(). '&iframe=1&print=1';
+		}
+		else
+		{
+			//$this->pdfURL = 'index.php?option=com_' . $this->package . '&view=details&formid=' . $model->getId() . '&rowid=' . $model->getRowId() . '&format=pdf';
+			$url = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $package . '&view=details&tmpl=component&formid=' . $form->id . '&listid=' . $table->id
+				. '&rowid=' . $formModel->getRowId() . '&iframe=1&print=1';
 
-		$url .= '&Itemid=' . FabrikWorker::itemId();
+			$url .= '&Itemid=' . FabrikWorker::itemId();
+		}
 
 		/* $$$ hugh - @TODO - FIXME - if they were using rowid=-1, we don't need this, as rowid has already been transmogrified
 		 * to the correct (PK based) rowid.  but how to tell if original rowid was -1???
@@ -434,7 +451,7 @@ EOD;
 		$url = JRoute::_($url);
 
 		// $$$ rob for some reason JRoute wasn't doing this ???
-		$url            = str_replace('&', '&amp;', $url);
+		//$url            = str_replace('&', '&amp;', $url);
 		self::$printURL = $url;
 
 		return self::$printURL;
@@ -787,15 +804,29 @@ EOD;
 	public static function mcl()
 	{
 		// Cant used compressed version as its not up to date
-		$src = array('media/com_fabrik/js/lib/mcl/CANVAS.js', 'media/com_fabrik/js/lib/mcl/CanvasItem.js',
-			'media/com_fabrik/js/lib/mcl/Cmorph.js', 'media/com_fabrik/js/lib/mcl/Layer.js', 'media/com_fabrik/js/lib/mcl/LayerHash.js',
-			'media/com_fabrik/js/lib/mcl/Thread.js');
+		$src = array(
+			'media/com_fabrik/js/lib/mcl/CANVAS.js',
+			'media/com_fabrik/js/lib/mcl/CanvasItem.js',
+			'media/com_fabrik/js/lib/mcl/Cmorph.js',
+			'media/com_fabrik/js/lib/mcl/Layer.js',
+			'media/com_fabrik/js/lib/mcl/LayerHash.js',
+			'media/com_fabrik/js/lib/mcl/Thread.js'
+		);
 
 		if (!self::$mcl)
 		{
 			self::script($src);
 			self::$mcl = true;
 		}
+
+		$src = array(
+			'lib/mcl/CANVAS',
+			'lib/mcl/CanvasItem',
+			'lib/mcl/Cmorph',
+			'lib/mcl/Layer',
+			'lib/mcl/LayerHash',
+			'lib/mcl/Thread'
+		);
 
 		return $src;
 	}
@@ -879,6 +910,7 @@ EOD;
 				$chosenOptions = empty($chosenOptions) ? new stdClass : ArrayHelper::fromObject(json_decode($chosenOptions));
 				JHtml::_('stylesheet', 'jui/chosen.css', false, true);
 				JHtml::_('script', 'jui/chosen.jquery.min.js', false, true, false, false, self::isDebug());
+				JHtml::_('script', 'jui/ajax-chosen.min', false, true, false, false, self::isDebug());
 			}
 
 			if (self::inAjaxLoadedPage() && !$bootstrapped)
@@ -1032,7 +1064,7 @@ EOD;
 	public static function iniRequireJs($shim = array(), $paths = array())
 	{
 		$session      = JFactory::getSession();
-		$requirePaths = (object) array_merge((array) self::requirePaths(), $paths);
+		self::$allRequirePaths = (object) array_merge((array) self::requirePaths(), $paths);
 		$framework    = array();
 		$deps         = array();
 		$j3           = FabrikWorker::j3();
@@ -1046,7 +1078,7 @@ EOD;
 		{
 			if (is_array($newShim) && array_key_exists($k, $newShim))
 			{
-				$s->deps = array_merge($s->deps, $newShim[$k]->deps);
+				$s->deps = array_unique(array_merge($s->deps, $newShim[$k]->deps));
 			}
 
 			$newShim[$k] = $s;
@@ -1091,7 +1123,7 @@ EOD;
 
 		$opts = array(
 			'baseUrl' => $requirejsBaseURI,
-			'paths' => $requirePaths,
+			'paths' => self::$allRequirePaths,
 			'shim' => $newShim,
 			'waitSeconds' => 30
 		);
@@ -1158,36 +1190,41 @@ EOD;
 	 */
 	protected static function requirePaths()
 	{
-		$r              = new stdClass;
-		$r->fab         = 'media/com_fabrik/js';
-		$r->lib         = 'media/com_fabrik/js/lib';
-		$r->element     = 'plugins/fabrik_element';
-		$r->list        = 'plugins/fabrik_list';
-		$r->form        = 'plugins/fabrik_form';
-		$r->cron        = 'plugins/fabrik_cron';
-		$r->viz         = 'plugins/fabrik_visualization';
-		$r->admin       = 'administrator/components/com_fabrik/views';
-		$r->adminfields = 'administrator/components/com_fabrik/models/fields';
-
-		$r->jQueryUI = 'media/com_fabrik/js/lib/jquery-ui/jquery-ui';
-		$r->chosen   = 'media/jui/js/chosen.jquery.min';
-		$r->ajaxChosen   = 'media/jui/js/ajax-chosen.min';
-
-		// We are now loading compressed js fabrik files from the media/com_fabrik/js/dist folder
-		// This avoids AMD issues where we were loading fab/form or fab/form-min.
-		if (!self::isDebug())
+		if (empty(self::$allRequirePaths))
 		{
-			$r->fab .= '/dist';
+			$r              = new stdClass;
+			$r->fab         = 'media/com_fabrik/js';
+			$r->lib         = 'media/com_fabrik/js/lib';
+			$r->element     = 'plugins/fabrik_element';
+			$r->list        = 'plugins/fabrik_list';
+			$r->form        = 'plugins/fabrik_form';
+			$r->cron        = 'plugins/fabrik_cron';
+			$r->viz         = 'plugins/fabrik_visualization';
+			$r->admin       = 'administrator/components/com_fabrik/views';
+			$r->adminfields = 'administrator/components/com_fabrik/models/fields';
+
+			$r->jQueryUI   = 'media/com_fabrik/js/lib/jquery-ui/jquery-ui';
+			$r->chosen     = 'media/jui/js/chosen.jquery.min';
+			$r->ajaxChosen = 'media/jui/js/ajax-chosen.min';
+
+			// We are now loading compressed js fabrik files from the media/com_fabrik/js/dist folder
+			// This avoids AMD issues where we were loading fab/form or fab/form-min.
+			if (!self::isDebug())
+			{
+				$r->fab .= '/dist';
+			}
+
+			$version = new JVersion;
+
+			if ($version->RELEASE >= 3.2 && $version->DEV_LEVEL > 1)
+			{
+				$r->punycode = 'media/system/js/punycode';
+			}
+
+			self::$allRequirePaths = $r;
 		}
 
-		$version = new JVersion;
-
-		if ($version->RELEASE >= 3.2 && $version->DEV_LEVEL > 1)
-		{
-			$r->punycode = 'media/system/js/punycode';
-		}
-
-		return $r;
+		return self::$allRequirePaths;
 	}
 
 	/**
@@ -1207,10 +1244,10 @@ EOD;
 	 *
 	 * @return  void
 	 */
-	public static function loadBootstrapCSS()
+	public static function loadBootstrapCSS($force = false)
 	{
 		$app = JFactory::getApplication();
-		if ($app->input->get('loadbootstrapcss', '') !== '')
+		if ($force || $app->input->get('loadbootstrapcss', '') !== '')
 		{
 			$doc = JFactory::getDocument();
 			JHtmlBootstrap::loadCss(true, $doc->direction);
@@ -1756,8 +1793,11 @@ EOD;
 
 		foreach ($path as $p)
 		{
-			$str[] = '<a href="#" class="crumb' . $i . '">' . $p . '</a><span> / </span>';
-			$i++;
+			if (!empty($p))
+			{
+				$str[] = '<a href="#" class="crumb' . $i . '">' . $p . '</a><span> / </span>';
+				$i++;
+			}
 		}
 
 		$str[] = '</span>';
@@ -1811,10 +1851,12 @@ EOD;
 		JText::script('COM_FABRIK_NO_RECORDS');
 		JText::script('COM_FABRIK_AUTOCOMPLETE_AJAX_ERROR');
 		$jsFile = 'autocomplete';
+		$className = 'AutoComplete';
 
 		if (FabrikWorker::j3())
 		{
 			$jsFile = $plugin === 'cascadingdropdown' ? 'autocomplete-bootstrap-cdd' : 'autocomplete-bootstrap';
+			$className = $plugin === 'cascadingdropdown' ? 'FabCddAutocomplete' : 'AutoComplete';
 		}
 
 		$needed   = array();
@@ -1822,8 +1864,8 @@ EOD;
 		$needed[] = 'lib/Event.mock';
 		$needed   = implode("', '", $needed);
 		self::addScriptDeclaration(
-			"require(['$needed'], function (AutoComplete) {
-	new AutoComplete('$htmlId', $str);
+			"require(['$needed'], function ($className) {
+	new $className('$htmlId', $str);
 });"
 		);
 	}
@@ -2323,13 +2365,14 @@ EOD;
 	/**
 	 * Run Joomla content plugins over text
 	 *
-	 * @param   string &$text Content
+	 * @param   string &$text  Content
+	 * @param   bool   $cloak  Cloak emails
 	 *
 	 * @return  void
 	 *
 	 * @since   3.0.7
 	 */
-	public static function runContentPlugins(&$text)
+	public static function runContentPlugins(&$text, $cloak = false)
 	{
 		$app    = JFactory::getApplication();
 		$input  = $app->input;
@@ -2349,15 +2392,14 @@ EOD;
 		 * In addition, if we are in a details PDF view we should not run the email cloak plugin.
 		 */
 
-		if ($view !== 'details' || $input->get('format') === 'pdf')
+		if (!$cloak)
 		{
 			$text .= '{emailcloak=off}';
 		}
 
 		$text = JHTML::_('content.prepare', $text);
 
-		if ($view !== 'details' || $input->get('format') === 'pdf')
-
+		if (!$cloak)
 		{
 			$text = FabrikString::rtrimword($text, '{emailcloak=off}');
 		}
@@ -2366,6 +2408,19 @@ EOD;
 		$input->set('view', $view);
 		$input->set('format', $format);
 	}
+
+	/**
+	 * Run text through J!'s email cloaking
+	 * @param $text
+	 *
+	 * @return mixed
+	 */
+	public static function cloakEmails($text)
+	{
+		$text = JHtml::_('email.cloak',$text);
+		return $text;
+	}
+
 
 	/**
 	 * Get content item template
@@ -2415,7 +2470,7 @@ EOD;
 
 		if ($runPlugins === true)
 		{
-			self::runContentPlugins($res);
+			self::runContentPlugins($res, false);
 		}
 
 		return $res;

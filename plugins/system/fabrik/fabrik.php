@@ -5,7 +5,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  System
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -78,7 +78,13 @@ class PlgSystemFabrik extends JPlugin
 
 		require_once JPATH_SITE . '/components/com_fabrik/helpers/file.php';
 
+		if (!file_exists(JPATH_LIBRARIES . '/fabrik/include.php'))
+		{
+			throw new Exception('PLG_FABRIK_SYSTEM_AUTOLOAD_MISSING');
+		}
+
 		require_once JPATH_LIBRARIES . '/fabrik/include.php';
+
 		parent::__construct($subject, $config);
 	}
 
@@ -112,6 +118,27 @@ class PlgSystemFabrik extends JPlugin
 		$session->clear('fabrik.js.config');
 		$session->clear('fabrik.js.shim');
 		$session->clear('fabrik.js.jlayouts');
+	}
+
+	/**
+	 * Store head script in session js store,
+	 * used by partial document type to exclude scripts already loaded
+	 *
+	 * @return  void
+	 */
+	public static function storeHeadJs()
+	{
+		$session = JFactory::getSession();
+		$doc = JFactory::getDocument();
+		$app = JFactory::getApplication();
+		$key = md5($app->input->server->get('REQUEST_URI', '', 'string'));
+
+		if (!empty($key))
+		{
+			$key = 'fabrik.js.head.cache.' . $key;
+			$scripts = json_encode($doc->_scripts);
+			$session->set($key, $scripts);
+		}
 	}
 
 	/**
@@ -180,6 +207,7 @@ class PlgSystemFabrik extends JPlugin
 		$app    = JFactory::getApplication();
 		$script = self::js();
 		self::clearJs();
+		self::storeHeadJs();
 
 		$version           = new JVersion;
 		$lessThanThreeFour = version_compare($version->RELEASE, '3.4', '<');
@@ -350,6 +378,15 @@ class PlgSystemFabrik extends JPlugin
 					break;
 				}
 			}
+
+			// Test for swap too boolean mode
+			$mode = $input->get('searchphrase', '') === 'all' ? 0 : 1;
+
+			if ($mode)
+			{
+				$input->set('override_join_val_column_concat', 1);
+			}
+
 			// $$$rob set this to current table
 			// Otherwise the fabrik_list_filter_all var is not used
 			$input->set('listid', $id);
@@ -378,9 +415,6 @@ class PlgSystemFabrik extends JPlugin
 			{
 				continue;
 			}
-
-			// Test for swap too boolean mode
-			$mode = $input->get('searchphrase', '') === 'all' ? 0 : 1;
 
 			// $params->set('search-mode-advanced', true);
 			$params->set('search-mode-advanced', $mode);

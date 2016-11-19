@@ -67,12 +67,6 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                 this.result = true; //used with plugins to determine if list actions should be performed
                 this.plugins = [];
                 this.list = document.id('list_' + this.options.listRef);
-                if (this.options.j3 === false) {
-                    this.actionManager = new FbListActions(this, {
-                        'method'  : this.options.actionMethod,
-                        'floatPos': this.options.floatPos
-                    });
-                }
 
                 if (this.options.toggleCols) {
                     this.toggleCols = new FbListToggle(this.form);
@@ -195,11 +189,19 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     width      : 360,
                     height     : 240,
                     content    : '',
-                    modal      : true,
-                    bootstrap  : this.options.j3
+                    modal: true,
+                    bootstrap  : true,
+                    visible: true,
+                    onContentLoaded: function () {
+                        var win = this;
+                        window.setTimeout(function () {
+                            win.fitToContent();
+                        }, 1000);
+
+                    }
                 };
-                this.exportWindowOpts.width = parseInt(this.options.csvOpts.popupwidth,10)>0 ? this.options.csvOpts.popupwidth : 340;
-                this.exportWindowOpts.optswidth = parseInt(this.options.csvOpts.optswidth,10)>0 ? this.options.csvOpts.optswidth : 200;
+                this.exportWindowOpts.width = parseInt(this.options.csvOpts.popupwidth,10)>0 ? this.options.csvOpts.popupwidth : 360;
+                this.exportWindowOpts.optswidth = parseInt(this.options.csvOpts.optswidth,10)>0 ? this.options.csvOpts.optswidth : 240;
                 if (this.options.view === 'csv') {
 
                     // For csv links e.g. index.php?option=com_fabrik&view=csv&listid=10
@@ -216,66 +218,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     });
                 }
             },
-            centerCSVWindow: function(start) {
-                /* hide the 'Save to' until file name is known */
-                var savingto = (start > 0) ? 'block' : 'none';
-                jQuery('p.saveto').css('display',savingto); 
 
-                /* allow modal to collapse height once form options are hidden
-                 * so that only csvmsg div is shown
-                 */
-                if(start >= 0 || jQuery('div.itemContent').outerHeight()==0){
-                    /* If selectable options - hide and remove space in DOM by setting outerHeight to 0 */
-                    if(jQuery('div.modal-footer').length) {
-                        jQuery('div.itemContent').outerHeight(0);
-                        jQuery('div.modal').css('height','auto');
-                    }else{
-                        jQuery('div.itemContent').css('overflow','initial');
-                    }   
-                }else{
-                    /* reset the itemContent height to max */
-                    if(jQuery('div.modal-footer').length) {
-                        jQuery('div.opt__file-type div').css({'float':'left','width': (this.exportWindowOpts.optswidth-8)+'px','background-color':'bisque','margin':'0px','padding':'4px 8px','font-weight':'600'});                        
-                        jQuery('div.itemContent').css('height','auto');
-                        jQuery('div.modal').css('height','auto');
-                    }   
-                }   
-                jQuery('div.contentWrapper').css('height','auto');
-                jQuery('#csvmsg').css('text-align','center');
-                                    
-                /* re-center the modal vertically */
-                var viewHeight = jQuery(window).outerHeight();
-                var headHeight = jQuery('div.modal-header').outerHeight(true);
-    
-                /* modHeight source depends on if there is a mod_footer (options were are shown) */
-                if(jQuery('div.modal-footer').length) {
-                    var modHeight = jQuery('div.itemContent').outerHeight(true);
-                    var footHeight =  jQuery('div.modal-footer').outerHeight(true);
-                }else{
-                    /* just hard-code the itemContent height to accomodate 
-                     * the csvmsg div if no options and footer are used */
-                    var modHeight = 134;
-                    var footHeight = 0;
-                    jQuery( 'div.modal' ).css('height',(headHeight+modHeight)+'px');
-                }
-        
-                var frameHeight = parseInt(headHeight+modHeight+footHeight);
-
-                /* If modal height will be within 10px of max (viewport) height
-                 * set height of scrolling content be to 80% of viewport height 
-                 * (allowing for header and footer)
-                 */
-                if(frameHeight+10 > viewHeight){
-                    var fullHeight= parseInt(headHeight+(viewHeight*.8)+footHeight);
-                    jQuery( 'div.itemContent' ).outerHeight(parseInt(viewHeight*.8));
-                    jQuery( 'div.modal' ).outerHeight(fullHeight);
-                    var offtop = parseInt((viewHeight-fullHeight)/2);
-                    jQuery( 'div.modal' ).css('top',offtop+'px');
-                }else{
-                    var offtop = parseInt((viewHeight-frameHeight)/2);
-                    jQuery('div.modal').css('top',offtop+'px');
-                }
-            },
             /**
              * Open either the window to choose csv export options or auto-start the CSV
              * download
@@ -284,48 +227,15 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                 var self = this;
                 this.exportWindowOpts.content = this.makeCSVExportForm();
                 this.csvWindow = Fabrik.getWindow(this.exportWindowOpts);
-                
-                /* set modal window height to auto to allow collapes/expansion */
-                jQuery('div.modal').css('height','auto');
-                
-                /* Prevent browser window from being scrolled */
-                jQuery('body').css({'height':'100%','overflow':'hidden'});
-
-                /* Allow browser window to be scrolled again when modal is released from DOM */
-                jQuery('div.modal').on('remove', function () {
-                    jQuery('body').css({'height':'initial','overflow':'initial'});  
-                }); 
-
-                /* adds draggable feature to modal popup */
-                jQuery('div.modal').draggable({
-                    handle: '.modal-header'
-                });
-                jQuery('.modal-header').on('mouseover', function(){
-                    jQuery(this).css('cursor','move');
-                }); 
-
-                /* recenter popup if window viewport gets resized */
-                jQuery(window).on('resize', function(){
-                    self.centerCSVWindow();  
-                });             
-                
-                /* force every form option to new line */
-                jQuery('div.modal').find('form div[class^=opt__]').css({'clear':'left','float':'left','white-space':'nowrap'});
-                
-                /* Allow wide option labels to wrap */
-                jQuery('div.modal').find('form div[class^=opt__] div').css({'line-height':'1.1em','white-space':'initial'});
-
-                /* vertically center the popup */
-                self.centerCSVWindow();    
 
                 jQuery('.exportCSVButton').on('click', function (e) {
                     e.stopPropagation();
                     this.disabled = true;
-                    
+
                     /* immediately hide the Export button and form options */
-                    jQuery(this).hide();    
+                    jQuery(this).hide();
                     jQuery(this).closest('div.modal').find('.contentWrapper').hide();
-                    
+
                     var csvMsg = jQuery('#csvmsg');
                     if (csvMsg.length === 0) {
                         csvMsg = jQuery('<div />').attr({
@@ -375,7 +285,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
             },
             /* Used to create class names for every line in the form options.
              * This will allow for more easilly adding custom css styling to
-             * hide options that you don't want the user to be able to change. 
+             * hide options that you don't want the user to be able to change.
              */
             makeSafeForCSS: function(name) {
                 return name.replace(/[^a-z0-9]/g, function(s) {
@@ -433,7 +343,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
              * @private
              */
             _csvExportForm: function () {
-                var thisClass,thisText;             
+                var thisClass,thisText;
                 var yes = Joomla.JText._('JYES'),
                     no = Joomla.JText._('JNO'),
                     self = this,
@@ -458,10 +368,9 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
 
                 ]);
                 thisText = Joomla.JText._('COM_FABRIK_SELECT_COLUMNS_TO_EXPORT');
-                thisClass = 'opt__' + self.makeSafeForCSS(thisText);    
-                jQuery('<div />').prop('class',thisClass)
-                .css({'clear':'left','float':'left','white-space':'nowrap','background-color':'bisque','padding':'2px 8px','font-weight':'600','margin-top':'10px'})
-                .text(thisText).appendTo(c);
+                thisClass = 'opt__' + self.makeSafeForCSS(thisText);
+                jQuery('<div />').prop('class', thisClass)
+                    .text(thisText).appendTo(c);
                 var g = '';
                 var i = 0;
                 jQuery.each(this.options.labels, function (k, labelText) {
@@ -486,7 +395,6 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     thisText = Joomla.JText._('COM_FABRIK_FORM_FIELDS');
                     thisClass = 'opt__' + self.makeSafeForCSS(thisText);
                     jQuery('<div />').prop('class',thisClass)
-                        .css({'clear':'left','float':'left','white-space':'nowrap','background-color':'bisque','padding':'2px 8px','font-weight':'600','margin-top':'10px'})
                         .text(thisText).appendTo(c);
                     this.options.formels.each(function (el) {
                         self._csvYesNo('fields[' + el.name + ']', false,
@@ -525,7 +433,6 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
 
             triggerCSVExport: function (start, opts, fields) {
                 var self = this;
-                self.centerCSVWindow(start);    
                 if (start !== 0) {
                     if (start === -1) {
                         // not triggered from front end selections
@@ -589,7 +496,6 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                         fconsole(text, error);
                     },
                     onComplete: function (res) {
-                        self.centerCSVWindow(start);                
                         if (res.err) {
                             window.alert(res.err);
                             Fabrik.Windows.exportcsv.close();
@@ -609,13 +515,18 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                                 jQuery('#csvmsg').html(msg);
                                 document.getElements('input.exportCSVButton').removeProperty('disabled');
 
+                                // commenting this out as it seems to hose up the download in IE11/Edge
+                                /*
                                 jQuery('#csvmsg a.btn-success').mouseup(function () {
                                     jQuery(this).hide();
-                                }); 
+                                });
+                                */
 
                                 jQuery('#csvmsg a.btn-success').focusout(function () {
                                     Fabrik.Windows.exportcsv.close(true);
                                 });
+
+                                self.csvWindow.fitToContent();
                             }
                         }
                     }
@@ -1034,6 +945,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     if (task === 'list.doPlugin') {
                         data += '&setListRefFromRequest=1';
                         data += '&listref=' + this.options.listRef;
+                        data += '&Itemid=' + this.options.Itemid;
                     }
 
                     if (task === 'list.filter' && this.advancedSearch !== false) {
@@ -1260,8 +1172,22 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
              * @private
              */
             _updateRows: function (data) {
-                var tbody, itemTemplate, i, groupHeading, columnCount, parent, items = [], item,
-                    rowTemplate, cell, cells, form = jQuery(this.form), self = this, fullRow;
+                var tbody,
+                    itemTemplate,
+                    i,
+                    groupHeading,
+                    columnCount,
+                    parent,
+                    items = [],
+                    item,
+                    rowTemplate,
+                    cell,
+                    cells,
+                    form = jQuery(this.form),
+                    self = this,
+                    tmpl = 'tr',
+                    fullRow;
+
                 if (typeOf(data) !== 'object') {
                     return;
                 }
@@ -1283,9 +1209,11 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                 if (cell.prop('tagName') === 'TR') {
                     parent = cell;
                     columnCount = 1;
+                    tmpl = 'tr';
                 } else {
                     parent = cell.parent();
                     columnCount = form.find('.fabrikDataContainer').data('cols');
+                    tmpl = 'div';
                 }
 
                 columnCount = columnCount === undefined ? 1 : columnCount;
@@ -1324,13 +1252,13 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
 
                     items = Fabrik.Array.chunk(items, columnCount);
                     for (i = 0; i < items.length; i++) {
-                        if (items[i].length > 0) {
-                            // We need to treat <tr>s differently from div templates
-                            cells = items[i][0].prop('tagName') === 'TR' ? items[i][0].children() : items[i];
-                        } else {
+                        if (tmpl === 'div') {
                             cells = items[i];
+                            fullRow = rowTemplate.clone().append(cells);
                         }
-                        fullRow = rowTemplate.clone().append(cells);
+                        else {
+                            fullRow = items[i];
+                        }
                         tbody.append(fullRow);
                     }
                 });
@@ -1383,20 +1311,39 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     if (cell.prop('tagName') !== 'A') {
                         cell.html(val);
                     } else {
-                        cell.prop('href', val);
+                        var href;
+                        try {
+                            // handle our view/edit links with data-rowid
+                            href = jQuery(val).prop('href');
+                            var rowid = jQuery(val).data('rowid');
+                            // need to only do this for our links, not custom detail links
+                            jQuery.each(cell, function (thisKey, thisCell) {
+                                if (jQuery(thisCell).data('iscustom') === 0) {
+                                    jQuery(thisCell).prop('href', href);
+                                    jQuery(thisCell).data('rowid', rowid);
+                                }
+                            });
+                        }
+                        catch (err) {
+                            // val wasn't an A tag, so just treat it as an href
+                            cell.prop('href', val);
+                        }
                     }
                 });
-                template.find('.fabrik_row').prop('id', row.id);
                 if (typeof(this.options.itemTemplate) === 'string') {
-                    c = template.find('.fabrik_row');
+                    c = template.find('.fabrik_row').addBack(template);
                     c.prop('id', row.id);
-                    var newClass = row['class'].split(' ');
+                    c.removeClass('oddRow0');
+                    c.removeClass('oddRow1');
+                    var newClass = row['class'].split(/\s+/);
                     for (j = 0; j < newClass.length; j++) {
-                        c.addClass(newClass[j]);
+                        if (!c.hasClass(newClass[j])) {
+                            c.addClass(newClass[j]);
+                        }
                     }
                     r = template.clone();
                 } else {
-                    r = template.find('.fabrik_row');
+                    r = template.find('.fabrik_row').addBack(template);
                 }
                 return r;
             },

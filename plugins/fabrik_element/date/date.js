@@ -1,7 +1,7 @@
 /**
  * Date Element
  *
- * @copyright: Copyright (C) 2005-2015, fabrikar.com - All rights reserved.
+ * @copyright: Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license:   GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
@@ -205,7 +205,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         calSelect: function (calendar, date) {
 
             // Test the date is selectable...
-            if (calendar.dateClicked && !this.dateSelect(calendar.date)) {
+            if (calendar.dateClicked && this.dateSelect(calendar.date) !== true) {
                 var d = this.setTimeFromField(calendar.date);
                 this.update(d.format('db'));
                 this.getDateField().fireEvent('change');
@@ -270,6 +270,8 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             this.addEventToCalOpts();
             var params = this.options.calendarSetup;
             var tmp = ['displayArea', 'button'];
+
+            Fabrik.fireEvent('fabrik.element.date.calendar.create', this);
 
             for (i = 0; i < tmp.length; i++) {
                 if (typeof params[tmp[i]] === 'string') {
@@ -454,6 +456,13 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     var s = t[2] ? t[2].toInt() : 0;
                     d.setSeconds(s);
                 } else {
+                    d.setSeconds(0);
+                }
+            }
+            else {
+                if (this.options.dateTimeFormat === '') {
+                    d.setHours(0);
+                    d.setMinutes(0);
                     d.setSeconds(0);
                 }
             }

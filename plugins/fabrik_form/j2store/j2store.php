@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.j2store
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -80,9 +80,25 @@ class PlgFabrik_FormJ2Store extends PlgFabrik_Form
 		$productTable->load(array('product_source' => $source, 'product_source_id' => $this->getModel()->getInsertId()));
 		$productId = $productTable->get('j2store_product_id');
 
-		$props = array('enabled', 'product_type', 'visibility', 'sku', 'upc', 'price', 'manufacturer_id',
-			'addtocart_text', 'shipping', 'length', 'width', 'height', 'weight', 'length_class_id', 'weight_class_id',
-			'taxprofile_id');
+		$props = array(
+			'enabled',
+			'product_type',
+			'visibility',
+			'sku',
+			'upc',
+			'price',
+			'manufacturer_id',
+			'vendor_id',
+			'addtocart_text',
+			'shipping',
+			'length',
+			'width',
+			'height',
+			'weight',
+			'length_class_id',
+			'weight_class_id',
+			'taxprofile_id'
+		);
 
 		foreach ($props as $prop)
 		{
@@ -94,13 +110,27 @@ class PlgFabrik_FormJ2Store extends PlgFabrik_Form
 		$this->appendProperty($productParams, 'download_expiry', $formData);
 		$data['params'] = json_encode($productParams);
 
-		$data['product_type']       = $data['product_type'] === 'downloadable' || 'simple' ? $data['product_type'] : 'simple';
+		$productTypes = array(
+			'downloadable',
+			'simple'
+		);
+
+		if (!in_array($data['product_type'], $productTypes))
+		{
+			$data['product_type'] = 'simple';
+		}
+
 		$data['product_source']     = $source;
 		$data['product_source_id']  = $this->getModel()->getInsertId();
 		$data['pricing_calculator'] = 'standard';
 		$data['j2store_product_id'] = $productId;
 
 		$productModel->save($data);
+
+		if (empty($productId))
+		{
+			$productId = $productModel->getId();
+		}
 
 		$this->storeImages($data, $productTable->get('j2store_productimage_id'));
 		$this->storeVariant($data, $productId);
@@ -119,6 +149,9 @@ class PlgFabrik_FormJ2Store extends PlgFabrik_Form
 	{
 		$table = F0FTable::getAnInstance('Variant', 'J2StoreTable');
 		$table->load(array('product_id' => $productId));
+
+		$data['product_id'] = $productId;
+		$data['is_master'] = 1;
 
 		return $table->save($data);
 	}
@@ -353,6 +386,7 @@ class PlgFabrik_FormJ2Store extends PlgFabrik_Form
 			self::$listJs = true;
 
 			// Includes the ajax add to cart js.
+			require_once (JPATH_ADMINISTRATOR.'/components/com_j2store/helpers/strapper.php');
 			J2StoreStrapper::addJs();
 
 			// Watch quantity input and update add to cart button data.
@@ -362,6 +396,12 @@ class PlgFabrik_FormJ2Store extends PlgFabrik_Form
 				var productId = $(this).data(\'product_id\'),
 				q = $(this).val();
 				$(\'a[data-product_id=\' + productId + \']\').data(\'product_qty\', q);
+			});
+			$(\'body\').on(\'adding_to_cart\', function(e, btn, data) {
+				Fabrik.loader.start(btn.closest(\'.fabrikForm\'), Joomla.JText._(\'COM_FABRIK_LOADING\'));
+			});
+			$(\'body\').on(\'after_adding_to_cart\', function(e, btn, response, type) {
+				Fabrik.loader.stop(btn.closest(\'.fabrikForm\'));
 			});
 		});
 		');

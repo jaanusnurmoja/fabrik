@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.user
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -78,7 +78,8 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 		 * @TODO when editing a form with joined repeat group the rowid will be set but
 		 * the record is in fact new
 		 */
-		if ($params->get('update_on_edit') || !$rowId || ($this->inRepeatGroup && $this->_inJoin && $this->_repeatGroupTotal == $repeatCounter))
+		//if ($params->get('update_on_edit') || !$rowId || ($this->inRepeatGroup && $this->_inJoin && $this->_repeatGroupTotal == $repeatCounter))
+		if ($params->get('update_on_edit') || !$rowId)
 		{
 			// Set user to logged in user
 			if ($this->isEditable())
@@ -87,10 +88,11 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 			}
 			else
 			{
-				$userId = (int) $this->getValue($data, $repeatCounter);
+				$userId = $this->getValue($data, $repeatCounter, array('raw' => 1));
+				$userId = is_array($userId) ? (int) FArrayHelper::getValue($userId, 0) : (int) $userId;
 
 				// On failed validation value is 1 - user ids are always more than that so don't load userid=1 otherwise an error is generated
-				$user = $userId <= 1 ? $this->user : JFactory::getUser($userId);
+				$user = $userId <= 1 ? false : JFactory::getUser($userId);
 			}
 		}
 		else
@@ -131,7 +133,7 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 
 				if ($id === '')
 				{
-					$id = $this->getValue($data, $repeatCounter);
+					$id = $this->getValue($data, $repeatCounter, array('raw' => 1));
 				}
 
 				/*
@@ -522,7 +524,20 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 */
 	protected function _getSelectLabel($filter = false)
 	{
-		return $this->getParams()->get('user_noselectionlabel', FText::_('COM_FABRIK_PLEASE_SELECT'));
+		$label  = $this->getParams()->get('user_noselectionlabel');
+
+		if (strstr($label, '::'))
+		{
+			$labels = explode('::', $label);
+			$label  = $filter ? $labels[1] : $labels[0];
+		}
+
+		if (!$filter && $label == '')
+		{
+			$label = 'COM_FABRIK_PLEASE_SELECT';
+		}
+
+		return FText::_($label);
 	}
 
 	/**
@@ -799,10 +814,11 @@ class PlgFabrik_ElementUser extends PlgFabrik_ElementDatabasejoin
 	 * @param   string $value         search string - already quoted if specified in filter array options
 	 * @param   string $originalValue original filter value without quotes or %'s applied
 	 * @param   string $type          filter type advanced/normal/prefilter/search/querystring/searchall
-	 *
+	 * @param   string  $evalFilter     evaled
+	 *                                  
 	 * @return  string    sql query part e,g, "key = value"
 	 */
-	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal')
+	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal', $evalFilter = '0')
 	{
 		if (!$this->inJDb())
 		{

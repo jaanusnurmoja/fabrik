@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.element.fileupload
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -179,7 +179,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 
 			// MCL test
 			$mcl = FabrikHelperHTML::mcl();
-			$s->deps[] = array_merge($s->deps, $mcl);
+			//$s->deps = array_merge($s->deps, $mcl);
 
 			if (strstr($runtimes, 'html5'))
 			{
@@ -214,6 +214,9 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 
 		if (array_key_exists($key, $shim) && isset($shim[$key]->deps))
 		{
+			$merged = array_merge($shim[$key]->deps, $s->deps);
+			$unique = array_unique($merged);
+			$values = array_values($unique);
 			$shim[$key]->deps = array_values(array_unique(array_merge($shim[$key]->deps, $s->deps)));
 		}
 		else
@@ -374,7 +377,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 						}
 						else
 						{
-							$parts   = explode('/', $value[$x]);
+							$parts   = explode(DIRECTORY_SEPARATOR, $value[$x]);
 							$o       = new stdClass;
 							$o->id   = 'alreadyuploaded_' . $element->id . '_' . $rawValues[$x];
 							$o->name = array_pop($parts);
@@ -539,6 +542,8 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		if ($params->get('fu_show_image_in_table', '0') != '2')
 		{
 			$data     = json_encode($data);
+			// icons will already have been set in _renderListData
+			$opts['icon'] = 0;
 			$rendered = parent::renderListData($data, $thisRow, $opts);
 		}
 
@@ -1021,9 +1026,11 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 	/**
 	 * Get an array of allowed file extensions
 	 *
+	 * @param  stripDot  bool  strip the dot prefix
+	 *
 	 * @return array
 	 */
-	protected function _getAllowedExtension()
+	protected function _getAllowedExtension($stripDot = true)
 	{
 		$params       = $this->getParams();
 		$allowedFiles = $params->get('ul_file_types');
@@ -1033,13 +1040,24 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 			// $$$ hugh - strip spaces and leading ., as folk often do ".bmp, .jpg"
 			// preg_replace('#(\s*|^)\.?#', '', trim($allowedFiles));
 			$allowedFiles = str_replace(' ', '', $allowedFiles);
-			$allowedFiles = str_replace('.', '', $allowedFiles);
+			if ($stripDot)
+			{
+				$allowedFiles = str_replace('.', '', $allowedFiles);
+			}
 			$aFileTypes   = explode(",", $allowedFiles);
 		}
 		else
 		{
 			$mediaParams = JComponentHelper::getParams('com_media');
 			$aFileTypes  = explode(',', $mediaParams->get('upload_extensions'));
+		}
+
+		if (!$stripDot)
+		{
+			foreach ($aFileTypes as &$type)
+			{
+				$type = '.' . ltrim($type, '.');
+			}
 		}
 
 		return $aFileTypes;
@@ -1625,8 +1643,9 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 			{
 				$val = $origData[$j]->$name;
 
-				if (!empty($val))
-				{
+				// http://fabrikar.com/forums/index.php?threads/fileupload-file-save-in-the-bad-record.44751/#post-230064
+				//if (!empty($val))
+				//{
 					if (in_array($val, $deletedImages))
 					{
 						unset($origData[$j]->$name);
@@ -1635,7 +1654,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 					{
 						$filesToKeep[$index] = $origData[$j]->$name;
 					}
-				}
+				//}
 			}
 
 			$index++;
@@ -2285,6 +2304,8 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		$allRenders = implode('<br/>', $allRenders);
 		$allRenders .= ($allRenders == '') ? '' : '<br/>';
 		$capture = '';
+		$fileTypes = implode(',', $this->_getAllowedExtension(false));
+
 		switch ($device_capture)
 		{
 			case 1:
@@ -2303,12 +2324,14 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 				$capture = ' accept="video/*"' . $capture;
 				break;
 			default:
-				$capture = implode(",.", $this->_getAllowedExtension());
+				$capture = $fileTypes;
 				$capture = $capture ? ' accept=".' . $capture . '"' : '';
 				break;
 		}
 
-		$str[] = $allRenders . '<input class="fabrikinput" name="' . $name . '" type="file" id="' . $id . '"' . $capture . ' />' . "\n";
+		$accept = !empty($fileTypes) ? ' accept="' . $fileTypes . '" ' : ' ';
+
+		$str[] = $allRenders . '<input class="fabrikinput" name="' . $name . '" type="file" ' . $accept . ' id="' . $id . '" ' . $capture . ' />' . "\n";
 
 		if ($params->get('fileupload_storage_type', 'filesystemstorage') == 'filesystemstorage' && $params->get('upload_allow_folderselect') == '1')
 		{
@@ -2918,6 +2941,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		$params                    = $this->getParams();
 		$storage                   = $this->getStorage();
 		$this->_repeatGroupCounter = $repeatCounter;
+		$output                    = array();
 
 		if ($params->get('fu_show_image_in_email', false))
 		{
@@ -2952,19 +2976,26 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 				{
 					$render->render($this, $params, $v);
 				}
-			}
 
-			if ($render->output == '' && $params->get('default_image') != '')
-			{
-				$render->output = '<img src="' . $params->get('default_image') . '" alt="image" />';
-			}
+				if ($render->output == '' && $params->get('default_image') != '')
+				{
+					$render->output = '<img src="' . $params->get('default_image') . '" alt="image" />';
+				}
 
-			return $render->output;
+				$output[] = $render->output;
+			}
 		}
 		else
 		{
-			return $storage->preRenderPath($value);
+			$value     = (array) $value;
+
+			foreach ($value as $v) {
+				$output[] = $storage->preRenderPath($value);
+			}
 		}
+
+		// @TODO figure better solution for sepchar
+		return implode('<br />', $output);
 	}
 
 	/**
@@ -3063,14 +3094,14 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		$filePath = FabrikWorker::JSONtoData($filePath, false);
 		$filePath = is_object($filePath) ? FArrayHelper::fromObject($filePath) : (array) $filePath;
 
-		if ($this->getGroupModel()->canRepeat())
-		{
-			$filePath = FArrayHelper::getValue($filePath, $repeatCount);
-		}
+		$filePath = FArrayHelper::getValue($filePath, $repeatCount);
 
 		if ($ajaxIndex !== '')
 		{
-			$filePath = FArrayHelper::getValue($filePath, $ajaxIndex);
+			if (is_array($filePath))
+			{
+				$filePath = FArrayHelper::getValue($filePath, $ajaxIndex);
+			}
 		}
 
 		$filePath    = $storage->getFullPath($filePath);

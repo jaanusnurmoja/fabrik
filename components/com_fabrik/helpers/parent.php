@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -768,6 +768,7 @@ class FabrikWorker
 				if (!$unsafe)
 				{
 					$msg = self::replaceWithUnsafe($msg);
+					$msg = self::replaceWithSession($msg);
 				}
 
 				$msg = preg_replace("/{}/", "", $msg);
@@ -908,6 +909,66 @@ class FabrikWorker
 		foreach ($replacements as $key => $value)
 		{
 			$msg = str_replace($key, $value, $msg);
+		}
+
+		return $msg;
+	}
+
+	/**
+	 * Called from parseMessageForPlaceHolder to iterate through string to replace
+	 * {placeholder} with session data
+	 *
+	 * @param   string $msg Message to parse
+	 *
+	 * @return    string    parsed message
+	 */
+	public static function replaceWithSession($msg)
+	{
+		if (strstr($msg, '{$session->'))
+		{
+			$session   = JFactory::getSession();
+			$sessionData = array(
+				'id' => $session->getId(),
+				'token' => $session->get('session.token'),
+				'formtoken' => JSession::getFormToken()
+			);
+
+			foreach ($sessionData as $key => $value)
+			{
+				$msg = str_replace('{$session->' . $key . '}', $value, $msg);
+			}
+
+			$msg = preg_replace_callback(
+				'/{\$session-\>(.*?)}/',
+				function($matches) use ($session) {
+					$bits       = explode(':', $matches[1]);
+
+					if (count($bits) > 1)
+					{
+						$sessionKey = $bits[1];
+						$nameSpace  = $bits[0];
+					}
+					else
+					{
+						$sessionKey = $bits[0];
+						$nameSpace  = 'default';
+					}
+
+					$val        = $session->get($sessionKey, '', $nameSpace);
+
+					if (is_string($val))
+					{
+						return $val;
+					}
+					else if (is_numeric($val))
+					{
+						return (string) $val;
+					}
+
+					return '';
+				},
+				$msg
+			);
 		}
 
 		return $msg;
@@ -1902,15 +1963,19 @@ class FabrikWorker
 	 * @param   mixed    $attachment   Attachment file name(s)
 	 * @param   mixed    $replyTo      Reply to email address(es)
 	 * @param   mixed    $replyToName  Reply to name(s)
+	 * @param   array    $headers      Optional custom headers, assoc array keyed by header name
 	 *
 	 * @return  boolean  True on success
 	 *
 	 * @since   11.1
 	 */
 	public static function sendMail($from, $fromName, $recipient, $subject, $body, $mode = false,
-		$cc = null, $bcc = null, $attachment = null, $replyTo = null, $replyToName = null)
+		$cc = null, $bcc = null, $attachment = null, $replyTo = null, $replyToName = null, $headers = array())
 	{
 		// do a couple of tweaks to improve spam scores
+
+		// Get a JMail instance
+		$mailer = JFactory::getMailer();
 
 		// If html, make sure there's an <html> tag
 		if ($mode)
@@ -1921,15 +1986,15 @@ class FabrikWorker
 			}
 		}
 
-		// if simple single email recipient with no name part, fake out name part to avoid TO_NO_BKRT hit in spam filters
+		/**
+		 * if simple single email recipient with no name part, fake out name part to avoid TO_NO_BKRT hit in spam filters
+		 * (don't do it for sendmail, as sendmail only groks simple emails in To header!)
+		 */
 		$recipientName = '';
-		if (is_string($recipient) && !strstr($recipient, '<'))
+		if ($mailer->Mailer !== 'sendmail' && is_string($recipient) && !strstr($recipient, '<'))
 		{
 			$recipientName = $recipient;
 		}
-
-		// Get a JMail instance
-		$mailer = JFactory::getMailer();
 
 		$mailer->setSubject($subject);
 		$mailer->setBody($body);
@@ -1965,13 +2030,16 @@ class FabrikWorker
 			// not sure if we should bail if Bcc is bad, for now just soldier on
 		}
 
-		try
+		if (!empty($attachment))
 		{
-			$mailer->addAttachment($attachment);
-		}
-		catch (Exception $e)
-		{
-			// most likely file didn't exist, ignore
+			try
+			{
+				$mailer->addAttachment($attachment);
+			}
+			catch (Exception $e)
+			{
+				// most likely file didn't exist, ignore
+			}
 		}
 
 		$autoReplyTo = false;
@@ -2023,10 +2091,31 @@ class FabrikWorker
 		 * a multipart MIME type, with an alt body for plain text.  If we don't do this,
 		 * the default behavior is to send it as just text/html, which causes spam filters
 		 * to downgrade it.
+		 * @@@trob: insert \n before  <br to keep newlines(strip_tag may then strip <br> or <br /> etc, decode html
 		 */
 		if ($mode)
 		{
+			$body = str_ireplace(array("<br />","<br>","<br/>"), "\n<br />", $body);
+			$body = html_entity_decode($body);
 			$mailer->AltBody = JMailHelper::cleanText(strip_tags($body));
+		}
+
+		foreach ($headers as $headerName => $headerValue) {
+			$mailer->addCustomHeader($headerName, $headerValue);
+		}
+
+		$config = JComponentHelper::getParams('com_fabrik');
+
+		if ($config->get('verify_peer', '1') === '0')
+		{
+			$mailer->SMTPOptions = array(
+				'ssl' =>
+					array(
+						'verify_peer' => false,
+						'verify_peer_name' => false,
+						'allow_self_signed' => true
+					)
+			);
 		}
 
 		try
@@ -2078,6 +2167,8 @@ class FabrikWorker
 	 */
 	public static function itemId($listId = null)
 	{
+		static $listIds = array();
+
 		$app = JFactory::getApplication();
 
 		if (!$app->isAdmin())
@@ -2085,19 +2176,31 @@ class FabrikWorker
 			// Attempt to get Itemid from possible list menu item.
 			if (!is_null($listId))
 			{
-				$db         = JFactory::getDbo();
-				$myLanguage = JFactory::getLanguage();
-				$myTag      = $myLanguage->getTag();
-				$qLanguage  = !empty($myTag) ? ' AND ' . $db->q($myTag) . ' = ' . $db->qn('m.language') : '';
-				$query      = $db->getQuery(true);
-				$query->select('m.id AS itemId')->from('#__extensions AS e')
-					->leftJoin('#__menu AS m ON m.component_id = e.extension_id')
-					->where('e.name = "com_fabrik" and e.type = "component" and m.link LIKE "%listid=' . $listId . '"' . $qLanguage);
-				$db->setQuery($query);
-
-				if ($itemId = $db->loadResult())
+				if (!array_key_exists($listId, $listIds))
 				{
-					return $itemId;
+					$db         = JFactory::getDbo();
+					$myLanguage = JFactory::getLanguage();
+					$myTag      = $myLanguage->getTag();
+					$qLanguage  = !empty($myTag) ? ' AND ' . $db->q($myTag) . ' = ' . $db->qn('m.language') : '';
+					$query      = $db->getQuery(true);
+					$query->select('m.id AS itemId')->from('#__extensions AS e')
+						->leftJoin('#__menu AS m ON m.component_id = e.extension_id')
+						->where('e.name = "com_fabrik" and e.type = "component" and m.link LIKE "%listid=' . $listId . '"' . $qLanguage);
+					$db->setQuery($query);
+
+					if ($itemId = $db->loadResult())
+					{
+						$listIds[$listId] = $itemId;
+					}
+					else{
+						$listIds[$listId] = false;
+					}
+				}
+				else{
+					if ($listIds[$listId] !== false)
+					{
+						return $listIds[$listId];
+					}
 				}
 			}
 

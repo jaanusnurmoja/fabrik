@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.list.email
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -402,33 +402,42 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 		$params    = $this->getParams();
 		$input     = $this->app->input;
 		$updateVal = $params->get($name);
+		$search    = array();
+		$replace   = array();
 
 		if ($updateVal === 'now()' || $updateVal === '{now}')
 		{
-			$updateVal = $this->date->toSql();
+			$search[]  = 'now()';
+			$replace[] = $this->date->toSql();
+			$search[]  = '{now}';
+			$replace[] = $this->date->toSql();
 		}
 
 		if ($updateVal === '{subject}')
 		{
-			$updateVal = $input->get('subject', '', 'string');
+			$search[]  = '{subject}';
+			$replace[] = $input->get('subject', '', 'string');
 		}
 
 		if ($updateVal === '{$my->id}')
 		{
-			$updateVal = $this->user->get('id', 0, 'int');
+			$search[]  = '{$my->id}';
+			$replace[] = $this->user->get('id', 0, 'int');
 		}
 
 		if ($updateVal === '{sent}')
 		{
-			$updateVal = $this->sent;
+			$search[]  = '{sent}';
+			$replace[] = $this->sent;
 		}
 
 		if ($updateVal === '{notsent}')
 		{
-			$updateVal = $this->notSent;
+			$search[]  = '{notsent}';
+			$replace[] = $this->notSent;
 		}
 
-		return $updateVal;
+		return str_replace($search, $replace, $updateVal);
 	}
 
 	/**
@@ -630,7 +639,7 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 		$params        = $this->getParams();
 		$sendSMS       = $params->get('emailtable_email_or_sms', 'email') == 'sms';
 		$input         = $this->app->input;
-		$coverMessage  = $input->get('message', '', 'html');
+		$coverMessage  = $input->get('message', '', 'raw');
 		$coverMessage  = nl2br($coverMessage);
 		$oldStyle      = $this->_oldStyle();
 		$emailTemplate = $this->_emailTemplate();
@@ -683,7 +692,7 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 
 		if ($toType == 'table' || $toType == 'table_picklist')
 		{
-			$to = $input->get('list_email_to', '', 'array');
+			$to = $input->get('list_email_to', array(), 'array');
 		}
 		else
 		{
@@ -750,6 +759,7 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 
 		$tableEmail = $params->get('emailtable_to_table_email');
 		$tableName  = $params->get('emailtable_to_table_name');
+		$tableWhere = $params->get('emailtable_to_table_where', '');
 
 		$toTableModel = JModelLegacy::getInstance('list', 'FabrikFEModel');
 		$toTableModel->setId($table);
@@ -762,6 +772,13 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 		$query = $toDb->getQuery(true);
 		$query->select($tableEmail . ' AS email, ' . $tableName . ' AS name')
 			->from($emailTableTo_table)->order('name ASC');
+
+		if (!empty($tableWhere)) {
+			$w = new FabrikWorker;
+			$tableWhere = $w->parseMessageForPlaceHolder($tableWhere);
+			$query->where($tableWhere);
+		}
+
 		$toDb->setQuery($query);
 		$results = $toDb->loadObjectList();
 

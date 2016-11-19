@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  * @since       3.1
  */
@@ -29,7 +29,7 @@ foreach ($this->elements as $element) :
 	$style = $element->hidden ? 'style="display:none"' : '';
 
 	if ($element->startRow) : ?>
-			<div class="row-fluid <?php echo $single ? 'fabrikElementContainer' : ''; ?>" <?php echo $style?>><!-- start element row -->
+			<div class="row-fluid <?php echo $single ? 'fabrikElementContainer ' : ''; echo $single && $element->dataEmpty ? 'fabrikDataEmpty ' : ''; ?>" <?php echo $style?>><!-- start element row -->
 	<?php
 		$rowStarted = true;
 	endif;

@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -303,14 +303,16 @@ class FabrikViewFormBase extends FabrikView
 		$text   = $this->loadTemplate();
 		$model  = $this->getModel();
 		$params = $model->getParams();
+		$view = $model->isEditable() === false ? 'details' : 'form';
 
 		if ($params->get('process-jplugins', 2) == 1 || ($params->get('process-jplugins', 2) == 2 && $model->isEditable() === false))
 		{
-			FabrikHelperHTML::runContentPlugins($text);
+			$cloak = $view === 'details' && $this->app->input->get('format') !== 'pdf';
+			FabrikHelperHTML::runContentPlugins($text, $cloak);
 		}
 
 		// Allows you to use {placeholders} in form template Only replacing data accessible to the users acl.
-		$view = $model->isEditable() === false ? 'details' : 'form';
+
 		$text = $w->parseMessageForPlaceHolder($text, $model->accessibleData($view));
 		echo $text;
 	}
@@ -968,7 +970,7 @@ class FabrikViewFormBase extends FabrikView
 
 		$layoutData = (object) array(
 			'type' => 'reset',
-			'class' => 'btn-warning button',
+			'class' => 'btn-warning button clearSession',
 			'name' => 'Reset',
 			'label' => $resetLabel
 		);

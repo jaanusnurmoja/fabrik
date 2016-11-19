@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik.helpers
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -83,7 +83,21 @@ class FabrikPDFHelper
 			if ($ok)
 			{
 				$uri = JUri::getInstance();
-				$base = $uri->getScheme() . '://' . $uri->getHost();
+				$host = $uri->getHost();
+				$port = $uri->getPort();
+
+				if (empty($port))
+				{
+					$port = 80;
+				}
+
+				// If the port is not default, add it
+				if (! (($uri->getScheme() == 'http' && $port == 80) ||
+					($uri->getScheme() == 'https' && $port == 443))) {
+					$host .= ':' . $port;
+				}
+
+				$base = $uri->getScheme() . '://' . $host;
 				$imgs = $ok->xpath('//img');
 
 				foreach ($imgs as &$img)
@@ -127,7 +141,7 @@ class FabrikPDFHelper
 			$config = JComponentHelper::getParams('com_fabrik');
 
 			// Don't show the errors if we want to debug the actual pdf html
-			if (JDEBUG && $config->get('pdf_debug', true) === true)
+			if (JDEBUG && $config->get('pdf_debug', false) === true)
 			{
 				echo "<pre>";
 				print_r($errors);

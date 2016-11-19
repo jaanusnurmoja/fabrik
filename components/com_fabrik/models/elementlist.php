@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -193,10 +193,11 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 	 * @param   string  $value          Search string - already quoted if specified in filter array options
 	 * @param   string  $originalValue  Original filter value without quotes or %'s applied
 	 * @param   string  $type           Filter type advanced/normal/prefilter/search/querystring/searchall
-	 *
+	 * @param   string  $evalFilter     evaled (only used for multiselect types)
+	 *                                  
 	 * @return  string	sql query part e,g, "key = value"
 	 */
-	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal')
+	public function getFilterQuery($key, $condition, $value, $originalValue, $type = 'normal', $evalFilter = '0')
 	{
 		$element = $this->getElement();
 		$condition = JString::strtoupper($condition);
@@ -205,7 +206,7 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 
 		if ($element->filter_type == 'checkbox' || $element->filter_type == 'multiselect')
 		{
-			$str = $this->filterQueryMultiValues($key, $condition, $originalValue);
+			$str = $this->filterQueryMultiValues($key, $condition, $originalValue, $evalFilter, $type);
 		}
 		else
 		{
@@ -246,12 +247,26 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 	 * @param $key
 	 * @param $condition
 	 * @param $originalValue
+	 * @param $evalFilter
+	 * @param $type
 	 *
 	 * @return string
 	 */
-	protected function filterQueryMultiValues ($key, $condition, $originalValue)
+	protected function filterQueryMultiValues ($key, $condition, $originalValue, $evalFilter, $type)
 	{
 		$str = array();
+
+		/**
+		 * Grrrr.  For some reason, $evalFilter is getting set in element filter session when it shouldn't.
+		 * This code was only meant for eval'ing of prefilters, so until i can work out why eval is getting set,
+		 * just restrict this to prefilter types
+		 */
+		if ($evalFilter && ($type === 'prefilter' || $type === 'menuprefilter'))
+		{
+			$originalValue = stripslashes(htmlspecialchars_decode($originalValue, ENT_QUOTES));
+			$originalValue = @eval($originalValue);
+			FabrikWorker::logEval($originalValue, 'Caught exception on eval of elementList::filterQueryMultiValues() ' . $key . ': %s');
+		}
 
 		if ($condition === 'NOT IN')
 		{
@@ -686,7 +701,8 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 		$displayData = array(
 			'uls' => $uls,
 			'condense' => $condense,
-			'addHtml' => $addHtml
+			'addHtml' => $addHtml,
+			'sepChar' => ArrayHelper::getValue($opts, 'sepChar', ' ')
 		);
 
 		return $layout->render((object) $displayData);
@@ -703,7 +719,7 @@ class PlgFabrik_ElementList extends PlgFabrik_Element
 	public function renderListData_csv($data, &$thisRow)
 	{
 		$this->renderWithHTML = false;
-		$d = $this->renderListData($data, $thisRow);
+		$d = $this->renderListData($data, $thisRow, array('sepChar' => "\n"));
 
 		if ($this->isJoin())
 		{

@@ -72,7 +72,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             this.events = {};
 
             this.submitBroker = new FbFormSubmit();
-
+            this.scrollTips();
             Fabrik.fireEvent('fabrik.form.loaded', [this]);
         },
 
@@ -152,8 +152,12 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     window.print();
                 } else {
                     // Build URL as we could have changed the rowid via ajax pagination
+                    /*
                     var url = 'index.php?option=com_' + Fabrik.package + '&view=details&tmpl=component&formid=' + this.id +
                         '&listid=' + this.options.listid + '&rowid=' + this.options.rowid + '&iframe=1&print=1';
+                    */
+                    var url = jQuery(e.target).prop('href');
+                    url = url.replace(/&rowid=\d+/, '&rowid=' + this.options.rowid);
                     if (this.options.lang !== false) {
                         url += '&lang=' + this.options.lang;
                     }
@@ -336,15 +340,23 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 targetInRepeat = target.options.inRepeatGroup;
             }
 
+            if (id.slice(0, 21) === 'fabrik_trigger_group_') {
+                groupfx = true;
+            }
+            else {
+                groupfx = false;
+            }
+
             // Update the element id that we will apply the fx to to be that of the calling elementModels group
             // (if in a repeat group)
-            if (elementModel && targetInRepeat) {
+            if (elementModel && targetInRepeat && !groupfx) {
                 if (elementModel.options.inRepeatGroup) {
                     var bits = id.split('_');
                     bits[bits.length - 1] = elementModel.options.repeatCounter;
                     id = bits.join('_');
                 }
             }
+
             // Create the fx key
             id = id.replace('fabrik_trigger_', '');
             if (id.slice(0, 6) === 'group_') {
@@ -354,9 +366,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     id = id.slice(6, id.length);
                 }
                 k = id;
-                groupfx = true;
             } else {
-                groupfx = false;
                 id = id.slice(8, id.length);
                 k = 'element' + id;
             }
@@ -1016,6 +1026,13 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             }).send();
         },
 
+        /**
+         * Run once a validation is completed
+         * @param {string} r
+         * @param {string} id
+         * @param {string} origid
+         * @private
+         */
         _completeValidaton: function (r, id, origid) {
             r = JSON.decode(r);
             if (typeOf(r) === 'null') {
@@ -1114,6 +1131,13 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             return err;
         },
 
+        /**
+         * Show element error
+         * @param {array} r
+         * @param {string} id
+         * @returns {boolean}
+         * @private
+         */
         _showElementError: function (r, id) {
             // r should be the errors for the specific element, down to its repeat group
             // id.
@@ -1234,8 +1258,9 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             }.bind(this));
         },
 
-        mockSubmit: function () {
-            var btn = this._getButton('Submit');
+        mockSubmit: function (btnName) {
+            btnName = typeof btnName !== 'undefined' ? btnName : 'Submit';
+            var btn = this._getButton(btnName);
             if (!btn) {
                 btn = new Element('button', {'name': 'Submit', 'type': 'submit'});
             }
@@ -1530,7 +1555,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 e.preventDefault();
                 if (!self.addingOrDeletingGroup) {
                     self.addingOrDeletingGroup = true;
-                    self.duplicateGroup(e);
+                    self.duplicateGroup(e, true);
                     self.addingOrDeletingGroup = false;
                 }
             }));
@@ -1587,6 +1612,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 }
 
                 var min = this.options.minRepeat[groupId].toInt();
+                var group = this.form.getElement('#group' + groupId);
 
                 /**
                  * $$$ hugh - added ability to override min count
@@ -1601,8 +1627,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     // Create mock event
                     deleteButton = this.form.getElement('#group' + groupId + ' .deleteGroup');
                     deleteEvent = typeOf(deleteButton) !== 'null' ? new Event.Mock(deleteButton, 'click') : false;
-                    var group = this.form.getElement('#group' + groupId),
-                        subGroup = group.getElement('.fabrikSubGroup');
+                    var subGroup = group.getElement('.fabrikSubGroup');
                     // Remove only group
                     this.deleteGroup(deleteEvent, group, subGroup);
 
@@ -1615,10 +1640,12 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
 
                         // Duplicate group
                         for (i = repeat_rows; i < min; i++) {
-                            this.duplicateGroup(add_e);
+                            this.duplicateGroup(add_e, false);
                         }
                     }
                 }
+
+                this.setRepeatGroupIntro(group, groupId);
             }.bind(this));
         },
 
@@ -1793,9 +1820,11 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
         /**
          * Duplicates the groups sub group and places it at the end of the group
          *
-         * @param   event  e  Click event
+         * @param   event  e       Click event
+         * @param   bool   scroll  Scroll to group if offscreen
          */
-        duplicateGroup: function (e) {
+        duplicateGroup: function (e, scroll) {
+            scroll = typeof scroll !== 'undefined' ? scroll : true;
             var subElementContainer, container;
             Fabrik.fireEvent('fabrik.form.group.duplicate', [this, e]);
             if (this.result === false) {
@@ -1980,16 +2009,25 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             o[i] = newElementControllers;
             this.addElements(o);
 
-            // Only scroll the window if the new element is not visible
-            var win_size = jQuery(window).height(),
-                win_scroll = document.id(window).getScroll().y,
-                obj = clone.getCoordinates();
-            // If the bottom of the new repeat goes below the bottom of the visible
-            // window,
-            // scroll up just enough to show it.
-            if (obj.bottom > (win_scroll + win_size)) {
-                var new_win_scroll = obj.bottom - win_size;
-                this.winScroller.start(0, new_win_scroll);
+	        /**
+             * Only scroll the window if the new element is not visible and 'scroll' arg true
+             * (so for example, we won't scroll if called from duplicateGroupsToMin)
+             */
+
+            if (scroll) {
+                var win_size = jQuery(window).height(),
+                    win_scroll = document.id(window).getScroll().y,
+                    obj = clone.getCoordinates();
+
+	            /**
+                 * If the bottom of the new repeat goes below the bottom of the visible window,
+                 * scroll up just enough to show it.
+                 */
+
+                if (obj.bottom > (win_scroll + win_size)) {
+                    var new_win_scroll = obj.bottom - win_size;
+                    this.winScroller.start(0, new_win_scroll);
+                }
             }
 
             var myFx = new Fx.Tween(clone, {
@@ -1998,10 +2036,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             }).set(0);
 
             clone.fade(1);
-            // $$$ hugh - added groupid (i) and repeatCounter (c) as args
-            // note I commented out the increment of c a few lines above//duplicate
             Fabrik.fireEvent('fabrik.form.group.duplicate.end', [this, e, i, c]);
-
             this.setRepeatGroupIntro(group, i);
             this.repeatGroupMarkers.set(i, this.repeatGroupMarkers.get(i) + 1);
         },
@@ -2155,7 +2190,43 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
         hideTips: function () {
           this.elements.each(function(element) {
               element.removeTipMsg();
-          })
+          });
+        },
+
+        /**
+         * If the form is in a modal and the modal scrolls we should update the
+         * elements tips to keep the tip attached to the element.
+         */
+        scrollTips: function () {
+            var self = this, top, left,
+                match = jQuery(self.form).closest('.fabrikWindow'),
+                modal = match.find('.itemContent'),
+                currentPos;
+
+            var pos = function () {
+                var origPos = match.data('origPosition');
+                if (origPos === undefined) {
+                    origPos = match.position();
+                    match.data('origPosition', origPos);
+                }
+
+                currentPos = match.position();
+                top = origPos.top - currentPos.top + modal.scrollTop();
+                left = origPos.left - currentPos.left + modal.scrollLeft();
+                self.elements.each(function(element) {
+                    element.moveTip(top, left);
+                });
+            };
+
+            modal.on('scroll', function () {
+                pos();
+            });
+
+            Fabrik.on('fabrik.window.resized', function (window) {
+                if (match.length > 0 && window === match[0]) {
+                    pos();
+                }
+            });
         },
 
         stopEnterSubmitting: function () {

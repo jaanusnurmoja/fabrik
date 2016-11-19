@@ -2,7 +2,7 @@
 /**
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.email
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -11,6 +11,7 @@ defined('_JEXEC') or die('Restricted access');
 
 // Require the abstract plugin class
 require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
+require_once COM_FABRIK_FRONTEND . '/helpers/pdf.php';
 
 /**
  * Send email upon form submission
@@ -114,7 +115,7 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 
 			if ($runContentPlugins === true)
 			{
-				FabrikHelperHTML::runContentPlugins($messageTemplate);
+				FabrikHelperHTML::runContentPlugins($messageTemplate, false);
 			}
 
 			$messageTemplate = str_replace('{content}', $content, $messageTemplate);
@@ -127,7 +128,7 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 
 			if ($runContentPlugins === true)
 			{
-				FabrikHelperHTML::runContentPlugins($messageText);
+				FabrikHelperHTML::runContentPlugins($messageText, false);
 			}
 
 			$messageText = str_replace('{content}', $content, $messageText);
@@ -170,6 +171,7 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 		$message = str_replace('{fabrik_viewlink}', $viewLink, $message);
 		$message = str_replace('{fabrik_editurl}', $editURL, $message);
 		$message = str_replace('{fabrik_viewurl}', $viewURL, $message);
+		FabrikPDFHelper::fullPaths($message);
 
 
 		// $$$ rob if email_to is not a valid email address check the raw value to see if that is
@@ -287,6 +289,16 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 			$userIds = array();
 		}
 
+		$customHeadersEval = $params->get('email_headers_eval', '');
+		$customHeaders = array();
+
+		if (!empty($customHeadersEval))
+		{
+			$customHeadersEval = $w->parseMessageForPlaceholder($customHeadersEval, $this->data, false);
+			$customHeaders = @eval($customHeadersEval);
+			FabrikWorker::logEval($customHeadersEval, 'Caught exception on eval in email custom headers : %s');
+		}
+
 		// Send email
 		foreach ($emailTo as $email)
 		{
@@ -330,10 +342,24 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 					}
 				}
 
+				JDEBUG ? $profiler->mark("email: sendMail start: " . $email) : null;
+
 				$res = FabrikWorker::sendMail(
-					$emailFrom, $emailFromName, $email, $thisSubject, $thisMessage,
-					$htmlEmail, $cc, $bcc, $thisAttachments, $returnPath, $returnPathName
+					$emailFrom,
+					$emailFromName,
+					$email,
+					$thisSubject,
+					$thisMessage,
+					$htmlEmail,
+					$cc,
+					$bcc,
+					$thisAttachments,
+					$returnPath,
+					$returnPathName,
+					$customHeaders
 				);
+
+				JDEBUG ? $profiler->mark("email: sendMail end: " . $email) : null;
 
 				/*
 				 * $$$ hugh - added some error reporting, but not sure if 'invalid address' is the appropriate message,
@@ -364,6 +390,8 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 		}
 
 		$this->updateRow();
+
+		JDEBUG ? $profiler->mark("email: end: onAfterProcess") : null;
 
 		return true;
 	}

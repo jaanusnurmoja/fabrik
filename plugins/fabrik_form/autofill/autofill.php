@@ -4,7 +4,7 @@
  *
  * @package     Joomla.Plugin
  * @subpackage  Fabrik.form.autofill
- * @copyright   Copyright (C) 2005-2015 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -19,7 +19,7 @@ defined('_JEXEC') or die('Restricted access');
  * @package     Joomla
  * @subpackage  Fabrik
  * @author      Rob Clayburn
- * @copyright   Copyright (C) 2005-2013 fabrikar.com - All rights reserved.
+ * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -88,7 +88,7 @@ class PlgFabrik_FormAutofill extends PlgFabrik_Form
 		}
 
 		$this->formJavascriptClass($params, $formModel);
-		$formModel->formPluginJS['Autofill'] = 'var autofill = new Autofill(' . $opts . ');';
+		$formModel->formPluginJS['Autofill' . $this->renderOrder] = 'var autofill = new Autofill(' . $opts . ');';
 	}
 
 	/**
