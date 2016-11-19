@@ -88,6 +88,11 @@ class FabrikControllerForm extends JControllerLegacy
 		$viewName = $input->get('view', 'form');
 		$modelName = $viewName;
 
+		if ($input->get('clearsession', '') === '1')
+		{
+			$this->clearSession();
+		}
+
 		if ($viewName == 'emailform')
 		{
 			$modelName = 'form';
@@ -226,12 +231,17 @@ class FabrikControllerForm extends JControllerLegacy
 			else
 			{
 				/*
-				 * Need to set up form data here so we can pass it to canEdit()
+				 * Need to set up form data here so we can pass it to canEdit(), remembering to
+				 * add encrypted vars, so things like user elements which have ACLs on them get
+				 * included in data for canUserDo() checks.  Nay also need to do copyToFromRaw(),
+				 * but leave that until we find a need for it.
 				 *
 				 * Note that canEdit() expects form data as an object, and $formData is an array,
 				 * but the actual canUserDo() helper func it calls with the data will accept either.
 				 */
 				$formData = $model->setFormData();
+				$model->addEncrytedVarsToArray($formData);
+
 				if (!$model->isNewRecord() && $listModel->canEdit($formData))
 				{
 					$aclOK = true;
@@ -567,17 +577,36 @@ class FabrikControllerForm extends JControllerLegacy
 	 * Clear down any temp db records or cookies
 	 * containing partially filled in form data
 	 *
+	 * This is the controller task, which then does display as well
+	 *
 	 * @return  null
 	 */
 	public function removeSession()
 	{
+		$this->clearSession();
+		$this->display();
+	}
+
+	/**
+	 * Clear down any temp db records or cookies
+	 * containing partially filled in form data
+	 *
+	 * @return  null
+	 */
+	public function clearSession()
+	{
 		$app = JFactory::getApplication();
 		$input = $app->input;
+
+		// clean the cache, just for good measure
+		$cache = JFactory::getCache($input->get('option'));
+		$cache->clean();
+
+		// remove the formsession row
 		$sessionModel = $this->getModel('formsession', 'FabrikFEModel');
 		$sessionModel->setFormId($input->getInt('formid', 0));
 		$sessionModel->setRowId($input->get('rowid', '', 'string'));
 		$sessionModel->remove();
-		$this->display();
 	}
 
 	/**
