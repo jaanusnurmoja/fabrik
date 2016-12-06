@@ -4074,7 +4074,10 @@ class FabrikFEModelForm extends FabModelForm
 			$text = preg_replace("/{details:\s*.*?}/is", '', $text);
 		}
 
-		$w = new FabrikWorker;
+		$this->data['fabrik_view_url'] = $this->getListModel()->viewDetailsLink($this->data);
+		$this->data['fabrik_edit_url'] = $this->getListModel()->editLink($this->data);
+
+		$w    = new FabrikWorker;
 		$text = $w->parseMessageForPlaceHolder($text, $this->data, true);
 
 		// Jaanus: to remove content plugin code from intro and/or outro when plugins are not processed
@@ -4105,7 +4108,7 @@ class FabrikFEModelForm extends FabModelForm
 		array_shift($m);
 		$m = implode(":", $m);
 		$m = FabrikString::rtrimword($m, "}");
-		$m = preg_replace('/\[(\S+)\]/', '{${1}}', $m);
+		$m = preg_replace('/\[(\S+?)\]/', '{${1}}', $m);
 		return $m;
 	}
 

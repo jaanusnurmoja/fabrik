@@ -1081,7 +1081,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				$filterWhere         = str_replace($this->orderBy, '', $filterWhere);
 				$filterWhere         = str_replace($matches[0], '', $filterWhere);
 			}
-			$where .= JString::stristr($where, 'WHERE') ? ' AND ' . $filterWhere : ' WHERE ' . $filterWhere;
+			//$where .= JString::stristr($where, 'WHERE') ? ' AND ' . $filterWhere : ' WHERE ' . $filterWhere;
+			$where .= !empty($where) ? ' AND ' . $filterWhere : ' WHERE ' . $filterWhere;
 		}
 
 		if ($where == '')
@@ -2162,7 +2163,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 *
 	 * @return  string    filter html
 	 */
-	public function getFilter($counter = 0, $normal = true)
+	public function getFilter($counter = 0, $normal = true, $container = '')
 	{
 		$params                    = $this->getParams();
 		$element                   = $this->getElement();
@@ -2218,7 +2219,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				break;
 			case 'auto-complete':
 				$defaultLabel = $this->getLabelForValue($default);
-				$autoComplete = $this->autoCompleteFilter($default, $v, $defaultLabel, $normal);
+				$autoComplete = $this->autoCompleteFilter($default, $v, $defaultLabel, $normal, $container);
 				$return       = array_merge($return, $autoComplete);
 				break;
 		}

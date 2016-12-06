@@ -48,8 +48,9 @@ foreach ($this->headings as $key => $heading) :
 	<tr class="fabrikFilterContainer">
 		<?php foreach ($this->headings as $key => $heading) :
 			$h = $this->headingClass[$key];
+			$style = empty($h['style']) ? '' : 'style="' . $h['style'] . '"';
 			?>
-			<th class="<?php echo $h['class'] ?>">
+			<th class="<?php echo $h['class'] ?>" <?php echo $style ?>>
 				<?php
 				if (array_key_exists($key, $this->filters)) :
 

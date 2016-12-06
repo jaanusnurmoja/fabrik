@@ -506,7 +506,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                             if (res.count < res.total) {
                                 self.triggerCSVExport(res.count);
                             } else {
-                                var finalurl = 'index.php?option=com_fabrik&view=list&format=csv&listid=' + self.id +
+                                var finalurl = Fabrik.liveSite + 'index.php?option=com_fabrik&view=list&format=csv&listid=' + self.id +
                                     '&start=' + res.count + '&Itemid=' + self.options.Itemid;
                                 var msg = '<div class="alert alert-success" style="padding:10px;margin-bottom:3px"><h3>' + Joomla.JText._('COM_FABRIK_CSV_COMPLETE');
                                 msg += '</h3><p><a class="btn btn-success" href="' + finalurl + '">' +
@@ -927,7 +927,11 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     if (this.form['limitstart' + this.id]) {
                         form.find('#limitstart' + this.id).val(0);
                     }
-                } else {
+                }
+                else if (task === 'list.view') {
+                    Fabrik['filter_listform_' + this.options.listRef].onSubmit();
+                }
+                else {
                     if (task !== '') {
                         this.form.task.value = task;
                     }
@@ -945,6 +949,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     if (task === 'list.doPlugin') {
                         data += '&setListRefFromRequest=1';
                         data += '&listref=' + this.options.listRef;
+                        data += '&Itemid=' + this.options.Itemid;
                     }
 
                     if (task === 'list.filter' && this.advancedSearch !== false) {
@@ -1100,13 +1105,17 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                         'task'    : 'list.view',
                         'format'  : 'raw',
                         'listid'  : this.id,
-                        'group_by': this.options.groupedBy,
                         'listref' : this.options.listRef
                     };
                 data['limit' + this.id] = this.options.limitLength;
 
                 if (extraData) {
                     Object.append(data, extraData);
+                }
+
+                if (this.options.groupedBy !== '')
+                {
+                    data['grouped_by'] = this.options.groupedBy;
                 }
 
                 new Request({
@@ -1230,6 +1239,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                 // testing with $H back in again for grouped by data? Yeah works for
                 // grouped data!!
                 var gdata = this.options.isGrouped || this.options.groupedBy !== '' ? $H(data.data) : data.data;
+                //var gdata = data.data;
                 var gcounter = 0;
                 gdata.each(function (groupData, groupKey) {
                     tbody = self.options.isGrouped ? self.list.getElements('.fabrik_groupdata')[gcounter] : self.tbody;
