@@ -291,6 +291,30 @@ class PlgFabrik_Element extends FabrikPlugin
 	}
 
 	/**
+	 * Weed out any non-serializable properties.  We only ever get serialized by J!'s cache handler,
+	 * to create the cache ID, so we don't really care about __wake() or not saving all state.  We just
+	 * want to avoid the dreaded "serialization of a closure is not allowed", and provide enough propeties
+	 * to guarrantee a unique hash for the cache ID.
+	 */
+
+	public function __sleep() {
+		$serializable = array();
+
+		foreach ($this as $paramName => $paramValue) {
+
+			//if (!is_string($paramValue) && !is_array($paramValue) && is_callable($paramValue))
+			if (!is_numeric($paramValue) && !is_string($paramValue) && !is_array($paramValue))
+			{
+				continue;
+			}
+
+			$serializable[] = $paramName;
+		}
+
+		return $serializable;
+	}
+
+	/**
 	 * Method to set the element id
 	 *
 	 * @param   int $id element ID number
@@ -1647,7 +1671,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		if ($displayData->rollOver)
 		{
-			$displayData->icons .= FabrikHelperHTML::image('question-sign.png', 'form', $tmpl, $iconOpts) . ' ';
+			$displayData->icons .= FabrikHelperHTML::image('question-sign', 'form', $tmpl, $iconOpts) . ' ';
 		}
 
 		if ($displayData->isEditable)
@@ -1804,7 +1828,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		if ($this->isTipped($mode))
 		{
-			$lines[] = '<li>' . FabrikHelperHTML::image('question-sign.png', 'form', $tmpl) . ' ' . $this->getTipText($data) . '</li>';
+			$lines[] = '<li>' . FabrikHelperHTML::image('question-sign', 'form', $tmpl) . ' ' . $this->getTipText($data) . '</li>';
 		}
 
 		if ($mode === 'form')
@@ -2202,7 +2226,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		if ($tip !== '')
 		{
-			$tip = FabrikHelperHTML::image('question-sign.png', 'form', $tmpl) . ' ' . $tip;
+			$tip = FabrikHelperHTML::image('question-sign', 'form', $tmpl) . ' ' . $tip;
 		}
 
 		$element->labels  = $groupModel->labelPosition('form');
@@ -6132,7 +6156,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$layout                          = new JLayoutFile('fabrik-element-addoptions', $basePath, array('debug' => false, 'component' => 'com_fabrik', 'client' => 'site'));
 		$displayData                     = new stdClass;
 		$displayData->id                 = $this->getHTMLId($repeatCounter);
-		$displayData->add_image          = FabrikHelperHTML::image('plus.png', 'form', @$this->tmpl, array('alt' => FText::_('COM_FABRIK_ADD')));
+		$displayData->add_image          = FabrikHelperHTML::image('plus', 'form', @$this->tmpl, array('alt' => FText::_('COM_FABRIK_ADD')));
 		$displayData->allowadd_onlylabel = $params->get('allowadd-onlylabel');
 		$displayData->savenewadditions   = $params->get('savenewadditions');
 		$displayData->onlylabel          = $onlylabel;
@@ -7250,18 +7274,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 					if ($c !== false)
 					{
-						$c = preg_replace('/[^A-Z|a-z|0-9]/', '-', $c);
-						$c = FabrikString::ltrim($c, '-');
-						$c = FabrikString::rtrim($c, '-');
-
-						// $$$ rob 24/02/2011 can't have numeric class names so prefix with element name
-						// $$$ hugh can't have class names which start with a number, so need preg_match, not is_numeric()
-						if (preg_match('#^\d#', $c))
-						{
-							$c = $this->getElement()->name . $c;
-						}
-
-						$data[$groupKey][$i]->class .= ' ' . $c;
+						$data[$groupKey][$i]->class .= ' ' . FabrikString::getRowClass($c, $this->element->name);
 					}
 				}
 			}
@@ -7668,6 +7681,12 @@ class PlgFabrik_Element extends FabrikPlugin
 		// Custom per element layout...
 		$layout->addIncludePaths(JPATH_THEMES . '/' . $this->app->getTemplate() . '/html/layouts/com_fabrik/element/' . $this->getFullName(true, false));
 
+		// Custom per template layout
+		$view = $this->getFormModel()->isEditable() ? 'form' : 'details';
+		$layout->addIncludePaths(COM_FABRIK_FRONTEND . '/views/'. $view . '/tmpl/' . $this->getFormModel()->getTmpl() . '/layouts/element/');
+		$layout->addIncludePaths(COM_FABRIK_FRONTEND . '/views/'. $view . '/tmpl/' . $this->getFormModel()->getTmpl() . '/layouts/element/' . $this->getFullName(true, false));
+		$layout->addIncludePaths(COM_FABRIK_FRONTEND . '/views/list/tmpl/' . $this->getFormModel()->getListModel()->getTmpl() . '/layouts/element/');
+		$layout->addIncludePaths(COM_FABRIK_FRONTEND . '/views/list/tmpl/' . $this->getFormModel()->getListModel()->getTmpl() . '/layouts/element/' . $this->getFullName(true, false));
 		return $layout;
 	}
 

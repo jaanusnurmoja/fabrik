@@ -541,6 +541,7 @@ class FabrikViewListBase extends FabrikView
 		}
 
 		$this->addLabel = $model->addLabel();
+		$this->addIcon  = $model->addIcon();
 		$this->showRSS  = $params->get('rss', 0) == 0 ? 0 : 1;
 
 		if ($this->showRSS)
