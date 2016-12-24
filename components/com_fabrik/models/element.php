@@ -2387,7 +2387,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			$v = $this->getROElement($data, $repeatCounter);
 			//$v = $v == '' ? '&nbsp;' : $v;
 
-			return '<div id="' . $htmlId . '">' . $v . '</div>';
+			return '<div class="fabrikElementReadOnly" id="' . $htmlId . '">' . $v . '</div>';
 		}
 	}
 
@@ -2968,14 +2968,16 @@ class PlgFabrik_Element extends FabrikPlugin
 						}
 						elseif ($jsAct->js_e_condition == 'CONTAINS')
 						{
-							$js = "if (Array.from(this.get('value')).contains('$jsAct->js_e_value')";
-							$js .= " || this.get('value').contains('$jsAct->js_e_value')";
+							$js = "if (this.get('value') !== null ";
+							$js .= " && (Array.from(this.get('value')).contains('$jsAct->js_e_value')";
+							$js .= " || this.get('value').contains('$jsAct->js_e_value'))";
 							$js .= ") {";
 						}
 						elseif ($jsAct->js_e_condition == '!CONTAINS')
 						{
-							$js = "if (!Array.from(this.get('value')).contains('$jsAct->js_e_value')";
-							$js .= " || !this.get('value').contains('$jsAct->js_e_value')";
+							$js = "if (this.get('value') === null ";
+							$js .= " !! (!Array.from(this.get('value')).contains('$jsAct->js_e_value')";
+							$js .= " || !this.get('value').contains('$jsAct->js_e_value'))";
 							$js .= ") {";
 						}
 						// $$$ hugh if we always quote the js_e_value, numeric comparison doesn't work, as '100' < '3'.
