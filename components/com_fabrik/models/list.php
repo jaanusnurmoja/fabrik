@@ -2895,7 +2895,7 @@ class FabrikFEModelList extends JModelForm
 
 			$orderDirs = explode(',', $input->getString('order_dir', $input->getString('orderdir', '')));
 
-			if ($orderDirs[0] == '')
+			if ($orderDirs[0] == '' || $orderDirs[0] == '-')
 			{
 				$orderDirs = json_decode($table->order_dir, true);
 			}
@@ -3079,6 +3079,12 @@ class FabrikFEModelList extends JModelForm
 		{
 			$context = 'com_' . $package . '.list' . $id . '.order.' . $postOrderBy;
 			$this->session->set($context, $postOrderDir);
+			// if the order is being cleared, remove the query string so list defaults get applied
+			if ($postOrderDir === '-')
+			{
+				$input->set('orderby', '');
+				$input->set('orderdir', '');
+			}
 		}
 	}
 
@@ -6602,12 +6608,24 @@ class FabrikFEModelList extends JModelForm
 				if (is_object($elModel))
 				{
 					$name = $elModel->getFullName(true, false);
-					$pName = $elModel->isJoin() ? $db->qn($elModel->getJoinModel()->getJoin()->table_join . '___params') : '';
+					//$pName = $elModel->isJoin() ? $db->qn($elModel->getJoinModel()->getJoin()->table_join . '___params') : '';
+
 
 					foreach ($asFields as $f)
 					{
-						if ((strstr($f, $db->qn($name)) || strstr($f, $db->qn($name . '_raw'))
-							|| ($elModel->isJoin() && strstr($f, $pName))))
+						if (
+							(
+								strstr($f, $db->qn($name))
+								|| strstr($f, $db->qn($name . '_raw'))
+							)
+							||
+							(
+								$elModel->isJoin() && (
+									strstr($f, $db->qn($name . '___params'))
+									|| strstr($f, $db->qn($name . '_id'))
+								)
+							)
+						)
 						{
 							$newFields[] = $f;
 						}
