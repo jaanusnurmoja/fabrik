@@ -288,6 +288,8 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 			$formModel->updateFormData($chargeEmailField, $tokenEmail, true, true);
 		}
 
+		$this->updateCustomerCustom($userId);
+
 		$opts = new stdClass;
 		$opts->listid = $listModel->getId();
 		$opts->formid = $formModel->getId();
@@ -370,6 +372,10 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 		$opts->allowRememberMe = false;
 		$opts->zipCode = $params->get('stripe_zipcode_check', '1') === '1';
 
+		$currencyCode       = $params->get('stripe_currencycode', 'USD');
+		$currencyCode       = $w->parseMessageForPlaceHolder($currencyCode, $this->data);
+		$opts->currencyCode = $currencyCode;
+
 		$amount = $params->get('stripe_cost');
 		$amount = $w->parseMessageForPlaceHolder($amount, $this->data);
 
@@ -389,16 +395,35 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 			}
 		}
 
-		if (trim($amount) == '')
+		if ($params->get('stripe_cost_eval_to_element', '0') === '1')
 		{
-			// Priority to raw data.
 			$amountKey = FabrikString::safeColNameToArrayKey($params->get('stripe_cost_element'));
-			$amount    = FArrayHelper::getValue($this->data, $amountKey);
-			$amount    = FArrayHelper::getValue($this->data, $amountKey . '_raw', $amount);
-
-			if (is_array($amount))
+			if (!empty($amountKey))
 			{
-				$amount = array_shift($amount);
+				if (class_exists('NumberFormatter'))
+				{
+					$formatter = new NumberFormatter(JFactory::getLanguage()->getTag(), NumberFormatter::CURRENCY);
+					$formModel->data[$amountKey] = $formatter->formatCurrency($amount, $currencyCode);
+				}
+				else
+				{
+					$formModel->data[$amountKey] = $amount;
+				}
+			}
+		}
+		else
+		{
+			if (trim($amount) == '')
+			{
+				// Priority to raw data.
+				$amountKey = FabrikString::safeColNameToArrayKey($params->get('stripe_cost_element'));
+				$amount    = FArrayHelper::getValue($this->data, $amountKey);
+				$amount    = FArrayHelper::getValue($this->data, $amountKey . '_raw', $amount);
+
+				if (is_array($amount))
+				{
+					$amount = array_shift($amount);
+				}
 			}
 		}
 
@@ -415,29 +440,28 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 			$item = @eval($item);
 		}
 
-		$itemRaw = $item;
-
-		if (trim($item) == '')
+		if ($params->get('stripe_item_eval_to_element', '0') === '1')
 		{
-			$itemRaw = FArrayHelper::getValue($this->data, FabrikString::safeColNameToArrayKey($params->get('stripe_item_element') . '_raw'));
-			$item    = $this->data[FabrikString::safeColNameToArrayKey($params->get('stripe_item_element'))];
-
-			if (is_array($item))
+			$itemKey = FabrikString::safeColNameToArrayKey($params->get('stripe_item_element'));
+			if (!empty($itemKey))
 			{
-				$item = array_shift($item);
+				$formModel->data[$itemKey] = $item;
 			}
-
-			if (is_array($itemRaw))
+		}
+		else
+		{
+			if (trim($item) == '')
 			{
-				$itemRaw = array_shift($itemRaw);
+				$item    = $this->data[FabrikString::safeColNameToArrayKey($params->get('stripe_item_element'))];
+
+				if (is_array($item))
+				{
+					$item = array_shift($item);
+				}
 			}
 		}
 
 		$opts->item = $item;
-
-		$currencyCode       = $params->get('stripe_currencycode', 'USD');
-		$currencyCode       = $w->parseMessageForPlaceHolder($currencyCode, $this->data);
-		$opts->currencyCode = $currencyCode;
 
 		$opts->billingAddress = $params->get('stripe_collect_billing_address', '0') === '1';
 
@@ -529,6 +553,8 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 			$layoutData->amount = $amount;
 			$layoutData->currencyCode = $currencyCode;
 			$layoutData->langTag = JFactory::getLanguage()->getTag();
+			$layoutData->item = $item;
+			$layoutData->bottomText = FText::_($params->get('stripe_charge_bottom_text_existing', 'PLG_FORM_STRIPE_CHARGE_BOTTOM_TEXT_EXISTING'));
 			$this->html = $layout->render($layoutData);
 		}
 		else
@@ -539,6 +565,9 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 			$layoutData->amount = $amount;
 			$layoutData->currencyCode = $currencyCode;
 			$layoutData->langTag = JFactory::getLanguage()->getTag();
+			$layoutData->bottomText = FText::_($params->get('stripe_charge_bottom_text_new', 'PLG_FORM_STRIPE_CHARGE_BOTTOM_TEXT_NEW'));
+			$layoutData->bottomText = $w->parseMessageForPlaceHolder($layoutData->bottomText, $this->data);
+			$layoutData->item = $item;
 			$this->html = $layout->render($layoutData);
 			FabrikHelperHTML::script('https://checkout.stripe.com/checkout.js');
 		}
@@ -641,6 +670,32 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 		$cDb->setQuery($cQuery);
 
 		return $cDb->loadResult();
+	}
+
+	private function updateCustomerCustom($userId)
+	{
+		$params       = $this->getParams();
+		$cDb          = FabrikWorker::getDbo(false, $params->get('stripe_customers_connection'));
+		$cQuery       = $cDb->getQuery(true);
+		$cUserIdField = FabrikString::shortColName($params->get('stripe_customers_userid'));
+		$customField  = FabrikString::shortColName($params->get('stripe_customers_custom_field'));
+		$customValue  = $params->get('stripe_customers_custom_value', '');
+
+		if (empty($cUserIdField) || empty($customField) || empty($customValue))
+		{
+			return;
+		}
+
+		$w           = new FabrikWorker;
+		$customValue = $w->parseMessageForPlaceHolder($customValue, $this->data);
+
+		$cQuery
+			->clear()
+			->update($cDb->quoteName($this->getCustomerTableName()))
+			->set($cDb->quoteName($customField) . ' = ' . $cDb->quote($customValue))
+			->where($cDb->quoteName($cUserIdField) . ' = ' . $cDb->quote($userId));
+		$cDb->setQuery($cQuery);
+		$cDb->execute();
 	}
 
 	private function updateCustomerId($userId, $customerId, $opts)
