@@ -176,15 +176,20 @@ class Com_FabrikInstallerScript
 		if (!JFolder::exists(JPATH_ROOT . '/' . $dest))
 		{
 			JFolder::create(JPATH_ROOT . '/' . $dest);
+
+			$moveRes = JFolder::copy($componentFrontend . '/fabrik', $dest, JPATH_SITE, true, false);
+
+			if ($moveRes !== true)
+			{
+				echo "<p style=\"color:red\">failed to moved " . $componentFrontend . '/fabrik to ' . $dest . '</p>';
+
+				return false;
+			}
 		}
 
-		$moveRes = JFolder::copy($componentFrontend . '/fabrik', $dest, JPATH_SITE, true, false);
-
-		if ($moveRes !== true)
+		if (JFile::exists(JPATH_ROOT . '/administrator/components/com_fabrik/header.php'))
 		{
-			echo "<p style=\"color:red\">failed to moved " . $componentFrontend . '/fabrik to ' . $dest . '</p>';
-
-			return false;
+			JFile::delete(JPATH_ROOT . '/administrator/components/com_fabrik/header.php');
 		}
 
 		return true;
