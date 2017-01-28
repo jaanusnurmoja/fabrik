@@ -61,7 +61,11 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
 				});
 
 				Fabrik.addEvent('fabrik.form.submit.start', function (form, event, btn) {
-					if (typeof Fabrik.FabrikStripeForm === 'undefined' || Fabrik.FabrikStripeFormSubmitting !== true) {
+					if (
+						typeof Fabrik.FabrikStripeForm === 'undefined' ||
+						Fabrik.FabrikStripeFormSubmitting !== true ||
+						jQuery('input[name=stripe_token_id]').length === 0
+					) {
 						Fabrik.FabrikStripeForm = form;
 						this.handler.open({
 							name           : this.options.name,
@@ -106,6 +110,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
 								'value': JSON.encode(opts),
 								'type' : 'hidden'
 							}));
+							jQuery('.fabrikStripeLast4').text(Joomla.JText._('PLG_FORM_STRIPE_CUSTOMERS_UPDATE_CC_UPDATED'));
 						}
 					});
 					changeBtn.addEvent('click', function (e) {
