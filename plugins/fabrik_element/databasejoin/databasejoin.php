@@ -3673,7 +3673,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$fullElName = $this->_db->qn($this->getFullName(true, false) . '_id');
 		$fullElName = $this->getFullName(true, false) . '_id';
 		$elementName = $this->getParams()->get('repeat_element', $this->element->name);
-		$str .= ", (SELECT GROUP_CONCAT(" . $elementName . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE " . $joinTable
+		$str .= " (SELECT GROUP_CONCAT(" . $elementName . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE " . $joinTable
 			. "." . $parentID . " = " . $parentKey . ") AS $fullElName";
 
 		return $str;
