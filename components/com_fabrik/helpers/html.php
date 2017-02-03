@@ -2136,7 +2136,9 @@ EOD;
 			$properties = array('alt' => $properties);
 		}
 
-		$forceImage = FArrayHelper::getValue($opts, 'forceImage', false);
+		// if there's a file of this name in our paths, or forceImage is set, don't use icon, use image
+		$src = self::getImagePath($file, $type, $tmpl);
+		$forceImage = FArrayHelper::getValue($opts, 'forceImage', false) || !empty($src);
 
 		if (FabrikWorker::j3() && $forceImage !== true)
 		{
@@ -2158,7 +2160,6 @@ EOD;
 			}
 		}
 
-		$src = self::getImagePath($file, $type, $tmpl);
 		$src = str_replace(COM_FABRIK_BASE, COM_FABRIK_LIVESITE, $src);
 		$src = str_replace("\\", "/", $src);
 
@@ -2530,9 +2531,23 @@ EOD;
 		$root = isset($rootUrl) ? $rootUrl : FArrayHelper::getValue($bits, 0, '', 'string');
 		$bits = FArrayHelper::getValue($bits, 1, '', 'string');
 		$bits = explode("&", $bits);
+		$rootBits = array();
+
+		if (isset($rootUrl))
+		{
+			$rootBits = explode('?', $rootUrl);
+			$rootBits = FArrayHelper::getValue($rootBits, 1, '', 'string');
+			$rootBits = explode("&", $rootBits);
+		}
 
 		for ($b = count($bits) - 1; $b >= 0; $b--)
 		{
+			if (in_array($bits[$b], $rootBits))
+			{
+				unset($bits[$b]);
+				continue;
+			}
+
 			$parts = explode("=", $bits[$b]);
 
 			if (count($parts) > 1)
@@ -2556,7 +2571,7 @@ EOD;
 			}
 		}
 
-		$url = $root . '?' . implode('&', $bits);
+		$url = empty($bits) ? $root : $root . FabrikString::qsSepChar($root) . implode('&', $bits);
 
 		return $url;
 	}
@@ -2659,15 +2674,16 @@ EOD;
 	/**
 	 * Make an <a> tag
 	 *
-	 * @param   string $href URL
-	 * @param   string $lbl  Link text
-	 * @param   array  $opts Link properties key = value
+	 * @param   string $href      URL
+	 * @param   string $lbl       Link text
+	 * @param   array  $opts      Link properties key = value
+	 * @param   bool   $normalize if true, tweak scheme to match J! URI
 	 *
 	 * @since  3.1
 	 *
 	 * @return string  <a> tag or empty string if not $href
 	 */
-	public static function a($href, $lbl = '', $opts = array())
+	public static function a($href, $lbl = '', $opts = array(), $normalize = false)
 	{
 		if (empty($href) || JString::strtolower($href) == 'http://' || JString::strtolower($href) == 'https://')
 		{
@@ -2680,6 +2696,15 @@ EOD;
 			jimport('joomla.mail.helper');
 
 			return JHTML::_('email.cloak', $href);
+		}
+
+		if ($normalize)
+		{
+			$parsedUrl = parse_url(JUri::root());
+			if ($parsedUrl['scheme'] === 'https')
+			{
+				$href = str_ireplace('http://', 'https://', $href);
+			}
 		}
 
 		if (empty($lbl))

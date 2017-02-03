@@ -1479,6 +1479,7 @@ class FabrikFEModelList extends JModelForm
 					$displayData->rowId = $rowId;
 					$displayData->isAjax = $isAjax;
 					$displayData->isCustom = $this->getCustomLink('url', 'edit') !== '';
+					$displayData->list_edit_link_icon = $params->get('list_edit_link_icon', 'edit');
 					$layout = $this->getLayout('listactions.fabrik-edit-button');
 					$editLink = $layout->render($displayData);
 				}
@@ -1511,7 +1512,7 @@ class FabrikFEModelList extends JModelForm
 					$displayData->rowId = $rowId;
 					$displayData->isAjax = $isAjax;
 					$displayData->isCustom = $this->getCustomLink('url', 'details') !== '';
-					$displayData->list_detail_link_icon = $params->get('list_detail_link_icon', 'search.png');
+					$displayData->list_detail_link_icon = $params->get('list_detail_link_icon', 'search');
 					$layout = $this->getLayout('listactions.fabrik-view-button');
 					$viewLink = $layout->render($displayData);
 				}
@@ -1812,6 +1813,7 @@ class FabrikFEModelList extends JModelForm
 	 */
 	protected function deleteButton($tpl = '', $heading = false)
 	{
+		$params = $this->getParams();
 		$displayData = new stdClass;
 		$label = FText::_('COM_FABRIK_DELETE');
 		$buttonAction = $this->actionMethod();
@@ -1819,7 +1821,8 @@ class FabrikFEModelList extends JModelForm
 		$displayData->tpl = $this->getTmpl();
 		$displayData->text = $buttonAction == 'dropdown' ? $label : '<span class="hidden">' . $label . '</span>';
 		$displayData->btnClass = ($j3 && $buttonAction != 'dropdown') ? 'btn btn-default ' : '';
-		$displayData->iconClass = $j3 ? 'icon-remove' : 'icon-minus';
+		//$displayData->iconClass = $j3 ? 'icon-remove' : 'icon-minus';
+		$displayData->list_delete_icon = $params->get('list_delete_icon', 'delete');
 		$displayData->label = $j3 ? ' ' . FText::_('COM_FABRIK_DELETE') : '<span>' . FText::_('COM_FABRIK_DELETE') . '</span>';
 		$displayData->renderContext = $this->getRenderContext();
 
@@ -2041,6 +2044,7 @@ class FabrikFEModelList extends JModelForm
 		$displayData->popUp = $popUp;
 		$displayData->canAdd = $facetTable->canAdd();
 		$displayData->tmpl = $this->getTmpl();
+		$displayData->row = $row;
 		$layout = $this->getLayout('list.fabrik-related-data-add-button');
 
 		return $layout->render($displayData);
@@ -2135,6 +2139,7 @@ class FabrikFEModelList extends JModelForm
 		$displayData->popUp = $popUp;
 		$displayData->canView = $facetTable->canView();
 		$displayData->tmpl = $this->getTmpl();
+		$displayData->row = $row;
 		$layout = $this->getLayout('list.fabrik-related-data-view-button');
 
 		return $layout->render($displayData);
@@ -2890,7 +2895,7 @@ class FabrikFEModelList extends JModelForm
 
 			$orderDirs = explode(',', $input->getString('order_dir', $input->getString('orderdir', '')));
 
-			if ($orderDirs[0] == '')
+			if ($orderDirs[0] == '' || $orderDirs[0] == '-')
 			{
 				$orderDirs = json_decode($table->order_dir, true);
 			}
@@ -3074,6 +3079,12 @@ class FabrikFEModelList extends JModelForm
 		{
 			$context = 'com_' . $package . '.list' . $id . '.order.' . $postOrderBy;
 			$this->session->set($context, $postOrderDir);
+			// if the order is being cleared, remove the query string so list defaults get applied
+			if ($postOrderDir === '-')
+			{
+				$input->set('orderby', '');
+				$input->set('orderdir', '');
+			}
 		}
 	}
 
@@ -5255,7 +5266,55 @@ class FabrikFEModelList extends JModelForm
 			{
 				// Bool match
 				$this->filters['origvalue'][$i] = $value;
-				$this->filters['sqlCond'][$i] = $key . ' ' . $condition . ' (' . $db->q($value) . ' IN BOOLEAN MODE)';
+
+				/*
+				 * Meh.  This next bit is a nasty hack.  Turns out you can't mix different tables in a
+				 * MATCH(...) AGAINST (...), so we have to split it out into one MATCH per table, joined with OR.
+				 * This should really be done when building the search in doBooleanSearch() in the list filter model,
+				 * but the concept of a single filter with index 9999 is fairly baked-in, so creating multiple filters
+				 * for a single searchall will be problematic.  So lets hack it here, by seeing if the MATCH(..) list
+				 * uses more than one table, and if so massage it into multiple MATCH.
+				 */
+				$fieldsByTable = array();
+				$matches = array();
+				preg_match('/MATCH\((.*)\)/', $key, $matches);
+
+				// if we parsed out the fields, process them
+				if (count($matches) > 1)
+				{
+					$fields = explode(',', $matches[1]);
+
+					foreach ($fields as $field)
+					{
+						$parts = explode('.', $field);
+
+						if (!array_key_exists($parts[0], $fieldsByTable))
+						{
+							$fieldsByTable[$parts[0]] = array();
+						}
+
+						$fieldsByTable[$parts[0]][] = $parts[0] . '.' . $parts[1];
+					}
+				}
+
+				if (count($fieldsByTable) > 1)
+				{
+					// if we got more than one table, build the multiple MATCHes
+					$matchSql = array();
+
+					foreach ($fieldsByTable as $table => $fields)
+					{
+						$matchSql[] = 'MATCH(' . implode(',', $fields) . ')' . ' ' . $condition . ' (' . $db->q($value) . ' IN BOOLEAN MODE)';
+					}
+
+					$this->filters['sqlCond'][$i] = '(' . implode(' OR ', $matchSql) . ')';
+				}
+				else
+				{
+					// if only one table, or couldn't parse out the fields, stick with original behavior
+					$this->filters['sqlCond'][$i] = $key . ' ' . $condition . ' (' . $db->q($value) . ' IN BOOLEAN MODE)';
+				}
+
 				continue;
 			}
 
@@ -6367,7 +6426,11 @@ class FabrikFEModelList extends JModelForm
 				$displayData->searchOpts[] = JHTML::_('select.option', 'any', FText::_('COM_FABRIK_ANY_OF_THESE_TERMS'));
 				$displayData->searchOpts[] = JHTML::_('select.option', 'exact', FText::_('COM_FABRIK_EXACT_TERMS'));
 				$displayData->searchOpts[] = JHTML::_('select.option', 'none', FText::_('COM_FABRIK_NONE_OF_THESE_TERMS'));
-				$displayData->mode = $this->app->getUserStateFromRequest('com_' . $package . '.list' . $this->getRenderContext() . '.searchallmode', 'search-mode-advanced');
+				$displayData->mode = $this->app->getUserStateFromRequest(
+					'com_' . $package . '.list' . $this->getRenderContext() . '.searchallmode',
+					'search-mode-advanced',
+					$params->get('search-mode-advanced-default', 'all')
+				);
 
 				//$o->filter .= '&nbsp;'
 				//		. JHTML::_('select.genericList', $searchOpts, 'search-mode-advanced', "class='fabrik_filter'", 'value', 'text', $mode);
@@ -6423,7 +6486,7 @@ class FabrikFEModelList extends JModelForm
 						$o = new stdClass;
 						$o->name = $elementModel->getFullName(true, false);
 						$o->id = $elementModel->getHTMLId() . 'value';
-						$o->filter = $elementModel->getFilter($counter, true);
+						$o->filter = $elementModel->getFilter($counter, true, $container);
 						$fScript[] = $elementModel->filterJS(true, $container);
 						$o->required = $elementModel->getParams()->get('filter_required');
 						$o->label = $elementModel->getListHeading();
@@ -6545,12 +6608,24 @@ class FabrikFEModelList extends JModelForm
 				if (is_object($elModel))
 				{
 					$name = $elModel->getFullName(true, false);
-					$pName = $elModel->isJoin() ? $db->qn($elModel->getJoinModel()->getJoin()->table_join . '___params') : '';
+					//$pName = $elModel->isJoin() ? $db->qn($elModel->getJoinModel()->getJoin()->table_join . '___params') : '';
+
 
 					foreach ($asFields as $f)
 					{
-						if ((strstr($f, $db->qn($name)) || strstr($f, $db->qn($name . '_raw'))
-							|| ($elModel->isJoin() && strstr($f, $pName))))
+						if (
+							(
+								strstr($f, $db->qn($name))
+								|| strstr($f, $db->qn($name . '_raw'))
+							)
+							||
+							(
+								$elModel->isJoin() && (
+									strstr($f, $db->qn($name . '___params'))
+									|| strstr($f, $db->qn($name . '_id'))
+								)
+							)
+						)
 						{
 							$newFields[] = $f;
 						}
@@ -9404,7 +9479,14 @@ class FabrikFEModelList extends JModelForm
 			if ($format == true)
 			{
 				$row = $fabrikDb->loadObject();
-				$row = array($row);
+				if (is_null($row))
+				{
+					$row = array();
+				}
+				else
+				{
+					$row = array($row);
+				}
 				$this->formatData($row);
 				/* $$$ hugh - if table is grouped, formatData will have turned $row into an
 				 * assoc array, so can't assume 0 is first key.
@@ -9900,6 +9982,20 @@ class FabrikFEModelList extends JModelForm
 		$params = $this->getParams();
 
 		return FText::_($params->get('addlabel', FText::_('COM_FABRIK_ADD')));
+	}
+
+	/**
+	 * Get add button label
+	 *
+	 * @since   3.1rc1
+	 *
+	 * @return  string
+	 */
+	public function addIcon()
+	{
+		$params = $this->getParams();
+
+		return $params->get('list_add_icon', 'plus');
 	}
 
 	/**

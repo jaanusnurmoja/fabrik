@@ -75,9 +75,7 @@ class PlgFabrik_ElementYesno extends PlgFabrik_ElementRadiobutton
 		$displayData        = new stdClass;
 		$displayData->tmpl  = isset($this->tmpl) ? $this->tmpl : '';
 		$displayData->format = $this->app->input->get('format', '');;
-		$basePath           = JPATH_ROOT . '/plugins/fabrik_element/yesno/layouts';
-		$layout             = new FabrikLayoutFile('fabrik_element_yesno_list', $basePath);
-		$layout->addIncludePaths(JPATH_THEMES . '/' . $this->app->getTemplate() . '/html/layouts');
+		$layout = $this->getLayout('list');
 		$labelData = array();
 
 		foreach ($rawData as $d)
@@ -224,10 +222,7 @@ class PlgFabrik_ElementYesno extends PlgFabrik_ElementRadiobutton
 		$displayData->value = $value;
 		$displayData->tmpl = @$this->tmpl;
 		$displayData->format = $this->app->input->get('format', '');;
-		$basePath = JPATH_ROOT . '/plugins/fabrik_element/yesno/layouts';
-		$layout = new FabrikLayoutFile('fabrik_element_yesno_details', $basePath);
-		$layout->addIncludePaths(JPATH_THEMES . '/' . $this->app->getTemplate() . '/html/layouts');
-
+		$layout = $this->getLayout('details');
 		return $layout->render($displayData);
 	}
 
@@ -287,7 +282,7 @@ class PlgFabrik_ElementYesno extends PlgFabrik_ElementRadiobutton
 	 *
 	 * @return  string	Filter html
 	 */
-	public function getFilter($counter = 0, $normal = true)
+	public function getFilter($counter = 0, $normal = true, $container = '')
 	{
 		$listModel = $this->getlistModel();
 		$elName = $this->getFullName(true, false);
@@ -491,7 +486,10 @@ class PlgFabrik_ElementYesno extends PlgFabrik_ElementRadiobutton
 	 */
 	protected function dataAttributes()
 	{
-		return array('data-toggle="buttons"');
+		return array(
+			'data-toggle="buttons"',
+			'style="padding-top:0px!important"'
+		);
 	}
 
 }

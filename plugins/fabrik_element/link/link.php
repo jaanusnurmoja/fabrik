@@ -146,7 +146,9 @@ class PlgFabrik_ElementLink extends PlgFabrik_Element
 					$opts['title'] = strip_tags($w->parseMessageForPlaceHolder($title, $data));
 				}
 
-				return FabrikHelperHTML::a($href, $lbl, $opts);
+				$normalize = $params->get('link_normalize', '0') === '1';
+
+				return FabrikHelperHTML::a($href, $lbl, $opts, $normalize);
 			}
 			else
 			{
@@ -250,7 +252,9 @@ class PlgFabrik_ElementLink extends PlgFabrik_Element
 				$opts['title'] = strip_tags($w->parseMessageForPlaceHolder($title, $data));
 			}
 
-			return FabrikHelperHTML::a($href, $lbl, $opts);
+			$normalize = $params->get('link_normalize', '0') === '1';
+
+			return FabrikHelperHTML::a($href, $lbl, $opts, $normalize);
 		}
 
 		$labelname = FabrikString::rtrimword($name, '[]') . '[label]';
@@ -423,6 +427,8 @@ class PlgFabrik_ElementLink extends PlgFabrik_Element
 	{
 		$name = $this->getFullName(true, false);
 		$group = $this->getGroup();
+		$value = $this->getValue($data, $c);
+		$value = FabrikWorker::JSONtoData($value, true);
 
 		if ($group->canRepeat())
 		{
@@ -433,13 +439,13 @@ class PlgFabrik_ElementLink extends PlgFabrik_Element
 				$values[$name]['data']['link'] = array();
 			}
 
-			$values[$name]['data']['label'][$c] = FArrayHelper::getValue($data, 'label');
-			$values[$name]['data']['link'][$c] = FArrayHelper::getValue($data, 'link');
+			$values[$name]['data']['label'][$c] = FArrayHelper::getValue($value, 'label');
+			$values[$name]['data']['link'][$c] = FArrayHelper::getValue($value, 'link');
 		}
 		else
 		{
-			$values[$name]['data']['label'] = FArrayHelper::getValue($data, 'label');
-			$values[$name]['data']['link'] = FArrayHelper::getValue($data, 'link');
+			$values[$name]['data']['label'] = FArrayHelper::getValue($value, 'label');
+			$values[$name]['data']['link'] = FArrayHelper::getValue($value, 'link');
 		}
 	}
 

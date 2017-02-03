@@ -2163,7 +2163,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 *
 	 * @return  string    filter html
 	 */
-	public function getFilter($counter = 0, $normal = true)
+	public function getFilter($counter = 0, $normal = true, $container = '')
 	{
 		$params                    = $this->getParams();
 		$element                   = $this->getElement();
@@ -2219,7 +2219,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				break;
 			case 'auto-complete':
 				$defaultLabel = $this->getLabelForValue($default);
-				$autoComplete = $this->autoCompleteFilter($default, $v, $defaultLabel, $normal);
+				$autoComplete = $this->autoCompleteFilter($default, $v, $defaultLabel, $normal, $container);
 				$return       = array_merge($return, $autoComplete);
 				break;
 		}
@@ -3616,7 +3616,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$elementName = $this->getParams()->get('repeat_element', $this->getElement()->name);
 
 		$parentKey  = $this->buildQueryParentKey();
-		$fullElName = $this->getFullName(true, false);
+		$fullElName = $this->_db->qn($this->getFullName(true, false));
 		$sql        = "(SELECT GROUP_CONCAT(" . $jKey . " " . $where . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable
 		LEFT JOIN " . $dbName . " AS lookup ON lookup." . $this->getJoinValueFieldName() . " = $joinTable." . $elementName . " WHERE "
 			. $joinTable . "." . $parentID . " = " . $parentKey . ")";
@@ -3670,6 +3670,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$str        = parent::buildQueryElementConcatId();
 		$joinTable  = $this->getJoinModel()->getJoin()->table_join;
 		$parentKey  = $this->buildQueryParentKey();
+		$fullElName = $this->_db->qn($this->getFullName(true, false) . '_id');
 		$fullElName = $this->getFullName(true, false) . '_id';
 		$elementName = $this->getParams()->get('repeat_element', $this->element->name);
 		$str .= ", (SELECT GROUP_CONCAT(" . $elementName . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE " . $joinTable

@@ -553,8 +553,13 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
          * button which resets the form and submits it using the removeSession task.
          */
         watchClearSession: function () {
+	        if (this.options.multipage_save === 0) {
+		        return;
+	        }
+
             var self = this,
                 form = jQuery(this.form);
+
             form.find('.clearSession').on('click', function (e) {
                 e.preventDefault();
                 form.find('input[name=task]').val('removeSession');
@@ -616,7 +621,9 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
         _doPageNav: function (e, dir) {
             var self = this, url, d;
             if (this.options.editable) {
-                this.form.getElement('.fabrikMainError').addClass('fabrikHide');
+                if (typeOf(this.form.getElement('.fabrikMainError')) !== 'null') {
+                    this.form.getElement('.fabrikMainError').addClass('fabrikHide');
+                }
 
                 // If tip shown at bottom of long page and next page shorter we need to move the tip to
                 // the top of the page to avoid large space appearing at the bottom of the page.
@@ -1160,13 +1167,14 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
 
         updateMainError: function () {
             var myfx, activeValidations;
-            var mainEr = this.form.getElement('.fabrikMainError');
-            mainEr.set('html', this.options.error);
+            if (typeOf(this.form.getElement('.fabrikMainError')) !== 'null') {
+                this.form.getElement('.fabrikMainError').set('html', this.options.error);
+            }
             activeValidations = this.form.getElements('.fabrikError').filter(
                 function (e, index) {
                     return !e.hasClass('fabrikMainError');
                 });
-            if (activeValidations.length > 0 && mainEr.hasClass('fabrikHide')) {
+            if (activeValidations.length > 0 && this.form.getElement('.fabrikMainError').hasClass('fabrikHide')) {
                 this.showMainError(this.options.error);
             }
             if (activeValidations.length === 0) {
@@ -1175,14 +1183,16 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
         },
 
         hideMainError: function () {
-            var mainEr = this.form.getElement('.fabrikMainError');
-            myfx = new Fx.Tween(mainEr, {
-                property  : 'opacity',
-                duration  : 500,
-                onComplete: function () {
-                    mainEr.addClass('fabrikHide');
-                }
-            }).start(1, 0);
+            if (typeOf(this.form.getElement('.fabrikMainError')) !== 'null') {
+                var mainEr = this.form.getElement('.fabrikMainError');
+                myfx = new Fx.Tween(mainEr, {
+                    property  : 'opacity',
+                    duration  : 500,
+                    onComplete: function () {
+                        mainEr.addClass('fabrikHide');
+                    }
+                }).start(1, 0);
+            }
         },
 
         showMainError: function (msg) {
@@ -1190,13 +1200,15 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             if (Fabrik.bootstrapped && this.options.ajaxValidation) {
                 return;
             }
-            var mainEr = this.form.getElement('.fabrikMainError');
-            mainEr.set('html', msg);
-            mainEr.removeClass('fabrikHide');
-            myfx = new Fx.Tween(mainEr, {
-                property: 'opacity',
-                duration: 500
-            }).start(0, 1);
+            if (typeOf(this.form.getElement('.fabrikMainError')) !== 'null') {
+                var mainEr = this.form.getElement('.fabrikMainError');
+                mainEr.set('html', msg);
+                mainEr.removeClass('fabrikHide');
+                myfx = new Fx.Tween(mainEr, {
+                    property: 'opacity',
+                    duration: 500
+                }).start(0, 1);
+            }
         },
 
         /** @since 3.0 get a form button name */
@@ -1272,6 +1284,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 e.stop();
                 return false;
             }
+            this.toggleSubmit(false);
             this.submitBroker.submit(function () {
                 if (this.options.showLoader) {
                     Fabrik.loader.start(this.getBlock(), Joomla.JText._('COM_FABRIK_LOADING'));
@@ -1283,6 +1296,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     Fabrik.loader.stop(this.getBlock());
                     // Update global status error
                     this.updateMainError();
+                    this.toggleSubmit(true);
 
                     // Return otherwise ajax upload may still occur.
                     return;
@@ -1321,13 +1335,16 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                                 fconsole(text + ': ' + error);
                                 this.showMainError(error);
                                 Fabrik.loader.stop(this.getBlock(), 'Error in returned JSON');
+                                this.toggleSubmit(true);
                             }.bind(this),
 
                             onFailure : function (xhr) {
                                 fconsole(xhr);
                                 Fabrik.loader.stop(this.getBlock(), 'Ajax failure');
+                                this.toggleSubmit(true);
                             }.bind(this),
                             onComplete: function (json, txt) {
+                                this.toggleSubmit(true);
                                 if (typeOf(json) === 'null') {
                                     // Stop spinner
                                     Fabrik.loader.stop(this.getBlock(), 'Error in returned JSON');
@@ -1571,6 +1588,24 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     });
                 }
             }.bind(this));
+        },
+
+        /**
+         * not currently used in our code, provided as a helper function for custom JS
+         *
+         * @param groupId
+         * @returns {boolean}
+         */
+        mockDuplicateGroup: function(groupId) {
+            var add_btn = this.form.getElement('#group' + groupId + ' .addGroup');
+
+            if (typeOf(add_btn) !== 'null') {
+                var add_e = new Event.Mock(add_btn, 'click');
+                this.duplicateGroup(add_e, false);
+                return true;
+            }
+
+            return false;
         },
 
         /**
