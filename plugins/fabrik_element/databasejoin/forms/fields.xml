@@ -81,40 +81,7 @@
 			       label="PLG_ELEMENT_DBJOIN_OR_CONCAT_LABEL_LABEL"
 			       rows="6"/>
 
-			<field name="repeat_db_name"
-			       label="PLG_ELEMENT_DBJOIN_TABLE_LABEL"
-			       observe="params_join_conn_id"
-			       key="name"
-			       type="tables"/>
-
-			<field name="repeat_db_name_c"
-			       label="PLG_ELEMENT_DBJOIN_TABLE_LABEL"
-			       type="text"/>
-
-				   <field name="repeat_parent_id"
-			       type="listfields"
-			       highlightpk="true"
-			       connection="params_join_conn_id"
-			       description="PLG_ELEMENT_DBJOIN_JOIN_KEY_DESC"
-			       label="PLG_ELEMENT_DBJOIN_JOIN_KEY_LABEL"
-			       table="params_repeat_db_name"/>
-
-			<field name="repeat_parent_id_c"
-			       label="PLG_ELEMENT_DBJOIN_JOIN_KEY_LABEL"
-			       type="text"/>
-
-				   <field name="repeat_element"
-			       type="listfields"
-			       connection="params_join_conn_id"
-			       description="PLG_ELEMENT_DBJOIN_JOIN_LABEL_DESC"
-			       label="PLG_ELEMENT_DBJOIN_JOIN_LABEL_LABEL"
-			       table="params_repeat_db_name"/>
-
-			<field name="repeat_element_c"
-			       label="PLG_ELEMENT_DBJOIN_JOIN_LABEL_LABEL"
-			       type="text"/>
-
-				   </fieldset>
+		</fieldset>
 
 		<fieldset label="PLG_FABRIK_DBJOIN_DATA_WHERE"
 		          name="plg-databasejoin-where">

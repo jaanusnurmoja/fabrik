@@ -1136,8 +1136,6 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$listModel  = $elementModel->getListModel();
 		$groupModel = $elementModel->getGroupModel();
 		$tableName  = $this->getRepeatElementTableName($elementModel, $row);
-		$params = $elementModel->getParams();
-		$parentID	= $params->get('repeat_parent_id', 'parent_id');
 
 		// Create db table!
 		$formModel = $elementModel->getForm();
@@ -1146,7 +1144,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$name      = $db->qn($row->name);
 		$db
 			->setQuery(
-				'CREATE TABLE IF NOT EXISTS ' . $db->qn($tableName) . ' ( id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, ' . $parentID . ' INT(11), '
+				'CREATE TABLE IF NOT EXISTS ' . $db->qn($tableName) . ' ( id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, parent_id INT(11), '
 				. $name . ' ' . $desc . ', ' . $db->qn('params') . ' TEXT );');
 		$db->execute();
 
@@ -1170,7 +1168,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 		}
 
 		$data = array('list_id' => $listModel->getTable()->id, 'element_id' => $row->id, 'join_from_table' => $joinFromTable,
-			'table_join' => $tableName, 'table_key' => $row->name, 'table_join_key' => $parentID, 'join_type' => 'left');
+			'table_join' => $tableName, 'table_key' => $row->name, 'table_join_key' => 'parent_id', 'join_type' => 'left');
 		$join = $this->getTable('join');
 		$join->load(array('element_id' => $data['element_id']));
 		$opts           = new stdClass;
@@ -1180,7 +1178,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$join->bind($data);
 		$join->store();
 
-		$fieldName = $tableName . '___' . $parentID;
+		$fieldName = $tableName . '___parent_id';
 		$listModel->addIndex($fieldName, 'parent_fk', 'INDEX', '');
 
 		$fields = $listModel->getDBFields($tableName, 'Field');
@@ -1213,7 +1211,6 @@ class FabrikAdminModelElement extends FabModelAdmin
 	{
 		$listModel  = $elementModel->getListModel();
 		$groupModel = $elementModel->getGroupModel();
-		$params = $elementModel->getParams();
 
 		if (is_null($row))
 		{
@@ -1228,11 +1225,8 @@ class FabrikAdminModelElement extends FabModelAdmin
 		{
 			$origTableName = $listModel->getTable()->db_table_name;
 		}
-		
-		$defaultName = $origTableName . '_repeat_' . str_replace('`', '', $row->name);
-		$tableName = $params->get('repeat_db_name', $defaultName);
 
-		return $tableName;
+		return $origTableName . '_repeat_' . str_replace('`', '', $row->name);
 	}
 
 	/**
