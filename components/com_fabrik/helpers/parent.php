@@ -1040,8 +1040,8 @@ class FabrikWorker
 		$config    = JFactory::getConfig();
 		$session   = JFactory::getSession();
 		$token     = $session->get('session.token');
-		$lang      = JFactory::getLanguage()->getTag();
-		$lang      = str_replace('-', '_', $lang);
+		$langtag   = JFactory::getLanguage()->getTag();
+		$lang      = str_replace('-', '_', $langtag);
 		$shortlang = explode('_', $lang);
 		$shortlang = $shortlang[0];
 		$multilang = FabrikWorker::getMultiLangURLCode();
@@ -1056,6 +1056,7 @@ class FabrikWorker
 			'{date}' => date('Ymd'),
 			'{mysql_date}' => date('Y-m-d H:i:s'),
 			'{lang}' => $lang,
+			'{langtag}' => $langtag,
 			'{multilang}' => $multilang,
 			'{shortlang}' => $shortlang,
 			'{session.token}' => $token,
