@@ -624,10 +624,11 @@ class FabrikWorker
 		}
 
 		// check valid MySQL - only alphanumeric or underscore
-		if (!preg_match('/^[a-zA-Z0-9_]*$/', $str) || (preg_match('/^[0-9]*$/', $str) && !preg_match('/^[a-zA-Z_]*$/',  $str)))
+		if (!preg_match('/\D/', $str) || preg_match('/\W/', $str))
 		{
 			return false;
 		}
+
 		// check for various other gotchas, like ending in _raw, starting with more than one _, etc.
 		if (preg_match('/^submit|^__|_raw$/', $str))
 		{
