@@ -3621,7 +3621,6 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$sql        = "(SELECT GROUP_CONCAT(" . $jKey . " " . $where . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable
 		LEFT JOIN " . $dbName . " AS lookup ON lookup." . $this->getJoinValueFieldName() . " = $joinTable." . $elementName . " WHERE "
 			. $joinTable . "." . $parentID . " = " . $parentKey . ")";
-			. $joinTable . ".parent_id = " . $parentKey . ")";
 
 		if ($addAs)
 		{
