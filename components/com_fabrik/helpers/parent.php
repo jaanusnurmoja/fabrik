@@ -624,7 +624,7 @@ class FabrikWorker
 		}
 
 		// check valid MySQL - only alphanumeric or underscore
-		if (!preg_match('/^[a-zA-Z0-9_]*$/', $str))
+		if (!preg_match('/\D/', $str) || preg_match('/\W/', $str))
 		{
 			return false;
 		}
