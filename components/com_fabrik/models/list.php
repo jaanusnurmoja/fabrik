@@ -1943,6 +1943,7 @@ class FabrikFEModelList extends JModelForm
 		$query = $listModel->buildQueryJoin($query);
 		$listModel->set('includeCddInJoin', true);
 		$query->group($linkKey);
+		$sql = (string) $query;
 		$db->setQuery($query);
 		$this->recordCounts[$k] = $db->loadObjectList('id');
 		$this->recordCounts[$k]['linkKey'] = FabrikString::safeColNameToArrayKey($key);
@@ -6785,6 +6786,10 @@ class FabrikFEModelList extends JModelForm
 
 				if ($responsiveClass !== '')
 				{
+					$displayData = new stdClass;
+					$displayData->responsiveClass = $responsiveClass;
+					$layout = $this->getLayout('fabrik-responsive-class');
+					$responsiveClass = $layout->render($displayData);
 					$responsiveClass .= ' ';
 				}
 
