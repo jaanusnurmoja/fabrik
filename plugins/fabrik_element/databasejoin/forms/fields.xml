@@ -103,7 +103,7 @@
 				   mode="combo"
 				   />
 
-				   <field name="repeat_parent_id"
+			<field name="repeat_parent_id"
 			       type="listfields"
 			       highlightpk="true"
 			       connection="params_join_conn_id"
@@ -113,7 +113,7 @@
 				   mode="gui"
 				   modefield="field"/>
 
-				   <field name="repeat_element"
+			<field name="repeat_element"
 			       type="listfields"
 			       connection="params_join_conn_id"
 			       description="PLG_ELEMENT_DBJOIN_THIS_FIELD_DESC"
