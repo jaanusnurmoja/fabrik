@@ -741,6 +741,58 @@ class FabrikFEModelForm extends FabModelForm
 		return $arJoinGroupIds;
 	}
 
+	//Jaanus
+	public function mergedGroups()
+	{
+		$joinIds = $this->getJoinGroupIds();
+		$listModel = $this->getlistModel();
+
+		$joins = $listModel->getJoins();
+		$groups = $this->getGroupsHiarachy();
+		
+		$parent = array();
+		$child = array();
+		$g = array();
+			
+		foreach ($groups as $groupModel)
+		{
+		
+			foreach ($joinIds as $gID => $jId)
+			{
+				foreach ($joins as $join)
+				{
+					if ($join->id == $jId && $groupModel->getGroup()->id == $join->group_id && $groupModel->canRepeat())
+					{
+						$parent[] = $join;
+						$child[] = $join;
+						$g[] = $gID;
+					}
+				}
+				
+			}
+		}
+		
+		$merged = array();
+		
+		foreach ($parent as $p)
+		{
+			foreach ($child as $c)
+			{
+				if ($p->table_join == $c->join_from_table)
+				{
+					$merged[implode(0, $g)] = array
+					(
+						'parent' => $p->group_id,
+						'child' => $c->group_id
+					);
+				}
+			}
+
+		}
+
+		return $merged;
+	}
+	
 	/**
 	 * Gets the javascript actions the forms elements
 	 *

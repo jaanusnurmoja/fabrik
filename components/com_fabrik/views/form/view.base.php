@@ -253,6 +253,7 @@ class FabrikViewFormBase extends FabrikView
 		$form->class  = $model->getFormClass();
 		$form->formid = $model->isEditable() ? 'form_' . $model->getId() : 'details_' . $model->getId();
 		$form->name   = 'form_' . $model->getId();
+		$form->mergedGroups = $model->mergedGroups();
 
 		if ((string) $this->rowid !== '')
 		{
