@@ -2462,7 +2462,7 @@ class FabrikFEModelList extends JModelForm
 						{
 							$v = str_replace('`', '', $tmpPks[$pk][0]);
 							$v = explode('.', $v);
-							// $v[0] = $v[0] . '_0';
+							//$v[0] = $v[0] . '_0';
 							$tmpPks[$pk][0] = $db->qn($v[0] . '.' . $v[1]);
 						}
 
@@ -2510,7 +2510,9 @@ class FabrikFEModelList extends JModelForm
 
 			$query->select(implode(', ', $this->selectedOrderFields) . ' FROM ' . $db->qn($table->db_table_name));
 			$query = $this->buildQueryJoin($query);
-			$query = $this->buildQueryWhere($input->get('incfilters', 1), $query);
+			
+			// Jaanus: used in bulidQuery() instead as in some cases prefilters haven't any impact here
+			// $query = $this->buildQueryWhere($input->get('incfilters', 1), $query);
 			$query = $this->buildQueryGroupBy($query);
 
 			// Can't limit the query here as this gives incorrect _data array.
@@ -2580,6 +2582,9 @@ class FabrikFEModelList extends JModelForm
 			* data. If no ids found then do where "2 = -2" to return no records (was "1 = -1", changed to make
 			* it easier to know where this is coming form when debugging)
 			*/
+
+			$query = $this->buildQueryWhere($input->get('incfilters', 1), $query);
+
 			if (!empty($ids))
 			{
 				if ($lookUpNames[$lookupC] !== $table->db_primary_key)
@@ -8617,7 +8622,7 @@ class FabrikFEModelList extends JModelForm
 				if ((int) $join->list_id !== 0)
 				{
 					$query->clear();
-					$query->delete($db->qn($join->table_join))->where($db->qn($join->table_join_key) . ' IN (' . $val . ')');
+					$query->delete($db->qn($join->table_join))->where($db->qn($join->table_join_key) . ' IN (' . array_values($val) . ')');
 					$db->setQuery($query);
 					$db->execute();
 				}
@@ -10570,8 +10575,10 @@ class FabrikFEModelList extends JModelForm
 						// Now store the
 						if (!isset($canRepeatsPkValues[$crk_sk][0]) and isset($data[0]->$crk_sk))
 						{
+							$canRepeatsPkValues[$crk_sk] = array_unique($canRepeatsPkValues[$crk_sk]);
 							$canRepeatsPkValues[$crk_sk][0] = $data[0]->$crk_sk;
 						}
+						
 					}
 				}
 
@@ -10600,7 +10607,9 @@ class FabrikFEModelList extends JModelForm
 							&& isset($data[$i]->{$canRepeatsKeys[$shortKey]}))
 						{
 							$canRepeatsPkValues[$canRepeatsKeys[$shortKey]][$i] = $data[$i]->{$canRepeatsKeys[$shortKey]};
+							$canRepeatsPkValues[$canRepeatsKeys[$shortKey]] = array_unique($canRepeatsPkValues[$canRepeatsKeys[$shortKey]]);
 						}
+						
 
 						if ($origKey == $shortKey)
 						{
@@ -10612,8 +10621,10 @@ class FabrikFEModelList extends JModelForm
 
 							if ($merge == 2)
 							{
+								$canRepeatsPkValues[$canRepeatsKeys[$shortKey]] = array_merge($canRepeatsPkValues[$canRepeatsKeys[$shortKey]]);
 								$pk_vals = array_count_values(array_filter($canRepeatsPkValues[$canRepeatsKeys[$shortKey]]));
 
+								/*
 								if (isset($data[$i]->{$canRepeatsKeys[$shortKey]}))
 								{
 									if ($pk_vals[$data[$i]->{$canRepeatsKeys[$shortKey]}] > 1)
@@ -10621,6 +10632,7 @@ class FabrikFEModelList extends JModelForm
 										$do_merge = false;
 									}
 								}
+								*/
 							}
 
 							if ($do_merge)
@@ -10688,6 +10700,7 @@ class FabrikFEModelList extends JModelForm
 							&& !isset($canRepeatsPkValues[$canRepeatsKeys[$shortKey]][$i])
 							&& isset($data[$i]->{$canRepeatsKeys[$shortKey]}))
 						{
+							$canRepeatsPkValues[$canRepeatsKeys[$shortKey]] = array_merge($canRepeatsPkValues[$canRepeatsKeys[$shortKey]]);
 							$canRepeatsPkValues[$canRepeatsKeys[$shortKey]][$i] = $data[$i]->{$canRepeatsKeys[$shortKey]};
 						}
 					}
@@ -10724,8 +10737,16 @@ class FabrikFEModelList extends JModelForm
 			}
 		}
 
+/*
+// Jaanus: leaving this debug code temporarily here to let you compare things with and without changes :)
+			echo '<pre>';
+			var_dump($canRepeats, $canRepeatsTables, $canRepeatsKeys, $canRepeatsPkValues);
+			echo '</pre>';
+*/
 		$data = array_values($data);
+		
 	}
+	
 
 	/**
 	 * Does the list model have an associated table (can occur when form model
