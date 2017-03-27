@@ -123,7 +123,6 @@ endforeach;
 ?>
 		<div id="id="group<?php echo $mgKey;?>">
 		<?php 
-		$titles = array();
 		if (!empty($titles)) :?>
 			<legend class="legend"><?php echo implode(' | ', $titles);?></legend>
 				<?php
