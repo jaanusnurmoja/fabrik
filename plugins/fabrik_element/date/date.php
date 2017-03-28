@@ -472,7 +472,16 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 
 		if ($alwaysToday)
 		{
-			$val = JFactory::getDate('now', $timeZone)->toSql($storeAsLocal);
+			if (!$storeAsLocal)
+			{
+				$val = JFactory::getDate('now', $timeZone);
+			}
+			else
+			{
+				$val = JFactory::getDate('now');
+			}
+
+			$val = $val->toSql(true);
 
 			return $val;
 		}
@@ -540,7 +549,8 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 			// 5.3 only
 			if (class_exists('DateInterval'))
 			{
-				$dateInterval         = new DateInterval('PT' . $hours . 'H');
+				// need to use minutes, as DateInterval will barf on fractional hours like 5.5 (India)
+				$dateInterval         = new DateInterval('PT' . $hours * 60 . 'M');
 				$dateInterval->invert = $invert;
 				$date->sub($dateInterval);
 			}
@@ -816,7 +826,7 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		$opts->align       = "Tl";
 		$opts->singleClick = true;
 		$opts->firstDay    = intval($params->get('date_firstday'));
-		$opts->ifFormat    = $params->get('date_form_format', $params->get('date_table_format', '%Y-%m-%d'));
+		$opts->ifFormat    = $params->get('date_form_format', $params->get('date_table_format', 'Y-m-d'));
 		$opts->timeFormat  = 24;
 		$opts->ifFormat    = FabDate::dateFormatToStrftimeFormat($opts->ifFormat);
 		$opts->dateAllowFunc = $params->get('date_allow_func');
@@ -1173,6 +1183,8 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		$params       = $this->getParams();
 		$storeAsLocal = (int) $params->get('date_store_as_local', 0);
 
+		$timeZone     = $storeAsLocal ? new DateTimeZone($this->config->get('offset')) : null;
+
 		if (!$params->get('date_showtime', 0) || $storeAsLocal)
 		{
 			$this->resetToGMT = false;
@@ -1244,7 +1256,7 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 				}
 				else
 				{
-					$value = JFactory::getDate($value)->toSql();
+					$value = JFactory::getDate($value, $timeZone)->toSql();
 
 					/**
 					 *  $$$ hugh - strip time if not needed.  Specific case is element filter,
@@ -1256,14 +1268,31 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 						$value = $this->setMySQLTimeToZero($value);
 					}
 
-					$next = JFactory::getDate(strtotime($this->addDays($value, 1)) - 1);
+					$next = JFactory::getDate(strtotime($this->addDays($value, 1)) - 1, $timeZone);
 					/**
 					 *  $$$ now we need to reset $value to GMT.
 					 *  Probably need to take $storeAsLocal into account here?
 					 */
-					$this->resetToGMT = true;
-					$value            = $this->toMySQLGMT(JFactory::getDate($value));
-					$this->resetToGMT = false;
+					if (!$storeAsLocal)
+					{
+						$this->resetToGMT = true;
+						$value            = $this->toMySQLGMT(JFactory::getDate($value));
+						$this->resetToGMT = false;
+					}
+					else
+					{
+						$seconds  = $timeZone->getOffset($next);
+						$invert = true;
+						if ($seconds < 0)
+						{
+							$invert = false;
+							$seconds  = $seconds * -1;
+						}
+						// need to use minutes, as DateInterval will barf on fractional hours like 5.5 (India)
+						$dateInterval         = new DateInterval('PT' . $seconds . 'S');
+						$dateInterval->invert = $invert;
+						$next->sub($dateInterval);
+					}
 				}
 
 				// Only set to a range if condition is matching (so don't set to range for < or > conditions)
@@ -1994,13 +2023,17 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 	 */
 	protected function addDays($date, $add = 0)
 	{
+		$params          = $this->getParams();
+		$storeAsLocal    = $params->get('date_store_as_local', 0) == 1;
 		$date            = JFactory::getDate($date);
+		/*
 		$PHPDate         = getdate($date->toUnix());
 		$PHPDate['mday'] = $PHPDate['mday'] + $add;
 		$v               = mktime($PHPDate['hours'], $PHPDate['minutes'], $PHPDate['seconds'], $PHPDate['mon'], $PHPDate['mday'], $PHPDate['year']);
 		$date            = JFactory::getDate($v);
-
-		return $date->toSql($v);
+		*/
+		$date->add(new DateInterval('PT24H'));
+		return $date->toSql($storeAsLocal);
 	}
 
 	/**
