@@ -1711,6 +1711,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$optsPerRow = intval($params->get('dbjoin_options_per_row', 0));
 		$targetIds  = $this->multiOptionTargetIds($data, $repeatCounter);
 		$class      = 'fabrikinput inputbox ' . $params->get('bootstrap_class', '');
+		$single		= $params->get('single_instead_multiple');
 
 		if ($targetIds !== false)
 		{
@@ -1719,9 +1720,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if ($this->isEditable())
 		{
-			$multiSize     = (int) $params->get('dbjoin_multilist_size', 6);
+			$multiSize     = $single ? 1 : (int) $params->get('dbjoin_multilist_size', 6);
+			$multiple = $single ? '' : ' multiple="true"';
 			$advancedClass = $this->getAdvancedSelectClass();
-			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '" multiple="true"';
+			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '"' . $multiple;
 			$html[]        = JHTML::_('select.genericlist', $tmp, $elName, $attributes, 'value', 'text', $default, $id);
 		}
 		else
@@ -1774,6 +1776,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$displayData->name         = $name;
 		$displayData->editable     = $this->isEditable();
 		$displayData->optionLayout = $this->getLayout('form-checkbox');
+		$displayData->single	 = $params->get('single_instead_multiple');
 
 		$html[]       = '<div class="fabrikSubElementContainer" id="' . $id . '">';
 		$singleLayout = 'fabrik-element-' . $this->getPluginName() . '-form-checkbox';

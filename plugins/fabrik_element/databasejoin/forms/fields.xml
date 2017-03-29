@@ -52,6 +52,11 @@
 				<option value="multilist">PLG_ELEMENT_DBJOIN_MULTILIST</option>
 			</field>
 
+			<field name="single_instead_multiple"
+			       label="PLG_ELEMENT_DBJOIN_SINGLE_INSTEAD_MULTIPLE_LABEL"
+			       type="checkbox"
+				   value="1"/>
+
 		</fieldset>
 
 		<fieldset label="COM_FABRIK_DATA"
