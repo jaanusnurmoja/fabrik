@@ -220,5 +220,74 @@
 
 		</fieldset>
 
+		<fieldset label="COM_FABRIK_DATA"
+		          name="plg-textarea">
+
+			<field name="repeat"
+			       label="PLG_ELEMENT_REPEAT"
+			       type="checkbox"
+				   value="1"/>
+
+			<field name="join_conn_id"
+			       label="PLG_ELEMENT_DBJOIN_CONNECTION"
+			       type="connections" />
+
+			<field name="repeat_db_name"
+			       label="PLG_ELEMENT_DBJOIN_REPEAT_TABLE_LABEL"
+			       description="PLG_ELEMENT_DBJOIN_REPEAT_TABLE_DESC"
+			       observe="params_join_conn_id"
+			       key="name"
+			       type="tables"
+				   mode="combo"
+				   />
+
+			<field name="repeat_parent_id"
+			       type="listfields"
+			       highlightpk="true"
+			       connection="params_join_conn_id"
+			       description="PLG_ELEMENT_DBJOIN_PARENT_ID_DESC"
+			       label="PLG_ELEMENT_DBJOIN_PARENT_ID_LABEL"
+			       table="params_repeat_db_name"
+				   mode="gui"
+				   modefield="field" />
+
+			<field name="repeat_element"
+			       type="listfields"
+			       connection="params_join_conn_id"
+			       description="PLG_ELEMENT_DBJOIN_THIS_FIELD_DESC"
+			       label="PLG_ELEMENT_DBJOIN_THIS_FIELD_LABEL"
+			       table="params_repeat_db_name"
+				   mode="gui"
+				   modefield="field" />
+
+			<field name="repeat_params"
+			       type="listfields"
+			       connection="params_join_conn_id"
+			       description="PLG_ELEMENT_DBJOIN_PARAMS_FIELD_DESC"
+			       label="PLG_ELEMENT_DBJOIN_PARAMS_FIELD_LABEL"
+			       table="params_repeat_db_name"
+				   mode="gui"
+				   modefield="field" />
+
+			<field name="repeat_params_type"
+			       type="radio"
+				   class="btn-group"
+				   default="TEXT"
+			       description="PLG_ELEMENT_DBJOIN_PARAMS_TYPE_DESC"
+			       label="PLG_ELEMENT_DBJOIN_PARAMS_TYPE_LABEL">
+					   <option value="TEXT">TEXT</option>
+					   <option value="VARCHAR(255)">VARCHAR</option>
+					   <option value="INT(11)">INT</option>
+				   </field>
+
+			<field name="repeat_params_value"
+			       type="listfields"
+				   valueformat="tableelement"
+			       description="PLG_ELEMENT_DBJOIN_PARAMS_VALUE_DESC"
+			       label="PLG_ELEMENT_DBJOIN_PARAMS_VALUE_LABEL"
+				   />
+
+		</fieldset>
+
 	</fields>
 </form>
