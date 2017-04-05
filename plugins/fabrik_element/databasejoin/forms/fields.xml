@@ -380,8 +380,8 @@
 
 		</fieldset>
 
-		<fieldset label="COM_FABRIK_MULTILIST"
-		          name="plg-databasejoin-multilist">
+		<fieldset label="COM_FABRIK_MULTIFIELD"
+		          name="plg-databasejoin-multifield">
 
 				<field name="multifield_element"
 			       type="listfields"

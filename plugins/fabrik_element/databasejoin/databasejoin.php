@@ -1840,7 +1840,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$extraFKName = $extraFields['extrafk']->name;
 		$extraPKRaw = $extraFields['extrafk']->xpkRaw;
 		$extraPKVal = $data[$extraPKRaw];
-		$extraNameVal = $data[$extraName];
+		$extraNameVal = isset($data[$extraName]) ? $data[$extraName] : '';
 
 		if (!$this->getFormModel()->isNewRecord())
 		{
@@ -3757,16 +3757,16 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		$parentKey  = $this->buildQueryParentKey();
 		$fullElName = $this->_db->qn($this->getFullName(true, false));
-		//$addFilter = ''; //!empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
-		// $xtras = $this->joinExtraFields();
-		//if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
-		//{
-			// $addFilter .= ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
-		// }
+		$addFilter = ''; //!empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+		$xtras = $this->joinExtraFields();
+		if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
+		{
+			$addFilter .= ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
+		}
 			
 		$sql        = "(SELECT GROUP_CONCAT(" . $jKey . " " . $where . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable
 		LEFT JOIN " . $dbName . " AS lookup ON lookup." . $this->getJoinValueFieldName() . " = $joinTable." . $elementName . " WHERE "
-			. $joinTable . "." . $parentID . " = " . $parentKey /*. $addFilter*/. ")";
+			. $joinTable . "." . $parentID . " = " . $parentKey . $addFilter. ")";
 
 		if ($addAs)
 		{
@@ -3820,10 +3820,17 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		//$fullElName = $this->_db->qn($this->getFullName(true, false) . '_id');
 		$fullElName = $this->getFullName(true, false) . '_id';
 		$elementName = $this->getParams()->get('repeat_element', $this->element->name);
-		// $addFilter = ''; // !empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+			
+		$addFilter = ''; //!empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+		$xtras = $this->joinExtraFields();
+
+		if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
+		{
+			$addFilter .= ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
+		}
 			
 		$str .= " (SELECT GROUP_CONCAT(" . $elementName . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE " . $joinTable
-			. "." . $parentID . " = " . $parentKey . ") AS $fullElName";
+			. "." . $parentID . " = " . $parentKey . $addFilter . ") AS $fullElName";
 
 		return $str;
 	}

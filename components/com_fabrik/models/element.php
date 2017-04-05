@@ -732,15 +732,15 @@ class PlgFabrik_Element extends FabrikPlugin
 		$pkField    = $this->groupConcactJoinKey();
 		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 		$fullElName = $this->_db->qn($dbTable . '___' . $this->element->name);
-		// $addFilter = !empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
-/*		$xtras = $this->joinExtraFields();
+		$addFilter = !empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+		$xtras = $this->joinExtraFields();
 		if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
 		{
 			$addFilter = ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
 		}
-*/			
+			
 		$sql        = '(SELECT GROUP_CONCAT(' . $jKey . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = '
-			. $pkField . /*$addFilter .*/ ')';
+			. $pkField . $addFilter . ')';
 
 		if ($addAs)
 		{
@@ -767,16 +767,16 @@ class PlgFabrik_Element extends FabrikPlugin
 		$fullElName = $this->_db->qn($dbTable . '___' . $this->element->name . '_raw');
 		$pkField    = $this->groupConcactJoinKey();
 		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
-/*		$addFilter = ''; // !empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+		$addFilter = ''; // !empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
 		$xtras = $this->joinExtraFields();
 		if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
 		{
 			$addFilter .= ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
 		}
-*/			
+			
 
 		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField
-		. /*$addFilter .*/ ') AS ' . $fullElName;
+		. $addFilter . ') AS ' . $fullElName;
 	}
 
 	/**
@@ -820,10 +820,17 @@ class PlgFabrik_Element extends FabrikPlugin
 			$joinTable  = $this->getJoinModel()->getJoin()->table_join;
 			$elementName = $this->getParams()->get('repeat_element', $this->element->name);
 
+			$addFilter = ''; //!empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+			$xtras = $this->joinExtraFields();
 
+			if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
+			{
+				$addFilter .= ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
+			}
+			
 			$as  = $db->qn($dbTable . '___' . $this->element->name . '_' . $multiField);
 	
-			$str = '(SELECT GROUP_CONCAT(' . $joinTable . '.' . $multiField  . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . $onWhere . ') AS ' . $as;
+			$str = '(SELECT GROUP_CONCAT(' . $joinTable . '.' . $multiField  . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . $onWhere . $addFilter . ') AS ' . $as;
 			
 			return $str;
 		}
@@ -869,8 +876,16 @@ class PlgFabrik_Element extends FabrikPlugin
 				$onWhere = ' WHERE ' . $parentID . ' = ' . $pkField;
 			}
 			
+			$addFilter = ''; //!empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+			$xtras = $this->joinExtraFields();
+
+			if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
+			{
+				$addFilter .= ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
+			}
+				
 			$as  = $db->qn($dbTable . '___' . $this->element->name . '_' . $extraFK);
-			$str = '(SELECT GROUP_CONCAT(DISTINCT ' . $xpkField  . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $from . $onWhere .') AS ' . $as;
+			$str = '(SELECT GROUP_CONCAT(DISTINCT ' . $xpkField  . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $from . $onWhere . $addFilter . ') AS ' . $as;
 			
 			return $str;
 		
@@ -7804,10 +7819,13 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 
 		$joinParams = $this->joinParams();
-		$jpValue = $this->joinParamsValue()->element_raw;
-		$paramsKey = !empty($jpValue) ? $jpValue : $this->getJoinParamsKey();
-		$allParams = (array) FArrayHelper::getValue($formData, $paramsKey, array());
-		$allParams = array_values($allParams);
+		if (!empty($joinParams))
+		{
+			$jpValue = $this->joinParamsValue()->element_raw;
+			$paramsKey = !empty($jpValue) ? $jpValue : $this->getJoinParamsKey();
+			$allParams = (array) FArrayHelper::getValue($formData, $paramsKey, array());
+			$allParams = array_values($allParams);
+		}
 
 		$extra = $this->joinExtraFields();
 		$multiField = $extra['multifield']->field;
@@ -7850,7 +7868,10 @@ class PlgFabrik_Element extends FabrikPlugin
 			if ($groupModel->canRepeat())
 			{
 				$joinValues = FArrayHelper::getValue($allJoinValues, $i, array());
-				$joinParamValues = FArrayHelper::getValue($allParams, $i, array());
+				if (!empty($joinParams))
+				{
+					$joinParamValues = FArrayHelper::getValue($allParams, $i, array());
+				}
 				$multiFieldValues = FArrayHelper::getValue($allMultiFields, $i, array());
 				$extraPKrawValues = FArrayHelper::getValue($allExtraPK, $i, array());
 				if (!array_diff($extraPKrawValues, FArrayHelper::getValue($allExtraFK, $i, array())))
@@ -7865,14 +7886,20 @@ class PlgFabrik_Element extends FabrikPlugin
 			else
 			{
 				$joinValues = $allJoinValues;
+				if (!empty($joinParams))
+				{
 				$joinParamValues = $allParams;
+				}
 				$multiFieldValues = $allMultiFields;
 				$extraPKrawValues = $allExtraPK;
 				$extraFKvalues = !array_diff($allExtraPK, $allExtraFK) ? $allExtraFK : $allExtraPK;
 			}
 
 			$joinValues = (array) $joinValues;
-			$joinParamValues = (array) $joinParamValues;
+				if (!empty($joinParams))
+				{
+					$joinParamValues = (array) $joinParamValues;
+				}
 			$multiFieldValues = (array) $multiFieldValues;
 			$extraPKrawValues = (array) $extraPKrawValues;
 			$extraFKvalues = (array) $extraFKvalues;
@@ -7913,7 +7940,10 @@ class PlgFabrik_Element extends FabrikPlugin
 				$formExtraPKraw = $formData[$extraPKraw];
 			 }
 						
-			$addFilter .= !empty($formData[$paramsKey]) ? ' AND ' . $joinParams . ' = ' . $formData[$paramsKey] : '';
+			if (!empty($joinParams))
+			{
+				$addFilter .= !empty($formData[$paramsKey]) ? ' AND ' . $joinParams . ' = ' . $formData[$paramsKey] : '';
+			}
 			$addFilter .= !empty($formExtraPKraw) ? ' AND ' . $extraFK . ' = ' . $formExtraPKraw : '';
 
 			// Get existing records
@@ -7942,7 +7972,10 @@ class PlgFabrik_Element extends FabrikPlugin
 				$record->$pID  = $parentId;
 				$fkVal              = FArrayHelper::getValue($joinValues, $jIndex);
 				$record->$shortName = $fkVal;
-				$record->$joinParams = $formData[$paramsKey];
+				if (!empty($joinParams))
+				{
+					$record->$joinParams = $formData[$paramsKey];
+				}
 				$record->$multiField = $formData[$multiFieldName];
 				$record->$extraFK = $formExtraPKraw;
 
@@ -7967,7 +8000,10 @@ class PlgFabrik_Element extends FabrikPlugin
 						$newId						= new stdClass;
 						$newId->id					= $lastInsertId;
 						$newId->$shortName    		= $record->$shortName;
-						$newId->$joinParams			= $record->$joinParams;
+						if (!empty($joinParams))
+						{
+							$newId->$joinParams		= $record->$joinParams;
+						}
 						$newId->$multiField 		= $record->$multiField;
 						$newId->$extraFK 			= $formExtraPKraw;
 						$ids[$record->$shortName] 	= $newId;
@@ -7984,10 +8020,6 @@ class PlgFabrik_Element extends FabrikPlugin
 				{
 					throw new RuntimeException('Didn\'t save dbjoined repeat element');
 				}
-				
-				echo '<pre>';
-				var_dump($record);
-				echo '</pre>';
 			}
 
 			$i++;
