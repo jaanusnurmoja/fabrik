@@ -903,23 +903,29 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function getJoinDataNames()
 	{
-		$xtras = $this->joinExtraFields();
-		$multifield = $xtras['multifield']->field;
-		$extra = $xtras['extrafk']->field;
 		$name    = $this->getFullName(true, false);
 		$rawName = $name . '_raw';
-		if ($multifield)
-		{
-			$multiName = $name . '_' . $multifield;
-		}
-		
-		if ($extra)
-		{
-			$extraName = $name . '_' . $extra;
-		}
+		$multiName = null;
+		$extraName = null;
 
-		return array($name, $rawName, $multiName, $extraName);
-	}
+		if ($this->isJoin())
+		{
+			$xtras = $this->joinExtraFields();
+			$multifield = $xtras['multifield']->field;
+			$extra = $xtras['extrafk']->field;
+			
+			if ($multifield)
+			{
+				$multiName = $name . '_' . $multifield;
+			}
+			
+			if ($extra)
+			{
+				$extraName = $name . '_' . $extra;
+			}
+		}
+		return array_filter(array($name, $rawName, $multiName, $extraName));
+}
 
 	/**
 	 * Create the SQL select 'name AS alias' segment for list/form queries

@@ -20,8 +20,8 @@ $rowStarted = false;
 <table>
 <tr>
 <td>County</td>
-<td><?php echo $d->multiName; ?></td>
-<td><?php echo $d->extraFKName; ?></td>
+<td><?php echo array_shift($d->multiName); ?></td>
+<td><?php echo $d->extraFKName . ' - planned as hidden'; ?></td>
 </tr>
 
 <?php
