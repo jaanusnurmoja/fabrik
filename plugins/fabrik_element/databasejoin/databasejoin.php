@@ -1833,15 +1833,22 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$attributes = 'class="fabrikinput inputbox" id="' . $id . '"';
 
 		$name = FabrikString::rtrimword($name, '[]');
+		$group = $this->getGroup();
+		$idInRepeatGroup = $group->canRepeat() ? '_' . $repeatCounter : '';
+		$nameInRepeatGroup = $group->canRepeat() ? '[' . $repeatCounter . ']' : '';
 		$extraFields = $this->joinExtraFields();
 		$extra = $extraFields['multifield']->field;
+		$extraId = $extraFields['multifield']->name . $idInRepeatGroup;
 		$extraName = $extraFields['multifield']->name;
+		$extraNameHtml = $extraFields['multifield']->name . $nameInRepeatGroup;
 		$extraFK = $extraFields['extrafk']->field;
+		$extraFKId = $extraFields['extrafk']->name . $idInRepeatGroup;
 		$extraFKName = $extraFields['extrafk']->name;
+		$extraFKNameHtml = $extraFields['extrafk']->name . $nameInRepeatGroup;
 		$extraPKRaw = $extraFields['extrafk']->xpkRaw;
 		$extraPKVal = $data[$extraPKRaw];
-		$extraNameVal = isset($data[$extraName]) ? $data[$extraName] : '';
-
+		$extraNameVal = isset($data[$extraName][$repeatCounter]) ? $data[$extraName][$repeatCounter] : (isset($data[$extraName]) ? $data[$extraName] : array());
+		
 		if (!$this->getFormModel()->isNewRecord())
 		{
 			// If its a new record we don't want to look up defaults in the look up table as they will not exist
@@ -1850,10 +1857,6 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			if ($targetIds !== false)
 			{
 				$default = $targetIds;
-				$extraName = '';
-				$extraFK = '';
-				
-				
 			}
 		}
 		
@@ -1867,9 +1870,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$displayData->default      = (array) $default;
 		$displayData->optsPerRow   = 1;
 		$displayData->name         = $name;
-		$displayData->multiName    = $extraName;
+		$displayData->multiId    = $extraId;
+		$displayData->multiName    = $extraNameHtml;
 		$displayData->multiNameVal = FabrikWorker::JSONtoData($extraNameVal, true);
-		$displayData->extraFKName  = $extraFKName;
+		$displayData->extraFKId  = $extraFKId;
+		$displayData->extraFKName  = $extraFKNameHtml;
 		$displayData->extraPKRaw  = $extraPKRaw;
 		$displayData->extraPKVal  = $extraPKVal;
 		$displayData->editable     = $this->isEditable();

@@ -14,20 +14,25 @@ if ($d->optsPerRow > 12)
 $label = isset($d->option) ? $d->option->text : '';
 $value = isset($d->option) ? $d->option->value : '';
 $name =  isset($d->colCounter) ? $d->name . '[' . $d->colCounter . ']' : $d->name . '[]';
+$multiId = isset($d->colCounter) ?  $d->multiId . '_' . $d->colCounter : $d->multiId;
 $multiName =  isset($d->colCounter) ? $d->multiName . '[' . $d->colCounter . ']' : $d->multiName . '[]';
+$extraFKId =  isset($d->colCounter) ? $d->extraFKId . '_' . $d->colCounter : $d->extraFKId;
 $extraFKName =  isset($d->colCounter) ? $d->extraFKName . '[' . $d->colCounter . ']' : $d->extraFKName . '[]';
 $extraPKVal = $d->extraPKVal[0];
-$multiNameVal = isset($d->colCounter) && isset($d->multiNameVal[$d->colCounter])? $d->multiNameVal[$d->colCounter] : '';
+$multiNameVal = isset($d->multiNameVal[$d->colCounter]) ? $d->multiNameVal[$d->colCounter] : ((is_array($d->multiNameVal) && count($d->multiNameVal) == 1) ? $d->multiNameVal[0] : $d->multiNameVal);
 $colSize    = floor(floatval(12) / $d->optsPerRow);
 //$type = isset($d->single) ? 'radio' : 'checkbox';
 ?>
 <td data-role="suboption">
 		<input type="hidden" value="<?php echo $value;?>" data-role="fabrikinput" name="<?php echo $name; ?>" class="fabrikinput" />
+		<input type="hidden" value="<?php echo $multiNameVal;?>" data-role="fabrikinput" id="<?php echo $multiId; ?>" name="<?php echo $multiName; ?>" class="fabrikinput" />
+		<input type="hidden" value="<?php echo $extraPKVal;?>" data-role="fabrikinput" id="<?php echo $extraFKId; ?>" name="<?php echo $extraFKName; ?>" class="fabrikinput" />
 		<span><?php echo $label;?></span>
 </td>
-<td class="controls fabrikElement fabrikSubElementContainer" id="<?php echo $multiName ;?>">
+<td class="controls fabrikElement fabrikSubElementContainer" id="<?php echo $multiId ;?>">
 <?php if ($d->multiElementType == 'radio') 
-{?>
+{
+?>
 <fieldset class="radio btn-radio btn-group" data-toggle="buttons">
 <?php 
 foreach ($d->radioSubValues as $k => $subVal)
@@ -40,10 +45,11 @@ foreach ($d->radioSubValues as $k => $subVal)
 	{
 		$checked = 'checked="checked"';
 		$success = ' btn-success';
+		//$subVal = $multiNameVal;
 	}
 ;?>
 	<label class="fabrikgrid_<?php echo $k; ?> btn-default btn<?php echo $success;?>">
-	<input type="radio" class="fabrikinput " name="<?php echo $multiName;?>" value="<?php echo $subVal;?>" <?php echo $checked;?>><span><?php echo $subLab;?></span></label>
+	<input type="radio" class="fabrikinput " name="<?php echo $multiName;?>" id="<?php echo $multiId ;?>" value="<?php echo $subVal;?>" <?php echo $checked;?>><span><?php echo $subLab;?></span></label>
 <?php 	
 } ?>
 </fieldset>
@@ -52,10 +58,10 @@ else
 {	?>
 <div class="fabrikElement">
 		
-<input type="text" id="<?php echo $multiName;?>" name="<?php echo $multiName;?>" size="10" maxlength="255" class="input-medium form-control fabrikinput inputbox text" value="<?php echo $multiNameVal;?>">
+<input type="text" id="<?php echo $multiId;?>" name="<?php echo $multiName;?>" size="10" maxlength="255" class="input-medium form-control fabrikinput inputbox text" value="<?php echo $multiNameVal;?>">
 	</div>
 <?php } ?>
 </td>
 <td data-role="suboption">
-		<input type="text" value="<?php echo $extraPKVal;?>" data-role="fabrikinput" name="<?php echo $extraFKName; ?>" class="fabrikinput" />
+		<input type="text" value="<?php echo $extraPKVal;?>" data-role="fabrikinput" id="<?php echo $extraFKId; ?>" name="<?php echo $extraFKName; ?>" class="fabrikinput" />
 </td>

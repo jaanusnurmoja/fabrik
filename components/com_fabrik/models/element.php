@@ -7760,15 +7760,15 @@ class PlgFabrik_Element extends FabrikPlugin
 			
 			foreach ($extraFields as $k =>$f)
 			{
-				if ($this->getGroupModel()->isJoin())
+/*				if ($this->getGroupModel()->isJoin())
 				{
 					$join      = $this->getJoin();
 					$extraFields[$k]->name = $join->table_join . '_' . $f->field;
 				}
 				else
 				{
-					$extraFields[$k]->name = $this->getFullName($step, false) . '_' . $f->field;
-				}
+*/					$extraFields[$k]->name = $this->getFullName(true, false) . '_' . $f->field;
+//				}
 				
 			}
 			

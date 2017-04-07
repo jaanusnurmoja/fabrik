@@ -15,19 +15,17 @@ if ($d->optsPerRow > 12)
 $colSize    = floor(floatval(12) / $d->optsPerRow);
 $colCounter = 0;
 $rowStarted = false;
-
 ?>
 <table>
 <tr>
 <td>County</td>
-<td><?php echo array_shift($d->multiName); ?></td>
+<td><?php echo $d->multiName; ?></td>
 <td><?php echo $d->extraFKName . ' - planned as hidden'; ?></td>
 </tr>
 
 <?php
 foreach ($d->options as $option) :
 	$name = $d->name . '[' . $colCounter . ']';
-	$multiNameVal = $d->multiNameVal;
 	$extraPKVal = $d->extraPKVal;
 	if (($colSize * $colCounter) % 12 === 0 || $colCounter == 0) :
 		$rowStarted = true;
