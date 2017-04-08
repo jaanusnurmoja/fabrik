@@ -1847,7 +1847,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$extraFKNameHtml = $extraFields['extrafk']->name . $nameInRepeatGroup;
 		$extraPKRaw = $extraFields['extrafk']->xpkRaw;
 		$extraPKVal = $data[$extraPKRaw];
-		$extraNameVal = isset($data[$extraName][$repeatCounter]) ? $data[$extraName][$repeatCounter] : (isset($data[$extraName]) ? $data[$extraName] : array());
+		$extraNameVal = isset($data[$extraName][$repeatCounter]) ? $data[$extraName][$repeatCounter] : (isset($data[$extraName]) ? $data[$extraName] : null);
 		
 		if (!$this->getFormModel()->isNewRecord())
 		{
