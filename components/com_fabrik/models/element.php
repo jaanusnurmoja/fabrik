@@ -7832,32 +7832,27 @@ class PlgFabrik_Element extends FabrikPlugin
 			$allParams = (array) FArrayHelper::getValue($formData, $paramsKey, array());
 			$allParams = array_values($allParams);
 		}
-		
-		$isMultiData = $this->getParams()->get('database_join_display_type', 'dropdown') == 'multifield';
-		
-		if ($isMultiData)
-		{
-			$extra = $this->joinExtraFields();
-			$multiField = $extra['multifield']->field;
-			$multiFieldName = $extra['multifield']->name;
-			// The submitted element's values
-			// $m = FArrayHelper::getValue($formData, $multiFieldName, array());
-			// set $emptyish to false so if no selection, we don't save a bogus empty row
-			// $allMultiFields = FabrikWorker::JSONtoData($m, true, false);
 
-			$m = (array) FArrayHelper::getValue($formData, $multiFieldName, array());
-			$allMultiFields = array_values($m);
-			
-			$extraPK = $extra['extrafk']->xpkField; // table.element
-			$extraPKname = $extra['extrafk']->xpkElement; // fullname 
-			$extraPKraw = $extra['extrafk']->xpkRaw; // fullname_raw`
-			$allExtraPK = FArrayHelper::getValue($formData, $extraPKraw, FArrayHelper::getValue($formData, $extraPKname, array()));
-			
-			$extraFK = $extra['extrafk']->field; // db short name
-			$extraFKname = $extra['extrafk']->name; // fullname
-			$allExtraFK = (array) FArrayHelper::getValue($formData, $extraFKname, $allExtraPK);
-			$allExtraFK = array_values($allExtraFK);		
-		}
+		$extra = $this->joinExtraFields();
+		$multiField = $extra['multifield']->field;
+		$multiFieldName = $extra['multifield']->name;
+		// The submitted element's values
+		$m = FArrayHelper::getValue($formData, $multiFieldName, array());
+		// set $emptyish to false so if no selection, we don't save a bogus empty row
+		$allMultiFields = FabrikWorker::JSONtoData($m, true, false);
+/*
+		$allMultiFields = (array) FArrayHelper::getValue($formData, $multiFieldName, array());
+		$allMultiFields = array_values($allMultiFields);
+*/		
+		$extraPK = $extra['extrafk']->xpkField; // table.element
+		$extraPKname = $extra['extrafk']->xpkElement; // fullname 
+		$extraPKraw = $extra['extrafk']->xpkRaw; // fullname_raw`
+		$allExtraPK = FArrayHelper::getValue($formData, $extraPKraw, FArrayHelper::getValue($formData, $extraPKname, array()));
+		
+		$extraFK = $extra['extrafk']->field; // db short name
+		$extraFKname = $extra['extrafk']->name; // fullname
+		$allExtraFK = (array) FArrayHelper::getValue($formData, $extraFKname, $allExtraPK);
+		$allExtraFK = array_values($allExtraFK);
 		
 		/*
 		if (is_array($extraPKraw))
@@ -7883,42 +7878,27 @@ class PlgFabrik_Element extends FabrikPlugin
 				{
 					$joinParamValues = FArrayHelper::getValue($allParams, $i, array());
 				}
-				if ($isMultiData)
+				$multiFieldValues = FArrayHelper::getValue($allMultiFields, $i, array());
+				$extraPKrawValues = FArrayHelper::getValue($allExtraPK, $i, array());
+				if (!array_diff($extraPKrawValues, FArrayHelper::getValue($allExtraFK, $i, array())))
 				{
-					$multiFieldValues = FArrayHelper::getValue($allMultiFields, $i, array());
-					if (!empty($extraFK))
-					{
-						$extraPKrawValues = FArrayHelper::getValue($allExtraPK, $i, array());
-						if (!array_diff($extraPKrawValues, FArrayHelper::getValue($allExtraFK, $i, array())))
-						{
-							$extraFKvalues = FArrayHelper::getValue($allExtraFK, $i, array());
-						}
-						else
-						{
-							$extraFKvalues = $extraPKrawValues;
-						}
-					}						
+					$extraFKvalues = FArrayHelper::getValue($allExtraFK, $i, array());
+				}
+				else
+				{
+					$extraFKvalues = $extraPKrawValues;
 				}
 			}
 			else
 			{
 				$joinValues = $allJoinValues;
-				
 				if (!empty($joinParams))
 				{
-					$joinParamValues = $allParams;
+				$joinParamValues = $allParams;
 				}
-				
-				if ($isMultiData)
-				{
-					$multiFieldValues = $allMultiFields;
-					
-					if (!empty($extraFK))
-					{
-						$extraPKrawValues = $allExtraPK;
-						$extraFKvalues = !array_diff($allExtraPK, $allExtraFK) ? $allExtraFK : $allExtraPK;
-					}
-				}
+				$multiFieldValues = $allMultiFields;
+				$extraPKrawValues = $allExtraPK;
+				$extraFKvalues = !array_diff($allExtraPK, $allExtraFK) ? $allExtraFK : $allExtraPK;
 			}
 
 			$joinValues = (array) $joinValues;
@@ -7926,39 +7906,51 @@ class PlgFabrik_Element extends FabrikPlugin
 				{
 					$joinParamValues = (array) $joinParamValues;
 				}
-				if ($isMultiData)
-				{
-					$multiFieldValues = (array) $multiFieldValues;
-					if (!empty($extraFK))
-					{
-						$extraPKrawValues = (array) $extraPKrawValues;
-						$extraFKvalues = (array) $extraFKvalues;
+			$multiFieldValues = (array) $multiFieldValues;
+			$extraPKrawValues = (array) $extraPKrawValues;
+			$extraFKvalues = (array) $extraFKvalues;
 			
-						$addFilter = '';
+			
 
-						if (is_array($formData[$extraPKraw]))
-						{
-							if (count($formData[$extraPKraw]) > 1)
-							{
-								$n = (!empty($formData[$extraPKraw][0]) && $formData[$extraPKraw][0] > 0) ? 0 : 1;
-								$formExtraPKraw = $formData[$extraPKraw][$n];
-							}
-							else
-							{
-								$formExtraPKraw = array_shift($formData[$extraPKraw]);
-							}
-						}
-						else 
-						 {
-							$formExtraPKraw = $formData[$extraPKraw];
-						 }
+			/*
+			$extra = $this->joinExtraFields();
+		$extra = $extraFields['multifield']->field;
+		$extraFK = $extraFields['extrafk']->field;
+			$extra['multifield']->field; // db short name
+			$extra['multifield']->name; // fullname
+			$extra['extrafk']->field; // db short name
+			$extra['extrafk']->name; // fullname
+			$extra['extrafk']->xpkField; // table.element
+			$extra['extrafk']->xpkElement; // fullname 
+			$extra['extrafk']->xpkRaw; // fullname_raw
+			
+			
+*/
 
-						$addFilter .= !empty($formExtraPKraw) ? ' AND ' . $extraFK . ' = ' . $formExtraPKraw : '';
-					}
+			$addFilter = '';
 
-					$addMulti =  ', ' . $multiField;
-					$addMulti .= !empty($extraFK) ? ', ' . $extraFK : '';
+			if (is_array($formData[$extraPKraw]))
+			{
+				if (count($formData[$extraPKraw]) > 1)
+				{
+					$n = (!empty($formData[$extraPKraw][0]) && $formData[$extraPKraw][0] > 0) ? 0 : 1;
+					$formExtraPKraw = $formData[$extraPKraw][$n];
 				}
+				else
+				{
+					$formExtraPKraw = array_shift($formData[$extraPKraw]);
+				}
+			}
+			else 
+			 {
+				$formExtraPKraw = $formData[$extraPKraw];
+			 }
+						
+			if (!empty($joinParams))
+			{
+				$addFilter .= !empty($formData[$paramsKey]) ? ' AND ' . $joinParams . ' = ' . $formData[$paramsKey] : '';
+			}
+			$addFilter .= !empty($formExtraPKraw) ? ' AND ' . $extraFK . ' = ' . $formExtraPKraw : '';
 
 			// Get existing records
 			if ($parentId == '')
@@ -7968,7 +7960,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			else
 			{
 				$query->clear();
-				$query->select('id, ' . $shortName . $addMulti)->from($join->table_join)->where($pID . ' = ' . $parentId . $addFilter);
+				$query->select('id, ' . $shortName . ', ' . $multiField . ', ' . $extraFK)->from($join->table_join)->where($pID . ' = ' . $parentId . $addFilter);
 				$db->setQuery($query);
 				$ids = (array) $db->loadObjectList($shortName);
 			}
@@ -7986,21 +7978,12 @@ class PlgFabrik_Element extends FabrikPlugin
 				$record->$pID  = $parentId;
 				$fkVal              = FArrayHelper::getValue($joinValues, $jIndex);
 				$record->$shortName = $fkVal;
-				
 				if (!empty($joinParams))
 				{
 					$record->$joinParams = $formData[$paramsKey];
 				}
-				
-				if ($isMultiData)
-				{
-					// $record->$multiField = $formData[$multiFieldName];
-					$record->$multiField = FArrayHelper::getValue($multiFieldValues, $jIndex);
-					if (!empty($extraFK))
-					{
-						$record->$extraFK = $formExtraPKraw;
-					}						
-				}
+				$record->$multiField = $formData[$multiFieldName];
+				$record->$extraFK = $formExtraPKraw;
 
 				// Stop notice with file-upload where fkVal is an array
 				if (array_key_exists($fkVal, $ids))
@@ -8023,22 +8006,12 @@ class PlgFabrik_Element extends FabrikPlugin
 						$newId						= new stdClass;
 						$newId->id					= $lastInsertId;
 						$newId->$shortName    		= $record->$shortName;
-						
 						if (!empty($joinParams))
 						{
 							$newId->$joinParams		= $record->$joinParams;
 						}
-						
-						if ($isMultiData)
-						{
-							$newId->$multiField 	= $record->$multiField;
-							
-							if (!empty($extraFK))
-							{
-								$newId->$extraFK 		= $formExtraPKraw;
-							}
-						}
-						
+						$newId->$multiField 		= $record->$multiField;
+						$newId->$extraFK 			= $formExtraPKraw;
 						$ids[$record->$shortName] 	= $newId;
 					}
 
@@ -8079,71 +8052,13 @@ class PlgFabrik_Element extends FabrikPlugin
 		$query     = $db->getQuery(true);
 		$pID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 
-/*		$store = $this->onFinalStoreRow();
-		$isMultiData = $store->$isMultiData;
-		if ($isMultiData)
-		{
-			$addFilter = $store->addFilter;
-			$addMulti = $store->addMulti;
-		}
-*/		
-
-		$isMultiData = $this->getParams()->get('database_join_display_type', 'dropdown') == 'multifield';
-		$formData = $this->getFormModel()->formDataWithTableName;
-		
-		if ($isMultiData)
-		{
-			$extra = $this->joinExtraFields();
-			$multiField = $extra['multifield']->field;
-			$multiFieldName = $extra['multifield']->name;
-			// The submitted element's values
-			// $m = FArrayHelper::getValue($formData, $multiFieldName, array());
-			// set $emptyish to false so if no selection, we don't save a bogus empty row
-			// $allMultiFields = FabrikWorker::JSONtoData($m, true, false);
-
-			$m = (array) FArrayHelper::getValue($formData, $multiFieldName, array());
-			$allMultiFields = array_values($m);
-			
-			$extraPK = $extra['extrafk']->xpkField; // table.element
-			$extraPKname = $extra['extrafk']->xpkElement; // fullname 
-			$extraPKraw = $extra['extrafk']->xpkRaw; // fullname_raw`
-			$allExtraPK = FArrayHelper::getValue($formData, $extraPKraw, FArrayHelper::getValue($formData, $extraPKname, array()));
-			
-			$extraFK = $extra['extrafk']->field; // db short name
-			$extraFKname = $extra['extrafk']->name; // fullname
-			$allExtraFK = (array) FArrayHelper::getValue($formData, $extraFKname, $allExtraPK);
-			$allExtraFK = array_values($allExtraFK);		
-			
-			if (is_array($formData[$extraPKraw]))
-			{
-				if (count($formData[$extraPKraw]) > 1)
-				{
-					$n = (!empty($formData[$extraPKraw][0]) && $formData[$extraPKraw][0] > 0) ? 0 : 1;
-					$formExtraPKraw = $formData[$extraPKraw][$n];
-				}
-				else
-				{
-					$formExtraPKraw = array_shift($formData[$extraPKraw]);
-				}
-			}
-			else 
-			 {
-				$formExtraPKraw = $formData[$extraPKraw];
-			 }
-
-			 $addFilter .= !empty($formExtraPKraw) ? ' AND ' . $extraFK . ' = ' . $formExtraPKraw : '';
-			$addMulti =  ', ' . $multiField;
-			$addMulti .= !empty($extraFK) ? ', ' . $extraFK : '';
-
-			}
-		
 		if (empty($idsToKeep))
 		{
 			$formData = $this->getFormModel()->formDataWithTableName;
 			$parentId = $formData[$k];
 			if (!empty($parentId))
 			{
-				$query->delete($join->table_join)->where($pID . ' = ' . $db->q($parentId) . $addFilter);
+				$query->delete($join->table_join)->where($pID . ' = ' . $db->q($parentId));
 				$db->setQuery($query);
 				$db->execute();
 			}
@@ -8153,7 +8068,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			foreach ($idsToKeep as $parentId => $ids)
 			{
 				$query->clear();
-				$query->delete($join->table_join)->where($pID . ' = ' . $parentId . $addFilter);
+				$query->delete($join->table_join)->where($pID . ' = ' . $parentId);
 
 				if (!empty($ids))
 				{

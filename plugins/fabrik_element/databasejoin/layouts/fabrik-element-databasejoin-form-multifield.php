@@ -19,7 +19,7 @@ $multiName =  isset($d->colCounter) ? $d->multiName . '[' . $d->colCounter . ']'
 $extraFKId =  isset($d->colCounter) ? $d->extraFKId . '_' . $d->colCounter : $d->extraFKId;
 $extraFKName =  isset($d->colCounter) ? $d->extraFKName . '[' . $d->colCounter . ']' : $d->extraFKName . '[]';
 $extraPKVal = $d->extraPKVal[0];
-$multiNameVal = isset($d->multiNameVal[$d->colCounter][$d->colCounter]) ? $d->multiNameVal[$d->colCounter][$d->colCounter] : (isset($d->multiNameVal[$d->colCounter]) ? $d->multiNameVal[$d->colCounter] : ($d->multiNameVal == array() ? null : $d->multiNameVal));
+$multiNameVal = isset($d->multiNameVal[$d->colCounter]) ? $d->multiNameVal[$d->colCounter] : ((is_array($d->multiNameVal) && count($d->multiNameVal) == 1) ? $d->multiNameVal[0] : $d->multiNameVal);
 $colSize    = floor(floatval(12) / $d->optsPerRow);
 //$type = isset($d->single) ? 'radio' : 'checkbox';
 ?>
@@ -44,19 +44,8 @@ foreach ($d->radioSubValues as $k => $subVal)
 	if ($multiNameVal == $subVal)
 	{
 		$checked = 'checked="checked"';
+		$success = ' btn-success';
 		//$subVal = $multiNameVal;
-	}
-	
-	if ($checked == 'checked="checked"')
-	{
-		$success = ' active btn-success';
-		//$subVal = $multiNameVal;
-	}
-	
-	if ($success == ' active btn-success')
-	{
-		$multiNameVal = $subVal;
-		$checked = 'checked="checked"';
 	}
 ;?>
 	<label class="fabrikgrid_<?php echo $k; ?> btn-default btn<?php echo $success;?>">
