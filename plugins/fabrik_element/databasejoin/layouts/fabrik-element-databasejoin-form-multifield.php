@@ -19,14 +19,18 @@ $multiName =  isset($d->colCounter) ? $d->multiName . '[' . $d->colCounter . ']'
 $extraFKId =  isset($d->colCounter) ? $d->extraFKId . '_' . $d->colCounter : $d->extraFKId;
 $extraFKName =  isset($d->colCounter) ? $d->extraFKName . '[' . $d->colCounter . ']' : $d->extraFKName . '[]';
 $extraPKVal = $d->extraPKVal[0];
-$multiNameVal = isset($d->multiNameVal[$d->colCounter][$d->colCounter]) ? $d->multiNameVal[$d->colCounter][$d->colCounter] : (isset($d->multiNameVal[$d->colCounter]) ? $d->multiNameVal[$d->colCounter] : ($d->multiNameVal == array() ? null : $d->multiNameVal));
+$multiNameVal = isset($d->multiNameVal[$d->colCounter][$d->colCounter]) ? $d->multiNameVal[$d->colCounter][$d->colCounter] : (isset($d->multiNameVal[$d->colCounter]) ? $d->multiNameVal[$d->colCounter] : (empty($d->multiNameVal) ? null : $d->multiNameVal));
+if (!empty ($multiNameVal))
+{
+	$multiNameVal = (array) $multiNameVal;
+	$multiNameVal = $multiNameVal[0];
+}
+
 $colSize    = floor(floatval(12) / $d->optsPerRow);
 //$type = isset($d->single) ? 'radio' : 'checkbox';
 ?>
 <td data-role="suboption">
 		<input type="hidden" value="<?php echo $value;?>" data-role="fabrikinput" name="<?php echo $name; ?>" class="fabrikinput" />
-		<input type="hidden" value="<?php echo $multiNameVal;?>" data-role="fabrikinput" id="<?php echo $multiId; ?>" name="<?php echo $multiName; ?>" class="fabrikinput" />
-		<input type="hidden" value="<?php echo $extraPKVal;?>" data-role="fabrikinput" id="<?php echo $extraFKId; ?>" name="<?php echo $extraFKName; ?>" class="fabrikinput" />
 		<span><?php echo $label;?></span>
 </td>
 <td class="controls fabrikElement fabrikSubElementContainer" id="<?php echo $multiId ;?>">
@@ -43,17 +47,12 @@ foreach ($d->radioSubValues as $k => $subVal)
 	
 	if ($multiNameVal == $subVal)
 	{
+		$success = ' active btn-success';
 		$checked = 'checked="checked"';
 		//$subVal = $multiNameVal;
 	}
 	
-	if ($checked == 'checked="checked"')
-	{
-		$success = ' active btn-success';
-		//$subVal = $multiNameVal;
-	}
-	
-	if ($success == ' active btn-success')
+	if ($success == ' active btn-success' && empty($multiNameVal))
 	{
 		$multiNameVal = $subVal;
 		$checked = 'checked="checked"';
@@ -74,5 +73,7 @@ else
 <?php } ?>
 </td>
 <td data-role="suboption">
-		<input type="text" value="<?php echo $extraPKVal;?>" data-role="fabrikinput" id="<?php echo $extraFKId; ?>" name="<?php echo $extraFKName; ?>" class="fabrikinput" />
+		<input type="hidden" value="<?php echo $extraPKVal;?>" data-role="fabrikinput" id="<?php echo $extraFKId; ?>" name="<?php echo $extraFKName; ?>" class="fabrikinput" />
+		<span><?php echo $extraPKVal;?></span>
+
 </td>
