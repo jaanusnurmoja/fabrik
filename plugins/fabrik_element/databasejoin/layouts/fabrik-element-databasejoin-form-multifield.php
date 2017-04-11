@@ -19,11 +19,20 @@ $multiName =  isset($d->colCounter) ? $d->multiName . '[' . $d->colCounter . ']'
 $extraFKId =  isset($d->colCounter) ? $d->extraFKId . '_' . $d->colCounter : $d->extraFKId;
 $extraFKName =  isset($d->colCounter) ? $d->extraFKName . '[' . $d->colCounter . ']' : $d->extraFKName . '[]';
 $extraPKVal = $d->extraPKVal[0];
-$multiNameVal = isset($d->multiNameVal[$d->colCounter][$d->colCounter]) ? $d->multiNameVal[$d->colCounter][$d->colCounter] : (isset($d->multiNameVal[$d->colCounter]) ? $d->multiNameVal[$d->colCounter] : (empty($d->multiNameVal) ? null : $d->multiNameVal));
+/*
 if (!empty ($multiNameVal))
 {
 	$multiNameVal = (array) $multiNameVal;
 	$multiNameVal = $multiNameVal[0];
+}
+*/
+if (!isset($d->multiNameVal[$d->colCounter]))
+{
+	$multiNameVal = ''; //$data[$multiName];
+}
+else
+{
+	$multiNameVal = $d->multiNameVal[$d->colCounter]; 
 }
 
 $colSize    = floor(floatval(12) / $d->optsPerRow);
@@ -70,7 +79,10 @@ else
 		
 <input type="text" id="<?php echo $multiId;?>" name="<?php echo $multiName;?>" size="10" maxlength="255" class="input-medium form-control fabrikinput inputbox text" value="<?php echo $multiNameVal;?>">
 	</div>
-<?php } ?>
+<?php 
+}
+
+?>
 </td>
 <td data-role="suboption">
 		<input type="hidden" value="<?php echo $extraPKVal;?>" data-role="fabrikinput" id="<?php echo $extraFKId; ?>" name="<?php echo $extraFKName; ?>" class="fabrikinput" />

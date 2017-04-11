@@ -1847,7 +1847,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$extraFKNameHtml = $extraFields['extrafk']->name . $nameInRepeatGroup;
 		$extraPKRaw = $extraFields['extrafk']->xpkRaw;
 		$extraPKVal = $data[$extraPKRaw];
-		$extraNameVal = isset($data[$extraName][$repeatCounter]) ? $data[$extraName][$repeatCounter] : (isset($data[$extraName]) ? $data[$extraName] : array());
+		$extraNameVal = $group->canRepeat() ? $data[$extraName][$repeatCounter] : $data[$extraName];
 		
 		if (!$this->getFormModel()->isNewRecord())
 		{
@@ -1872,7 +1872,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$displayData->name         = $name;
 		$displayData->multiId    = $extraId;
 		$displayData->multiName    = $extraNameHtml;
-		$displayData->multiNameVal = FabrikWorker::JSONtoData($extraNameVal, true);
+		$displayData->multiNameVal = $extraNameVal; //(array) FabrikWorker::JSONtoData($extraNameVal, true);
 		$displayData->extraFKId  = $extraFKId;
 		$displayData->extraFKName  = $extraFKNameHtml;
 		$displayData->extraPKRaw  = $extraPKRaw;
