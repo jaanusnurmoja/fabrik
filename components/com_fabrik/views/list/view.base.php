@@ -588,8 +588,142 @@ class FabrikViewListBase extends FabrikView
 
 		$this->buttons();
 		$this->pluginTopButtons = $model->getPluginTopButtons();
+		$this->rowSpanData = $this->rowSpanData();
+		$this->rowSpans = $this->rowSpanData['elements'];
+		
+		// Jaanuse täienduse algus
+		//$rowspan = $this->rowSpanVals();
+/*
+		echo '<pre>';
+		echo 'ELAGU KOOD :D<br>';
+		var_dump($this->rowSpanData);
+		echo '</pre>';
+*/
+		
 	}
 
+	public function rowSpanData()
+	{
+		$c = array();
+		
+		foreach ($this->rows as $group)	
+		{
+/*					
+			foreach ($group as $this->_row)
+			{
+				echo '<pre>';
+				echo 'SEE RIDA';
+				var_dump($this->_row);
+				echo '</pre>';
+				$r = $this->_row->id;
+				$c[$r][] = $this->_row->cursor;
+				$c['rownum'] = $this->_row->cursor;
+			}
+*/			
+			foreach ($c as $r => $rid)
+			{
+				$c['rowcount'][$r] = count($c[$r]);
+			}
+			
+			foreach ($this->headings as $heading => $label) 
+			{
+				foreach ($group as $this->_row)
+				{
+					$r = $this->_row->id;
+					$d = $this->_row->data->$heading;
+					$c['elements'][$heading][$r][$d][] = $this->_row->cursor;
+					//$cnumber = count($c['elements'][$heading][$r][$d]);
+					$crs = $c['elements'][$heading][$r][$d][0];
+					
+					$c[$this->_row->cursor][$heading]['showCell'] = false;
+					
+					if ($crs == $this->_row->cursor)
+					{
+						$c[$this->_row->cursor][$heading]['showCell'] = true;
+						// $cnumber = max(array_keys($c[$heading][$r][$d])) + 1;
+						// $c[$this->_row->cursor][$heading]['rowspan'] = 'rowspan="' . $cnumber . '"';
+					}
+					
+				}
+				
+			}
+/*			
+			foreach ($c as $heading => $rid)
+			{
+				foreach ((array) $rid as $r => $rd)
+				{
+					foreach ((array) $rd as $d => $v)
+					{
+						$c['datacount'][$heading][$r][$d] = count($c[$heading][$r][$d]);
+						$cnumber = $c['datacount'][$heading][$r][$d];
+
+						if ($c[$heading][$r][$d][0])
+						{
+							$c['showCell'][$heading][$r][$d] = true;
+							$c['rowspan'][$heading][$r][$d] = 'rowspan="' . $cnumber . '"';
+							
+						}
+					}
+				}
+			}
+*/		
+		}
+
+		$rowSpanValues = $c['elements'];
+/*
+		echo '<pre>';
+		echo 'KAS SAAME KORDUSED KÄTTE :D<br>';
+		var_dump($c['elements']);
+		echo '</pre>';
+*/		
+		return $c;
+	}
+
+/*
+	public function rowSpanVals()
+	{
+		foreach ($this->rows as $group)	
+		{
+			$d = array();
+			//$rowspan = array();
+			//$cnt = array();
+			foreach ($this->headings as $heading => $label) 
+			{
+				$i = 0;
+				$d[$heading]['showCell'] = false;
+				$d[$heading]['amount'] = null;
+				$cnt_r = count($d[$heading][$v][$tr]);
+
+				foreach ($group as $this->_row)
+				{
+					$tr = $this->_row->id;
+					$v = $this->_row->data->$heading;
+					$d[$heading][$v][$tr][$i] = $v;	
+					if ($this->_row->id == $tr)
+					{
+						$this->_row->rownum = $i;
+					}
+					if ($i == min(array_keys($d[$heading][$v][$tr])))
+					{
+						$d[$heading]['showCell'] = true;
+						$d[$heading]['amount'] = 'rowspan="' . $cnt_r . '" ';
+					}
+					
+					$i++;
+				}
+
+
+				
+				
+			}
+			
+			return $d;
+		}
+		
+	// Jaanuse täienduse lõpp
+	}
+	*/
+	
 	/**
 	 * Model check for publish/access
 	 *
