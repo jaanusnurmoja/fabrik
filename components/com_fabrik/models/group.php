@@ -1035,13 +1035,16 @@ class FabrikFEModelGroup extends FabModel
 		$group->displaystate = ($group->canRepeat == 1 && $formModel->isEditable()) ? 1 : 0;
 		$group->maxRepeat = (int) $params->get('repeat_max');
 		$group->minRepeat = $params->get('repeat_min', '') === '' ? 1 : (int) $params->get('repeat_min', '');
+		$group->numRepeatElement = $params->get('repeat_num_element', '');
 		$group->showMaxRepeats  = $params->get('show_repeat_max', '0') == '1';
 		$group->minMaxErrMsg = $params->get('repeat_error_message', '');
 		$group->minMaxErrMsg = FText::_($group->minMaxErrMsg);
 		$group->canAddRepeat = $this->canAddRepeat();
 		$group->canDeleteRepeat = $this->canDeleteRepeat();
-		$group->intro = $text = FabrikString::translate($params->get('intro'));
-		$group->outro = FText::_($params->get('outro'));
+		$intro = FabrikString::translate($params->get('intro'));
+		$group->intro = $formModel->parseIntroOutroPlaceHolders($intro, $group->editable, $formModel->isNewRecord());
+		$outro = FText::_($params->get('outro'));
+		$group->outro = $formModel->parseIntroOutroPlaceHolders($outro, $group->editable, $formModel->isNewRecord());
 		$group->columns = $params->get('group_columns', 1);
 		$group->splitPage = $params->get('split_page', 0);
 		$group->showLegend = $this->showLegend($group);
@@ -1059,7 +1062,7 @@ class FabrikFEModelGroup extends FabModel
 
 		return $group;
 	}
-
+	
 	/**
 	 * Get the label positions, if set to global then return form's label positions
 	 *

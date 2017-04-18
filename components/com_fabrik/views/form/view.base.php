@@ -790,6 +790,7 @@ class FabrikViewFormBase extends FabrikView
 			$hidden[$g->id]         = $g->startHidden;
 			$maxRepeat[$g->id]      = $g->maxRepeat;
 			$minRepeat[$g->id]      = $g->minRepeat;
+			$numRepeatEls[$g->id]   = FabrikString::safeColNameToArrayKey($g->numRepeatElement);
 			$showMaxRepeats[$g->id] = $g->showMaxRepeats;
 			$minMaxErrMsg[$g->id]   = $g->minMaxErrMsg;
 		}
@@ -799,6 +800,7 @@ class FabrikViewFormBase extends FabrikView
 		$opts->minRepeat      = $minRepeat;
 		$opts->showMaxRepeats = $showMaxRepeats;
 		$opts->minMaxErrMsg   = $minMaxErrMsg;
+		$opts->numRepeatEls   = $numRepeatEls;
 
 		// $$$ hugh adding these so calc element can easily find joined and repeated join groups
 		// when it needs to add observe events ... don't ask ... LOL!
@@ -1125,20 +1127,35 @@ class FabrikViewFormBase extends FabrikView
 		$format   = $model->isAjax() ? 'raw' : 'html';
 		$fields[] = '<input type="hidden" name="format" value="' . $format . '" />';
 		$groups   = $model->getGroupsHiarachy();
+		$origRowIds = array();
+
+		if ($model->hasErrors())
+		{
+			$origRowIds = $this->app->input->getRaw('fabrik_group_rowids', array());
+		}
 
 		foreach ($groups as $groupModel)
 		{
 			if ($groupModel->isJoin())
 			{
-				$groupPk = $groupModel->getJoinModel()->getForeignId();
+				$groupId = $groupModel->getId();
 
-				// Use raw otherwise we inject the actual <input> into the hidden field's value
-				$groupPk .= '_raw';
-				$groupRowIds = (array) FArrayHelper::getValue($this->data, $groupPk, array());
-				$groupRowIds = htmlentities(json_encode($groupRowIds));
+				if (array_key_exists($groupId, $origRowIds))
+				{
+					$groupRowIds = htmlentities($origRowIds[$groupId]);
+				}
+				else
+				{
+					$groupPk = $groupModel->getJoinModel()->getForeignId();
+
+					// Use raw otherwise we inject the actual <input> into the hidden field's value
+					$groupPk     .= '_raw';
+					$groupRowIds = (array) FArrayHelper::getValue($this->data, $groupPk, array());
+					$groupRowIds = htmlentities(json_encode($groupRowIds));
+				}
 
 				// Used to check against in group process(), when deleting removed repeat groups
-				$fields[] = '<input type="hidden" name="fabrik_group_rowids[' . $groupModel->getId() . ']" value="' . $groupRowIds . '" />';
+				$fields[] = '<input type="hidden" name="fabrik_group_rowids[' . $groupId . ']" value="' . $groupRowIds . '" />';
 			}
 
 			$group = $groupModel->getGroup();
