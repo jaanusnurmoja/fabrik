@@ -683,7 +683,17 @@ class PlgFabrik_Element extends FabrikPlugin
 						}
 
 						$data = htmlspecialchars($data, ENT_QUOTES);
-						$img  = '<a class="fabrikTip" ' . $target . ' href="' . $aHref . '" opts=\'' . $opts . '\' title="' . $data . '">' . $img . '</a>';
+
+						$layout                  = FabrikHelperHTML::getLayout('element.fabrik-element-listicon-tip');
+						$displayData             = new stdClass;
+						$displayData->img     = $img;
+						$displayData->title   = $data;
+						$displayData->href    = $aHref;
+						$displayData->target  = $target;
+						$displayData->opts    = $opts;
+						$img                  = $layout->render($displayData);
+
+						//$img  = '<a class="fabrikTip" ' . $target . ' href="' . $aHref . '" opts=\'' . $opts . '\' title="' . $data . '">' . $img . '</a>';
 					}
 					elseif (!empty($iconFile))
 					{
@@ -2420,7 +2430,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			// $$$ rob changed from span wrapper to div wrapper as element's content may contain divs which give html error
 
 			// Placeholder to be updated by ajax code
-			$v = $this->getROElement($data, $repeatCounter);
+			$v = html_entity_decode($this->getROElement($data, $repeatCounter));
 			//$v = $v == '' ? '&nbsp;' : $v;
 			if (is_array($htmlId) || is_array($v))
 			{

@@ -1718,6 +1718,40 @@ class FabrikFEModelForm extends FabModelForm
 			$this->formData['rowid'] = '';
 		}
 
+		// set the repeat group counts (mutated from the base view code which creates the hidden input)
+		$groups   = $this->getGroupsHiarachy();
+		$fabrikRepeatGroup = array();
+
+		foreach ($groups as $groupModel)
+		{
+			// Check if group is actually a table join
+			$repeatGroup = 1;
+			$foreignKey  = null;
+
+			if ($groupModel->canRepeat())
+			{
+				if ($groupModel->isJoin())
+				{
+					$joinModel  = $groupModel->getJoinModel();
+					$joinTable  = $joinModel->getJoin();
+
+					if (is_object($joinTable))
+					{
+						$elementModels = $groupModel->getPublishedElements();
+						reset($elementModels);
+						$tmpElement        = current($elementModels);
+						$smallerElHTMLName = $tmpElement->getFullName(true, false);
+						$repeatGroup       = count($this->formData[$smallerElHTMLName]);
+					}
+				}
+			}
+
+			$groupModel->repeatTotal = $repeatGroup;
+			$fabrikRepeatGroup[$groupModel->getId()] = $repeatGroup;
+		}
+
+		$this->app->input->set('fabrik_repeat_group', $fabrikRepeatGroup);
+
 		return $origId;
 	}
 
@@ -3059,6 +3093,9 @@ class FabrikFEModelForm extends FabModelForm
 		 * $$$ hugh - we need to remove any elements from the query string,
 		 * if the user doesn't have access, otherwise ACL's on elements can
 		 * be bypassed by just setting value on form load query string!
+		 *
+		 * Also remove all form data if task is form.process, in case some plugin is trying to reload
+		 * form data.
 		 */
 
 		$clean_request = $f->clean($_REQUEST, 'array');
@@ -3070,7 +3107,7 @@ class FabrikFEModelForm extends FabModelForm
 
 			if ($elementModel !== false)
 			{
-				if (!$elementModel->canUse())
+				if (!$elementModel->canUse() || $this->app->input->get('task', '') === 'form.process')
 				{
 					unset($clean_request[$key]);
 				}
@@ -3307,7 +3344,7 @@ class FabrikFEModelForm extends FabModelForm
 
 		if (in_array(true, $pluginManager->data))
 		{
-			if ($this->session->get($this->getSessionContext() . '.session.on') == true && $useSessionOn)
+			if ($this->session->get($this->getSessionContext() . 'session.on') == true && $useSessionOn)
 			{
 				return true;
 			}
