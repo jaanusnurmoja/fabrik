@@ -1386,6 +1386,9 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					case 'multilist':
 						$this->renderMultiSelectList($data, $repeatCounter, $html, $tmp, $default);
 						break;
+					case 'multifield':
+						$this->renderMultiFieldList($data, $repeatCounter, $html, $tmp, $default);
+						break;
 					case 'auto-complete':
 						$this->renderAutoComplete($data, $repeatCounter, $html, $default);
 						break;
@@ -1717,6 +1720,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$optsPerRow = intval($params->get('dbjoin_options_per_row', 0));
 		$targetIds  = $this->multiOptionTargetIds($data, $repeatCounter);
 		$class      = 'fabrikinput inputbox ' . $params->get('bootstrap_class', '');
+		$single		= $params->get('single_instead_multiple');
 
 		if ($targetIds !== false)
 		{
@@ -1725,9 +1729,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if ($this->isEditable())
 		{
-			$multiSize     = (int) $params->get('dbjoin_multilist_size', 6);
+			$multiSize     = $single ? 1 : (int) $params->get('dbjoin_multilist_size', 6);
+			$multiple = $single ? '' : ' multiple="true"';
 			$advancedClass = $this->getAdvancedSelectClass();
-			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '" multiple="true"';
+			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '"' . $multiple;
 			//$attributes    .= ' data-chosen-options=\'{"max_selected_options":3}\'';
 			$html[]        = JHTML::_('select.genericlist', $tmp, $elName, $attributes, 'value', 'text', $default, $id);
 		}
@@ -1781,6 +1786,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$displayData->name         = $name;
 		$displayData->editable     = $this->isEditable();
 		$displayData->optionLayout = $this->getLayout('form-checkbox');
+		$displayData->single	 = $params->get('single_instead_multiple');
 
 		$html[]       = '<div class="fabrikSubElementContainer" id="' . $id . '">';
 		$singleLayout = 'fabrik-element-' . $this->getPluginName() . '-form-checkbox';
@@ -1806,6 +1812,108 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$tmpIds[] = $o;
 			$tmp      = $tmpIds;
 			$dummy    = FabrikHelperHTML::aList('checkbox', $tmp, $name, $attributes, $default, 'value', 'text', 1, true);
+			$html[]   = '<div class="chxTmplNode">' . $dummy . '</div>';
+		}
+
+		$html[] = '</div>';
+	}
+
+	/**
+	 * Render checkbox list in form
+	 *
+	 * @param   array $data          Form data
+	 * @param   int   $repeatCounter Repeat group counter
+	 * @param   array &$html         HTML to assign output to
+	 * @param   array $tmp           List of value/label objects
+	 * @param   array $default       Default values - the lookup table's primary key values
+	 *
+	 * @since   3.0.7
+	 *
+	 * @return  void
+	 */
+	protected function renderMultiFieldList($data, $repeatCounter, &$html, $tmp, $default)
+	{
+		$id     = $this->getHTMLId($repeatCounter);
+		$name   = $this->getHTMLName($repeatCounter);
+		$params = $this->getParams();
+
+		$attributes = 'class="fabrikinput inputbox" id="' . $id . '"';
+
+		$name = FabrikString::rtrimword($name, '[]');
+		$group = $this->getGroup();
+		$idInRepeatGroup = $group->canRepeat() ? '_' . $repeatCounter : '';
+		$nameInRepeatGroup = $group->canRepeat() ? '[' . $repeatCounter . ']' : '';
+		$extraFields = $this->joinExtraFields();
+		$extra = $extraFields['multifield']->field;
+		$extraId = $extraFields['multifield']->name . $idInRepeatGroup;
+		$extraName = $extraFields['multifield']->name;
+		$extraNameHtml = $extraFields['multifield']->name . $nameInRepeatGroup;
+		$extraFK = $extraFields['extrafk']->field;
+		$extraFKId = $extraFields['extrafk']->name . $idInRepeatGroup;
+		$extraFKName = $extraFields['extrafk']->name;
+		$extraFKNameHtml = $extraFields['extrafk']->name . $nameInRepeatGroup;
+		$extraPKRaw = $extraFields['extrafk']->xpkRaw;
+		$extraPKVal = $data[$extraPKRaw];
+		$extraNameVal = $group->canRepeat() ? $data[$extraName][$repeatCounter] : $data[$extraName];
+		
+		if (!$this->getFormModel()->isNewRecord())
+		{
+			// If its a new record we don't want to look up defaults in the look up table as they will not exist
+			$targetIds = $this->multiOptionTargetIds($data, $repeatCounter);
+
+			if ($targetIds !== false)
+			{
+				$default = $targetIds;
+			}
+		}
+		
+		$radioSub = $params->get('sub_options');
+		$multiElementType = $params->get('multifield_element_type', 'textbox');
+
+		$this->renderReadOnlyTrimOptions($tmp, $default);
+		$layout                    = $this->getLayout('form-multifieldlist');
+		$displayData               = new stdClass;
+		$displayData->options      = $tmp;
+		$displayData->default      = (array) $default;
+		$displayData->optsPerRow   = 1;
+		$displayData->name         = $name;
+		$displayData->multiId    = $extraId;
+		$displayData->multiName    = $extraNameHtml;
+		$displayData->multiNameVal = $extraNameVal; //(array) FabrikWorker::JSONtoData($extraNameVal, true);
+		$displayData->extraFKId  = $extraFKId;
+		$displayData->extraFKName  = $extraFKNameHtml;
+		$displayData->extraPKRaw  = $extraPKRaw;
+		$displayData->extraPKVal  = $extraPKVal;
+		$displayData->editable     = $this->isEditable();
+		$displayData->optionLayout = $this->getLayout('form-multifield');
+		$displayData->radioSubValues = $radioSub->sub_values;
+		$displayData->radioSubLabels = $radioSub->sub_labels;
+		$displayData->multiElementType	= $multiElementType;
+
+		$html[]       = '<div class="fabrikSubElementContainer" id="' . $id . '">';
+		$singleLayout = 'fabrik-element-' . $this->getPluginName() . '-form-multifield';
+		FabrikHelperHTML::jLayoutJs($singleLayout . '_' . $id, $singleLayout, $displayData, array($this->layoutBasePath()));
+		$rowOptsLayout = 'fabrik-element-' . $this->getPluginName() . '-form-rowopts';
+		FabrikHelperHTML::jLayoutJs($rowOptsLayout, $rowOptsLayout, $displayData, array($this->layoutBasePath()));
+
+		if (FabrikWorker::j3())
+		{
+			$html[] = $layout->render($displayData);
+		}
+		else
+		{
+			$html[] = FabrikHelperHTML::aList('hidden', $tmp, $name, $attributes, $default, 'value', 'text', $displayData->optsPerRow, $displayData->editable);
+		}
+
+		if (empty($tmp) && !FabrikWorker::j3())
+		{
+			$tmpIds   = array();
+			$o        = new stdClass;
+			$o->text  = 'dummy';
+			$o->value = 'dummy';
+			$tmpIds[] = $o;
+			$tmp      = $tmpIds;
+			$dummy    = FabrikHelperHTML::aList('hidden', $tmp, $name, $attributes, $default, 'value', 'text', 1, true);
 			$html[]   = '<div class="chxTmplNode">' . $dummy . '</div>';
 		}
 
@@ -2094,7 +2202,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	{
 		$raw         = $this->getFullName(true, false);
 		$displayType = $this->getDisplayType();
-		$raw .= ($displayType == 'checkbox' || $displayType == 'multilist') ? '_id' : '_raw';
+		$raw .= ($displayType == 'checkbox' || $displayType == 'multilist' || $displayType == 'multifield') ? '_id' : '_raw';
 		$values = isset($thisRow->$raw) ? FabrikWorker::JSONtoData($thisRow->$raw, true) : array();
 
 		foreach ($data as $key => $value)
@@ -2649,8 +2757,9 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					{
 						$where = $this->_db->qn($dbName . '.' . $this->getJoinValueFieldName());
 					}
+					$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 
-					$groupBy = $this->_db->qn($dbName . '.parent_id');
+					$groupBy = $this->_db->qn($dbName . '.' . $parentID);
 					$rows    = $this->checkboxRows($groupBy, $condition, $value, $where);
 					$joinIds = array_keys($rows);
 
@@ -2722,9 +2831,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$jKey  = $this->getLabelOrConcatVal();
 			$jKey  = !strstr($jKey, 'CONCAT') ? $label : $jKey;
 			$label = str_replace($join->table_join, $to, $jKey);
+			$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 		}
 
-		$query->select($joinTable . '.parent_id, ' . $v . ' AS value, ' . $label . ' AS text')->from($joinTable)
+		$query->select($joinTable . '.' . $parentID . ', ' . $v . ' AS value, ' . $label . ' AS text')->from($joinTable)
 			->join('LEFT', $to . ' ON ' . $key . ' = ' . $joinTable . '.' . $shortName);
 
 		$this->buildQueryWhere(array(), true, null, array('mode' => 'filter'), $query);
@@ -3623,7 +3733,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 */
 	public function isJoin()
 	{
-		if (in_array($this->getDisplayType(), array('checkbox', 'multilist')))
+		if (in_array($this->getDisplayType(), array('checkbox', 'multilist', 'multifield')))
 		{
 			return true;
 		}
@@ -3671,12 +3781,21 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			*/
 			$jKey = str_replace($joinTable, 'lookup', $jKey);
 		}
+		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$elementName = $this->getParams()->get('repeat_element', $this->getElement()->name);
 
 		$parentKey  = $this->buildQueryParentKey();
 		$fullElName = $this->_db->qn($this->getFullName(true, false));
+		$addFilter = ''; //!empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+		$xtras = $this->joinExtraFields();
+		if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
+		{
+			$addFilter .= ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
+		}
+			
 		$sql        = "(SELECT GROUP_CONCAT(" . $jKey . " " . $where . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable
-		LEFT JOIN " . $dbName . " AS lookup ON lookup." . $this->getJoinValueFieldName() . " = $joinTable." . $this->getElement()->name . " WHERE "
-			. $joinTable . ".parent_id = " . $parentKey . ")";
+		LEFT JOIN " . $dbName . " AS lookup ON lookup." . $this->getJoinValueFieldName() . " = $joinTable." . $elementName . " WHERE "
+			. $joinTable . "." . $parentID . " = " . $parentKey . $addFilter. ")";
 
 		if ($addAs)
 		{
@@ -3723,12 +3842,24 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 */
 	protected function buildQueryElementConcatId()
 	{
-		//$str        = parent::buildQueryElementConcatId();
+		$str = parent::buildQueryElementConcatId();
+		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 		$joinTable  = $this->getJoinModel()->getJoin()->table_join;
 		$parentKey  = $this->buildQueryParentKey();
-		$fullElName = $this->_db->qn($this->getFullName(true, false) . '_id');
-		$str = "(SELECT GROUP_CONCAT(" . $this->element->name . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE " . $joinTable
-			. ".parent_id = " . $parentKey . ") AS $fullElName";
+		//$fullElName = $this->_db->qn($this->getFullName(true, false) . '_id');
+		$fullElName = $this->getFullName(true, false) . '_id';
+		$elementName = $this->getParams()->get('repeat_element', $this->element->name);
+			
+		$addFilter = ''; //!empty($this->joinParamsValue()->field) ? ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue()->field : '';
+		$xtras = $this->joinExtraFields();
+
+		if (!empty($xtras['extrafk']->field) || !empty($xtras['extrafk']->xpkField))
+		{
+			$addFilter .= ' AND ' . $xtras['extrafk']->field . ' = ' . $xtras['extrafk']->xpkField;
+		}
+			
+		$str .= " (SELECT GROUP_CONCAT(" . $elementName . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE " . $joinTable
+			. "." . $parentID . " = " . $parentKey . $addFilter . ") AS $fullElName";
 
 		return $str;
 	}
@@ -3880,7 +4011,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	{
 		$displayType = $this->getDisplayType();
 
-		if ($displayType == 'checkbox' || $displayType == 'multilist')
+		if ($displayType == 'checkbox' || $displayType == 'multilist' || $displayType == 'multifield')
 		{
 			$idName    = $this->getFullName(true, false) . '_id';
 			$formModel = $this->getFormModel();
@@ -3915,7 +4046,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	{
 		$displayType = $this->getDisplayType();
 
-		if ($displayType == 'checkbox' || $displayType == 'multilist')
+		if ($displayType == 'checkbox' || $displayType == 'multilist'|| $displayType == 'multifield')
 		{
 			$name  = $this->getFullName(true, false);
 			$group = $this->getGroup();
