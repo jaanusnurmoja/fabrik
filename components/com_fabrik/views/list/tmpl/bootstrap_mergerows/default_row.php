@@ -16,24 +16,29 @@ $tr = $this->_row->id;
 <tr id="<?php echo $tr;?>" class="<?php echo $this->_row->class;?>">
 	<?php foreach ($this->headings as $heading => $label) {
 		$v = $this->_row->data->$heading;
+		$pkField = empty($this->pkFields->$heading->name) ? '__pk_val' : $this->pkFields->$heading->name;
+		$pkValue = empty($this->_row->data->$pkField) ? 0 : $this->_row->data->$pkField;
 		$showCell = $this->rowSpanData[$this->_row->cursor][$heading]['showCell'];
 		$rowspan = '';
 		if ($showCell == true)
 		{
-			$rowspan = isset($this->rowSpans) ? $this->rowSpans[$heading][$tr][$v] : 'Debug: no rowspan';
-			$rowspan = count($rowspan);			
+			$rowspans = isset($this->rowSpans) ? $this->rowSpans[$heading][$tr][$pkValue] : array();
+			$rowspan = 'rowspan="' . count($rowspans) . '"';			
 		}
 		else
 		{
 			$rowspan = '';
 		}
-			$style = empty($this->cellClass[$heading]['style']) ? '' : 'style="'.$this->cellClass[$heading]['style'].'"';
+		
+		$style = empty($this->cellClass[$heading]['style']) ? '' : 'style="'.$this->cellClass[$heading]['style'].'"';
+		
+		if ($showCell)
+		{
 			?>
-			<td class="<?php echo $this->cellClass[$heading]['class']?>" <?php //echo $rowspan;?><?php echo $style?>>
-				<?php echo isset($this->_row->data) ? $v . ' + ' . var_dump($this->rowSpanData[$this->_row->cursor][$heading]['showCell']) . ' + ' . $rowspan  : '';?>
+			<td class="<?php echo $this->cellClass[$heading]['class']?>" <?php echo $rowspan;?><?php echo $style?>>
+				<?php echo isset($this->_row->data) ? $v  : '';?>
 			</td>
 		<?php 
-		
-	}
+		}	}
 	?>
 </tr>

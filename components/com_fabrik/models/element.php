@@ -683,7 +683,17 @@ class PlgFabrik_Element extends FabrikPlugin
 						}
 
 						$data = htmlspecialchars($data, ENT_QUOTES);
-						$img  = '<a class="fabrikTip" ' . $target . ' href="' . $aHref . '" opts=\'' . $opts . '\' title="' . $data . '">' . $img . '</a>';
+
+						$layout                  = FabrikHelperHTML::getLayout('element.fabrik-element-listicon-tip');
+						$displayData             = new stdClass;
+						$displayData->img     = $img;
+						$displayData->title   = $data;
+						$displayData->href    = $aHref;
+						$displayData->target  = $target;
+						$displayData->opts    = $opts;
+						$img                  = $layout->render($displayData);
+
+						//$img  = '<a class="fabrikTip" ' . $target . ' href="' . $aHref . '" opts=\'' . $opts . '\' title="' . $data . '">' . $img . '</a>';
 					}
 					elseif (!empty($iconFile))
 					{
@@ -910,11 +920,11 @@ class PlgFabrik_Element extends FabrikPlugin
 	 *
 	 * @return string
 	 */
-	protected function groupConcactJoinKey()
+	public function groupConcactJoinKey()
 	{
 		$table = $this->getListModel()->getTable();
 
-		if ($this->getGroupModel()->isJoin() && $this->isJoin())
+		if ($this->getGroupModel()->isJoin()) //  && $this->isJoin()
 		{
 			$groupJoin = $this->getGroupModel()->getJoinModel()->getJoin();
 			$pkField   = $groupJoin->params->get('pk');
@@ -2285,6 +2295,10 @@ class PlgFabrik_Element extends FabrikPlugin
 				break;
 		}
 
+		$primary = $this->groupConcactJoinKey();
+		$element->primary = FabrikString::safeColNameToArrayKey($primary);
+		$element->isPK = $this->getFullName() == $element->primary;
+		
 		return $element;
 	}
 
