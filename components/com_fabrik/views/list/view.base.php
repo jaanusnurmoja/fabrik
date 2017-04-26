@@ -405,6 +405,28 @@ class FabrikViewListBase extends FabrikView
 		$form = $model->getFormModel();
 		$nav  = $model->getPagination();
 
+		$groups = $form->getGroupsHiarachy();
+
+		$this->pkFields = new stdClass;
+		
+		foreach ($groups as $groupModel)
+		{
+			$elementModels = $groupModel->getPublishedElements();
+
+			foreach ($elementModels as $elementModel)
+			{
+				$elementModel->setContext($groupModel, $form, $model);
+				$elementModel->setRowClass($data);
+				$elementModel->groupConcactJoinKey();
+				$pkField = $elementModel->groupConcactJoinKey();
+				$pkField = FabrikString::safeColNameToArrayKey($pkField);
+				$elementModel->getFullName(true, false);
+				$element = $elementModel->getFullName(true, false);
+				$this->pkFields->$element = new stdClass;
+				$this->pkFields->$element->name = $pkField;
+			}
+		}
+		
 		foreach ($data as $groupk => $group)
 		{
 			$num_rows = 1;
@@ -425,18 +447,7 @@ class FabrikViewListBase extends FabrikView
 			}
 		}
 
-		$groups = $form->getGroupsHiarachy();
-
-		foreach ($groups as $groupModel)
-		{
-			$elementModels = $groupModel->getPublishedElements();
-
-			foreach ($elementModels as $elementModel)
-			{
-				$elementModel->setContext($groupModel, $form, $model);
-				$elementModel->setRowClass($data);
-			}
-		}
+		
 
 		$this->rows = $data;
 		reset($this->rows);
@@ -591,13 +602,12 @@ class FabrikViewListBase extends FabrikView
 		$this->rowSpanData = $this->rowSpanData();
 		$this->rowSpans = $this->rowSpanData['elements'];
 		
-		// Jaanuse täienduse algus
-		//$rowspan = $this->rowSpanVals();
 /*
-		echo '<pre>';
-		echo 'ELAGU KOOD :D<br>';
-		var_dump($this->rowSpanData);
-		echo '</pre>';
+		Jaanus:
+		The following function is aimed to 
+		enable merge data in lists with joins so that it reduces duplicates of 
+		main and no-repeated data but preserves table view and visual relationship between data. 
+		Partially done in default_row.php
 */
 		
 	}
@@ -608,18 +618,6 @@ class FabrikViewListBase extends FabrikView
 		
 		foreach ($this->rows as $group)	
 		{
-/*					
-			foreach ($group as $this->_row)
-			{
-				echo '<pre>';
-				echo 'SEE RIDA';
-				var_dump($this->_row);
-				echo '</pre>';
-				$r = $this->_row->id;
-				$c[$r][] = $this->_row->cursor;
-				$c['rownum'] = $this->_row->cursor;
-			}
-*/			
 			foreach ($c as $r => $rid)
 			{
 				$c['rowcount'][$r] = count($c[$r]);
@@ -627,101 +625,51 @@ class FabrikViewListBase extends FabrikView
 			
 			foreach ($this->headings as $heading => $label) 
 			{
+				if (!isset($this->pkFields->$heading))
+				{
+					$this->pkFields->$heading = new stdClass;
+					$this->pkFields->$heading->name = '__pk_val';
+				}
+				
+				$pkField = $this->pkFields->$heading->name;
+				$pk_range = array();
 				foreach ($group as $this->_row)
 				{
+					$pkValue = empty($this->_row->data->$pkField) ? 0 : $this->_row->data->$pkField;
+					
 					$r = $this->_row->id;
+					
+					// Not used yet but "ready to use" :)
+					// $rpk = $this->_row->data->__pk_val;
+					
 					$d = $this->_row->data->$heading;
-					$c['elements'][$heading][$r][$d][] = $this->_row->cursor;
-					//$cnumber = count($c['elements'][$heading][$r][$d]);
-					$crs = $c['elements'][$heading][$r][$d][0];
+					$c['elements'][$heading][$r][$pkValue][] = $this->_row->cursor;
+					$crs = $c['elements'][$heading][$r][$pkValue][0];
 					
 					$c[$this->_row->cursor][$heading]['showCell'] = false;
 					
 					if ($crs == $this->_row->cursor)
 					{
 						$c[$this->_row->cursor][$heading]['showCell'] = true;
-						// $cnumber = max(array_keys($c[$heading][$r][$d])) + 1;
-						// $c[$this->_row->cursor][$heading]['rowspan'] = 'rowspan="' . $cnumber . '"';
-					}
-					
-				}
-				
-			}
-/*			
-			foreach ($c as $heading => $rid)
-			{
-				foreach ((array) $rid as $r => $rd)
-				{
-					foreach ((array) $rd as $d => $v)
-					{
-						$c['datacount'][$heading][$r][$d] = count($c[$heading][$r][$d]);
-						$cnumber = $c['datacount'][$heading][$r][$d];
-
-						if ($c[$heading][$r][$d][0])
-						{
-							$c['showCell'][$heading][$r][$d] = true;
-							$c['rowspan'][$heading][$r][$d] = 'rowspan="' . $cnumber . '"';
-							
-						}
 					}
 				}
 			}
-*/		
 		}
 
-		$rowSpanValues = $c['elements'];
 		echo '<pre>';
-		echo 'KAS SAAME KORDUSED KÄTTE :D<br>';
-		var_dump($c['elements']);
+		if (isset($c['elements']['birthday_test_94_repeat___id']))
+		{
+			echo strip_tags(str_replace('\n', '', json_encode($c['elements']['birthday_test_94_repeat___id'])));
+			echo '<br />';
+		}
+		if (isset($c['elements']['birthday_test_94_repeat___id'], $c['elements']['birthday_test_93_repeat___id']))
+		{
+			strip_tags(str_replace(array('\n','<br>','<br />'), '', var_dump('94_repeat ', $c['elements']['birthday_test_94_repeat___id'], '93_repeat', $c['elements']['birthday_test_93_repeat___id'])));
+		}
 		echo '</pre>';
-		
 		return $c;
 	}
 
-/*
-	public function rowSpanVals()
-	{
-		foreach ($this->rows as $group)	
-		{
-			$d = array();
-			//$rowspan = array();
-			//$cnt = array();
-			foreach ($this->headings as $heading => $label) 
-			{
-				$i = 0;
-				$d[$heading]['showCell'] = false;
-				$d[$heading]['amount'] = null;
-				$cnt_r = count($d[$heading][$v][$tr]);
-
-				foreach ($group as $this->_row)
-				{
-					$tr = $this->_row->id;
-					$v = $this->_row->data->$heading;
-					$d[$heading][$v][$tr][$i] = $v;	
-					if ($this->_row->id == $tr)
-					{
-						$this->_row->rownum = $i;
-					}
-					if ($i == min(array_keys($d[$heading][$v][$tr])))
-					{
-						$d[$heading]['showCell'] = true;
-						$d[$heading]['amount'] = 'rowspan="' . $cnt_r . '" ';
-					}
-					
-					$i++;
-				}
-
-
-				
-				
-			}
-			
-			return $d;
-		}
-		
-	// Jaanuse täienduse lõpp
-	}
-	*/
 	
 	/**
 	 * Model check for publish/access
