@@ -16,8 +16,8 @@ $tr = $this->_row->id;
 <tr id="<?php echo $tr;?>" class="<?php echo $this->_row->class;?>">
 	<?php foreach ($this->headings as $heading => $label) {
 		$v = $this->_row->data->$heading;
-		$pkField = empty($this->pkFields->$heading->name) ? '__pk_val' : $this->pkFields->$heading->name;
-		$pkValue = empty($this->_row->data->$pkField) ? 0 : $this->_row->data->$pkField;
+		$pkField = empty($this->pkFields->$heading->name) ? '__pk_val' : $this->pkFields->$heading->name . '_raw';
+		$pkValue = empty($this->_row->data->$pkField) ? '0' : (string) $this->_row->data->$pkField;
 		$showCell = $this->rowSpanData[$this->_row->cursor][$heading]['showCell'];
 		$rowspan = '';
 		if ($showCell == true)

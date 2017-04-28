@@ -600,22 +600,21 @@ class FabrikViewListBase extends FabrikView
 		$this->buttons();
 		$this->pluginTopButtons = $model->getPluginTopButtons();
 		$this->rowSpanData = $this->rowSpanData();
-		$this->rowSpans = $this->rowSpanData['elements'];
-		
+		$this->rowSpans = $this->rowSpanData['elements'];	
+	}
+
 /*
 		Jaanus:
 		The following function is aimed to 
 		enable merge data in lists with joins so that it reduces duplicates of 
 		main and no-repeated data but preserves table view and visual relationship between data. 
 		Partially done in default_row.php
+		Many thanks to mr Aivar Luist :)
 */
-		
-	}
-
 	public function rowSpanData()
 	{
 		$c = array();
-		
+			$tempDebug = array();		
 		foreach ($this->rows as $group)	
 		{
 			foreach ($c as $r => $rid)
@@ -631,20 +630,36 @@ class FabrikViewListBase extends FabrikView
 					$this->pkFields->$heading->name = '__pk_val';
 				}
 				
-				$pkField = $this->pkFields->$heading->name;
+				$pkField = $this->pkFields->$heading->name . '_raw';
+				foreach ($group as $this->_row)
+				{
+					$pkValue = empty($this->_row->data->$pkField) ? '0' : (string) $this->_row->data->$pkField;
+					$r = $this->_row->id;
+					$d = $this->_row->data->$heading;
+					$c['origels'][$heading][$r][$pkValue][] = $this->_row->cursor;
+				}
+				
+			}
+
+			$c['elements'] = FArrayHelper::sortSubgroupedArrays($c['origels']);
+
+			foreach ($this->headings as $heading => $label) 
+			{
+				if (!isset($this->pkFields->$heading))
+				{
+					$this->pkFields->$heading = new stdClass;
+					$this->pkFields->$heading->name = '__pk_val';
+				}
+				
+				$pkField = $this->pkFields->$heading->name . '_raw';
 				$pk_range = array();
 				foreach ($group as $this->_row)
 				{
-					$pkValue = empty($this->_row->data->$pkField) ? 0 : $this->_row->data->$pkField;
-					
+					$pkValue = empty($this->_row->data->$pkField) ? '0' : (string) $this->_row->data->$pkField;
 					$r = $this->_row->id;
-					
-					// Not used yet but "ready to use" :)
-					// $rpk = $this->_row->data->__pk_val;
-					
 					$d = $this->_row->data->$heading;
-					$c['elements'][$heading][$r][$pkValue][] = $this->_row->cursor;
 					$crs = $c['elements'][$heading][$r][$pkValue][0];
+					$tempDebug[] = $heading . ': ' . $pkValue . ' at zero: ' . $crs . ' real: ' . $this->_row->cursor;
 					
 					$c[$this->_row->cursor][$heading]['showCell'] = false;
 					
@@ -664,9 +679,10 @@ class FabrikViewListBase extends FabrikView
 		}
 		if (isset($c['elements']['birthday_test_94_repeat___id'], $c['elements']['birthday_test_93_repeat___id']))
 		{
-			strip_tags(str_replace(array('\n','<br>','<br />'), '', var_dump('94_repeat ', $c['elements']['birthday_test_94_repeat___id'], '93_repeat', $c['elements']['birthday_test_93_repeat___id'])));
+			var_dump($tempDebug, '<br> 94_repeat ', $c['elements']['birthday_test_94_repeat___id'], '93_repeat', $c['elements']['birthday_test_93_repeat___id']);
 		}
 		echo '</pre>';
+		
 		return $c;
 	}
 
