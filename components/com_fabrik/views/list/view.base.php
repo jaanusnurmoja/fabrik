@@ -604,17 +604,16 @@ class FabrikViewListBase extends FabrikView
 	}
 
 /*
-		Jaanus:
-		The following function is aimed to 
+		Jaanus: The following function is aimed to 
 		enable merge data in lists with joins so that it reduces duplicates of 
 		main and no-repeated data but preserves table view and visual relationship between data. 
 		Partially done in default_row.php
-		Many thanks to mr Aivar Luist :)
+		Many thanks to mr Aivar Luist for FArrayHelper::sortSubgroupedArrays :)
 */
 	public function rowSpanData()
 	{
 		$c = array();
-			$tempDebug = array();		
+
 		foreach ($this->rows as $group)	
 		{
 			foreach ($c as $r => $rid)
@@ -652,7 +651,7 @@ class FabrikViewListBase extends FabrikView
 				}
 				
 				$pkField = $this->pkFields->$heading->name . '_raw';
-				$pk_range = array();
+
 				foreach ($group as $this->_row)
 				{
 					$pkValue = empty($this->_row->data->$pkField) ? '0' : (string) $this->_row->data->$pkField;
@@ -671,18 +670,6 @@ class FabrikViewListBase extends FabrikView
 			}
 		}
 
-		echo '<pre>';
-		if (isset($c['elements']['birthday_test_94_repeat___id']))
-		{
-			echo strip_tags(str_replace('\n', '', json_encode($c['elements']['birthday_test_94_repeat___id'])));
-			echo '<br />';
-		}
-		if (isset($c['elements']['birthday_test_94_repeat___id'], $c['elements']['birthday_test_93_repeat___id']))
-		{
-			var_dump($tempDebug, '<br> 94_repeat ', $c['elements']['birthday_test_94_repeat___id'], '93_repeat', $c['elements']['birthday_test_93_repeat___id']);
-		}
-		echo '</pre>';
-		
 		return $c;
 	}
 
