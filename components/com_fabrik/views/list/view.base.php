@@ -599,8 +599,12 @@ class FabrikViewListBase extends FabrikView
 
 		$this->buttons();
 		$this->pluginTopButtons = $model->getPluginTopButtons();
-		$this->rowSpanData = $this->rowSpanData();
-		$this->rowSpans = $this->rowSpanData['elements'];	
+		$this->rowSpanMerge = $model->mergeJoinedData() == 3 && !$this->ajax;
+		if ($this->rowSpanMerge)
+		{
+			$this->rowSpanData = $this->rowSpanData();
+			$this->rowSpans = $this->rowSpanData['elements'];				
+		}
 	}
 
 /*
