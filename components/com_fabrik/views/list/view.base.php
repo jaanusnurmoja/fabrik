@@ -662,8 +662,6 @@ class FabrikViewListBase extends FabrikView
 					$r = $this->_row->id;
 					$d = $this->_row->data->$heading;
 					$crs = $c['elements'][$heading][$r][$pkValue][0];
-					$tempDebug[] = $heading . ': ' . $pkValue . ' at zero: ' . $crs . ' real: ' . $this->_row->cursor;
-					
 					$c[$this->_row->cursor][$heading]['showCell'] = false;
 					
 					if ($crs == $this->_row->cursor)

@@ -6804,7 +6804,7 @@ class FabrikFEModelList extends JModelForm
 					$cellClass[$compositeKey]['class'] .= ' repeat';
 					$dis = $params->get('join-display');
 
-					if ($dis != 'default')
+					if ($dis != 'default' && $dis != 'rowspan')
 					{
 						$cellClass[$compositeKey]['class'] .= '-' . $dis;
 					}
