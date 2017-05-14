@@ -646,6 +646,8 @@ class FabrikViewListBase extends FabrikView
 				$c['rowcount'][$r] = count($c[$r]);
 			}
 			
+			$c['origels'] = array();
+			
 			foreach ($this->headings as $heading => $label) 
 			{
 				if (!isset($this->pkFields->$heading))
