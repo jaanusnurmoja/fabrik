@@ -3045,22 +3045,22 @@ class PlgFabrik_Element extends FabrikPlugin
 						{
 							if (preg_match('#^/.+/\w*#', $jsAct->js_e_value))
 							{
-								$js .= "if (this.get('value').test(%%REGEX%%)) {";
+								$js .= "if (this.get('value').toString().test(%%REGEX%%)) {";
 							}
 							else
 							{
-								$js .= "if (this.get('value').test(/%%REGEX%%/)) {";
+								$js .= "if (this.get('value').toString().test(/%%REGEX%%/)) {";
 							}
 						}
 						elseif ($jsAct->js_e_condition == '!regex')
 						{
 							if (preg_match('#^/.+/\w*#', $jsAct->js_e_value))
 							{
-								$js .= "if (this.get('value').test(%%REGEX%%)) {";
+								$js .= "if (this.get('value').toString().test(%%REGEX%%)) {";
 							}
 							else
 							{
-								$js .= "if (!this.get('value').test(/%%REGEX%%/)) {";
+								$js .= "if (!this.get('value').toString().test(/%%REGEX%%/)) {";
 							}
 						}
 						else
