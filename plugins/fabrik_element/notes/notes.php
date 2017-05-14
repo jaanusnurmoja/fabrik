@@ -236,7 +236,7 @@ class PlgFabrik_ElementNotes extends PlgFabrik_ElementDatabasejoin
 	 *
 	 * @return string|JDatabaseQuery
 	 */
-	protected function buildQueryWhere($data = array(), $repeatCounter = 0, $incWhere = true, $thisTableAlias = null, $opts = array(), $query = false)
+	protected function buildQueryWhere($data = array(), $incWhere = true, $thisTableAlias = null, $opts = array(), $query = false)
 	{
 		$params = $this->getParams();
 		$db = $this->getDb();
@@ -244,7 +244,7 @@ class PlgFabrik_ElementNotes extends PlgFabrik_ElementDatabasejoin
 		$value = $params->get('notes_where_value');
 		$fk = $params->get('join_fk_column', '');
 		$rowId = $this->getFormModel()->getRowId();
-		$primaryKey = $this->getGroupModel()->isJoin() ? $this->getJoinedGroupPkVal($repeatCounter) : $rowId;
+		$primaryKey = $this->getGroupModel()->isJoin() ? $this->getJoinedGroupPkVal($opts['repeatCounter']) : $rowId;
 		$where = array();
 
 		// Jaanus: here we can choose whether WHERE has to have single or (if field is the same as FK then only) custom (single or multiple) criteria,
