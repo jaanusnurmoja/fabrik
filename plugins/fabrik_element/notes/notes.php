@@ -244,7 +244,8 @@ class PlgFabrik_ElementNotes extends PlgFabrik_ElementDatabasejoin
 		$value = $params->get('notes_where_value');
 		$fk = $params->get('join_fk_column', '');
 		$rowId = $this->getFormModel()->getRowId();
-		$primaryKey = $this->getGroupModel()->isJoin() ? $this->getJoinedGroupPkVal($opts['repeatCounter']) : $rowId;
+		$repeatCounter = isset($opts['repeatCounter']) ? $opts['repeatCounter'] : 0;
+		$primaryKey = $this->getGroupModel()->isJoin() ? $this->getJoinedGroupPkVal($repeatCounter) : $rowId;
 		$where = array();
 
 		// Jaanus: here we can choose whether WHERE has to have single or (if field is the same as FK then only) custom (single or multiple) criteria,
