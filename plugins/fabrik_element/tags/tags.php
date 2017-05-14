@@ -48,19 +48,6 @@ class PlgFabrik_ElementTags extends PlgFabrik_ElementDatabasejoin
 	}
 
 	/**
-	 * Returns real pk that the parent_id of repeatelement refers to
-	 * Jaanus: testing purposes
-	 * 
-	 */
-	public function actualPKvalue($repeatCounter)
-	{
-		$joinPK = $this->getJoinedGroupPkVal($repeatCounter);
-		$mainPK = $this->getFormModel()->getRowId();
-		$pk = $this->getGroupModel()->isJoin() ? $joinPK : $mainPK;
-		return $pk;
-	}
-
-	/**
 	 * Returns javascript which creates an instance of the class defined in formJavascriptClass()
 	 *
 	 * @param   int  $repeatCounter  Repeat group counter
@@ -71,7 +58,7 @@ class PlgFabrik_ElementTags extends PlgFabrik_ElementDatabasejoin
 	{
 		$id = $this->getHTMLId($repeatCounter);
 		$opts = $this->getElementJSOptions($repeatCounter);
-		$opts->rowid = $this->actualPKvalue($repeatCounter);
+		$opts->rowid = $this->getFormModel()->getRowId();
 		$opts->id = $this->id;
 		$opts->listid = $this->getListModel()->getId();
 
@@ -147,7 +134,7 @@ class PlgFabrik_ElementTags extends PlgFabrik_ElementDatabasejoin
 	 */
 	protected function buildQueryWhere($data = array(), $repeatCounter = 0, $incWhere = true, $thisTableAlias = null, $opts = array(), $query = false)
 	{
-		$rowId = $this->actualPKvalue($repeatCounter);
+		$rowId = $this->getFormModel()->getRowId();
 		$db = $this->getDb();
 		$join = $this->getJoin();
 		$fk = $db->qn($join->table_join_alias . '.' . $join->table_join_key);
@@ -207,10 +194,7 @@ class PlgFabrik_ElementTags extends PlgFabrik_ElementDatabasejoin
 	protected function buildQueryJoin($query = false)
 	{
 		$db = $this->getDb();
-		
-		// Jaanus: not sure where it was needed but .tags seems obsolete as field names are built dynamically
-		
-		$f = $db->qn($this->getJoin()->table_join_alias . '.' . $join->table_key);
+		$f = $db->qn($this->getJoin()->table_join_alias . '.tags');
 
 		if ($query !== false)
 		{
