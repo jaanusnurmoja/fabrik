@@ -30,6 +30,7 @@ if ($file)
   foreach ($this->elements as $element) :
     if (isset($element->plugin) && ($element->plugin == 'fileupload' || $element->plugin == 'image') && $element->element_raw != '') :
     $this->element = $element;
+	$style = $element->hidden ? 'style="display:none"' : '';
     if ($element->startRow) : ?>
 			<div class="row-fluid <?php echo $single ? 'fabrikElementContainer' : ''; ?>" <?php echo $style?>><!-- start element row -->
 	<?php
@@ -82,7 +83,6 @@ foreach ($this->elements as $element) :
 	<?php
 		$rowStarted = true;
 	endif;
-	$style = $element->hidden ? 'style="display:none"' : '';
 	$labels_above = $element->dlabels;
 
 	if ($labels_above == 1)
