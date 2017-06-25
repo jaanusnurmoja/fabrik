@@ -13,7 +13,7 @@ defined('_JEXEC') or die('Restricted access');
 
 jimport('joomla.application.component.modelform');
 
-use \Joomla\Registry\Registry;
+use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
 require_once COM_FABRIK_FRONTEND . '/helpers/pagination.php';
@@ -498,6 +498,13 @@ class FabrikFEModelList extends JModelForm
 	 */
 	protected $lang;
 
+    /**
+     * Set by (for example) email plugin, to allow bypassing detail view ACL for producing PDF
+     *
+     * @var bool
+     */
+	protected $localPdf = false;
+
 	/**
 	 * Load form
 	 *
@@ -885,9 +892,11 @@ class FabrikFEModelList extends JModelForm
 	/**
 	 * Get the table's data
 	 *
+     * @param   $opts  array  list options
+     *
 	 * @return  array	of objects (rows)
 	 */
-	public function getData()
+	public function getData($opts = array())
 	{
 		if (isset($this->data) && !is_null($this->data))
 		{
@@ -908,7 +917,7 @@ class FabrikFEModelList extends JModelForm
 
 		try
 		{
-			$this->finesseData();
+			$this->finesseData($opts);
 		}
 		catch (Exception $e)
 		{
@@ -936,9 +945,11 @@ class FabrikFEModelList extends JModelForm
 	/**
 	 * Method to run the getData select query and do our Fabrik magikin'
 	 *
+     * @param  $opts  array  list options
+     *
 	 * @return void
 	 */
-	public function finesseData()
+	public function finesseData($opts = array())
 	{
 		$profiler = JProfiler::getInstance('Application');
 		$traceModel = ini_get('mysql.trace_mode');
@@ -994,7 +1005,7 @@ class FabrikFEModelList extends JModelForm
 		JDEBUG ? $profiler->mark('start format for joins') : null;
 		$this->formatForJoins($this->data);
 		JDEBUG ? $profiler->mark('start format data') : null;
-		$this->formatData($this->data);
+		$this->formatData($this->data, $opts);
 		JDEBUG ? $profiler->mark('data formatted') : null;
 	}
 
@@ -1169,13 +1180,16 @@ class FabrikFEModelList extends JModelForm
 	 * Run the list data through element filters
 	 *
 	 * @param   array  &$data  list data
+     * @param   array  $opts   list options
 	 *
 	 * @return  void
 	 */
-	protected function formatData(&$data)
+	protected function formatData(&$data, $opts = array())
 	{
 		$profiler = JProfiler::getInstance('Application');
-		$input = $this->app->input;
+        JDEBUG ? $profiler->mark("formatData: start") : null;
+
+        $input = $this->app->input;
 		jimport('joomla.filesystem.file');
 		$form = $this->getFormModel();
 		$tableParams = $this->getParams();
@@ -1217,7 +1231,7 @@ class FabrikFEModelList extends JModelForm
 						{
 							$thisRow = $data[$i];
 							$colData = $thisRow->$col;
-							$data[$i]->$col = $elementModel->renderListData($colData, $thisRow);
+							$data[$i]->$col = $elementModel->renderListData($colData, $thisRow, $opts);
 							$rawCol = $col . '_raw';
 
 							/**
@@ -1335,23 +1349,34 @@ class FabrikFEModelList extends JModelForm
 
 		if ($this->outputFormat != 'pdf' && $this->outputFormat != 'csv' && $this->outputFormat != 'feed')
 		{
-			$this->addSelectBoxAndLinks($data);
+			$this->addSelectBoxAndLinks($data, $opts);
 			FabrikHelperHTML::debug($data, 'table:data');
 		}
 
-		JDEBUG ? $profiler->mark('end format data') : null;
+		JDEBUG ? $profiler->mark('formatData: end') : null;
 	}
 
 	/**
 	 * Add the select box and various links into the data array
 	 *
 	 * @param   array  &$data  list's row objects
+     * $param   array  $opts   list rendering options
 	 *
 	 * @return  void
 	 */
-	protected function addSelectBoxAndLinks(&$data)
-	{
-		$j3 = FabrikWorker::j3();
+	protected function addSelectBoxAndLinks(&$data, $opts = array())
+    {
+        $profiler = JProfiler::getInstance('Application');
+
+        if (!FArrayHelper::getValue($opts, 'add_box_and_links', 1))
+        {
+            JDEBUG ? $profiler->mark('addSelectboxAndLinks: skipping') : null;
+            return;
+        }
+
+        JDEBUG ? $profiler->mark('addSelectboxAndLinks: start') : null;
+
+        $j3 = FabrikWorker::j3();
 		$db = FabrikWorker::getDbo(true);
 		$params = $this->getParams();
 		$buttonAction = $this->actionMethod();
@@ -1405,6 +1430,7 @@ class FabrikFEModelList extends JModelForm
 				// Done each row as its result can change
 				$canEdit = $this->canEdit($row);
 				$canView = $this->canView($row);
+				$canDelete = $this->canDelete($row);
 				$pKeyVal = array_key_exists($tmpKey, $row) ? $row->$tmpKey : '';
 				$pkCheck = array();
 				$pkCheck[] = '<div style="display:none">';
@@ -1443,7 +1469,9 @@ class FabrikFEModelList extends JModelForm
 						. htmlspecialchars($pKeyVal, ENT_COMPAT, 'UTF-8') . '" />' . $pkCheck : '';
 
 				// Add in some default links if no element chosen to be a link
-				$link = $this->viewDetailsLink($data[$groupKey][$i]);
+                JDEBUG ? $profiler->mark('addSelectboxAndLinks: building edit link') : null;
+
+                $link = $this->viewDetailsLink($data[$groupKey][$i]);
 				$edit_link = $this->editLink($data[$groupKey][$i]);
 				$row->fabrik_view_url = $link;
 				$row->fabrik_edit_url = $edit_link;
@@ -1467,6 +1495,7 @@ class FabrikFEModelList extends JModelForm
 
 				if ($j3)
 				{
+                    JDEBUG ? $profiler->mark('addSelectboxAndLinks: building edit link: layout start') : null;
 					$displayData = new stdClass;
 					$displayData->loadMethod = $loadMethod;
 					$displayData->class = $class;
@@ -1482,6 +1511,7 @@ class FabrikFEModelList extends JModelForm
 					$displayData->list_edit_link_icon = $params->get('list_edit_link_icon', 'edit');
 					$layout = $this->getLayout('listactions.fabrik-edit-button');
 					$editLink = $layout->render($displayData);
+                    JDEBUG ? $profiler->mark('addSelectboxAndLinks: building edit link: layout end') : null;
 				}
 				else
 				{
@@ -1491,7 +1521,9 @@ class FabrikFEModelList extends JModelForm
 						. ' ' . $editText . '</a>';
 				}
 
-				$viewLabel = $this->viewLabel($data[$groupKey][$i]);
+                JDEBUG ? $profiler->mark('addSelectboxAndLinks: building view link') : null;
+
+                $viewLabel = $this->viewLabel($data[$groupKey][$i]);
 				$viewText = $buttonAction == 'dropdown' ? $viewLabel : '<span class="hidden">' . $viewLabel . '</span>';
 				$class = $j3 ? $btnClass . 'fabrik_view fabrik__rowlink' : 'btn fabrik__rowlink';
 
@@ -1526,7 +1558,9 @@ class FabrikFEModelList extends JModelForm
 
 
 				// 3.0 actions now in list in one cell
-				$row->fabrik_actions = array();
+                JDEBUG ? $profiler->mark('addSelectboxAndLinks: building actions') : null;
+
+                $row->fabrik_actions = array();
 				$actionMethod = $this->actionMethod();
 
 				if ($canView || $canEdit)
@@ -1573,7 +1607,7 @@ class FabrikFEModelList extends JModelForm
 					$row->fabrik_actions['fabrik_view'] = $j3 ? $row->fabrik_view : '<li class="fabrik_view">' . $row->fabrik_view . '</li>';
 				}
 
-				if ($this->canDelete($row))
+				if ($canDelete)
 				{
 					if ($buttonAction == 'dropdown')
 					{
@@ -1717,8 +1751,10 @@ class FabrikFEModelList extends JModelForm
 					$row->fabrik_actions = '';
 				}
 			}
-		}
-	}
+        }
+
+        JDEBUG ? $profiler->mark('addSelectBoxAndLinks: end') : null;
+    }
 
 	/**
 	 * Should the list link load in an i-frame or a xhr
@@ -4033,6 +4069,11 @@ class FabrikFEModelList extends JModelForm
 		return $this->access->allow_drop;
 	}
 
+	public function setLocalPdf()
+    {
+        $this->localPdf = true;
+    }
+
 	/**
 	 * Check if the user can view the detailed records
 	 *
@@ -4050,20 +4091,25 @@ class FabrikFEModelList extends JModelForm
 
 				if ($config->get('allow_pdf_localhost_view', '0') === '1')
 				{
-					$whitelist = array(
-						'127.0.0.1',
-						'::1'
-					);
-					$pdfLocalhostIP = $config->get('allow_pdf_localhost_ip', '');
+				    if ($this->localPdf)
+                    {
+                        $allowPDF = true;
+                    }
+                    else {
+                        $whitelist = array(
+                            '127.0.0.1',
+                            '::1'
+                        );
+                        $pdfLocalhostIP = $config->get('allow_pdf_localhost_ip', '');
 
-					if (!empty($pdfLocalhostIP))
-					{
-						$whitelist[] = $pdfLocalhostIP;
-					}
+                        if (!empty($pdfLocalhostIP)) {
+                            $whitelist[] = $pdfLocalhostIP;
+                        }
 
-					if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-						$allowPDF = true;
-					}
+                        if (in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
+                            $allowPDF = true;
+                        }
+                    }
 				}
 
 			}
@@ -4175,6 +4221,7 @@ class FabrikFEModelList extends JModelForm
 	 */
 	public function canDelete($row = null)
 	{
+
 		/**
 		 * Find out if any plugins deny delete.  We then allow a plugin to override with 'false' if
 		 * if useDo or group ACL allows edit.  But we don't allow plugin to allow, if userDo or group ACL

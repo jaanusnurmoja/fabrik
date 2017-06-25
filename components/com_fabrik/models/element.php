@@ -11,8 +11,8 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
-use \Joomla\Utilities\ArrayHelper;
+use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
 jimport('joomla.filesystem.file');
@@ -6084,7 +6084,10 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$params    = $this->getParams();
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: parent: start: {$this->element->name}") : null;
+
+        $params    = $this->getParams();
 		$listModel = $this->getListModel();
 		$data      = FabrikWorker::JSONtoData($data, true);
 
@@ -6107,20 +6110,27 @@ class PlgFabrik_Element extends FabrikPlugin
 			}
 		}
 
-		return $this->renderListDataFinal($data);
+		$final = $this->renderListDataFinal($data, $opts);
+        JDEBUG ? $profiler->mark("renderListData: parent: end: {$this->element->name}") : null;
+
+        return $final;
 	}
 
 	/**
 	 * Final prepare data function called from renderListData(), converts data to string and if needed
 	 * encases in <ul> (for repeating data)
 	 *
-	 * @param   array $data list cell data
+	 * @param   array  $data  list cell data
+     * $param   array  $opts  list options
 	 *
 	 * @return  string    cell data
 	 */
-	protected function renderListDataFinal($data)
+	protected function renderListDataFinal($data, $opts)
 	{
-		if (is_array($data))
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListDataFinal: parent: start: {$this->element->name}") : null;
+
+        if (is_array($data))
 		{
 			if (count($data) > 1)
 			{
@@ -6152,10 +6162,17 @@ class PlgFabrik_Element extends FabrikPlugin
 			$r = $data;
 		}
 
-		$layout            = $this->getLayout('list');
-		$displayData       = new stdClass;
-		$displayData->text = $r;
-		$res               = $layout->render($displayData);
+        $displayData = new stdClass;
+        $displayData->text = $r;
+
+        if (ArrayHelper::getValue($opts, 'custom_layout', 1)) {
+            $layout = $this->getLayout('list');
+            $res = $layout->render($displayData);
+        }
+        else
+        {
+            $res = '';
+        }
 
 		// If no custom list layout found revert to the default list renderer
 		if ($res === '')
@@ -6165,7 +6182,9 @@ class PlgFabrik_Element extends FabrikPlugin
 			$res      = $layout->render($displayData);
 		}
 
-		return $res;
+        JDEBUG ? $profiler->mark("renderListDataFinal: parent: end: {$this->element->name}") : null;
+
+        return $res;
 	}
 
 	/**
