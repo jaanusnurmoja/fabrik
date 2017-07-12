@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
+use Joomla\Registry\Registry;
 
 jimport('joomla.application.component.view');
 
@@ -389,6 +389,11 @@ class FabrikViewListBase extends FabrikView
 		$model = $this->getModel();
 		$params = $model->getParams();
 
+        if (!$this->access($model))
+        {
+            return false;
+        }
+
 		// Force front end templates
 		$tmpl            = $model->getTmpl();
 		$this->_basePath = COM_FABRIK_FRONTEND . '/views';
@@ -480,11 +485,6 @@ class FabrikViewListBase extends FabrikView
 		$this->nodata               = (empty($this->rows) || (count($this->rows) == 1 && empty($firstRow)) || !$this->requiredFiltersFound) ? true : false;
 		$this->tableStyle           = $this->nodata ? 'display:none' : '';
 		$this->emptyStyle           = $this->nodata ? '' : 'display:none';
-
-		if (!$this->access($model))
-		{
-			return false;
-		}
 
 		if (!class_exists('JSite'))
 		{
@@ -580,6 +580,11 @@ class FabrikViewListBase extends FabrikView
 				// If some data is shown then ensure that menu links reset filters (combined with require filters) doesn't produce an empty data set for the pdf
 				$pdfLink .= '&resetfilters=0';
 			}
+
+			if ($this->app->input->get('group_by', '') !== '')
+            {
+                $pdfLink .= '&group_by=' . $this->app->input->get('group_by', '');
+            }
 
 			$this->pdfLink = JRoute::_($pdfLink);
 		}
