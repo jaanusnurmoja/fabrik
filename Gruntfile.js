@@ -122,7 +122,7 @@ module.exports = function (grunt) {
 						},
 					]
 				}
-			},
+			}
 		}
 	});
 
@@ -198,6 +198,11 @@ module.exports = function (grunt) {
 			dest = 'fabrik_build/output/pkg_fabrik_sink/packages/' +  config.fileName.replace('{version}', version);
 			zipPromises.push(zipPlugin(config.path, dest));
 		}
+        for (i = 0; i < buildConfig.libraries.length; i++) {
+            config = buildConfig.libraries[i];
+            dest = 'fabrik_build/output/pkg_fabrik_sink/packages/' +  config.fileName.replace('{version}', version);
+            zipPromises.push(zipPlugin(config.path, dest));
+        }
 
 		buildPHPDocs(grunt);
 		uploadPHPDocs(grunt);
@@ -206,6 +211,7 @@ module.exports = function (grunt) {
 			'to update the db download entries');
 
 		simpleGit.tags(function (err, tags) {
+			console.log('git tags err: ' + err);
 			if (tags.all.indexOf(version) !== -1) {
 				// A previous tag with the same version exists - remove it and reset latest version #
 				shell.exec('git tag -d ' + version);
@@ -245,7 +251,7 @@ var zipPlugin = function (source, dest) {
 			var output = fs.createWriteStream(dest);
 
 			output.on('close', function () {
-				//console.log(dest + ': ' + archive.pointer() + ' total bytes');
+				console.log(dest + ': ' + archive.pointer() + ' total bytes');
 				resolve();
 			});
 

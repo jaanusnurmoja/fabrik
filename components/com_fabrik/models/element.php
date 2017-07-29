@@ -11,8 +11,8 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
-use \Joomla\Utilities\ArrayHelper;
+use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
 jimport('joomla.filesystem.file');
@@ -670,6 +670,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 					if ($params->get('icon_hovertext', true))
 					{
+						//$aHref  = 'javascript:void(0)';
 						$aHref  = '#';
 						$target = '';
 
@@ -683,7 +684,17 @@ class PlgFabrik_Element extends FabrikPlugin
 						}
 
 						$data = htmlspecialchars($data, ENT_QUOTES);
-						$img  = '<a class="fabrikTip" ' . $target . ' href="' . $aHref . '" opts=\'' . $opts . '\' title="' . $data . '">' . $img . '</a>';
+
+						$layout                  = FabrikHelperHTML::getLayout('element.fabrik-element-listicon-tip');
+						$displayData             = new stdClass;
+						$displayData->img     = $img;
+						$displayData->title   = $data;
+						$displayData->href    = $aHref;
+						$displayData->target  = $target;
+						$displayData->opts    = $opts;
+						$img                  = $layout->render($displayData);
+
+						//$img  = '<a class="fabrikTip" ' . $target . ' href="' . $aHref . '" opts=\'' . $opts . '\' title="' . $data . '">' . $img . '</a>';
 					}
 					elseif (!empty($iconFile))
 					{
@@ -2412,7 +2423,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			// $$$ rob changed from span wrapper to div wrapper as element's content may contain divs which give html error
 
 			// Placeholder to be updated by ajax code
-			$v = $this->getROElement($data, $repeatCounter);
+			$v = html_entity_decode($this->getROElement($data, $repeatCounter));
 			//$v = $v == '' ? '&nbsp;' : $v;
 
 			return '<div class="fabrikElementReadOnly" id="' . $htmlId . '">' . $v . '</div>';
@@ -3018,22 +3029,22 @@ class PlgFabrik_Element extends FabrikPlugin
 						{
 							if (preg_match('#^/.+/\w*#', $jsAct->js_e_value))
 							{
-								$js .= "if (this.get('value').test(%%REGEX%%)) {";
+								$js .= "if (this.get('value').toString().test(%%REGEX%%)) {";
 							}
 							else
 							{
-								$js .= "if (this.get('value').test(/%%REGEX%%/)) {";
+								$js .= "if (this.get('value').toString().test(/%%REGEX%%/)) {";
 							}
 						}
 						elseif ($jsAct->js_e_condition == '!regex')
 						{
 							if (preg_match('#^/.+/\w*#', $jsAct->js_e_value))
 							{
-								$js .= "if (this.get('value').test(%%REGEX%%)) {";
+								$js .= "if (this.get('value').toString().test(%%REGEX%%)) {";
 							}
 							else
 							{
-								$js .= "if (!this.get('value').test(/%%REGEX%%/)) {";
+								$js .= "if (!this.get('value').toString().test(/%%REGEX%%/)) {";
 							}
 						}
 						else
@@ -3337,7 +3348,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$element = $this->getElement();
 		$id      = $this->getHTMLId() . 'value';
 
-		if ($element->filter_type === 'dropdown')
+		if ($element->filter_type === 'dropdown' || $element->filter_type === 'multiselect')
 		{
 			$advancedClass = $this->getAdvancedSelectClass();
 			$class .= !empty($advancedClass) ? ' ' . $advancedClass : '';
@@ -3998,7 +4009,7 @@ class PlgFabrik_Element extends FabrikPlugin
 				if ($aJoin->group_id == $element->group_id && $aJoin->element_id == 0)
 				{
 					$fromTable = $aJoin->table_join;
-					$elName    = str_replace($origTable . '.', $fromTable . '.', $elName2);
+					$elName    = preg_replace('/^' . $origTable . '\./', $fromTable . '.', $elName2);
 				}
 			}
 		}
@@ -6055,7 +6066,10 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$params    = $this->getParams();
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: parent: start: {$this->element->name}") : null;
+
+        $params    = $this->getParams();
 		$listModel = $this->getListModel();
 		$data      = FabrikWorker::JSONtoData($data, true);
 
@@ -6078,20 +6092,27 @@ class PlgFabrik_Element extends FabrikPlugin
 			}
 		}
 
-		return $this->renderListDataFinal($data);
+		$final = $this->renderListDataFinal($data, $opts);
+        JDEBUG ? $profiler->mark("renderListData: parent: end: {$this->element->name}") : null;
+
+        return $final;
 	}
 
 	/**
 	 * Final prepare data function called from renderListData(), converts data to string and if needed
 	 * encases in <ul> (for repeating data)
 	 *
-	 * @param   array $data list cell data
+	 * @param   array  $data  list cell data
+     * $param   array  $opts  list options
 	 *
 	 * @return  string    cell data
 	 */
-	protected function renderListDataFinal($data)
+	protected function renderListDataFinal($data, $opts)
 	{
-		if (is_array($data))
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListDataFinal: parent: start: {$this->element->name}") : null;
+
+        if (is_array($data))
 		{
 			if (count($data) > 1)
 			{
@@ -6123,10 +6144,17 @@ class PlgFabrik_Element extends FabrikPlugin
 			$r = $data;
 		}
 
-		$layout            = $this->getLayout('list');
-		$displayData       = new stdClass;
-		$displayData->text = $r;
-		$res               = $layout->render($displayData);
+        $displayData = new stdClass;
+        $displayData->text = $r;
+
+        if (ArrayHelper::getValue($opts, 'custom_layout', 1)) {
+            $layout = $this->getLayout('list');
+            $res = $layout->render($displayData);
+        }
+        else
+        {
+            $res = '';
+        }
 
 		// If no custom list layout found revert to the default list renderer
 		if ($res === '')
@@ -6136,7 +6164,9 @@ class PlgFabrik_Element extends FabrikPlugin
 			$res      = $layout->render($displayData);
 		}
 
-		return $res;
+        JDEBUG ? $profiler->mark("renderListDataFinal: parent: end: {$this->element->name}") : null;
+
+        return $res;
 	}
 
 	/**
@@ -6277,9 +6307,25 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db              = FabrikWorker::getDbo(true);
 		$element->params = $this->getParams()->toString();
 
+		/*
+		 * Trying to save JSON params larger than the params field totally breaks the backend.  Original size
+		 * of params field was TEXT, and a large serialized calculation could blow that away.
+		 *
+		 * In 3.6.1 we increased the size of params to MEDIUMTEXT, but people only updating from github
+		 * may not get that update right away.  So just to be on the safe side, we'll update it on the fly
+		 * if params are big.  Leave this in till 3.7.
+		 */
 		if (strlen($element->params) > 65535)
 		{
-			throw new RuntimeException(sprintf(FText::_('COM_FABRIK_ELEMENT_PARAMS_TOO_BIG'), $this->getId()));
+			$db->setQuery("ALTER TABLE `#__fabrik_elements` MODIFY `params` MEDIUMTEXT");
+			try
+			{
+				$db->execute;
+			}
+			catch (RuntimeException $e)
+			{
+				// meh
+			}
 		}
 
 		$query           = $db->getQuery(true);
@@ -7433,7 +7479,25 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		$join = $this->getJoin();
 
-		// The submitted element's values
+		/*
+		 * The submitted element's values
+		 *
+		 * NOTE - if we are coming from a list row copy, the _raw data is actually the map table
+		 * id's, not the FK's, because we used form model getData to load it.  So we need to stuff the
+		 * actual FK's (in the _id array) back into _raw
+		 */
+
+        if (array_key_exists('fabrik_copy_from_table', $formData))
+        {
+            $idName = $name . '_id';
+            $idValues = FArrayHelper::getValue($formData, $idName, array());
+
+            if (!empty($idValues))
+            {
+                $formData[$rawName] = $idValues;
+            }
+        }
+
 		$d = FArrayHelper::getValue($formData, $rawName, FArrayHelper::getValue($formData, $name));
 		// set $emptyish to false so if no selection, we don't save a bogus empty row
 		$allJoinValues = FabrikWorker::JSONtoData($d, true, false);

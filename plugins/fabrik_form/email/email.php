@@ -85,6 +85,14 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 			return true;
 		}
 
+		// set up some useful placeholders for links to form
+		$this->data['fabrik_editurl'] = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $this->package . '&amp;view=form&amp;formid=' . $formModel->get('id') . '&amp;rowid='
+			. $input->get('rowid', '', 'string');
+		$this->data['fabrik_viewurl'] = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $this->package . '&amp;view=details&amp;formid=' . $formModel->get('id') . '&amp;rowid='
+			. $input->get('rowid', '', 'string');
+		$this->data['fabrik_editlink'] = '<a href="' . $this->data['fabrik_editurl'] . '">' . FText::_('EDIT') . '</a>';
+		$this->data['fabrik_viewlink'] = '<a href="' . $this->data['fabrik_viewurl'] . '">' . FText::_('VIEW') . '</a>';
+
 		/**
 		 * Added option to run content plugins on message text.  Note that rather than run it one time at the
 		 * end of the following code, after we have assembled all the various options in to a single $message,
@@ -161,16 +169,6 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 		// $$$ hugh - test stripslashes(), should be safe enough.
 		$message = stripslashes($message);
 
-		$editURL = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $this->package . '&amp;view=form&amp;fabrik=' . $formModel->get('id') . '&amp;rowid='
-			. $input->get('rowid', '', 'string');
-		$viewURL = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $this->package . '&amp;view=details&amp;fabrik=' . $formModel->get('id') . '&amp;rowid='
-			. $input->get('rowid', '', 'string');
-		$editLink = '<a href="' . $editURL . '">' . FText::_('EDIT') . '</a>';
-		$viewLink = '<a href="' . $viewURL . '">' . FText::_('VIEW') . '</a>';
-		$message = str_replace('{fabrik_editlink}', $editLink, $message);
-		$message = str_replace('{fabrik_viewlink}', $viewLink, $message);
-		$message = str_replace('{fabrik_editurl}', $editURL, $message);
-		$message = str_replace('{fabrik_viewurl}', $viewURL, $message);
 		FabrikPDFHelper::fullPaths($message);
 
 
@@ -457,6 +455,13 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 
 		try
 		{
+			// Require files and set up DOM pdf
+			require_once JPATH_SITE . '/components/com_fabrik/helpers/pdf.php';
+			require_once JPATH_SITE . '/components/com_fabrik/controllers/details.php';
+
+			// if DOMPDF isn't installed, this will throw an exception which we should catch
+			$domPdf = FabrikPDFHelper::iniDomPdf(true);
+
 			$model->getFormCss();
 
 			foreach ($document->_styleSheets as $url => $ss)
@@ -470,11 +475,7 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 				$formCss[] = file_get_contents($url);
 			}
 
-			// Require files and set up DOM pdf
-			require_once JPATH_SITE . '/components/com_fabrik/helpers/pdf.php';
-			require_once JPATH_SITE . '/components/com_fabrik/controllers/details.php';
-			FabrikPDFHelper::iniDomPdf();
-			$domPdf = new DOMPDF;
+
 			$size = strtoupper($params->get('pdf_size', 'A4'));
 			$orientation = $params->get('pdf_orientation', 'portrait');
 			$domPdf->set_paper($size, $orientation);
@@ -493,7 +494,13 @@ class PlgFabrik_FormEmail extends PlgFabrik_Form
 			 * submitted data.  "One of these days" we need to have a serious look at normalizing the data formats,
 			 * so submitted data is in the same format (once processed) as data read from the database.
 			 */
-			$controller->_model->data = $this->model->getData();
+			$model->data = null;
+			$controller->_model->data = $model->getData();
+
+			/*
+			 * Allows us to bypass "view records" ACL settings for creating the details view
+			 */
+			$model->getListModel()->setLocalPdf();
 
 			// Store in output buffer
 			ob_start();

@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
+use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
@@ -1094,8 +1094,11 @@ class FabrikFEModelForm extends FabModelForm
 			 * the rowid will be set to the actual form tables's rowid, not the userid,
 			 * so we need to unset 'usekey', otherwise we end up with the wrong row.
 			 * I thought we used to take care of this elsewhere?
+			 *
+			 * $$$ 7/25/2017 - don't think this is true any more
 			 */
 
+			/*
 			$isUserRow = $this->isUserRowId();
 
 			if ($isUserRow)
@@ -1103,6 +1106,7 @@ class FabrikFEModelForm extends FabModelForm
 				$origUseKey = $input->get('usekey', '');
 				$input->set('usekey', '');
 			}
+			*/
 
 			$listModel = $this->getListModel();
 			$fabrikDb = $listModel->getDb();
@@ -1110,10 +1114,12 @@ class FabrikFEModelForm extends FabModelForm
 			$fabrikDb->setQuery($sql);
 			$this->_origData = $fabrikDb->loadObjectList();
 
+			/*
 			if ($isUserRow)
 			{
 				$input->set('usekey', $origUseKey);
 			}
+			*/
 		}
 	}
 
@@ -1717,6 +1723,40 @@ class FabrikFEModelForm extends FabModelForm
 			$this->formData[$k] = '';
 			$this->formData['rowid'] = '';
 		}
+
+		// set the repeat group counts (mutated from the base view code which creates the hidden input)
+		$groups   = $this->getGroupsHiarachy();
+		$fabrikRepeatGroup = array();
+
+		foreach ($groups as $groupModel)
+		{
+			// Check if group is actually a table join
+			$repeatGroup = 1;
+			$foreignKey  = null;
+
+			if ($groupModel->canRepeat())
+			{
+				if ($groupModel->isJoin())
+				{
+					$joinModel  = $groupModel->getJoinModel();
+					$joinTable  = $joinModel->getJoin();
+
+					if (is_object($joinTable))
+					{
+						$elementModels = $groupModel->getPublishedElements();
+						reset($elementModels);
+						$tmpElement        = current($elementModels);
+						$smallerElHTMLName = $tmpElement->getFullName(true, false);
+						$repeatGroup       = count($this->formData[$smallerElHTMLName]);
+					}
+				}
+			}
+
+			$groupModel->repeatTotal = $repeatGroup;
+			$fabrikRepeatGroup[$groupModel->getId()] = $repeatGroup;
+		}
+
+		$this->app->input->set('fabrik_repeat_group', $fabrikRepeatGroup);
 
 		return $origId;
 	}
@@ -3059,9 +3099,13 @@ class FabrikFEModelForm extends FabModelForm
 		 * $$$ hugh - we need to remove any elements from the query string,
 		 * if the user doesn't have access, otherwise ACL's on elements can
 		 * be bypassed by just setting value on form load query string!
+		 *
+		 * Also remove all form data if task is form.process, in case some plugin is trying to reload
+		 * form data.
 		 */
 
 		$clean_request = $f->clean($_REQUEST, 'array');
+		$qs_request = array();
 
 		foreach ($clean_request as $key => $value)
 		{
@@ -3070,10 +3114,16 @@ class FabrikFEModelForm extends FabModelForm
 
 			if ($elementModel !== false)
 			{
-				if (!$elementModel->canUse())
+				if (!$elementModel->canUse()
+					|| $this->app->input->get('task', '') === 'form.process'
+					|| $this->app->input->get('task', '') === 'process')
 				{
 					unset($clean_request[$key]);
 				}
+				else
+                {
+                    $qs_request[$key] = $value;
+                }
 			}
 		}
 
@@ -3179,7 +3229,10 @@ class FabrikFEModelForm extends FabModelForm
 					 * use !== '' as rowid may be alphanumeric.
 					 * Unlike 3.0 rowId does equal '' if using rowid=-1 and user not logged in
 					 */
-					$useKey = FabrikWorker::getMenuOrRequestVar('usekey', '', $this->isMambot);
+                    $opts = array(
+                        'formid' => $this->getId()
+                    );
+					$useKey = FabrikWorker::getMenuOrRequestVar('usekey', '', $this->isMambot, 'var', $opts);
 
 					if (!empty($useKey) || $this->rowId !== '')
 					{
@@ -3244,6 +3297,8 @@ class FabrikFEModelForm extends FabModelForm
 							// $$$ hugh - special case when using -1, if user doesn't have a record yet
 							if ($this->isUserRowId())
 							{
+							    // set data to just elements that have been set on the qs (and "cleaned" / ACL checked)
+							    $this->data = $qs_request;
 								return;
 							}
 							else
@@ -3307,7 +3362,7 @@ class FabrikFEModelForm extends FabModelForm
 
 		if (in_array(true, $pluginManager->data))
 		{
-			if ($this->session->get($this->getSessionContext() . '.session.on') == true && $useSessionOn)
+			if ($this->session->get($this->getSessionContext() . 'session.on') == true && $useSessionOn)
 			{
 				return true;
 			}
@@ -3556,7 +3611,10 @@ class FabrikFEModelForm extends FabModelForm
 		$sql .= $listModel->buildQueryJoin();
 		$emptyRowId = $this->rowId === '' ? true : false;
 		$random = $input->get('random');
-		$useKey = FabrikWorker::getMenuOrRequestVar('usekey', '', $this->isMambot, 'var');
+        $opts = array(
+            'formid' => $this->getId()
+        );
+		$useKey = FabrikWorker::getMenuOrRequestVar('usekey', '', $this->isMambot, 'var', $opts);
 
 		if ($useKey != '')
 		{
@@ -3767,15 +3825,33 @@ class FabrikFEModelForm extends FabModelForm
 	public function isMultiPage()
 	{
 		$groups = $this->getGroupsHiarachy();
+        $view =   $this->app->input->get('view', 'form');
 
 		foreach ($groups as $groupModel)
 		{
 			$params = $groupModel->getParams();
 
-			if ($params->get('split_page'))
-			{
-				return true;
-			}
+			switch ($params->get('split_page'))
+            {
+                default:
+                case '0':
+                    break;
+                case '1':
+                    return true;
+                    break;
+                case '2':
+                    if ($view === 'form')
+                    {
+                        return true;
+                    }
+                    break;
+                case '3':
+                    if ($view == 'details')
+                    {
+                        return true;
+                    }
+                    break;
+            }
 		}
 
 		return false;
@@ -3802,7 +3878,7 @@ class FabrikFEModelForm extends FabModelForm
 		{
 			$params = $groupModel->getParams();
 
-			if ($params->get('split_page') && $c != 0 && $groupModel->canView())
+			if ($groupModel->isSplitPage() && $c != 0 && $groupModel->canView())
 			{
 				$pageCounter++;
 			}
@@ -4061,7 +4137,7 @@ class FabrikFEModelForm extends FabModelForm
 	 *
 	 * @return  string
 	 */
-	protected function parseIntroOutroPlaceHolders($text)
+	public function parseIntroOutroPlaceHolders($text)
 	{
 
 		if (!$this->isEditable())
@@ -4176,7 +4252,7 @@ class FabrikFEModelForm extends FabModelForm
 		$form->id = false;
 
 		// $$$ rob newFormLabel set in table copy
-		if ($input->get('newFormLabel', '') !== '')
+		if ($input->get('newFormLabel', '', 'string') !== '')
 		{
 			$form->label = $input->get('newFormLabel', '', 'string');
 		}

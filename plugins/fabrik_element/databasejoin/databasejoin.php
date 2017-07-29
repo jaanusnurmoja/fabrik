@@ -11,8 +11,8 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
-use \Joomla\Utilities\ArrayHelper;
+use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 /**
  *  Plugin element to render list of data looked up from a database table
@@ -581,6 +581,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		}
 		// $$$ rob 18/06/2012 cache the option vals on a per query basis (was previously incwhere but this was not ok
 		// for auto-completes in repeating groups
+		// $$$ hugh - add repeatCounter to opts to force not caching, as may have WHERE clause using repeat data
+		$opts['repeatCounter'] = $repeatCounter;
 		$sql = $this->buildQuery($data, $incWhere, $opts);
 
 		if (!$sql)
@@ -595,7 +597,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		}
 
 		$db->setQuery($sql);
-		FabrikHelperHTML::debug((string) $db->getQuery(), $this->getElement()->name . 'databasejoin element: get options query');
+		FabrikHelperHTML::debug((string) $db->getQuery(), $this->getElement()->name . ' databasejoin element: get options query');
 		$this->optionVals[$sqlKey] = $db->loadObjectList();
 		FabrikHelperHTML::debug($this->optionVals, 'databasejoin elements');
 
@@ -1043,6 +1045,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$where          = ($this->mustApplyWhere($whereAccess, $element->id) && $incWhere) ? $params->get('database_join_where_sql') : '';
 		$join           = $this->getJoin();
 		$thisTableAlias = is_null($thisTableAlias) ? $join->table_join_alias : $thisTableAlias;
+		$repeatCounter  = FArrayHelper::getValue($opts, 'repeatCounter', 0);
 
 		// $$$rob 11/10/2011  remove order by statements which will be re-inserted at the end of buildQuery()
 		if (preg_match('/(ORDER\s+BY)(.*)/is', $where, $matches))
@@ -1099,6 +1102,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$data['lang'] = $this->lang->getTag();
 		}
 
+		$where = $w->parseMessageForRepeats($where, $data, $this, $repeatCounter);
 		$where = $w->parseMessageForPlaceHolder($where, $data, false);
 
 		if (!$query)
@@ -1387,7 +1391,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 						break;
 				}
 
-				$html[] = $this->renderFrontEndSelect($data);
+				$html[] = $this->renderFrontEndSelect($data, $repeatCounter);
 			}
 			elseif ($this->canView())
 			{
@@ -1405,10 +1409,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 * Render the front end select / add buttons in a JLayout file
 	 *
 	 * @param   array $data row data in case template override wants it
+	 * @param   string  $repeatCounter  repeat count, in case override wants it
 	 *
 	 * @return  string
 	 */
-	protected function renderFrontEndSelect($data)
+	protected function renderFrontEndSelect($data, $repeatCounter = 0)
 	{
 		$params                      = $this->getParams($data);
 		$displayData                 = new stdClass;
@@ -1420,6 +1425,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$popupListId                 = (empty($popupForm) || !isset($forms[$popupForm])) ? '' : $forms[$popupForm]->listid;
 		$layout                      = $this->getLayout('form-front-end-select');
 		$displayData->tmpl           = $this->tmpl;
+		$displayData->repeatCounter  = $repeatCounter;
 
 		if ($this->app->isAdmin())
 		{
@@ -1722,6 +1728,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$multiSize     = (int) $params->get('dbjoin_multilist_size', 6);
 			$advancedClass = $this->getAdvancedSelectClass();
 			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '" multiple="true"';
+			//$attributes    .= ' data-chosen-options=\'{"max_selected_options":3}\'';
 			$html[]        = JHTML::_('select.genericlist', $tmp, $elName, $attributes, 'value', 'text', $default, $id);
 		}
 		else
@@ -2014,7 +2021,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					}
 				}
 
-				$val = $this->renderListData($value, new stdClass);
+				$oData = new stdClass;
+				$val = $this->renderListData($value, $oData);
 			}
 		}
 
@@ -2037,7 +2045,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$groupModel = $this->getGroupModel();
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
+
+        $groupModel = $this->getGroupModel();
 		$labelData  = array();
 
 		if (!$groupModel->isJoin() && $groupModel->canRepeat())
@@ -2883,8 +2894,12 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if ($this->getParams()->get('database_join_display_type', 'dropdown') == 'auto-complete')
 		{
-			$autoOpts                            = array();
-			$autoOpts['max']                     = $this->getParams()->get('autocomplete_rows', '10');
+            $usersConfig           = JComponentHelper::getParams('com_fabrik');
+            $autoOpts                            = array();
+			$autoOpts['max']                     = $this->getParams()->get(
+			    'dbjoin_autocomplete_rows',
+                $usersConfig->get('autocomplete_max_rows', '10')
+            );
 			$autoOpts['storeMatchedResultsOnly'] = true;
 			FabrikHelperHTML::autoComplete($id, $this->getElement()->get('id'), $this->getFormModel()->getId(), 'databasejoin', $autoOpts);
 		}
@@ -3101,6 +3116,23 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$this->getElement(true);
 		$filter  = JFilterInput::getInstance();
 		$request = $filter->clean($_REQUEST, 'array');
+		$groupModel = $this->getGroupModel();
+
+		if ($groupModel->isJoin())
+		{
+			if ($groupModel->canRepeat())
+			{
+				$groupElements = $groupModel->getMyElements();
+				$repeatCounter = $this->app->input->get('repeatCounter', '0');
+
+				foreach ($groupElements as $elementModel)
+				{
+					$name = $elementModel->getFullName(true, false);
+					$request[$name] = FArrayHelper::getValue($request, $name . '_' . $repeatCounter, '');
+					$request[$name . '_raw'] = FArrayHelper::getValue($request, $name . '_' . $repeatCounter . '_raw', '');
+				}
+			}
+		}
 
 		echo json_encode($this->_getOptions($request));
 	}

@@ -122,7 +122,10 @@ class PlgFabrik_ElementDigsig extends PlgFabrik_Element
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		if ($this->dataConsideredEmpty($data, 0))
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
+
+        if ($this->dataConsideredEmpty($data, 0))
 		{
 			return '';
 		}
@@ -217,7 +220,7 @@ class PlgFabrik_ElementDigsig extends PlgFabrik_Element
 
 		if (empty($rowId))
 		{
-			$this->app->enqueueMessage(FText::_('PLG_ELEMENT_FDIGSIG_NO_SUCH_FILE'));
+			$this->app->enqueueMessage(FText::_('PLG_ELEMENT_DIGSIG_NO_SUCH_FILE'));
 			$this->app->redirect($url);
 			exit;
 		}

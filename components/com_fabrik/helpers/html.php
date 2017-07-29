@@ -2007,9 +2007,15 @@ EOD;
 			$json->minTriggerChars = (int) $usersConfig->get('autocomplete_min_trigger_chars', '1');
 		}
 
+        if (!array_key_exists('max', $opts))
+        {
+            $usersConfig = JComponentHelper::getParams('com_fabrik');
+            $json->max   = (int) $usersConfig->get('autocomplete_max_rows', '1');
+        }
+
 		$app       = JFactory::getApplication();
 		$package   = $app->getUserState('com_fabrik.package', 'fabrik');
-		$json->url = 'index.php?option=com_' . $package . '&format=raw';
+		$json->url = COM_FABRIK_LIVESITE . 'index.php?option=com_' . $package . '&format=raw';
 		$json->url .= $app->isAdmin() ? '&task=plugin.pluginAjax' : '&view=plugin&task=pluginAjax';
 		$json->url .= '&g=element&element_id=' . $elementId
 			. '&formid=' . $formId . '&plugin=' . $plugin . '&method=autocomplete_options&package=' . $package;
@@ -3062,5 +3068,20 @@ EOD;
 		FabrikHelperHTML::jLayoutJs('modal-close', 'modal.fabrik-close');
 		FabrikHelperHTML::jLayoutJs('icon-expand', 'fabrik-icon', (object) array('icon' => 'icon-expand'));
 		FabrikHelperHTML::jLayoutJs('icon-full-screen', 'fabrik-icon', (object) array('icon' => 'icon-out-2 icon-fullscreen'));
+	}
+
+	/**
+	 * Get framework specific grid span class
+	 *
+	 * @param   string  $spanSize  numeric span size
+	 *
+	 * @return  void
+	 */
+	public static function getGridSpan($spanSize)
+	{
+		$layout                = self::getLayout('fabrik-grid-span');
+		$displayData           = new stdClass;
+		$displayData->spanSize = $spanSize;
+		return $layout->render($displayData);
 	}
 }

@@ -703,6 +703,12 @@ class FabrikWorker
 							if (array_key_exists($tmpElName, $searchData) && is_array($searchData[$tmpElName]) && array_key_exists($repeatCounter, $searchData[$tmpElName]))
 							{
 								$tmpVal = $searchData[$tmpElName][$repeatCounter];
+
+								if (is_array($tmpVal))
+								{
+									$tmpVal = implode(',', $tmpVal);
+								}
+
 								$msg    = str_replace('{' . $tmpElName . '}', $tmpVal, $msg);
 							}
 						}
@@ -1889,10 +1895,11 @@ class FabrikWorker
 	 * Test if a string is a compatible date
 	 *
 	 * @param   string $d Date to test
+     * @param   bool   $notNull  don't allow null / empty dates
 	 *
 	 * @return    bool
 	 */
-	public static function isDate($d)
+	public static function isDate($d, $notNull = true)
 	{
 		$db         = self::getDbo();
 		$aNullDates = array('0000-00-000000-00-00', '0000-00-00 00:00:00', '0000-00-00', '', $db->getNullDate());
@@ -1903,7 +1910,7 @@ class FabrikWorker
 			return false;
 		}
 
-		if (in_array($d, $aNullDates))
+		if ($notNull && in_array($d, $aNullDates))
 		{
 			return false;
 		}
@@ -2274,55 +2281,81 @@ class FabrikWorker
 	 *
 	 * @return  string
 	 */
-	public static function getMenuOrRequestVar($name, $val = '', $mambot = false, $priority = 'menu', $opts = array())
-	{
-		$app   = JFactory::getApplication();
-		$input = $app->input;
+    public static function getMenuOrRequestVar($name, $val = '', $mambot = false, $priority = 'menu', $opts = array())
+    {
+        $app   = JFactory::getApplication();
+        $input = $app->input;
 
-		if ($priority === 'menu')
-		{
+        if ($priority === 'menu')
+        {
 
-			$val = $input->get($name, $val, 'string');
+            $val = $input->get($name, $val, 'string');
 
-			if (!$app->isAdmin())
-			{
-				if (!$mambot)
-				{
-					$menus = $app->getMenu();
-					$menu  = $menus->getActive();
+            if (!$app->isAdmin())
+            {
+                if (!$mambot)
+                {
+                    $menus = $app->getMenu();
+                    $menu  = $menus->getActive();
 
-					if (is_object($menu))
-					{
-						$menuListId  = ArrayHelper::getValue($menu->query, 'listid', '');
-						$checkListId = ArrayHelper::getValue($opts, 'listid', $menuListId);
+                    if (is_object($menu))
+                    {
+                        $match = true;
 
-						if ((int) $menuListId === (int) $checkListId)
-						{
-							$val = $menu->params->get($name, $val);
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			if (!$app->isAdmin())
-			{
-				$menus = $app->getMenu();
-				$menu  = $menus->getActive();
+                        if (array_key_exists('listid', $opts)) {
+                            $menuListId = ArrayHelper::getValue($menu->query, 'listid', '');
+                            $checkListId = ArrayHelper::getValue($opts, 'listid', $menuListId);
+                            $match = (int) $menuListId === (int) $checkListId;
+                        }
+                        else if (array_key_exists('formid', $opts)) {
+                            $menuFormId  = ArrayHelper::getValue($menu->query, 'formid', '');
+                            $checkFormId = ArrayHelper::getValue($opts, 'formid', $menuFormId);
+                            $match = (int) $menuFormId === (int) $checkFormId;
+                        }
 
-				// If there is a menu item available AND the view is not rendered in a content plugin
-				if (is_object($menu) && !$mambot)
-				{
-					$val = $menu->params->get($name, $val);
-				}
-			}
+                        if ($match)
+                        {
+                            $val = $menu->params->get($name, $val);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (!$app->isAdmin())
+            {
+                $menus = $app->getMenu();
+                $menu  = $menus->getActive();
 
-			$val = $input->get($name, $val, 'string');
-		}
+                // If there is a menu item available AND the view is not rendered in a content plugin
+                if (is_object($menu) && !$mambot)
+                {
+                    $match = true;
 
-		return $val;
-	}
+                    if (array_key_exists('listid', $opts)) {
+                        $menuListId = ArrayHelper::getValue($menu->query, 'listid', '');
+                        $checkListId = ArrayHelper::getValue($opts, 'listid', $menuListId);
+                        $match = (int) $menuListId === (int) $checkListId;
+                    }
+                    else if (array_key_exists('formid', $opts)) {
+                        $menuFormId  = ArrayHelper::getValue($menu->query, 'formid', '');
+                        $checkFormId = ArrayHelper::getValue($opts, 'formid', $menuFormId);
+                        $match = (int) $menuFormId === (int) $checkFormId;
+                    }
+
+                    if ($match)
+                    {
+                        $val = $menu->params->get($name, $val);
+                    }
+                }
+            }
+
+            $val = $input->get($name, $val, 'string');
+        }
+
+        return $val;
+    }
 
 	/**
 	 * Access control function for determining if the user can perform
@@ -2395,17 +2428,26 @@ class FabrikWorker
 	/**
 	 * Can Fabrik render PDF - required the DOMPDF library to be installed in Joomla libraries folder
 	 *
+	 * @param  bool  $puke  throw an exception if can't
+	 *
 	 * @throws RuntimeException
 	 *
 	 * @return bool
 	 */
-	public static function canPdf()
+	public static function canPdf($puke = true)
 	{
-		$file = JPATH_LIBRARIES . '/dompdf/dompdf_config.inc.php';
+		$file = COM_FABRIK_LIBRARY . '/vendor/dompdf/dompdf/autoload.inc.php';
 
 		if (!JFile::exists($file))
 		{
-			throw new RuntimeException(FText::_('COM_FABRIK_NOTICE_DOMPDF_NOT_FOUND'));
+			if ($puke)
+			{
+				throw new RuntimeException(FText::_('COM_FABRIK_NOTICE_DOMPDF_NOT_FOUND'));
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		return true;
@@ -2556,5 +2598,32 @@ class FabrikWorker
 		}
 
 		return $default;
+	}
+
+	/**
+	 * Get a getID3 instance - check if library installed, if not, toss an exception
+	 *
+	 * @return  object|bool  - getid3 object or false if lib not installed
+	 */
+	public static function getID3Instance()
+	{
+		$getID3 = false;
+
+		if (JFile::exists(COM_FABRIK_LIBRARY . '/libs/getid3/getid3/getid3.php'))
+		{
+			ini_set('display_errors', true);
+			require_once COM_FABRIK_LIBRARY . '/libs/getid3/getid3/getid3.php';
+			require_once COM_FABRIK_LIBRARY . '/libs/getid3/getid3/getid3.lib.php';
+
+			getid3_lib::IncludeDependency(COM_FABRIK_LIBRARY . '/libs/getid3/getid3/extension.cache.mysqli.php', __FILE__, true);
+			$config   = JFactory::getConfig();
+			$host     = $config->get('host');
+			$database = $config->get('db');
+			$username = $config->get('user');
+			$password = $config->get('password');
+			$getID3   = new getID3_cached_mysqli($host, $database, $username, $password);
+		}
+
+		return $getID3;
 	}
 }
