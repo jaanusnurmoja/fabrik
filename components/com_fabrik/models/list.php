@@ -3340,16 +3340,24 @@ class FabrikFEModelList extends JModelForm
 			}
 		}
 
-		if (!empty($this->pluginQueryGroupBy))
+		$groupByQueryList = $this->getParams()->get('group_by_query_list');
+		$listGroupBy = !empty($groupByQueryList) ? explode(',', $groupByQueryList) : array();
+		$groupBy = array_merge($listGroupBy, $this->pluginQueryGroupBy);
+		
+		if (!empty($groupBy))
 		{
 			if ($query === false)
 			{
-				return ' GROUP BY ' . implode(', ', $this->pluginQueryGroupBy);
+				return ' GROUP BY ' . implode(', ', $groupBy);
 			}
 			else
 			{
-				$pluginManager->runPlugins('onBuildQueryGroupBy', $this, 'list', $query);
-				$query->group($this->pluginQueryGroupBy);
+				if (!empty($this->pluginQueryGroupBy))
+				{
+					$pluginManager->runPlugins('onBuildQueryGroupBy', $this, 'list', $query);
+				}
+				
+				$query->group($groupBy);
 
 				return $query;
 			}
