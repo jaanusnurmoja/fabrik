@@ -1216,6 +1216,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 	{
 		$listModel  = $elementModel->getListModel();
 		$groupModel = $elementModel->getGroupModel();
+		$params = $elementModel->getParams();
 
 		if (is_null($row))
 		{
