@@ -805,6 +805,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	protected function buildQueryElementConcatId()
 	{
+
 		return '';
 	}
 
@@ -820,8 +821,6 @@ class PlgFabrik_Element extends FabrikPlugin
 		$name    = $this->getFullName(true, false);
 		$rawName = $name . '_raw';
 
-		return array($name, $rawName);
-	}
 
 	/**
 	 * Create the SQL select 'name AS alias' segment for list/form queries
@@ -900,10 +899,13 @@ class PlgFabrik_Element extends FabrikPlugin
 				$as  = $db->qn($dbTable . '___' . $this->element->name . '_raw');
 				$aAsFields[] = $as;
 
-				$str         = $this->buildQueryElementConcatId();
-				$aFields[]   = $str;
-				$as  = $db->qn($dbTable . '___' . $this->element->name . '_id');
-				$aAsFields[] = $as;
+				if (!empty($this->buildQueryElementConcatId()))
+				{
+					$str         = $this->buildQueryElementConcatId();
+					$aFields[]   = $str;
+					$as  = $db->qn($dbTable . '___' . $this->element->name . '_id');
+					$aAsFields[] = $as;
+				}
 				$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 
 				$as  = $db->qn($dbTable . '___' . $this->element->name . '___params');
@@ -2329,6 +2331,14 @@ class PlgFabrik_Element extends FabrikPlugin
 				break;
 		}
 
+		foreach ($element as $k => $v)
+		{
+			if (is_array($v))
+			{
+				$element->$k = array_shift($v);
+			}
+		}
+		
 		$primary = $this->groupConcactJoinKey();
 		$element->primary = FabrikString::safeColNameToArrayKey($primary);
 		$element->isPK = $this->getFullName() == $element->primary;
@@ -2462,8 +2472,17 @@ class PlgFabrik_Element extends FabrikPlugin
 			// Placeholder to be updated by ajax code
 			$v = html_entity_decode($this->getROElement($data, $repeatCounter));
 			//$v = $v == '' ? '&nbsp;' : $v;
-
-			return '<div class="fabrikElementReadOnly" id="' . $htmlId . '">' . $v . '</div>';
+			if (is_array($htmlId) || is_array($v))
+			{
+				$h = is_array($htmlId) ? $htmlId[key($htmlId)] : $htmlId;
+				$vv = is_array($v) ? $v[key($v)] : $v;
+				$return[] = '<div class="fabrikElementReadOnly" id="' . $h . '">' . $vv . '</div>';
+			}
+			else
+			{
+				$return = '<div class="fabrikElementReadOnly" id="' . $htmlId . '">' . $v . '</div>';
+			}
+			return $return;
 		}
 	}
 
@@ -2586,7 +2605,37 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function render($data, $repeatCounter = 0)
 	{
-		return 'need to overwrite in element plugin class';
+		$element = $this->getElement();
+		$value = $this->getValue($data, $repeatCounter);
+		$layoutData = new stdClass;
+		if (is_array($value))
+		{
+			foreach ($value as $k => $v)
+			{
+				$value[$k] = stripslashes($value[$k]);
+				$layoutData->value = htmlspecialchars($value[$k], ENT_COMPAT, 'UTF-8');
+				$return = ($element->hidden == '1') ? "<!-- " . $value[$k] . " -->" : $value[$k];
+			}
+		}
+		else
+		{
+			$value = stripslashes($value);
+			$layoutData->value = htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
+			$return = ($element->hidden == '1') ? "<!-- " . $value . " -->" : $value;
+		}
+		
+		if (!$this->isEditable())
+		{
+			return $return;
+		}
+
+		$layout = $this->getLayout('form');
+		$layoutData->name = $this->getHTMLName($repeatCounter);;
+		$layoutData->id = $this->getHTMLId($repeatCounter);;
+		$layoutData->class = 'fabrikinput inputbox hidden';
+
+		return $layout->render($layoutData);
+		// return 'need to overwrite in element plugin class';
 	}
 
 	/**
@@ -2978,7 +3027,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$jsStr        = '';
 		$allJsActions = $this->getFormModel()->getJsActions();
 		/**
-		 * hugh - only needed getParent when we weren't saving changes to parent params to child
+		 * $$$ hugh - only needed getParent when we weren't saving changes to parent params to child
 		 * which we should now be doing ... and getParent() causes an extra table lookup for every child
 		 * element on the form.
 		 * $element = $this->getParent();
@@ -6190,7 +6239,7 @@ class PlgFabrik_Element extends FabrikPlugin
 					}
 				}
 
-				$r = '<ul class="fabrikRepeatData"><li>' . implode('</li><li>', $data) . '</li></ul>';
+				$r = !empty(trim(implode($data))) ? '<ul class="fabrikRepeatData"><li>' . implode('</li><li>', $data) . '</li></ul>' : '';
 			}
 			else
 			{
@@ -7508,6 +7557,170 @@ class PlgFabrik_Element extends FabrikPlugin
 	}
 
 	/**
+	 * Is the element a join
+	 *
+	 * @return  bool
+	 */
+	public function isJoin()
+	{
+		return $this->getParams()->get('repeat', false);
+	}
+
+	/**
+	 * Parent_id or something else
+	 *
+	 * @return  string
+	 */
+	public function parentID()
+	{
+		return $this->getParams()->get('repeat_parent_id', 'parent_id');
+	}
+
+	/**
+	 * For joins:
+	 * Get the key which contains the linking tables primary key values.
+	 *
+	 * @param   bool $step Use step '___' or '.' in full name
+	 *
+	 * @return boolean|string
+	 */
+	public function getJoinIdKey($step = true)
+	{
+		if (!$this->isJoin())
+		{
+			return false;
+		}
+
+		if ($this->getGroupModel()->isJoin())
+		{
+			$join  = $this->getJoin();
+			$idKey = $join->table_join . '___id';
+		}
+		else
+		{
+			$idKey = $this->getFullName($step, false) . '___id';
+		}
+
+		return $idKey;
+	}
+
+	/**
+	 * Params field name
+	 *
+	 * @return  string
+	 */
+
+	 public function joinParams()
+	{
+		$noParams = $this->getParams()->get('no_params');
+		$joinParams = !$noParams ? $this->getParams()->get('repeat_params', 'params') : '';
+		return $joinParams;
+	}
+
+	/**
+	 * For joins:
+	 * Get the key which contains the linking tables params values.
+	 *
+	 * @param   bool $step Use step '___' or '.' in full name
+	 *
+	 * @return boolean|string
+	 */
+	public function getJoinParamsKey($step = true)
+	{
+		if (!$this->isJoin() || empty($this->joinParams()))
+		{
+			return false;
+		}
+
+		if ($this->getGroupModel()->isJoin())
+		{
+			$join      = $this->getJoin();
+			$paramsKey = $join->table_join . '___' . $this->joinParams();
+		}
+		else
+		{
+			$paramsKey = $this->getFullName($step, false) . '___' . $this->joinParams();
+		}
+
+		return $paramsKey;
+	}
+
+	/**
+	 * Form field where the value for params field comes from
+	 *
+	 * @return  string
+	 */
+
+	 public function joinParamsValue()
+	{
+		if (!$this->isJoin())
+		{
+			return false;
+		}
+
+		$db = FabrikWorker::getDbo();
+		$v = $this->getParams()->get('repeat_params_value', $db->q(''));
+		$jParamsVal = new stdClass;
+		$jParamsVal->field = $v;
+		$jParamsVal->element = FabrikString::safeColNameToArrayKey($v);
+		$jParamsVal->element_raw = $jParamsVal->element . '_raw';
+		return $jParamsVal;
+	}
+
+	/**
+	 * Form field where the value for params field comes from
+	 *
+	 * @return  string
+	 */
+
+	 public function joinExtraFields($step = true)
+	{
+		if (!$this->isJoin())
+		{
+			return false;
+		}
+		else
+		{
+			$multiFieldElement = $this->getParams()->get('multifield_element');
+			$extraFK = $this->getParams()->get('multifield_extra_fk');
+			$extraFields = array();
+			
+			if (!empty($multiFieldElement))
+			{
+				$extraFields['multifield'] = new stdClass;
+				$extraFields['multifield']->field = $multiFieldElement;
+			}
+			
+			if (!empty($extraFK))
+			{
+				$extraFields['extrafk'] = new stdClass;
+				$extraFields['extrafk']->field = $extraFK;
+				$extraPK = $this->getParams()->get('multifield_extra_pk');
+				$extraFields['extrafk']->xpkField = $extraPK;
+				$extraFields['extrafk']->xpkElement = FabrikString::safeColNameToArrayKey($extraPK);
+				$extraFields['extrafk']->xpkRaw = $extraFields['extrafk']->xpkElement . '_raw';				
+			}
+			
+			
+			foreach ($extraFields as $k =>$f)
+			{
+/*				if ($this->getGroupModel()->isJoin())
+				{
+					$join      = $this->getJoin();
+					$extraFields[$k]->name = $join->table_join . '_' . $f->field;
+				}
+				else
+				{
+*/					$extraFields[$k]->name = $this->getFullName(true, false) . '_' . $f->field;
+//				}
+				
+			}
+			
+			return $extraFields;
+		}
+	}
+
+	/**
 	 * Called at end of form record save. Used for many-many join elements to save their data
 	 *
 	 * @param   array &$data Form data
@@ -7564,7 +7777,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		if ($groupModel->isJoin())
 		{
 			$groupJoinModel = $groupModel->getJoinModel();
-			$k              = str_replace('`', '', str_replace('.', '___', $groupJoinModel->getJoin()->params->get('pk')));
+			$k              = FabrikString::safeColNameToArrayKey($groupJoinModel->getJoin()->params->get('pk'));
 			$parentIds      = (array) $formData[$k];
 		}
 		else
@@ -7573,9 +7786,6 @@ class PlgFabrik_Element extends FabrikPlugin
 			$parentIds = empty($allJoinValues) ? array() : FArrayHelper::array_fill(0, count($allJoinValues), $formData[$k]);
 		}
 
-		$paramsKey = $this->getJoinParamsKey();
-		$allParams = (array) FArrayHelper::getValue($formData, $paramsKey, array());
-		$allParams = array_values($allParams);
 		$i         = 0;
 		$idsToKeep = array();
 
@@ -7623,7 +7833,6 @@ class PlgFabrik_Element extends FabrikPlugin
 				$record->$pID  = $parentId;
 				$fkVal              = FArrayHelper::getValue($joinValues, $jIndex);
 				$record->$shortName = $fkVal;
-				$record->params     = FArrayHelper::getValue($allParams, $jIndex);
 
 				// Stop notice with file-upload where fkVal is an array
 				if (array_key_exists($fkVal, $ids))
@@ -7643,10 +7852,6 @@ class PlgFabrik_Element extends FabrikPlugin
 
 					if (!$this->allowDuplicates)
 					{
-						$newId                    = new stdClass;
-						$newId->id                = $lastInsertId;
-						$newId->$shortName        = $record->$shortName;
-						$ids[$record->$shortName] = $newId;
 					}
 
 					$idsToKeep[$parentId][] = $lastInsertId;

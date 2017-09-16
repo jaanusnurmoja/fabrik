@@ -1717,6 +1717,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$optsPerRow = intval($params->get('dbjoin_options_per_row', 0));
 		$targetIds  = $this->multiOptionTargetIds($data, $repeatCounter);
 		$class      = 'fabrikinput inputbox ' . $params->get('bootstrap_class', '');
+		$single		= $params->get('single_instead_multiple');
 
 		if (!FArrayHelper::emptyIsh($targetIds, true))
 		{
@@ -1725,10 +1726,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if ($this->isEditable())
 		{
-			$multiSize     = (int) $params->get('dbjoin_multilist_size', 6);
+			$multiSize     = $single ? 1 : (int) $params->get('dbjoin_multilist_size', 6);
+			$multiple = $single ? '' : ' multiple="true"';
 			$multiMax      = $params->get('dbjoin_multiselect_max', '0');
 			$advancedClass = $this->getAdvancedSelectClass();
-			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '" multiple="true"';
+			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '"' . $multiple;
 
 			if (!empty($advancedClass) && (int)$multiMax > 0)
 			{
@@ -1787,6 +1789,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$displayData->name         = $name;
 		$displayData->editable     = $this->isEditable();
 		$displayData->optionLayout = $this->getLayout('form-checkbox');
+		$displayData->single	 = $params->get('single_instead_multiple');
 
 		$html[]       = '<div class="fabrikSubElementContainer" id="' . $id . '">';
 		$singleLayout = 'fabrik-element-' . $this->getPluginName() . '-form-checkbox';
@@ -3748,7 +3751,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$joinTable  = $this->getJoinModel()->getJoin()->table_join;
 		$parentKey  = $this->buildQueryParentKey();
 		$fullElName = $this->_db->qn($this->getFullName(true, false) . '_id');
-		$fullElName = $this->getFullName(true, false) . '_id';
+		//$fullElName = $this->getFullName(true, false) . '_id';
 		$elementName = $this->getParams()->get('repeat_element', $this->element->name);
 		$str .= " (SELECT GROUP_CONCAT(" . $elementName . " SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE " . $joinTable
 			. "." . $parentID . " = " . $parentKey . ") AS $fullElName";

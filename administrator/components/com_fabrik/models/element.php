@@ -1141,16 +1141,18 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$tableName  = $this->getRepeatElementTableName($elementModel, $row);
 		$params = $elementModel->getParams();
 		$parentID	= $params->get('repeat_parent_id', 'parent_id');
+		$noParams = $params->get('no_params');
+		$paramsName	= $noParams ? '' : $params->get('repeat_params', 'params');
+		$paramsField = !empty($paramsName) ? ', ' . $db->qn($paramsField) . ' TEXT' : '';
 
 		// Create db table!
 		$formModel = $elementModel->getForm();
 		$db        = $listModel->getDb();
 		$desc      = $elementModel->getFieldDescription();
 		$name      = $db->qn($params->get('repeat_element', $row->name));
-		$db
-			->setQuery(
+		$db->setQuery(
 				'CREATE TABLE IF NOT EXISTS ' . $db->qn($tableName) . ' ( id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, ' . $parentID . ' INT(11), '
-				. $name . ' ' . $desc . ', ' . $db->qn('params') . ' TEXT );');
+				. $name . ' ' . $desc . $paramsField . ');');
 		$db->execute();
 
 		// Remove previous join records if found
