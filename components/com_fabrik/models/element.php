@@ -11,8 +11,8 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
-use \Joomla\Utilities\ArrayHelper;
+use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
 jimport('joomla.filesystem.file');
@@ -273,6 +273,23 @@ class PlgFabrik_Element extends FabrikPlugin
 	 * @var array
 	 */
 	protected $phpOptions = array();
+
+	/**
+	 *
+	 * Cache for suboptions
+	 *
+	 * @var null|array
+	 *
+	 * @since 3.7
+	 */
+	protected $subOptionValues = null;
+
+	/**
+	 * Cache for subpoption labels
+	 *
+	 * @var null|array
+	 */
+	protected $subOptionLabels = null;
 
 	/**
 	 * Constructor
@@ -670,6 +687,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 					if ($params->get('icon_hovertext', true))
 					{
+						//$aHref  = 'javascript:void(0)';
 						$aHref  = '#';
 						$target = '';
 
@@ -1963,21 +1981,25 @@ class PlgFabrik_Element extends FabrikPlugin
 			$data = ArrayHelper::fromObject($data);
 		}
 
-		//$title = $this->tipTextAndValidations($mode, $data);
-		//$opts = $this->tipOpts();
-		//$opts = json_encode($opts);
+		$title    = $this->tipTextAndValidations($mode, $data);
 
-		//return $title !== '' ? 'title="' . $title . '" opts=\'' . $opts . '\'' : '';
+		// $$$ hugh - only run the layout if there's a title, save row rendering time
+		if (!empty($title))
+		{
+			$layout                  = FabrikHelperHTML::getLayout('element.fabrik-element-tip');
+			$displayData             = new stdClass;
+			$displayData->tipTitle   = $title;
+			$displayData->tipText    = $txt;
+			$displayData->rollOver   = $this->isTipped();
+			$displayData->isEditable = $this->isEditable();
+			$displayData->tipOpts    = $this->tipOpts();
 
-		$layout                  = FabrikHelperHTML::getLayout('element.fabrik-element-tip');
-		$displayData             = new stdClass;
-		$displayData->tipTitle   = $this->tipTextAndValidations($mode, $data);
-		$displayData->tipText    = $txt;
-		$displayData->rollOver   = $this->isTipped();
-		$displayData->isEditable = $this->isEditable();
-		$displayData->tipOpts    = $this->tipOpts();
-
-		$rollOver = $layout->render($displayData);
+			$rollOver = $layout->render($displayData);
+		}
+		else
+		{
+			$rollOver = is_string($txt) ? $txt : '';
+		}
 
 		return $rollOver;
 	}
@@ -2026,8 +2048,6 @@ class PlgFabrik_Element extends FabrikPlugin
 			return '';
 		}
 
-		$lines[] = '<ul class="validation-notices" style="list-style:none">';
-
 		if ($this->isTipped($mode))
 		{
 			$lines[] = '<li>' . FabrikHelperHTML::image('question-sign', 'form', $tmpl) . ' ' . $this->getTipText($data) . '</li>';
@@ -2045,16 +2065,17 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		if (count($lines) > 0)
 		{
+			array_unshift($lines,'<ul class="validation-notices" style="list-style:none">');
 			$lines[] = '</ul>';
+			$lines    = array_unique($lines);
+			$rollOver = implode('', $lines);
+			// $$$ rob - looks like htmlspecialchars is needed otherwise invalid markup created and pdf output issues.
+			$rollOver = htmlspecialchars($rollOver, ENT_QUOTES);
 		}
-
-		$lines    = array_unique($lines);
-		$rollOver = implode('', $lines);
-
-		// $$$ rob - looks like htmlspecialchars is needed otherwise invalid markup created and pdf output issues.
-		$rollOver = htmlspecialchars($rollOver, ENT_QUOTES);
-
-		//$rollOver = str_replace('"', '&quot;', $rollOver);
+		else
+		{
+			$rollOver = '';
+		}
 
 		return $rollOver;
 	}
@@ -3239,22 +3260,22 @@ class PlgFabrik_Element extends FabrikPlugin
 						{
 							if (preg_match('#^/.+/\w*#', $jsAct->js_e_value))
 							{
-								$js .= "if (this.get('value').test(%%REGEX%%)) {";
+								$js .= "if (this.get('value').toString().test(%%REGEX%%)) {";
 							}
 							else
 							{
-								$js .= "if (this.get('value').test(/%%REGEX%%/)) {";
+								$js .= "if (this.get('value').toString().test(/%%REGEX%%/)) {";
 							}
 						}
 						elseif ($jsAct->js_e_condition == '!regex')
 						{
 							if (preg_match('#^/.+/\w*#', $jsAct->js_e_value))
 							{
-								$js .= "if (this.get('value').test(%%REGEX%%)) {";
+								$js .= "if (this.get('value').toString().test(%%REGEX%%)) {";
 							}
 							else
 							{
-								$js .= "if (!this.get('value').test(/%%REGEX%%/)) {";
+								$js .= "if (!this.get('value').toString().test(/%%REGEX%%/)) {";
 							}
 						}
 						else
@@ -3558,7 +3579,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$element = $this->getElement();
 		$id      = $this->getHTMLId() . 'value';
 
-		if ($element->filter_type === 'dropdown')
+		if ($element->filter_type === 'dropdown' || $element->filter_type === 'multiselect')
 		{
 			$advancedClass = $this->getAdvancedSelectClass();
 			$class .= !empty($advancedClass) ? ' ' . $advancedClass : '';
@@ -3922,9 +3943,16 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		if (!$phpOpts)
 		{
-			$params = $this->getParams();
-			$opts   = $params->get('sub_options', '');
-			$opts   = $opts == '' ? array() : (array) @$opts->sub_values;
+			// cache, as even just fetching the params can eat up time in list with lots of rows
+			if (!isset($this->subOptionValues))
+			{
+				$params = $this->getParams();
+				$opts   = $params->get('sub_options', '');
+				$opts   = $opts == '' ? array() : (array) @$opts->sub_values;
+				$this->subOptionValues = $opts;
+			}
+
+			return $this->subOptionValues;
 		}
 		else
 		{
@@ -3968,9 +3996,22 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		if (!$phpOpts)
 		{
-			$params = $this->getParams();
-			$opts   = $params->get('sub_options', '');
-			$opts   = $opts == '' ? array() : (array) @$opts->sub_labels;
+			// cache, as running FText::() can eat up time with lots of options
+			if (!isset($this->subOptionLabels))
+			{
+				$params = $this->getParams();
+				$opts   = $params->get('sub_options', '');
+				$opts   = $opts == '' ? array() : (array) @$opts->sub_labels;
+
+				foreach ($opts as &$opt)
+				{
+					$opt = FText::_($opt);
+				}
+
+				$this->subOptionLabels = $opts;
+			}
+
+			return $this->subOptionLabels;
 		}
 		else
 		{
@@ -4219,7 +4260,7 @@ class PlgFabrik_Element extends FabrikPlugin
 				if ($aJoin->group_id == $element->group_id && $aJoin->element_id == 0)
 				{
 					$fromTable = $aJoin->table_join;
-					$elName    = str_replace($origTable . '.', $fromTable . '.', $elName2);
+					$elName    = preg_replace('/^' . $origTable . '\./', $fromTable . '.', $elName2);
 				}
 			}
 		}
@@ -6284,7 +6325,10 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$params    = $this->getParams();
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: parent: start: {$this->element->name}") : null;
+
+        $params    = $this->getParams();
 		$listModel = $this->getListModel();
 		$data      = FabrikWorker::JSONtoData($data, true);
 
@@ -6307,20 +6351,27 @@ class PlgFabrik_Element extends FabrikPlugin
 			}
 		}
 
-		return $this->renderListDataFinal($data);
+		$final = $this->renderListDataFinal($data, $opts);
+        JDEBUG ? $profiler->mark("renderListData: parent: end: {$this->element->name}") : null;
+
+        return $final;
 	}
 
 	/**
 	 * Final prepare data function called from renderListData(), converts data to string and if needed
 	 * encases in <ul> (for repeating data)
 	 *
-	 * @param   array $data list cell data
+	 * @param   array  $data  list cell data
+     * $param   array  $opts  list options
 	 *
 	 * @return  string    cell data
 	 */
-	protected function renderListDataFinal($data)
+	protected function renderListDataFinal($data, $opts)
 	{
-		if (is_array($data))
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListDataFinal: parent: start: {$this->element->name}") : null;
+
+        if (is_array($data))
 		{
 			if (count($data) > 1)
 			{
@@ -6352,10 +6403,17 @@ class PlgFabrik_Element extends FabrikPlugin
 			$r = $data;
 		}
 
-		$layout            = $this->getLayout('list');
-		$displayData       = new stdClass;
-		$displayData->text = $r;
-		$res               = $layout->render($displayData);
+        $displayData = new stdClass;
+        $displayData->text = $r;
+
+        if (ArrayHelper::getValue($opts, 'custom_layout', 1)) {
+            $layout = $this->getLayout('list');
+            $res = $layout->render($displayData);
+        }
+        else
+        {
+            $res = '';
+        }
 
 		// If no custom list layout found revert to the default list renderer
 		if ($res === '')
@@ -6365,7 +6423,9 @@ class PlgFabrik_Element extends FabrikPlugin
 			$res      = $layout->render($displayData);
 		}
 
-		return $res;
+        JDEBUG ? $profiler->mark("renderListDataFinal: parent: end: {$this->element->name}") : null;
+
+        return $res;
 	}
 
 	/**
@@ -6506,9 +6566,25 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db              = FabrikWorker::getDbo(true);
 		$element->params = $this->getParams()->toString();
 
+		/*
+		 * Trying to save JSON params larger than the params field totally breaks the backend.  Original size
+		 * of params field was TEXT, and a large serialized calculation could blow that away.
+		 *
+		 * In 3.6.1 we increased the size of params to MEDIUMTEXT, but people only updating from github
+		 * may not get that update right away.  So just to be on the safe side, we'll update it on the fly
+		 * if params are big.  Leave this in till 3.7.
+		 */
 		if (strlen($element->params) > 65535)
 		{
-			throw new RuntimeException(sprintf(FText::_('COM_FABRIK_ELEMENT_PARAMS_TOO_BIG'), $this->getId()));
+			$db->setQuery("ALTER TABLE `#__fabrik_elements` MODIFY `params` MEDIUMTEXT");
+			try
+			{
+				$db->execute();
+			}
+			catch (RuntimeException $e)
+			{
+				// meh
+			}
 		}
 
 		$query           = $db->getQuery(true);
@@ -7817,7 +7893,25 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		$join = $this->getJoin();
 
-		// The submitted element's values
+		/*
+		 * The submitted element's values
+		 *
+		 * NOTE - if we are coming from a list row copy, the _raw data is actually the map table
+		 * id's, not the FK's, because we used form model getData to load it.  So we need to stuff the
+		 * actual FK's (in the _id array) back into _raw
+		 */
+
+        if (array_key_exists('fabrik_copy_from_table', $formData))
+        {
+            $idName = $name . '_id';
+            $idValues = FArrayHelper::getValue($formData, $idName, array());
+
+            if (!empty($idValues))
+            {
+                $formData[$rawName] = $idValues;
+            }
+        }
+
 		$d = FArrayHelper::getValue($formData, $rawName, FArrayHelper::getValue($formData, $name));
 		// set $emptyish to false so if no selection, we don't save a bogus empty row
 		$allJoinValues = FabrikWorker::JSONtoData($d, true, false);
@@ -8203,8 +8297,6 @@ class PlgFabrik_Element extends FabrikPlugin
 		$view = $this->getFormModel()->isEditable() ? 'form' : 'details';
 		$layout->addIncludePaths(COM_FABRIK_FRONTEND . '/views/'. $view . '/tmpl/' . $this->getFormModel()->getTmpl() . '/layouts/element/');
 		$layout->addIncludePaths(COM_FABRIK_FRONTEND . '/views/'. $view . '/tmpl/' . $this->getFormModel()->getTmpl() . '/layouts/element/' . $this->getFullName(true, false));
-		$layout->addIncludePaths(COM_FABRIK_FRONTEND . '/views/list/tmpl/' . $this->getFormModel()->getListModel()->getTmpl() . '/layouts/element/');
-		$layout->addIncludePaths(COM_FABRIK_FRONTEND . '/views/list/tmpl/' . $this->getFormModel()->getListModel()->getTmpl() . '/layouts/element/' . $this->getFullName(true, false));
 		return $layout;
 	}
 

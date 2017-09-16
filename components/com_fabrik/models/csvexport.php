@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Utilities\ArrayHelper;
+use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
 
@@ -483,11 +483,12 @@ class FabrikFEModelCSVExport extends FabModel
 
 							if (count($json) == 1)
 							{
-								$default = $json['Total']->value;
+								$default = $defaultRaw = $json['Total']->value;
 							}
 							else
 							{
-								$default = json_encode($json);
+								$default = strip_tags($calcs[$calKey][$aKey]);
+								$defaultRaw = json_encode($json);
 							}
 						}
 
@@ -524,7 +525,7 @@ class FabrikFEModelCSVExport extends FabModel
 
 							if ($incRaw)
 							{
-								$calculations[$calKey][$x + 1] = $default;
+								$calculations[$calKey][$x + 1] = $defaultRaw;
 							}
 						}
 					}
@@ -732,7 +733,7 @@ class FabrikFEModelCSVExport extends FabModel
 		}
 
 		$this->model->csvExportHeadings = $h;
-		$pluginResults = FabrikWorker::getPluginManager()->runPlugins('onExportCSVHeadings', $this->model, 'list', $a);
+		$pluginResults = FabrikWorker::getPluginManager()->runPlugins('onExportCSVHeadings', $this->model, 'list', $h);
 		if (in_array(false, $pluginResults))
 		{
 			return false;
