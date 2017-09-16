@@ -7667,58 +7667,6 @@ class PlgFabrik_Element extends FabrikPlugin
 		return $jParamsVal;
 	}
 
-	/**
-	 * Form field where the value for params field comes from
-	 *
-	 * @return  string
-	 */
-
-	 public function joinExtraFields($step = true)
-	{
-		if (!$this->isJoin())
-		{
-			return false;
-		}
-		else
-		{
-			$multiFieldElement = $this->getParams()->get('multifield_element');
-			$extraFK = $this->getParams()->get('multifield_extra_fk');
-			$extraFields = array();
-			
-			if (!empty($multiFieldElement))
-			{
-				$extraFields['multifield'] = new stdClass;
-				$extraFields['multifield']->field = $multiFieldElement;
-			}
-			
-			if (!empty($extraFK))
-			{
-				$extraFields['extrafk'] = new stdClass;
-				$extraFields['extrafk']->field = $extraFK;
-				$extraPK = $this->getParams()->get('multifield_extra_pk');
-				$extraFields['extrafk']->xpkField = $extraPK;
-				$extraFields['extrafk']->xpkElement = FabrikString::safeColNameToArrayKey($extraPK);
-				$extraFields['extrafk']->xpkRaw = $extraFields['extrafk']->xpkElement . '_raw';				
-			}
-			
-			
-			foreach ($extraFields as $k =>$f)
-			{
-/*				if ($this->getGroupModel()->isJoin())
-				{
-					$join      = $this->getJoin();
-					$extraFields[$k]->name = $join->table_join . '_' . $f->field;
-				}
-				else
-				{
-*/					$extraFields[$k]->name = $this->getFullName(true, false) . '_' . $f->field;
-//				}
-				
-			}
-			
-			return $extraFields;
-		}
-	}
 
 	/**
 	 * Called at end of form record save. Used for many-many join elements to save their data
