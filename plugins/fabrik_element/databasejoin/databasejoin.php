@@ -2738,6 +2738,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$jKey  = !strstr($jKey, 'CONCAT') ? $label : $jKey;
 			$label = str_replace($join->table_join, $to, $jKey);
 			$tableAlias = $to;
+			$shortName = $db->qn($this->getParams()->get('repeat_element', $this->getElement()->name));
 			$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
 		}
 

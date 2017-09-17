@@ -820,6 +820,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	{
 		$name    = $this->getFullName(true, false);
 		$rawName = $name . '_raw';
+	}
 
 
 	/**
@@ -849,7 +850,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		if ($this->isJoin())
 		{
-			$jKey = $this->element->name;
+			$jKey = $this->getParams()->get('repeat_element', $this->element->name);
 
 			if ($this->encryptMe())
 			{
@@ -7557,16 +7558,6 @@ class PlgFabrik_Element extends FabrikPlugin
 	}
 
 	/**
-	 * Is the element a join
-	 *
-	 * @return  bool
-	 */
-	public function isJoin()
-	{
-		return $this->getParams()->get('repeat', false);
-	}
-
-	/**
 	 * Parent_id or something else
 	 *
 	 * @return  string
@@ -7820,62 +7811,6 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		// Delete any records that were unselected.
 		$this->deleteDeselectedItems($idsToKeep, $k);
-	}
-
-	/**
-	 * For joins:
-	 * Get the key which contains the linking tables primary key values.
-	 *
-	 * @param   bool $step Use step '___' or '.' in full name
-	 *
-	 * @return boolean|string
-	 */
-	public function getJoinIdKey($step = true)
-	{
-		if (!$this->isJoin())
-		{
-			return false;
-		}
-
-		if ($this->getGroupModel()->isJoin())
-		{
-			$join  = $this->getJoin();
-			$idKey = $join->table_join . '___id';
-		}
-		else
-		{
-			$idKey = $this->getFullName($step, false) . '___id';
-		}
-
-		return $idKey;
-	}
-
-	/**
-	 * For joins:
-	 * Get the key which contains the linking tables params values.
-	 *
-	 * @param   bool $step Use step '___' or '.' in full name
-	 *
-	 * @return boolean|string
-	 */
-	public function getJoinParamsKey($step = true)
-	{
-		if (!$this->isJoin())
-		{
-			return false;
-		}
-
-		if ($this->getGroupModel()->isJoin())
-		{
-			$join      = $this->getJoin();
-			$paramsKey = $join->table_join . '___params';
-		}
-		else
-		{
-			$paramsKey = $this->getFullName($step, false) . '___params';
-		}
-
-		return $paramsKey;
 	}
 
 	/**
