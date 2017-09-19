@@ -341,7 +341,8 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                     'plugin'    : 'databasejoin',
                     'method'    : 'ajax_getOptions',
                     'element_id': this.options.id,
-                    'formid'    : this.options.formid
+                    'formid'    : this.options.formid,
+                    'repeatCounter' : this.options.repeatCounter
                 };
             data = Object.append(formdata, data);
 
@@ -531,6 +532,8 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                             if (Fabrik.Windows[winId]) {
                                 Fabrik.Windows[winId].close();
                             }
+	                        self.element.fireEvent('change', new Event.Mock(self.element, 'change'));
+	                        self.element.fireEvent('blur', new Event.Mock(self.element, 'blur'));
                         }
                     });
 
@@ -633,7 +636,7 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                     return;
                 }
                 if (typeOf(val) === 'string') {
-                    val = JSON.decode(val);
+                    val = JSON.parse(val);
                 }
                 var h = this.form.getFormData();
                 if (typeOf(h) === 'object') {
@@ -676,7 +679,7 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                         }
                     } else {
                         if (typeOf(val) === 'string') {
-                            val = val === '' ? [] : JSON.decode(val);
+                            val = val === '' ? [] : JSON.parse(val);
                         }
                         if (typeOf(val) !== 'array') {
                             val = [val];
@@ -756,11 +759,28 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
             var v = null;
             this.getElement();
             if (!this.options.editable) {
-                return this.options.value;
+	            switch (this.options.displayType) {
+		            case 'multilist':
+		            case 'checkbox':
+			            return this.options.value;
+		            case 'dropdown':
+		            case 'auto-complete':
+		            case 'radio':
+		            default:
+		                if (!jQuery.isArray(this.options.value)) {
+		                    return this.options.value;
+                        }
+		                else if (this.options.value.length !== 0) {
+			                return this.options.value.getLast();
+		                }
+		                return '';
+	            }
             }
+
             if (typeOf(this.element) === 'null') {
                 return '';
             }
+
             switch (this.options.displayType) {
                 case 'dropdown':
                 /* falls through */

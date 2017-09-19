@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
+use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
@@ -346,6 +346,15 @@ class FabrikFEModelForm extends FabModelForm
 	public $sessionData = null;
 
 	/**
+	 * cache tmpl name
+	 *
+	 * @since 3.7
+	 *
+	 * @var string
+	 */
+	public $tmpl = null;
+
+	/**
 	 * Constructor
 	 *
 	 * @param   array  $config  An array of configuration options (name, state, dbo, table_path, ignore_request).
@@ -521,56 +530,60 @@ class FabrikFEModelForm extends FabModelForm
 	 */
 	public function getTmpl()
 	{
-		$input = $this->app->input;
-		$params = $this->getParams();
-		$item = $this->getForm();
-		$tmpl = '';
-		$default = FabrikWorker::j3() ? 'bootstrap' : 'default';
-		$jTmplFolder = FabrikWorker::j3() ? 'tmpl' : 'tmpl25';
-		$document = JFactory::getDocument();
+		if (!isset($this->tmpl))
+		{
+			$input       = $this->app->input;
+			$params      = $this->getParams();
+			$item        = $this->getForm();
+			$tmpl        = '';
+			$default     = FabrikWorker::j3() ? 'bootstrap' : 'default';
+			$jTmplFolder = FabrikWorker::j3() ? 'tmpl' : 'tmpl25';
+			$document    = JFactory::getDocument();
 
-		if ($document->getType() === 'pdf')
-		{
-			$tmpl = $params->get('pdf_template', '') !== '' ? $params->get('pdf_template') : $default;
-		}
-		else
-		{
-			if ($this->app->isAdmin())
+			if ($document->getType() === 'pdf')
 			{
-				$tmpl = $this->isEditable() ? $params->get('admin_form_template') : $params->get('admin_details_template');
-				$tmpl = $tmpl == '' ? $default : $tmpl;
+				$tmpl = $params->get('pdf_template', '') !== '' ? $params->get('pdf_template') : $default;
+			}
+			else
+			{
+				if ($this->app->isAdmin())
+				{
+					$tmpl = $this->isEditable() ? $params->get('admin_form_template') : $params->get('admin_details_template');
+					$tmpl = $tmpl == '' ? $default : $tmpl;
+				}
+
+				if ($tmpl == '')
+				{
+					if ($this->isEditable())
+					{
+						$tmpl = $item->form_template == '' ? $default : $item->form_template;
+					}
+					else
+					{
+						$tmpl = $item->view_only_template == '' ? $default : $item->view_only_template;
+					}
+				}
+
+				$tmpl = FabrikWorker::getMenuOrRequestVar('fabriklayout', $tmpl, $this->isMambot);
 			}
 
-			if ($tmpl == '')
+			// Finally see if the options are overridden by a querystring var
+			$baseTmpl = $tmpl;
+			$tmpl     = $input->get('layout', $tmpl);
+
+			// Test it exists - otherwise revert to baseTmpl tmpl
+			$folder = $this->isEditable() ? 'form' : 'details';
+
+			if (!JFolder::exists(JPATH_SITE . '/components/com_fabrik/views/' . $folder . '/' . $jTmplFolder . '/' . $tmpl))
 			{
-				if ($this->isEditable())
-				{
-					$tmpl = $item->form_template == '' ? $default : $item->form_template;
-				}
-				else
-				{
-					$tmpl = $item->view_only_template == '' ? $default : $item->view_only_template;
-				}
+				$tmpl = $baseTmpl;
 			}
+
+			$this->isEditable() ? $item->form_template = $tmpl : $item->view_only_template = $tmpl;
+			$this->tmpl = $tmpl;
 		}
 
-		$tmpl = FabrikWorker::getMenuOrRequestVar('fabriklayout', $tmpl, $this->isMambot);
-
-		// Finally see if the options are overridden by a querystring var
-		$baseTmpl = $tmpl;
-		$tmpl = $input->get('layout', $tmpl);
-
-		// Test it exists - otherwise revert to baseTmpl tmpl
-		$folder = $this->isEditable() ? 'form' : 'details';
-
-		if (!JFolder::exists(JPATH_SITE . '/components/com_fabrik/views/' . $folder . '/' . $jTmplFolder . '/' . $tmpl))
-		{
-			$tmpl = $baseTmpl;
-		}
-
-		$this->isEditable() ? $item->form_template = $tmpl : $item->view_only_template = $tmpl;
-
-		return $tmpl;
+		return $this->tmpl;
 	}
 
 	/**
@@ -1094,6 +1107,11 @@ class FabrikFEModelForm extends FabModelForm
 			 * the rowid will be set to the actual form tables's rowid, not the userid,
 			 * so we need to unset 'usekey', otherwise we end up with the wrong row.
 			 * I thought we used to take care of this elsewhere?
+			 *
+			 * $$$ 7/25/2017 - don't think this is true any more?
+			 *
+			 * $$$ 9/5/2017 = yup, still seems to be necesaasy, definitely when submitting with a juser plugin.  So
+			 * reverted changes made on 7/25, and will keep an eye out for situations where doing this causes problems.
 			 */
 
 			$isUserRow = $this->isUserRowId();
@@ -1717,6 +1735,40 @@ class FabrikFEModelForm extends FabModelForm
 			$this->formData[$k] = '';
 			$this->formData['rowid'] = '';
 		}
+
+		// set the repeat group counts (mutated from the base view code which creates the hidden input)
+		$groups   = $this->getGroupsHiarachy();
+		$fabrikRepeatGroup = array();
+
+		foreach ($groups as $groupModel)
+		{
+			// Check if group is actually a table join
+			$repeatGroup = 1;
+			$foreignKey  = null;
+
+			if ($groupModel->canRepeat())
+			{
+				if ($groupModel->isJoin())
+				{
+					$joinModel  = $groupModel->getJoinModel();
+					$joinTable  = $joinModel->getJoin();
+
+					if (is_object($joinTable))
+					{
+						$elementModels = $groupModel->getPublishedElements();
+						reset($elementModels);
+						$tmpElement        = current($elementModels);
+						$smallerElHTMLName = $tmpElement->getFullName(true, false);
+						$repeatGroup       = count($this->formData[$smallerElHTMLName]);
+					}
+				}
+			}
+
+			$groupModel->repeatTotal = $repeatGroup;
+			$fabrikRepeatGroup[$groupModel->getId()] = $repeatGroup;
+		}
+
+		$this->app->input->set('fabrik_repeat_group', $fabrikRepeatGroup);
 
 		return $origId;
 	}
@@ -3059,9 +3111,13 @@ class FabrikFEModelForm extends FabModelForm
 		 * $$$ hugh - we need to remove any elements from the query string,
 		 * if the user doesn't have access, otherwise ACL's on elements can
 		 * be bypassed by just setting value on form load query string!
+		 *
+		 * Also remove all form data if task is form.process, in case some plugin is trying to reload
+		 * form data.
 		 */
 
 		$clean_request = $f->clean($_REQUEST, 'array');
+		$qs_request = array();
 
 		foreach ($clean_request as $key => $value)
 		{
@@ -3070,10 +3126,16 @@ class FabrikFEModelForm extends FabModelForm
 
 			if ($elementModel !== false)
 			{
-				if (!$elementModel->canUse())
+				if (!$elementModel->canUse()
+					|| $this->app->input->get('task', '') === 'form.process'
+					|| $this->app->input->get('task', '') === 'process')
 				{
 					unset($clean_request[$key]);
 				}
+				else
+                {
+                    $qs_request[$key] = $value;
+                }
 			}
 		}
 
@@ -3179,7 +3241,10 @@ class FabrikFEModelForm extends FabModelForm
 					 * use !== '' as rowid may be alphanumeric.
 					 * Unlike 3.0 rowId does equal '' if using rowid=-1 and user not logged in
 					 */
-					$useKey = FabrikWorker::getMenuOrRequestVar('usekey', '', $this->isMambot);
+                    $opts = array(
+                        'formid' => $this->getId()
+                    );
+					$useKey = FabrikWorker::getMenuOrRequestVar('usekey', '', $this->isMambot, 'var', $opts);
 
 					if (!empty($useKey) || $this->rowId !== '')
 					{
@@ -3244,6 +3309,8 @@ class FabrikFEModelForm extends FabModelForm
 							// $$$ hugh - special case when using -1, if user doesn't have a record yet
 							if ($this->isUserRowId())
 							{
+							    // set data to just elements that have been set on the qs (and "cleaned" / ACL checked)
+							    $this->data = $qs_request;
 								return;
 							}
 							else
@@ -3307,7 +3374,7 @@ class FabrikFEModelForm extends FabModelForm
 
 		if (in_array(true, $pluginManager->data))
 		{
-			if ($this->session->get($this->getSessionContext() . '.session.on') == true && $useSessionOn)
+			if ($this->session->get($this->getSessionContext() . 'session.on') == true && $useSessionOn)
 			{
 				return true;
 			}
@@ -3556,7 +3623,10 @@ class FabrikFEModelForm extends FabModelForm
 		$sql .= $listModel->buildQueryJoin();
 		$emptyRowId = $this->rowId === '' ? true : false;
 		$random = $input->get('random');
-		$useKey = FabrikWorker::getMenuOrRequestVar('usekey', '', $this->isMambot, 'var');
+        $opts = array(
+            'formid' => $this->getId()
+        );
+		$useKey = FabrikWorker::getMenuOrRequestVar('usekey', '', $this->isMambot, 'var', $opts);
 
 		if ($useKey != '')
 		{
@@ -3767,15 +3837,33 @@ class FabrikFEModelForm extends FabModelForm
 	public function isMultiPage()
 	{
 		$groups = $this->getGroupsHiarachy();
+        $view =   $this->app->input->get('view', 'form');
 
 		foreach ($groups as $groupModel)
 		{
 			$params = $groupModel->getParams();
 
-			if ($params->get('split_page'))
-			{
-				return true;
-			}
+			switch ($params->get('split_page'))
+            {
+                default:
+                case '0':
+                    break;
+                case '1':
+                    return true;
+                    break;
+                case '2':
+                    if ($view === 'form')
+                    {
+                        return true;
+                    }
+                    break;
+                case '3':
+                    if ($view == 'details')
+                    {
+                        return true;
+                    }
+                    break;
+            }
 		}
 
 		return false;
@@ -3802,7 +3890,7 @@ class FabrikFEModelForm extends FabModelForm
 		{
 			$params = $groupModel->getParams();
 
-			if ($params->get('split_page') && $c != 0 && $groupModel->canView())
+			if ($groupModel->isSplitPage() && $c != 0 && $groupModel->canView())
 			{
 				$pageCounter++;
 			}
@@ -4176,7 +4264,7 @@ class FabrikFEModelForm extends FabModelForm
 		$form->id = false;
 
 		// $$$ rob newFormLabel set in table copy
-		if ($input->get('newFormLabel', '') !== '')
+		if ($input->get('newFormLabel', '', 'string') !== '')
 		{
 			$form->label = $input->get('newFormLabel', '', 'string');
 		}

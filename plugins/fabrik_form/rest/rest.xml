@@ -2,16 +2,17 @@
 <extension group="fabrik_form" method="upgrade" type="plugin" version="3">
 	<name>plg_fabrik_form_rest</name>
 	<author>Media A-Team, Inc.</author>
-	<creationDate>January 2017</creationDate>
+	<creationDate>July 2017</creationDate>
 	<copyright>Copyright (C) 2005-2017 Media A-Team, Inc. - All rights reserved.</copyright>
 	<license>GNU/GPL http://www.gnu.org/copyleft/gpl.html</license>
 	<authorEmail>rob@pollen-8.co.uk</authorEmail>
 	<authorUrl>www.fabrikar.com</authorUrl>
-	<version>3.5.2</version>
+	<version>3.7</version>
 	<help url="PLG_FORM_REST_HELP_SERVER"/>
 	<description>PLG_FORM_REST_DESCRIPTION</description>
 	<files>
 		<filename plugin="rest">rest.php</filename>
+		<filename>fabrikOAuth.php</filename>
 		<filename>index.html</filename>
 		<folder>forms</folder>
 		<folder>language</folder>

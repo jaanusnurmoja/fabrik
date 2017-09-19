@@ -56,11 +56,15 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 		$w = new FabrikWorker;
 		($params->get('cronemail_return', '') != '') ? $MailFrom = $params->get('cronemail_return') : $MailFrom = $this->app->get('mailfrom');
 		($params->get('cronemail_from', '') != '') ? $FromName = $params->get('cronemail_from') : $FromName = $this->app->get('fromname');
+		($params->get('cronemail_replyto', '') != '') ? $replyTo = $params->get('cronemail_replyto') : $replyTo = $this->app->get('replyto');
+		($params->get('cronemail_replytoname', '') != '') ? $replyToName = $params->get('cronemail_replytoname') : $replyToName = $this->app->get('replytoname');
 		$subject   = $params->get('subject', 'Fabrik cron job');
 		$eval      = $params->get('cronemail-eval');
 		$condition = $params->get('cronemail_condition', '');
+		$nodups    = $params->get('cronemail_no_dups', '0') === '1';
 		$sentIds   = array();
 		$failedIds   = array();
+		$sentTos = array();
 		$this->log = '';
 
 		foreach ($data as $group)
@@ -85,6 +89,18 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 					{
 						$thisTo = trim($w->parseMessageForPlaceHolder($thisTo, $row));
 
+						if ($nodups)
+						{
+							if (in_array($thisTo, $sentTos))
+							{
+								continue;
+							}
+							else
+							{
+								$sentTos[] = $thisTo;
+							}
+						}
+
 						if (FabrikWorker::isEmail($thisTo))
 						{
 							$thisMsg = $w->parseMessageForPlaceHolder($msg, $row);
@@ -95,8 +111,19 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 							}
 
 							$thisSubject = $w->parseMessageForPlaceHolder($subject, $row);
-							$mail        = JFactory::getMailer();
-							$res         = $mail->sendMail($MailFrom, $FromName, $thisTo, $thisSubject, $thisMsg, true);
+							$res         = FabrikWorker::sendMail(
+								$MailFrom,
+								$FromName,
+								$thisTo,
+								$thisSubject,
+								$thisMsg,
+								true,
+								null,
+								null,
+								null,
+								$replyTo,
+								$replyToName
+							);
 
 							if (!$res)
 							{
@@ -118,12 +145,11 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 							$failedIds[] = $row['__pk_val'];
 						}
 					}
-
-
 				}
 			}
 		}
 
+		$sentIds = array_unique($sentIds);
 		$field = $params->get('cronemail-updatefield');
 
 		if (!empty($sentIds) && trim($field) != '')
@@ -144,7 +170,9 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 			$field    = str_replace('___', '.', $field);
 			$fabrikDb = $listModel->getDb();
 			$query    = $fabrikDb->getQuery(true);
-			$query->update($table->db_table_name)->set($field . ' = ' . $fabrikDb->quote($value))
+			$query
+				->update($table->db_table_name)
+				->set($field . ' = ' . $fabrikDb->quote($value))
 				->where($table->db_primary_key . ' IN (' . implode(',', $sentIds) . ')');
 			$this->log .= "\n update query: $query";
 			$fabrikDb->setQuery($query);

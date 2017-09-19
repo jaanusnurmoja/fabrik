@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
+use Joomla\Registry\Registry;
 
 jimport('joomla.application.component.view');
 
@@ -48,6 +48,18 @@ class FabrikViewListBase extends FabrikView
 		$csvOpts->incraw       = (int) $params->get('csv_include_raw_data');
 		$csvOpts->inccalcs     = (int) $params->get('csv_include_calculations');
 		$csvOpts->custom_qs    = $params->get('csv_custom_qs', '');
+
+		$itemId = FabrikWorker::itemId();
+		$exportUrl = 'index.php?option=com_' . $this->package . '&view=list&listid=' . $this->getModel()->getId();
+
+		if (!empty($itemId))
+		{
+			$exportUrl .= '&Itemid=' . $itemId;
+		}
+
+		$exportUrl .= '&format=csv';
+		$csvOpts->exportLink   = JRoute::_($exportUrl, false);
+
 		$w->replaceRequest($csvOpts->custom_qs);
 		$csvOpts->incfilters   = (int) $params->get('incfilters');
 		$csvOpts->popupwidth   = FabrikWorker::getMenuOrRequestVar('popup_width','340',false,'menu');
@@ -388,6 +400,11 @@ class FabrikViewListBase extends FabrikView
 		/** @var FabrikFEModelList $model */
 		$model = $this->getModel();
 
+        if (!$this->access($model))
+        {
+            return false;
+        }
+
 		// Force front end templates
 		$tmpl            = $model->getTmpl();
 		$this->_basePath = COM_FABRIK_FRONTEND . '/views';
@@ -451,11 +468,6 @@ class FabrikViewListBase extends FabrikView
 		$this->emptyStyle           = $this->nodata ? '' : 'display:none';
 		$params                     = $model->getParams();
 
-		if (!$this->access($model))
-		{
-			return false;
-		}
-
 		if (!class_exists('JSite'))
 		{
 			require_once JPATH_ROOT . '/includes/application.php';
@@ -501,7 +513,7 @@ class FabrikViewListBase extends FabrikView
 
 		if ($this->showPDF)
 		{
-			FabrikWorker::canPdf();
+			$this->showPdf = FabrikWorker::canPdf(false);
 		}
 
 		$this->emptyLink     = $model->canEmpty() ? '#' : '';
@@ -549,6 +561,11 @@ class FabrikViewListBase extends FabrikView
 				// If some data is shown then ensure that menu links reset filters (combined with require filters) doesn't produce an empty data set for the pdf
 				$pdfLink .= '&resetfilters=0';
 			}
+
+			if ($this->app->input->get('group_by', '') !== '')
+            {
+                $pdfLink .= '&group_by=' . $this->app->input->get('group_by', '');
+            }
 
 			$this->pdfLink = JRoute::_($pdfLink);
 		}
@@ -715,11 +732,11 @@ class FabrikViewListBase extends FabrikView
 
 		$buttonProperties['title'] = '<span>' . FText::_('COM_FABRIK_GROUP_BY') . '</span>';
 		$buttonProperties['alt']   = FText::_('COM_FABRIK_GROUP_BY');
-		$this->buttons->groupby    = FabrikHelperHTML::image('group_by.png', 'list', $this->tmpl, $buttonProperties);
+		$this->buttons->groupby    = FabrikHelperHTML::image('list-view', 'list', $this->tmpl, $buttonProperties);
 
 		unset($buttonProperties['title']);
 		$buttonProperties['alt'] = FText::_('COM_FABRIK_FILTER');
-		$this->buttons->filter   = FabrikHelperHTML::image('filter.png', 'list', $this->tmpl, $buttonProperties);
+		$this->buttons->filter   = FabrikHelperHTML::image('filter', 'list', $this->tmpl, $buttonProperties);
 
 		$addLabel                  = $model->addLabel();
 		$buttonProperties['title'] = '<span>' . $addLabel . '</span>';

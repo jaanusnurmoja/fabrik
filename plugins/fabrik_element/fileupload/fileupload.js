@@ -41,7 +41,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                             bar = jQuery('#' + file.id).find('.bar')[0];
                         self.uploader.trigger('UploadProgress', file);
                         self.uploader.trigger('FileUploaded', file, {
-                            response: JSON.encode(response)
+                            response: JSON.stringify(response)
                         });
 
                         jQuery(bar).replaceWith(newBar);
@@ -234,7 +234,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
         },
 
         decloned: function (groupid) {
-            var i = jQuery('#form_' + this.form.id).find('input[name=fabrik_deletedimages[' + groupid + ']');
+            var i = jQuery('#form_' + this.form.id).find('input[name=fabrik_deletedimages[' + groupid + ']]');
             if (i.length > 0) {
                 this.makeDeletedImageField(groupid, this.options.value).inject(this.form.form);
             }
@@ -339,13 +339,20 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             this.pluploadContainer = c.find('.plupload_container');
             this.pluploadFallback = c.find('.plupload_fallback');
             this.droplist = c.find('.plupload_filelist');
+            var url = 'index.php?option=com_fabrik&format=raw&task=plugin.pluginAjax';
+            url += '&plugin=fileupload&' + this.options.ajaxToken + '=1';
+            url += '&method=ajax_upload&element_id=' + this.options.elid;
+
+            if (this.options.isAdmin) {
+                url = 'administrator/' + url;
+            }
 
             var plupopts = {
                 runtimes           : this.options.ajax_runtime,
                 browse_button      : elementId + '_browseButton',
                 container          : elementId + '_container',
                 drop_element       : elementId + '_dropList_container',
-                url                : 'index.php?option=com_fabrik&format=raw&task=plugin.pluginAjax&plugin=fileupload&method=ajax_upload&element_id=' + this.options.elid,
+                url                : url,
                 max_file_size      : this.options.max_file_size + 'kb',
                 unique_names       : false,
                 flash_swf_url      : this.options.ajax_flash_path,
@@ -501,7 +508,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                     'type' : 'hidden',
                     name   : name + '[crop][' + response.filepath + ']',
                     'id'   : 'coords_' + file.id,
-                    'value': JSON.encode(file.params)
+                    'value': JSON.stringify(file.params)
                 }).insertAfter(self.pluploadContainer);
 
 
@@ -754,7 +761,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                         // Avoid circular reference in chrome when saving in ajax form
                         var i = image.img;
                         delete (image.img);
-                        f.val(JSON.encode(image));
+                        f.val(JSON.stringify(image));
                         image.img = i;
                     }
                 });

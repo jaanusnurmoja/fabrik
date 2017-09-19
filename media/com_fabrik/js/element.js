@@ -280,14 +280,14 @@ define(['jquery'], function (jQuery) {
             var added = document.id(this.options.element + '_additions').value;
             var json = {'val': val, 'label': label};
             if (added !== '') {
-                a = JSON.decode(added);
+                a = JSON.parse(added);
             } else {
                 a = [];
             }
             a.push(json);
             var s = '[';
             for (var i = 0; i < a.length; i++) {
-                s += JSON.encode(a[i]) + ',';
+                s += JSON.stringify(a[i]) + ',';
             }
             s = s.substring(0, s.length - 1) + ']';
             document.id(this.options.element + '_additions').value = s;
@@ -402,6 +402,7 @@ define(['jquery'], function (jQuery) {
                 this.element.addClass('chzn-select');
                 this.element.getParent().getElement('.chzn-container').destroy();
                 jQuery('#' + this.element.id).chosen();
+                jQuery(this.element).addClass('chzn-done');
                 var changeEvent = this.getChangeEvent();
                 jQuery('#' + this.options.element).on('change', {changeEvent: changeEvent}, function (event) {
                     document.id(this.id).fireEvent(event.data.changeEvent, new Event.Mock(event.data.changeEvent,
@@ -648,6 +649,14 @@ define(['jquery'], function (jQuery) {
                         }
                     }
 
+                    var tabDiv = this.getTabDiv();
+                    if (tabDiv) {
+                        var tab = this.getTab(tabDiv);
+                        if (tab) {
+                            tab.addClass('fabrikErrorGroup');
+                        }
+                    }
+
                     break;
                 case 'fabrikSuccess':
                     container.addClass('success').removeClass('info').removeClass('error');
@@ -886,6 +895,29 @@ define(['jquery'], function (jQuery) {
                     }.bind(this));
                 }
             }.bind(this)).delay(500);
+        },
+
+        getTab: function(tab_div) {
+            var tab_dl;
+	        if (Fabrik.bootstrapped) {
+		        var a = jQuery('a[href$=#' + tab_div.id + ']');
+		        tab_dl = a.closest('[data-role=fabrik_tab]');
+	        } else {
+		        tab_dl = tab_div.getPrevious('.tabs');
+	        }
+	        if (tab_dl) {
+	            return tab_dl;
+            }
+            return false;
+        },
+
+        getTabDiv: function() {
+	        var c = Fabrik.bootstrapped ? '.tab-pane' : '.current';
+	        var tab_div = this.element.getParent(c);
+	        if (tab_div) {
+	            return tab_div;
+            }
+            return false;
         },
 
         /**
