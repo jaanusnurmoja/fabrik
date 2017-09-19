@@ -1155,6 +1155,23 @@ class FabrikAdminModelElement extends FabModelAdmin
 				. $name . ' ' . $desc . $paramsField . ');');
 		$db->execute();
 
+		// Add extra fields if set
+		$multiFieldElement = $db->qn($params->get('repeat_element'));
+		$mfDataType = $desc;
+		
+		
+		$fields = $listModel->getDBFields($tableName, 'Field');
+		$fieldMF  = FArrayHelper::getValue($fields, $multiFieldElement, false);
+
+		if (!empty($multiFieldElement) && !$fieldMF)
+		{
+			$db = $listModel->getDb();
+			$db->setQuery('ALTER TABLE ' . $db->qn($tableName) . ' ADD COLUMN ' . $multiFieldElement . ' ' . $mfDataType . ';');
+			$db->execute();
+			$fieldName = $tableName . '___' . $multiFieldElement;
+			$listModel->addIndex($fieldName, 'multifield_el', 'INDEX', $size);
+		}
+
 		// Remove previous join records if found
 		if ((int) $row->id !== 0)
 		{
@@ -1164,6 +1181,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 			$jdb->setQuery($query);
 			$jdb->execute();
 		}
+
 		// Create or update fabrik join
 		if ($groupModel->isJoin())
 		{
