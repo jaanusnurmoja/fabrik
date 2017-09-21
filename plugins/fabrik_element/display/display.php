@@ -67,7 +67,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 		if (!$params->get('display_showlabel', true))
 		{
 			$element->label = $this->getValue(array());
-			$element->label_raw = $element->label;
+			//$element->label_raw = $element->label;
 		}
 
 		return parent::getLabel($repeatCounter, $tmpl);
@@ -82,7 +82,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 	{
 		if (!$this->getParams()->get('display_showlabel', true))
 		{
-			return $this->getValue(array());;
+			return $this->getValue(array()) . ' rawlabel';
 		}
 
 		return parent::getRawLabel();
@@ -103,9 +103,10 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
         JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
 
         unset($this->default);
-		$value = $this->getValue(ArrayHelper::fromObject($thisRow));
+        $value = FabrikWorker::JSONtoData($data, true);
+		$defeval = '<br />' . $this->getDefaultOnACL(ArrayHelper::fromObject($thisRow), array()) . '';
 
-		return parent::renderListData($value, $thisRow, $opts);
+		return parent::renderListData($value, $thisRow, $opts) . $defeval;
 	}
 
 	/**
@@ -124,6 +125,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 		$displayData = new stdClass;
 		$displayData->id = $this->getHTMLId($repeatCounter);
 		$displayData->value = $params->get('display_showlabel', true) ? $this->getValue($data, $repeatCounter) : '';
+		$displayData->label = !$params->get('display_showlabel', true) ? $this->getValue($data, $repeatCounter) : '';
 
 		return $layout->render($displayData);
 	}
@@ -158,7 +160,8 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 
 	public function getValue($data, $repeatCounter = 0, $opts = array())
 	{
-		$value = $this->getDefaultOnACL($data, $opts);
+		$value =  parent::getValue($data, $repeatCounter, $opts);
+		$value .= '<br />' . $this->getDefaultOnACL($data, array());
 
 		if ($value === '')
 		{

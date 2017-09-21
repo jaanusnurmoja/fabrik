@@ -6,7 +6,11 @@
 			<field type="helplink"
 				url="PLG_ELEMENT_DISPLAY_HELP_SERVER" />
 
-			<field name="default"
+			<field name="generated_type"
+				type="textarea"
+				label="PLG_ELEMENT_DISPLAY_GENERATED" />
+
+				<field name="default"
 				type="fabrikeditor"
 				mode="php"
 				label="PLG_ELEMENT_DISPLAY_DEFAULT_LABEL" />
