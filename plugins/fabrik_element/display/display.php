@@ -49,7 +49,35 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 	{
 		$this->recordInDatabase = false;
 	}
-
+	
+	/*
+	As of MySQL 5.7.6, CREATE TABLE supports the specification of generated columns. 
+	Values of a generated column are computed from an expression included in the column definition.
+	Generated columns are supported by the NDB storage engine beginning with MySQL NDB Cluster 7.5.3
+	Generated columns can be added.
+	The data type and expression of generated columns can be modified.
+	Generated columns can be renamed or dropped, if no other column refers to them.
+	Virtual generated columns cannot be altered to stored generated columns, or vice versa. To work around this, drop the column, then add it with the new definition.
+	Nongenerated columns can be altered to stored but not virtual generated columns.
+	Stored but not virtual generated columns can be altered to nongenerated columns. The stored generated values become the values of the nongenerated column.
+	
+	*/
+	public function getFieldDescription()
+	{
+		$params = $this->getParams();
+		$as = $params->get('generated_type');
+		$virtualOrStored = $params->get('virtual_or_stored');
+		
+		$desc = $this->fieldDesc;
+		
+		if (!empty($as) && !empty($virtualOrStored))
+		{
+			$desc .= ' GENERATED ALWAYS AS (' . $as . ') ' . $virtualOrStored;
+		}
+		
+		return $desc;
+	}
+	
 	/**
 	 * Get the element's HTML label
 	 *
@@ -103,10 +131,24 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
         JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
 
         unset($this->default);
-        $value = FabrikWorker::JSONtoData($data, true);
-		$defeval = '<br />' . $this->getDefaultOnACL(ArrayHelper::fromObject($thisRow), array()) . '';
+		$value = null;
+		$defeval = null;
+		
+		// Jaanus: shows data from the corresponding db field and/or default/eval data
+		
+		if (in_array($this->getParams()->get('display_showdata', 1), array(1,2)))
+        {
+			$value = FabrikWorker::JSONtoData($data, true);
+		}
+		
+		if (in_array($this->getParams()->get('display_showdefault', 1), array(1,2)))
+        {
+			$defeval = $this->getDefaultOnACL(ArrayHelper::fromObject($thisRow), array()) . '';
+		}
+		
+		$br = !empty($value) && !empty($defeval) ? '<br />' : '';
 
-		return parent::renderListData($value, $thisRow, $opts) . $defeval;
+		return parent::renderListData($value, $thisRow, $opts) . $br . $defeval;
 	}
 
 	/**
@@ -160,8 +202,30 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 
 	public function getValue($data, $repeatCounter = 0, $opts = array())
 	{
-		$value =  parent::getValue($data, $repeatCounter, $opts);
-		$value .= '<br />' . $this->getDefaultOnACL($data, array());
+		$params = $this->getParams();
+		
+		$d = null;
+		$br = null;
+		$v = null;
+		
+		// Jaanus: shows data from the corresponding db field and/or default/eval data
+
+		if (in_array($params->get('display_showdata', 1), array(1,3)))
+		{
+			$d =  parent::getValue($data, $repeatCounter, $opts);
+		}
+		
+		if (in_array($params->get('display_showdefault', 1), array(1,3)))
+		{
+			$v =  $this->getDefaultOnACL($data, array());
+		}
+		
+		if (!empty($d) && !empty($v))
+		{
+			$br = '<br />';
+		}
+		
+		$value = $d . $br . $v;
 
 		if ($value === '')
 		{
