@@ -95,7 +95,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 		if (!$params->get('display_showlabel', true))
 		{
 			$element->label = $this->getValue(array());
-			//$element->label_raw = $element->label;
+			$element->label_raw = $element->label;
 		}
 
 		return parent::getLabel($repeatCounter, $tmpl);
@@ -110,7 +110,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 	{
 		if (!$this->getParams()->get('display_showlabel', true))
 		{
-			return $this->getValue(array()) . ' rawlabel';
+			return $this->getValue(array());
 		}
 
 		return parent::getRawLabel();
