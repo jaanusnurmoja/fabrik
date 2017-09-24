@@ -65,7 +65,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 	public function getFieldDescription()
 	{
 		$params = $this->getParams();
-		$as = $params->get('generated_type');
+		$as = $params->get('generated_expression');
 		$virtualOrStored = $params->get('virtual_or_stored');
 		
 		$desc = $this->fieldDesc;
