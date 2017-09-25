@@ -94,7 +94,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 
 		if (!$params->get('display_showlabel', true))
 		{
-			$element->label = $this->getValue(array());
+			$element->label = parent::getValue(array());
 			$element->label_raw = $element->label;
 		}
 
@@ -110,7 +110,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 	{
 		if (!$this->getParams()->get('display_showlabel', true))
 		{
-			return $this->getValue(array());
+			return parent::getValue(array());
 		}
 
 		return parent::getRawLabel();
@@ -133,12 +133,18 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
         unset($this->default);
 		$value = null;
 		$defeval = null;
+		$parent = null;
+		$sep = null;
+		$w = new FabrikWorker;
 		
 		// Jaanus: shows data from the corresponding db field and/or default/eval data
 		
 		if (in_array($this->getParams()->get('display_showdata', 1), array(1,2)))
         {
-			$value = FabrikWorker::JSONtoData($data, true);
+			$value = $w->JSONtoData($data, true);
+			$value = $w->parseMessageForPlaceHolder($value, $thisRow);
+			$parent = parent::renderListData($value, $thisRow, $opts);
+			//$parent = $w->parseMessageForPlaceHolder($parent, $thisRow);
 		}
 		
 		if (in_array($this->getParams()->get('display_showdefault', 1), array(1,2)))
@@ -146,9 +152,16 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 			$defeval = $this->getDefaultOnACL(ArrayHelper::fromObject($thisRow), array()) . '';
 		}
 		
-		$br = !empty($value) && !empty($defeval) ? '<br />' : '';
+		if (!empty($value) && !empty($defeval))
+		{
+			$sep = $this->getParams()->get('display_separator', 'hr');
+			if (in_array($sep, array('hr', 'br')))
+			{
+				$sep = '<' . $sep . ' />';
+			}
+		}
 
-		return parent::renderListData($value, $thisRow, $opts) . $br . $defeval;
+		return $parent . $sep . $defeval;
 	}
 
 	/**
@@ -166,8 +179,8 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 		$layout = $this->getLayout('form');
 		$displayData = new stdClass;
 		$displayData->id = $this->getHTMLId($repeatCounter);
-		$displayData->value = $params->get('display_showlabel', true) ? $this->getValue($data, $repeatCounter) : '';
-		$displayData->label = !$params->get('display_showlabel', true) ? $this->getValue($data, $repeatCounter) : '';
+		$displayData->value = $params->get('display_showlabel', true) ? $this->getValue($data, $repeatCounter) : $this->getDefaultOnACL($data, array());
+		$displayData->label = !$params->get('display_showlabel', true) ? parent::getValue($data, $repeatCounter) : '';
 
 		return $layout->render($displayData);
 	}
@@ -205,7 +218,7 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 		$params = $this->getParams();
 		
 		$d = null;
-		$br = null;
+		$sep = null;
 		$v = null;
 		
 		// Jaanus: shows data from the corresponding db field and/or default/eval data
@@ -222,10 +235,14 @@ class PlgFabrik_ElementDisplay extends PlgFabrik_Element
 		
 		if (!empty($d) && !empty($v))
 		{
-			$br = '<br />';
+			$sep = $this->getParams()->get('display_separator', 'hr');
+			if (in_array($sep, array('hr', 'br')))
+			{
+				$sep = '<' . $sep . ' />';
+			}
 		}
 		
-		$value = $d . $br . $v;
+		$value = $d . $sep . $v;
 
 		if ($value === '')
 		{

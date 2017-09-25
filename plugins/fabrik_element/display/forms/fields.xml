@@ -78,6 +78,18 @@
 					<option value="3">DETAILS</option>
 			</field>
 
+			<field name="display_separator"
+				type="radio"
+				default="hr"
+				class="btn-group"
+				description="PLG_ELEMENT_DISPLAY_SEPARATOR_DESC"
+				label="PLG_ELEMENT_DISPLAY_SEPARATOR_LABEL">
+					<option value="hr">PLG_ELEMENT_DISPLAY_SEPARATOR_HR</option>
+					<option value="br">PLG_ELEMENT_DISPLAY_SEPARATOR_BR</option>
+					<option value=": ">PLG_ELEMENT_DISPLAY_SEPARATOR_COLON</option>
+					<option value=" - ">PLG_ELEMENT_DISPLAY_SEPARATOR_DASH</option>
+			</field>
+
 		</fieldset>
 	</fields>
 </form>
