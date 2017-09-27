@@ -37,7 +37,7 @@ class PlgSystemFabrik extends JPlugin
 	public function __construct(&$subject, $config)
 	{
 		// Could be component was uninstalled but not the plugin
-		if (!JFile::exists(JPATH_SITE . '/components/com_fabrik/helpers/file.php'))
+		if (!JFile::exists(JPATH_SITE . '/components/com_fabrik/fabrik.php'))
 		{
 			return;
 		}
@@ -64,9 +64,22 @@ class PlgSystemFabrik extends JPlugin
 		}
 		else
 		{
-			JLoader::import($base . '.field', JPATH_SITE . '/administrator', 'administrator.');
-			JLoader::import($base . '.form', JPATH_SITE . '/administrator', 'administrator.');
+		    if (version_compare($version->RELEASE, '3.8', '<'))
+            {
+                JLoader::import($base . '.field', JPATH_SITE . '/administrator', 'administrator.');
+            }
+			else
+            {
+                JLoader::import($base . '.FormField', JPATH_SITE . '/administrator', 'administrator.');
+            }
 		}
+
+        // The fabrikfeed doc type has been deprecated.  For backward compat, change it use standard J! feed instead
+        if (version_compare($version->RELEASE, '3.8', '<')) {
+            if ($app->input->get('format') === 'fabrikfeed') {
+                $app->input->set('format', 'feed');
+            }
+        }
 
 		if (version_compare($version->RELEASE, '3.1', '<='))
 		{
@@ -75,8 +88,6 @@ class PlgSystemFabrik extends JPlugin
 			JLoader::import($base . '.layout.file', JPATH_SITE . '/administrator', 'administrator.');
 			JLoader::import($base . '.layout.helper', JPATH_SITE . '/administrator', 'administrator.');
 		}
-
-		require_once JPATH_SITE . '/components/com_fabrik/helpers/file.php';
 
 		if (!file_exists(JPATH_LIBRARIES . '/fabrik/include.php'))
 		{

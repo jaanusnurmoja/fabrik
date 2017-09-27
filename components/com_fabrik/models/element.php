@@ -13,6 +13,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
+use Fabrik\Helpers\LayoutFile;
 
 jimport('joomla.application.component.model');
 jimport('joomla.filesystem.file');
@@ -7804,20 +7805,20 @@ class PlgFabrik_Element extends FabrikPlugin
 
 	/**
 	 * Get the element's JLayout file
-	 * Its actually an instance of FabrikLayoutFile which inverses the ordering added include paths.
-	 * In FabrikLayoutFile the addedPath takes precedence over the default paths, which makes more sense!
+	 * Its actually an instance of LayoutFile which inverses the ordering added include paths.
+	 * In LayoutFile the addedPath takes precedence over the default paths, which makes more sense!
 	 *
 	 * @param   string $type  form/details/list
 	 * @param   array  $paths Optional paths to add as includes
 	 *
-	 * @return FabrikLayoutFile
+	 * @return LayoutFile
 	 */
 	public function getLayout($type, $paths = array(), $options = array())
 	{
 		$defaultOptions = array('debug' => false, 'component' => 'com_fabrik', 'client' => 'site');
 		$options        = array_merge($defaultOptions, $options);
 		$basePath       = $this->layoutBasePath();
-		$layout         = new FabrikLayoutFile('fabrik-element-' . $this->getPluginName() . '-' . $type, $basePath, $options);
+		$layout         = new LayoutFile('fabrik-element-' . $this->getPluginName() . '-' . $type, $basePath, $options);
 
 		foreach ($paths as $path)
 		{
@@ -7951,5 +7952,16 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function jsJLayouts()
 	{
+	}
+
+	/**
+	 * Give elements a chance to reset data after a failed validation.  For instance, file upload element
+	 * needs to reset the values as they aren't submitted with the form
+	 *
+	 * @param  $data  array form data
+	 */
+	public function setValidationFailedData(&$data)
+	{
+		return;
 	}
 }

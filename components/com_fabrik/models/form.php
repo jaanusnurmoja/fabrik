@@ -13,10 +13,10 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
+use Fabrik\Helpers\Uploader;
 
 jimport('joomla.application.component.model');
 require_once 'fabrikmodelform.php';
-require_once COM_FABRIK_FRONTEND . '/helpers/element.php';
 
 /**
  * Fabrik Form Model
@@ -161,7 +161,7 @@ class FabrikFEModelForm extends FabModelForm
 	/**
 	 * Uploader helper
 	 *
-	 * @var FabrikUploader
+	 * @var Uploader
 	 */
 	protected $uploader = null;
 
@@ -1198,7 +1198,6 @@ class FabrikFEModelForm extends FabModelForm
 
 		error_reporting(error_reporting() ^ (E_WARNING | E_NOTICE));
 		@set_time_limit(300);
-		require_once COM_FABRIK_FRONTEND . '/helpers/uploader.php';
 		$form = $this->getForm();
 		$pluginManager = FabrikWorker::getPluginManager();
 
@@ -2016,6 +2015,28 @@ class FabrikFEModelForm extends FabModelForm
 	}
 
 	/**
+	 * Give elements a way to re-instate data after a validation failure, for example upload elements,
+	 * where the value won't be in the submitted data, in order to preserve state
+	 **
+	 * @return	void
+	 */
+	public function setValidationFailedData()
+	{
+		$this->getGroupsHiarachy();
+		$groups = $this->getGroupsHiarachy();
+
+		foreach ($groups as $groupModel)
+		{
+			$elementModels = $groupModel->getPublishedElements();
+
+			foreach ($elementModels as $elementModel)
+			{
+				$elementModel->setValidationFailedData($this->formData);
+			}
+		}
+	}
+
+	/**
 	 * Add in any encrypted stuff, in case we fail validation ...
 	 * otherwise it won't be in $data when we rebuild the page.
 	 * Need to do it here, so _raw fields get added in the next chunk 'o' code.
@@ -2192,7 +2213,6 @@ class FabrikFEModelForm extends FabModelForm
 			return true;
 		}
 
-		require_once COM_FABRIK_FRONTEND . '/helpers/uploader.php';
 		$pluginManager = JModelLegacy::getInstance('Pluginmanager', 'FabrikFEModel');
 		$pluginManager->getPlugInGroup('validationrule');
 
@@ -2523,7 +2543,7 @@ class FabrikFEModelForm extends FabModelForm
 	{
 		if (is_null($this->uploader))
 		{
-			$this->uploader = new FabrikUploader($this);
+			$this->uploader = new Uploader($this);
 		}
 
 		return $this->uploader;
@@ -2649,7 +2669,7 @@ class FabrikFEModelForm extends FabModelForm
 		if (FArrayHelper::getValue($opts, 'loadPrefilters', false))
 		{
 			$listModel = $this->getListModel();
-			list($afilterFields, $afilterConditions, $afilterValues, $afilterAccess, $afilterEval, $afilterJoins) = $listModel->prefilterSetting();
+			list($afilterFields, $afilterConditions, $afilterValues, $afilterAccess, $afilterEval, $afilterJoins, $aFilterType) = $listModel->prefilterSetting();
 
 			foreach ($afilterFields as $name)
 			{
@@ -3128,14 +3148,16 @@ class FabrikFEModelForm extends FabModelForm
 			{
 				if (!$elementModel->canUse()
 					|| $this->app->input->get('task', '') === 'form.process'
-					|| $this->app->input->get('task', '') === 'process')
+					|| $this->app->input->get('task', '') === 'process'
+					|| $this->hasErrors()
+				)
 				{
 					unset($clean_request[$key]);
 				}
 				else
-                {
-                    $qs_request[$key] = $value;
-                }
+				{
+					$qs_request[$key] = $value;
+				}
 			}
 		}
 
@@ -3183,6 +3205,7 @@ class FabrikFEModelForm extends FabModelForm
 				{
 					// $$$ rob - use setFormData rather than $_GET
 					// as it applies correct input filtering to data as defined in article manager parameters
+					$this->setValidationFailedData($this->formData);
 					$data = $this->setFormData();
 					$data = FArrayHelper::toObject($data, 'stdClass', false);
 
@@ -5460,7 +5483,7 @@ class FabrikFEModelForm extends FabModelForm
 	 * @param   array   $paths    Optional paths to add as includes
 	 * @param   array   $options  Options
 	 *
-	 * @return FabrikLayoutFile
+	 * @return LayoutFile
 	 */
 	public function getLayout($name, $paths = array(), $options = array())
 	{
