@@ -2666,7 +2666,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					{
 						$where = $this->_db->qn($dbName . '.' . $this->getJoinValueFieldName());
 					}
-					$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+					$parentID	= $this->parentID();
 
 					$groupBy = $this->_db->qn($dbName . '.' . $parentID);
 					$rows    = $this->checkboxRows($groupBy, $condition, $value, $where);
@@ -2741,7 +2741,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$jKey  = $this->getLabelOrConcatVal();
 			$jKey  = !strstr($jKey, 'CONCAT') ? $label : $jKey;
 			$label = str_replace($join->table_join, $to, $jKey);
-			$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+			$parentID	= $this->parentID();
 			$tableAlias = $to;
 		}
 
@@ -3696,7 +3696,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			*/
 			$jKey = str_replace($joinTable, 'lookup', $jKey);
 		}
-		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$parentID	= $this->parentID();
 		$elementName = $this->getParams()->get('repeat_element', $this->getElement()->name);
 
 		$parentKey  = $this->buildQueryParentKey();

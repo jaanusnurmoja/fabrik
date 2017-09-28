@@ -759,11 +759,10 @@ class PlgFabrik_Element extends FabrikPlugin
 		$dbTable   = $this->actualTableName();
 		// Jaanus: joined group pk? set in groupConcactJoinKey()
 		$pkField    = $this->groupConcactJoinKey();
-		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$parentID	= $this->parentID();
 		$fullElName = $this->_db->qn($dbTable . '___' . $this->element->name);
-		$addFilter = ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue();
 		$sql        = '(SELECT GROUP_CONCAT(' . $jKey . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = '
-			. $pkField . $addFilter . ')';
+			. $pkField . ')';
 
 		if ($addAs)
 		{
@@ -789,11 +788,9 @@ class PlgFabrik_Element extends FabrikPlugin
 		$dbTable    = $this->actualTableName();
 		$fullElName = $this->_db->qn($dbTable . '___' . $this->element->name . '_raw');
 		$pkField    = $this->groupConcactJoinKey();
-		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
-		$addFilter = ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue();
+		$parentID	= $this->parentID();
 
-		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField
-		. $addFilter . ') AS ' . $fullElName;
+		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField . ') AS ' . $fullElName;
 	}
 
 	/**
@@ -903,22 +900,21 @@ class PlgFabrik_Element extends FabrikPlugin
 				$as  = $db->qn($dbTable . '___' . $this->element->name . '_raw');
 				$aAsFields[] = $as;
 
-				if (!empty($this->buildQueryElementConcatId()))
-				{
 					$str         = $this->buildQueryElementConcatId();
 					$aFields[]   = $str;
 					$as  = $db->qn($dbTable . '___' . $this->element->name . '_id');
 					$aAsFields[] = $as;
+
+				if ($this->joinParams())
+				{
+					$parentID	= $this->parentID();
+
+					$as  = $db->qn($dbTable . '___' . $this->element->name . '___params');
+					$str = '(SELECT GROUP_CONCAT(params SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField . ') AS ' . $as;
+					// Jaanus: joined group pk set in groupConcactJoinKey()
+					$aFields[]   = $str;
+					$aAsFields[] = $as;
 				}
-
-				$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
-
-				$as  = $db->qn($dbTable . '___' . $this->element->name . '___' . $this->joinParams());
-				$addFilter = ' AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue();
-				$str = '(SELECT GROUP_CONCAT(' . $this->joinParams() . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField . $addFilter . ') AS ' . $as;
-				// Jaanus: joined group pk set in groupConcactJoinKey()
-				$aFields[]   = $str;
-				$aAsFields[] = $as;
 			}
 			else
 			{
@@ -4659,8 +4655,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 					// Jaanus: joined group pk set in groupConcactJoinKey()
 					$pk    = $this->groupConcactJoinKey();
-					$addFilter = 'AND ' . $this->joinParams() . ' = ' . $this->joinParamsValue();
-					$key   = "(SELECT GROUP_CONCAT(id SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE $parentID = $pk $addFilter)";
+					$key   = "(SELECT GROUP_CONCAT(id SEPARATOR '" . GROUPSPLITTER . "') FROM $joinTable WHERE $parentID = $pk)";
 					$value = str_replace("'", '', $value);
 					$query = "($key = '$value' OR $key LIKE '$value" . GROUPSPLITTER . "%' OR
 					$key LIKE '" . GROUPSPLITTER . "$value" . GROUPSPLITTER . "%' OR
@@ -7184,7 +7179,8 @@ class PlgFabrik_Element extends FabrikPlugin
 
 	 public function joinParams()
 	{
-		return $this->getParams()->get('repeat_params', 'params');
+		$ajaxSubmit = $this->app->input->get('fabrik_ajax');
+		return (get_class($this) === 'PlgFabrik_ElementFileupload' && $ajaxSubmit);
 	}
 
 	/**
@@ -7556,7 +7552,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db         = $listModel->getDb();
 		$query      = $db->getQuery(true);
 		$formData   =& $this->getFormModel()->formDataWithTableName;
-		$pID 		= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$pID 		= $this->parentID();
 
 		// I set this to raw for cdd.
 		$name       = $this->getFullName(true, false);
@@ -7601,9 +7597,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			$parentIds = empty($allJoinValues) ? array() : FArrayHelper::array_fill(0, count($allJoinValues), $formData[$k]);
 		}
 
-		$joinParams = $this->joinParams();
-		$jpValue = str_replace('.', '___', $this->joinParamsValue()) . '_raw';
-		$paramsKey = !empty($this->joinParamsValue()) ? $jpValue : $this->getJoinParamsKey();
+		$paramsKey = $this->getJoinParamsKey();
 		$allParams = (array) FArrayHelper::getValue($formData, $paramsKey, array());
 		$allParams = array_values($allParams);
 		$i         = 0;
@@ -7619,16 +7613,13 @@ class PlgFabrik_Element extends FabrikPlugin
 			if ($groupModel->canRepeat())
 			{
 				$joinValues = FArrayHelper::getValue($allJoinValues, $i, array());
-				$joinParamValues = FArrayHelper::getValue($allParams, $i, array());
 			}
 			else
 			{
 				$joinValues = $allJoinValues;
-				$joinParamValues = $allParams;
 			}
 
 			$joinValues = (array) $joinValues;
-			$joinParamValues = (array) $joinParamValues;
 
 			// Get existing records
 			if ($parentId == '')
@@ -7638,7 +7629,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			else
 			{
 				$query->clear();
-				$query->select('id, ' . $shortName)->from($join->table_join)->where($pID . ' = ' . $parentId . ' AND ' . $joinParams . ' = ' . $formData[$paramsKey]);
+				$query->select('id, ' . $shortName)->from($join->table_join)->where($pID . ' = ' . $parentId);
 				$db->setQuery($query);
 				$ids = (array) $db->loadObjectList($shortName);
 			}
@@ -7646,7 +7637,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			// If doing an ajax form submit and the element is an ajax file upload then its data is different.
 			if (get_class($this) === 'PlgFabrik_ElementFileupload' && $ajaxSubmit)
 			{
-				$joinParamValues  = array_key_exists('crop', $joinValues) ? array_values($joinValues['crop']) : array();
+				$allParams  = array_key_exists('crop', $joinValues) ? array_values($joinValues['crop']) : array();
 				$joinValues = array_key_exists('id', $joinValues) ? array_keys($joinValues['id']) : $joinValues;
 			}
 
@@ -7656,7 +7647,10 @@ class PlgFabrik_Element extends FabrikPlugin
 				$record->$pID  = $parentId;
 				$fkVal              = FArrayHelper::getValue($joinValues, $jIndex);
 				$record->$shortName = $fkVal;
-				$record->$joinParams = $formData[$paramsKey];
+				if (get_class($this) === 'PlgFabrik_ElementFileupload' && $ajaxSubmit)
+				{
+					$record->params = FArrayHelper::getValue($allParams, $jIndex);
+				}
 
 				// Stop notice with file-upload where fkVal is an array
 				if (array_key_exists($fkVal, $ids))
@@ -7679,7 +7673,6 @@ class PlgFabrik_Element extends FabrikPlugin
 						$newId						= new stdClass;
 						$newId->id					= $lastInsertId;
 						$newId->$shortName    		= $record->$shortName;
-						$newId->$joinParams			= $record->$joinParams;
 						$ids[$record->$shortName] 	= $newId;
 					}
 
@@ -7749,11 +7742,11 @@ class PlgFabrik_Element extends FabrikPlugin
 		if ($this->getGroupModel()->isJoin())
 		{
 			$join      = $this->getJoin();
-			$paramsKey = $join->table_join . '___' . $this->joinParams();
+			$paramsKey = $join->table_join . '___params';
 		}
 		else
 		{
-			$paramsKey = $this->getFullName($step, false) . '___' . $this->joinParams();
+			$paramsKey = $this->getFullName($step, false) . '___params';
 		}
 
 		return $paramsKey;
@@ -7773,7 +7766,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$join      = $this->getJoin();
 		$db        = $listModel->getDb();
 		$query     = $db->getQuery(true);
-		$pID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$pID	= $this->parentID();
 
 		if (empty($idsToKeep))
 		{
