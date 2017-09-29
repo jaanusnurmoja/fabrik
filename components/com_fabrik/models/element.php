@@ -4651,7 +4651,7 @@ class PlgFabrik_Element extends FabrikPlugin
 				{
 					// Query the joined table concatenating into one field
 					$joinTable = $this->getJoinModel()->getJoin()->table_join;
-					$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+					$parentID	= $this->parentID();
 
 					// Jaanus: joined group pk set in groupConcactJoinKey()
 					$pk    = $this->groupConcactJoinKey();
