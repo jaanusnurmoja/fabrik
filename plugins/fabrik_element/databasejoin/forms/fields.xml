@@ -52,9 +52,9 @@
 				<option value="multilist">PLG_ELEMENT_DBJOIN_MULTILIST</option>
 			</field>
 
-			<field name="repeat"
-			       label="PLG_ELEMENT_FORCE_ISJOIN_LABEL"
-			       description="PLG_ELEMENT_FORCE_ISJOIN_DESC"
+			<field name="single_instead_multiple"
+			       label="PLG_ELEMENT_FORCE_SINGLE_LABEL"
+			       description="PLG_ELEMENT_FORCE_SINGLE_DESC"
 			       type="checkbox"
 				   value="1"/>
 

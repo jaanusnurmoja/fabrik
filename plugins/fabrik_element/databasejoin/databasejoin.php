@@ -1257,14 +1257,15 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		// For repeating groups we need to unset this where each time the element is rendered
 		unset($this->autocomplete_where);
 
-		if ($this->isJoin())
+		$params        = $this->getParams();
+		$formModel     = $this->getFormModel();
+		$displayType   = $this->getDisplayType();
+
+		if ($this->isJoin()) //  && in_array($displayType, array('checkbox', 'multilist'))
 		{
 			$this->hasSubElements = true;
 		}
 
-		$params        = $this->getParams();
-		$formModel     = $this->getFormModel();
-		$displayType   = $this->getDisplayType();
 		$default       = (array) $this->getValue($data, $repeatCounter, array('raw' => true));
 		$defaultLabels = (array) $this->getValue($data, $repeatCounter, array('raw' => false));
 		$defaultLabels = array_values($defaultLabels);
@@ -1724,6 +1725,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$optsPerRow = intval($params->get('dbjoin_options_per_row', 0));
 		$targetIds  = $this->multiOptionTargetIds($data, $repeatCounter);
 		$class      = 'fabrikinput inputbox ' . $params->get('bootstrap_class', '');
+		$single		= $params->get('single_instead_multiple');
 
 		if (!FArrayHelper::emptyIsh($targetIds, true))
 		{
@@ -1732,10 +1734,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if ($this->isEditable())
 		{
-			$multiSize     = (int) $params->get('dbjoin_multilist_size', 6);
+			$multiSize     = $single ? '' : ' size="' . (int) $params->get('dbjoin_multilist_size', 6) .  '"';
+			$multiple 	= $single ? '' : ' multiple="true"';
 			$multiMax      = $params->get('dbjoin_multiselect_max', '0');
 			$advancedClass = $this->getAdvancedSelectClass();
-			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '" multiple="true"';
+			$attributes    = 'class="' . $class . ' ' . $advancedClass . '"' . $multiSize . $multiple;
 
 			if (!empty($advancedClass) && (int)$multiMax > 0)
 			{
@@ -1769,6 +1772,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$id     = $this->getHTMLId($repeatCounter);
 		$name   = $this->getHTMLName($repeatCounter);
 		$params = $this->getParams();
+		$single		= $params->get('single_instead_multiple');
+		$type = $single ?  'radio' : 'checkbox';
 
 		$attributes = 'class="fabrikinput inputbox" id="' . $id . '"';
 
@@ -1786,17 +1791,17 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		}
 
 		$this->renderReadOnlyTrimOptions($tmp, $default);
-		$layout                    = $this->getLayout('form-checkboxlist');
+		$layout                    = $this->getLayout('form-' . $type . 'list');
 		$displayData               = new stdClass;
 		$displayData->options      = $tmp;
 		$displayData->default      = (array) $default;
 		$displayData->optsPerRow   = (int) $params->get('dbjoin_options_per_row', 1);
 		$displayData->name         = $name;
 		$displayData->editable     = $this->isEditable();
-		$displayData->optionLayout = $this->getLayout('form-checkbox');
+		$displayData->optionLayout = $this->getLayout('form-' . $type);
 
 		$html[]       = '<div class="fabrikSubElementContainer" id="' . $id . '">';
-		$singleLayout = 'fabrik-element-' . $this->getPluginName() . '-form-checkbox';
+		$singleLayout = 'fabrik-element-' . $this->getPluginName() . '-form-' . $type;
 		FabrikHelperHTML::jLayoutJs($singleLayout . '_' . $id, $singleLayout, $displayData, array($this->layoutBasePath()));
 		$rowOptsLayout = 'fabrik-element-' . $this->getPluginName() . '-form-rowopts';
 		FabrikHelperHTML::jLayoutJs($rowOptsLayout, $rowOptsLayout, $displayData, array($this->layoutBasePath()));
@@ -1807,7 +1812,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		}
 		else
 		{
-			$html[] = FabrikHelperHTML::aList('checkbox', $tmp, $name, $attributes, $default, 'value', 'text', $displayData->optsPerRow, $displayData->editable);
+			$html[] = FabrikHelperHTML::aList($type, $tmp, $name, $attributes, $default, 'value', 'text', $displayData->optsPerRow, $displayData->editable);
 		}
 
 		if (empty($tmp) && !FabrikWorker::j3())
@@ -1818,7 +1823,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			$o->value = 'dummy';
 			$tmpIds[] = $o;
 			$tmp      = $tmpIds;
-			$dummy    = FabrikHelperHTML::aList('checkbox', $tmp, $name, $attributes, $default, 'value', 'text', 1, true);
+			$dummy    = FabrikHelperHTML::aList($type, $tmp, $name, $attributes, $default, 'value', 'text', 1, true);
 			$html[]   = '<div class="chxTmplNode">' . $dummy . '</div>';
 		}
 
