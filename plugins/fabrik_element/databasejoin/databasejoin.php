@@ -1260,6 +1260,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$params        = $this->getParams();
 		$formModel     = $this->getFormModel();
 		$displayType   = $this->getDisplayType();
+		// $single		= $this->isJoin() && in_array($displayType, array('dropdown', 'radio'));
 
 		if ($this->isJoin()) //  && in_array($displayType, array('checkbox', 'multilist'))
 		{
@@ -1380,10 +1381,24 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				{
 					case 'dropdown':
 					default:
-						$this->renderDropdownList($data, $repeatCounter, $html, $tmp, $default);
+						if ($this->isJoin())
+						{
+							$this->renderMultiSelectList($data, $repeatCounter, $html, $tmp, $default);
+						}
+						else
+						{
+							$this->renderDropdownList($data, $repeatCounter, $html, $tmp, $default);
+						}
 						break;
 					case 'radio':
-						$this->renderRadioList($data, $repeatCounter, $html, $tmp, FArrayHelper::getValue($default, 0));
+						if ($this->isJoin())
+						{
+							$this->renderCheckBoxList($data, $repeatCounter, $html, $tmp, $default);
+						}
+						else
+						{
+							$this->renderRadioList($data, $repeatCounter, $html, $tmp, FArrayHelper::getValue($default, 0));
+						}
 						break;
 					case 'checkbox':
 						$this->renderCheckBoxList($data, $repeatCounter, $html, $tmp, $default);
@@ -1725,7 +1740,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$optsPerRow = intval($params->get('dbjoin_options_per_row', 0));
 		$targetIds  = $this->multiOptionTargetIds($data, $repeatCounter);
 		$class      = 'fabrikinput inputbox ' . $params->get('bootstrap_class', '');
-		$single		= $params->get('single_instead_multiple');
+		$single		= $this->isJoin() && $this->getDisplayType() == 'dropdown';
 
 		if (!FArrayHelper::emptyIsh($targetIds, true))
 		{
@@ -1772,7 +1787,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$id     = $this->getHTMLId($repeatCounter);
 		$name   = $this->getHTMLName($repeatCounter);
 		$params = $this->getParams();
-		$single		= $params->get('single_instead_multiple');
+		$single		= $this->isJoin() && $this->getDisplayType() == 'radio';
 		$type = $single ?  'radio' : 'checkbox';
 
 		$attributes = 'class="fabrikinput inputbox" id="' . $id . '"';

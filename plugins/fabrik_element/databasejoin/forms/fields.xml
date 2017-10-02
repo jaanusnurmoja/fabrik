@@ -53,8 +53,8 @@
 			</field>
 
 			<field name="single_instead_multiple"
-			       label="PLG_ELEMENT_FORCE_SINGLE_LABEL"
-			       description="PLG_ELEMENT_FORCE_SINGLE_DESC"
+			       label="PLG_ELEMENT_FORCE_ISJOIN_LABEL"
+			       description="PLG_ELEMENT_FORCE_ISJOIN_DESC"
 			       type="checkbox"
 				   value="1"/>
 
