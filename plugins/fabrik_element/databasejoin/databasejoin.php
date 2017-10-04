@@ -1262,7 +1262,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$displayType   = $this->getDisplayType();
 		// $single		= $this->isJoin() && in_array($displayType, array('dropdown', 'radio'));
 
-		if ($this->isJoin()) //  && in_array($displayType, array('checkbox', 'multilist'))
+		if ($this->isJoin() && in_array($displayType, array('checkbox', 'multilist')))
 		{
 			$this->hasSubElements = true;
 		}
@@ -1393,7 +1393,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					case 'radio':
 						if ($this->isJoin())
 						{
-							$this->renderCheckBoxList($data, $repeatCounter, $html, $tmp, $default);
+							$this->renderCheckBoxList($data, $repeatCounter, $html, $tmp, FArrayHelper::getValue($default, 0));
 						}
 						else
 						{
@@ -3817,6 +3817,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	public function getJoinRepeatCount($data, $oJoin)
 	{
 		$displayType = $this->getDisplayType();
+		
+		// Jaanus: perhaps it should be if ($this->isJoin()) instead?
 
 		if ($displayType === 'multilist')
 		{
@@ -3927,14 +3929,13 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 */
 	protected function multiOptionTargetIds($data, $repeatCounter = 0)
 	{
-		$displayType = $this->getDisplayType();
 
-		if ($displayType == 'checkbox' || $displayType == 'multilist')
+		if ($this->isJoin())
 		{
 			$idName    = $this->getFullName(true, false) . '_id';
 			$formModel = $this->getFormModel();
 
-			if ($this->isJoin() && !$formModel->hasErrors())
+			if (!$formModel->hasErrors())
 			{
 				// Only add repeatCounter if group model repeating - otherwise we only ever select one checkbox.
 				if ($this->getGroupModel()->canRepeat())
