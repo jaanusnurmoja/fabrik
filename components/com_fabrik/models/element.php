@@ -2451,7 +2451,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			// Placeholder to be updated by ajax code
 			$v = html_entity_decode($this->getROElement($data, $repeatCounter));
 			//$v = $v == '' ? '&nbsp;' : $v;
-			if(is_array($v)) $v = implode($v);
+			// if(is_array($v)) $v = implode($v);
 
 			return '<div class="fabrikElementReadOnly" id="' . $htmlId . '">' . $v . '</div>';
 		}
@@ -7181,18 +7181,6 @@ class PlgFabrik_Element extends FabrikPlugin
 	{
 		$ajaxSubmit = $this->app->input->get('fabrik_ajax');
 		return (get_class($this) === 'PlgFabrik_ElementFileupload' && $ajaxSubmit);
-	}
-
-	/**
-	 * Value for params field
-	 *
-	 * @return  string
-	 */
-
-	 public function joinParamsValue()
-	{
-		$v = $this->getParams()->get('repeat_params_value', '');
-		return $v;
 	}
 
 	/**
