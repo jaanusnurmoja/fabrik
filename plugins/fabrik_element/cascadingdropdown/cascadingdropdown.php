@@ -286,6 +286,7 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 					if ($this->isJoin())
 					{
 						$this->renderMultiSelectList($data, $repeatCounter, $html, $tmp, $default);
+						$defaultLabel = implode("\n", $html);
 					}
 					else
 					{
