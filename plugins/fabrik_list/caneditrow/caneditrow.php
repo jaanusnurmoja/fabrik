@@ -27,6 +27,9 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-list.php';
 class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 {
 	protected $acl = array();
+
+	protected $result = null;
+
 	/**
 	 * Can the plug-in select list rows
 	 *
@@ -56,6 +59,7 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 		// and we don't have an opinion on per-table edit permissions, so just return true.
 		if (is_null($row) || is_null($row[0]))
 		{
+			$this->result = true;
 			return true;
 		}
 
@@ -64,6 +68,7 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 		{
 			if ($params->get('caneditrow_on_submit', '1') === '0')
 			{
+				$this->result = true;
 				return true;
 			}
 		}
@@ -72,6 +77,7 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
         {
             if ($formModel->failedValidation())
             {
+            	$this->result = true;
                 return true;
             }
         }
@@ -91,7 +97,17 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 		 */
 		if (!isset($data->__pk_val) || empty($data->__pk_val))
 		{
+			$this->result = true;
 			return true;
+		}
+
+		/**
+		 * If we've got the results for this PK, return them.  Set result, so customProcessResult() gets it right
+		 */
+		if (array_key_exists($data->__pk_val, $this->acl))
+		{
+			$this->result = $this->acl[$data->__pk_val];
+			return $this->acl[$data->__pk_val];
 		}
 
 		$field = str_replace('.', '___', $params->get('caneditrow_field'));
@@ -103,6 +119,7 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 		if (trim($field) == '' && trim($caneditrow_eval) == '')
 		{
 			$this->acl[$data->__pk_val] = true;
+			$this->result = true;
 
 			return true;
 		}
@@ -116,6 +133,7 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 			$caneditrow_eval = @eval($caneditrow_eval);
 			FabrikWorker::logEval($caneditrow_eval, 'Caught exception on eval in can edit row : %s');
 			$this->acl[$data['__pk_val']] = $caneditrow_eval;
+			$this->result = $caneditrow_eval;
 
 			return $caneditrow_eval;
 		}
@@ -147,6 +165,7 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 			}
 
 			$this->acl[$data->__pk_val] = $return;
+			$this->result = $return;
 
 			return $return;
 		}
@@ -190,5 +209,26 @@ class PlgFabrik_ListCaneditrow extends PlgFabrik_List
 	public function loadJavascriptClassName_result()
 	{
 		return 'FbListCaneditrow';
+	}
+
+	/**
+	 * Custom process plugin result
+	 *
+	 * @param   string $method Method
+	 *
+	 * @return boolean
+	 */
+	public function customProcessResult($method)
+	{
+		/*
+		 * If we didn't return false from onCanEdit(), the plugin manager will get the final result from this method,
+		 * so we need to return whatever onCanEdit() set the result to.
+		 */
+		if ($method === 'onCanEdit')
+		{
+			return $this->result;
+		}
+
+		return true;
 	}
 }
