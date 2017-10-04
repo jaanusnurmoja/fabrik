@@ -933,76 +933,78 @@ class FabrikFEModelGroup extends FabModel
 					}
 				}
 
-				if (!$editable)
+                if (!$editable) 
 				{
-					$this->editable = false;
-				}
-			}
-
-			$group->editable  = $this->editable;
-			$group->canRepeat = $params->get('repeat_group_button', '0');
-			$showGroup        = $params->def('repeat_group_show_first', '1');
-			$pages            = $formModel->getPages();
-			$startPage        = isset($formModel->sessionModel->last_page) ? $formModel->sessionModel->last_page : 0;
+                    $this->editable = false;
+                }
+            }
+            
+			$group->editable = $this->editable;
+            $group->canRepeat = $params->get('repeat_group_button', '0');
+            $showGroup = $params->def('repeat_group_show_first', '1');
+            $pages = $formModel->getPages();
+            $startPage = isset($formModel->sessionModel->last_page) ? $formModel->sessionModel->last_page : 0;
+            
 			/**
-			 * $$$ hugh - added array_key_exists for (I think!) corner case where group properties have been
-			 * changed to remove (or change) paging, but user still has session state set.  So it was throwing
-			 * a PHP 'undefined index' notice.
-			 */
-
+             * $$$ hugh - added array_key_exists for (I think!) corner case where group properties have been
+             * changed to remove (or change) paging, but user still has session state set.  So it was throwing
+             * a PHP 'undefined index' notice.
+             */
+            
 			if (array_key_exists($startPage, $pages) && is_array($pages[$startPage])
-				&& !in_array($groupTable->id, $pages[$startPage]) || $showGroup == -1 || $showGroup == 0 || ($view == 'form' && $showGroup == -2) || ($view == 'details' && $showGroup == -3))
+                && !in_array($groupTable->id, $pages[$startPage]) || $showGroup == -1 || $showGroup == 0 || ($view == 'form' && $showGroup == -2) || ($view == 'details' && $showGroup == -3)) 
 			{
-				$groupTable->css .= ";display:none;";
-			}
-
+                $groupTable->css .= ";display:none;";
+            }
+            
 			$group->css = trim(str_replace(array("<br />", "<br>"), "", $groupTable->css));
-			$group->id  = $groupTable->id;
-
+            $group->id = $groupTable->id;
+            
 			$label = $input->getString('group' . $group->id . '_label', $groupTable->label);
-
-			if (JString::stristr($label, "{Add/Edit}"))
+            
+			if (JString::stristr($label, "{Add/Edit}")) 
 			{
-				$replace = $formModel->isNewRecord() ? FText::_('COM_FABRIK_ADD') : FText::_('COM_FABRIK_EDIT');
-				$label   = str_replace("{Add/Edit}", $replace, $label);
-			}
-
-			$groupTable->label       = $label;
-			$group->title            = $w->parseMessageForPlaceHolder($groupTable->label, $formModel->data, false);
-			$group->title            = FText::_($group->title);
-			$group->name             = $groupTable->name;
-			$group->displaystate     = ($group->canRepeat == 1 && $formModel->isEditable()) ? 1 : 0;
-			$group->maxRepeat        = (int) $params->get('repeat_max');
-			$group->minRepeat        = $params->get('repeat_min', '') === '' ? 1 : (int) $params->get('repeat_min', '');
-			$group->numRepeatElement = $params->get('repeat_num_element', '');
-			$group->showMaxRepeats   = $params->get('show_repeat_max', '0') == '1';
-			$group->minMaxErrMsg     = $params->get('repeat_error_message', '');
-			$group->minMaxErrMsg     = FText::_($group->minMaxErrMsg);
-			$group->canAddRepeat     = $this->canAddRepeat();
-			$group->canDeleteRepeat  = $this->canDeleteRepeat();
-			$intro                   = FabrikString::translate($params->get('intro'));
-			$group->intro            = $formModel->parseIntroOutroPlaceHolders($intro, $group->editable, $formModel->isNewRecord());
-			$outro                   = FText::_($params->get('outro'));
-			$group->outro            = $formModel->parseIntroOutroPlaceHolders($outro, $group->editable, $formModel->isNewRecord());
-			$group->columns          = $params->get('group_columns', 1);
-			$group->splitPage        = $this->isSplitPage();
-			$group->showLegend       = $this->showLegend($group);
-			$group->labels           = $params->get('labels_above', -1);
-			$group->dlabels          = $params->get('labels_above_details', -1);
-			$group->class            = array();
-
-			if ($this->canRepeat())
+                $replace = $formModel->isNewRecord() ? FText::_('COM_FABRIK_ADD') : FText::_('COM_FABRIK_EDIT');
+                $label = str_replace("{Add/Edit}", $replace, $label);
+            }
+            
+			$groupTable->label = $label;
+            $group->title = $w->parseMessageForPlaceHolder($groupTable->label, $formModel->data, false);
+            $group->title = FText::_($group->title);
+            $group->name = $groupTable->name;
+            $group->displaystate = ($group->canRepeat == 1 && $formModel->isEditable()) ? 1 : 0;
+            $group->maxRepeat = (int)$params->get('repeat_max');
+            $group->minRepeat = $params->get('repeat_min', '') === '' ? 1 : (int)$params->get('repeat_min', '');
+            $group->numRepeatElement = $params->get('repeat_num_element', '');
+            $group->showMaxRepeats = $params->get('show_repeat_max', '0') == '1';
+            $group->minMaxErrMsg = $params->get('repeat_error_message', '');
+            $group->minMaxErrMsg = FText::_($group->minMaxErrMsg);
+            $group->canAddRepeat = $this->canAddRepeat();
+            $group->canDeleteRepeat = $this->canDeleteRepeat();
+            $intro = FabrikString::translate($params->get('intro'));
+            $group->intro = $formModel->parseIntroOutroPlaceHolders($intro, $group->editable, $formModel->isNewRecord());
+            $outro = FText::_($params->get('outro'));
+            $group->outro = $formModel->parseIntroOutroPlaceHolders($outro, $group->editable, $formModel->isNewRecord());
+            $group->columns = $params->get('group_columns', 1);
+            $group->splitPage = $this->isSplitPage();
+			$group->start = in_array($params->get('repeat_table_part', 0), array(0, 1));
+			$group->end = in_array($params->get('repeat_table_part', 0), array(0, 3));
+            $group->showLegend = $this->showLegend($group);
+            $group->labels = $params->get('labels_above', -1);
+            $group->dlabels = $params->get('labels_above_details', -1);
+            
+			if ($this->canRepeat()) 
 			{
-				$group->tmpl = $params->get('repeat_template', 'repeatgroup');
-			}
-			else
+                $group->tmpl = $params->get('repeat_template', 'repeatgroup');
+            } 
+			else 
 			{
-				$group->tmpl = 'group';
-			}
-
+                $group->tmpl = 'group';
+            }
+            
 			$this->groupProperties = $group;
-		}
-
+        }
+		
 		return $this->groupProperties;
 	}
 
