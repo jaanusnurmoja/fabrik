@@ -759,9 +759,9 @@ class PlgFabrik_Element extends FabrikPlugin
 		$dbTable   = $this->actualTableName();
 		// Jaanus: joined group pk? set in groupConcactJoinKey()
 		$pkField    = $this->groupConcactJoinKey();
-		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$parentID	= $this->parentID();
 		$fullElName = $this->_db->qn($dbTable . '___' . $this->element->name);
-		$sql        = '(SELECT GROUP_CONCAT(' . $jKey . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' .$parentID . ' = '
+		$sql        = '(SELECT GROUP_CONCAT(' . $jKey . ' SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = '
 			. $pkField . ')';
 
 		if ($addAs)
@@ -788,10 +788,9 @@ class PlgFabrik_Element extends FabrikPlugin
 		$dbTable    = $this->actualTableName();
 		$fullElName = $this->_db->qn($dbTable . '___' . $this->element->name . '_raw');
 		$pkField    = $this->groupConcactJoinKey();
-		$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$parentID	= $this->parentID();
 
-		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField
-		. ') AS ' . $fullElName;
+		return '(SELECT GROUP_CONCAT(id SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField . ') AS ' . $fullElName;
 	}
 
 	/**
@@ -901,19 +900,21 @@ class PlgFabrik_Element extends FabrikPlugin
 				$as  = $db->qn($dbTable . '___' . $this->element->name . '_raw');
 				$aAsFields[] = $as;
 
-				$str         = $this->buildQueryElementConcatId();
-				$aFields[]   = $str;
-				$as  = $db->qn($dbTable . '___' . $this->element->name . '_id');
-				$aAsFields[] = $as;
-				$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+					$str         = $this->buildQueryElementConcatId();
+					$aFields[]   = $str;
+					$as  = $db->qn($dbTable . '___' . $this->element->name . '_id');
+					$aAsFields[] = $as;
 
-				$as  = $db->qn($dbTable . '___' . $this->element->name . '___params');
-				$str = '(SELECT GROUP_CONCAT(params SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = '
+				if ($this->joinParams())
+				{
+					$parentID	= $this->parentID();
 
-					. $pkField . ') AS ' . $as;
-				// Jaanus: joined group pk set in groupConcactJoinKey()
-				$aFields[]   = $str;
-				$aAsFields[] = $as;
+					$as  = $db->qn($dbTable . '___' . $this->element->name . '___params');
+					$str = '(SELECT GROUP_CONCAT(params SEPARATOR \'' . GROUPSPLITTER . '\') FROM ' . $joinTable . ' WHERE ' . $parentID . ' = ' . $pkField . ') AS ' . $as;
+					// Jaanus: joined group pk set in groupConcactJoinKey()
+					$aFields[]   = $str;
+					$aAsFields[] = $as;
+				}
 			}
 			else
 			{
@@ -2463,6 +2464,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			// Placeholder to be updated by ajax code
 			$v = html_entity_decode($this->getROElement($data, $repeatCounter));
 			//$v = $v == '' ? '&nbsp;' : $v;
+			// if(is_array($v)) $v = implode($v);
 
 			return '<div class="fabrikElementReadOnly" id="' . $htmlId . '">' . $v . '</div>';
 		}
@@ -2979,7 +2981,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$jsStr        = '';
 		$allJsActions = $this->getFormModel()->getJsActions();
 		/**
-		 * hugh - only needed getParent when we weren't saving changes to parent params to child
+		 * $$$ hugh - only needed getParent when we weren't saving changes to parent params to child
 		 * which we should now be doing ... and getParent() causes an extra table lookup for every child
 		 * element on the form.
 		 * $element = $this->getParent();
@@ -4662,7 +4664,7 @@ class PlgFabrik_Element extends FabrikPlugin
 				{
 					// Query the joined table concatenating into one field
 					$joinTable = $this->getJoinModel()->getJoin()->table_join;
-					$parentID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+					$parentID	= $this->parentID();
 
 					// Jaanus: joined group pk set in groupConcactJoinKey()
 					$pk    = $this->groupConcactJoinKey();
@@ -7173,6 +7175,28 @@ class PlgFabrik_Element extends FabrikPlugin
 	}
 
 	/**
+	 * Parent_id or something else
+	 *
+	 * @return  string
+	 */
+	public function parentID()
+	{
+		return $this->getParams()->get('repeat_parent_id', 'parent_id');
+	}
+
+	/**
+	 * Params field name
+	 *
+	 * @return  string
+	 */
+
+	 public function joinParams()
+	{
+		$ajaxSubmit = $this->app->input->get('fabrik_ajax');
+		return (get_class($this) === 'PlgFabrik_ElementFileupload' && $ajaxSubmit);
+	}
+
+	/**
 	 * Used by inline edit table plugin
 	 * If returns yes then it means that there are only two possible options for the
 	 * ajax edit, so we should simply toggle to the alternative value and show the
@@ -7529,7 +7553,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$db         = $listModel->getDb();
 		$query      = $db->getQuery(true);
 		$formData   =& $this->getFormModel()->formDataWithTableName;
-		$pID 		= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$pID 		= $this->parentID();
 
 		// I set this to raw for cdd.
 		$name       = $this->getFullName(true, false);
@@ -7624,7 +7648,10 @@ class PlgFabrik_Element extends FabrikPlugin
 				$record->$pID  = $parentId;
 				$fkVal              = FArrayHelper::getValue($joinValues, $jIndex);
 				$record->$shortName = $fkVal;
-				$record->params     = FArrayHelper::getValue($allParams, $jIndex);
+				if (get_class($this) === 'PlgFabrik_ElementFileupload' && $ajaxSubmit)
+				{
+					$record->params = FArrayHelper::getValue($allParams, $jIndex);
+				}
 
 				// Stop notice with file-upload where fkVal is an array
 				if (array_key_exists($fkVal, $ids))
@@ -7644,10 +7671,10 @@ class PlgFabrik_Element extends FabrikPlugin
 
 					if (!$this->allowDuplicates)
 					{
-						$newId                    = new stdClass;
-						$newId->id                = $lastInsertId;
-						$newId->$shortName        = $record->$shortName;
-						$ids[$record->$shortName] = $newId;
+						$newId						= new stdClass;
+						$newId->id					= $lastInsertId;
+						$newId->$shortName    		= $record->$shortName;
+						$ids[$record->$shortName] 	= $newId;
 					}
 
 					$idsToKeep[$parentId][] = $lastInsertId;
@@ -7740,7 +7767,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$join      = $this->getJoin();
 		$db        = $listModel->getDb();
 		$query     = $db->getQuery(true);
-		$pID	= $this->getParams()->get('repeat_parent_id', 'parent_id');
+		$pID	= $this->parentID();
 
 		if (empty($idsToKeep))
 		{
