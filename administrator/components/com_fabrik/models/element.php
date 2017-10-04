@@ -1146,13 +1146,54 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$formModel = $elementModel->getForm();
 		$db        = $listModel->getDb();
 		$desc      = $elementModel->getFieldDescription();
-		$name      = $db->qn($params->get('repeat_element', $row->name));
+		$name      = $params->get('repeat_element', $row->name);
 		$joinParams = $elementModel->joinParams() ?  ', ' . $db->qn('params') . ' TEXT' : '';
-		$db
-			->setQuery(
-				'CREATE TABLE IF NOT EXISTS ' . $db->qn($tableName) . ' ( id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, ' . $parentID . ' INT(11), '
-				. $name . ' ' . $desc . $joinParams . ' );');
-		$db->execute();
+		
+		$db->setQuery('SHOW TABLES LIKE ' . $db->quote($tableName));
+		$tableExists = $db->loadResult();
+		
+		if (!empty($tableExists))
+		{
+
+			// Add new fields if set
+			/*
+			$db->setQuery('SHOW COLUMNS FROM ' . $db->qn($tableName));
+			$columns = $db->loadObjectList();
+			$col = array();
+			
+			foreach ($columns as $c)
+			{
+				$col[] = $c->Field;
+			}
+			echo implode(',', $col);
+			$newFK  = in_array($parentID, $col);
+			$newField  = in_array($name, $col);
+			// Jaanus - commented lines above are just to understand what we get with 3 lines below :)
+			*/
+			
+			$fields = $listModel->getDBFields($tableName, 'Field');
+			$newFK  = FArrayHelper::getValue($fields, $parentID, false);
+			$newField  = FArrayHelper::getValue($fields, $name, false);
+
+			$andAdd = $newFK || $newField ? '' : ', ADD ';
+			$newFKdesc = $newFK ? '' : $parentID . ' INT(11)';
+			$newFieldDesc = $newField ? '' : $name . ' ' . $desc;
+
+			if (!$newField || !$newFK)
+			{
+				$db->setQuery('ALTER TABLE ' . $db->qn($tableName) . ' ADD ' . $newFKdesc . $andAdd . $newFieldDesc . ';');
+				$db->execute();
+			}
+	// End of alter table stuff
+		}
+		else
+		{
+			$db
+				->setQuery(
+					'CREATE TABLE IF NOT EXISTS ' . $db->qn($tableName) . ' ( id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, ' . $parentID . ' INT(11), '
+					. $name . ' ' . $desc . $joinParams . ' );');
+			$db->execute();
+		}
 
 		// Remove previous join records if found
 		if ((int) $row->id !== 0)
@@ -1188,7 +1229,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$listModel->addIndex($fieldName, 'parent_fk', 'INDEX', '');
 
 		$fields = $listModel->getDBFields($tableName, 'Field');
-		$field  = FArrayHelper::getValue($fields, $row->name, false);
+		$field  = FArrayHelper::getValue($fields, $name, false);
 		switch ($field->BaseType)
 		{
 			case 'VARCHAR':
@@ -1200,7 +1241,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 				$size = '';
 				break;
 		}
-		$fieldName = $tableName . '___' . $row->name;
+		$fieldName = $tableName . '___' . $name;
 		$listModel->addIndex($fieldName, 'repeat_el', 'INDEX', $size);
 
 	}
