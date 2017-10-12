@@ -298,11 +298,11 @@ var refreshFiles = function () {
 	fs.copySync('libraries/joomla/document/fabrikfeed', './fabrik_build/output/component/site/fabrikfeed');
 	fs.copySync('libraries/joomla/document/pdf', './fabrik_build/output/component/site/pdf');
 	fs.copySync('libraries/joomla/document/partial', './fabrik_build/output/component/site/partial');
-    fs.copySync('libraries/joomla/src/Document/PartialDocument.ph', './fabrik_build/output/component/site/Document/PartialDocument.php');
-    fs.copySync('libraries/joomla/src/Document/PdfDocument.ph', './fabrik_build/output/component/site/Document/PdfDocument.php');
-    fs.copySync('libraries/joomla/src/Document/Renderer/Partial', './fabrik_build/output/component/site/Document/Renderer/Partial');
-    fs.copySync('libraries/joomla/src/Document/Renderer/Pdf', './fabrik_build/output/component/site/Document/Renderer/Pdf');
-
+    fs.copySync('libraries/src/Document/PartialDocument.php', './fabrik_build/output/component/site/Document/PartialDocument.php');
+    fs.copySync('libraries/src/Document/PdfDocument.php', './fabrik_build/output/component/site/Document/PdfDocument.php');
+    fs.copySync('libraries/src/Document/Renderer/Partial', './fabrik_build/output/component/site/Document/Renderer/Partial');
+    fs.copySync('libraries/src/Document/Renderer/Pdf', './fabrik_build/output/component/site/Document/Renderer/Pdf');
+    fs.copySync('libraries/fabrik/fabrik/Helpers', './fabrik_build/output/component/site/fabrik/fabrik/Helpers');
 
     // Library folder
 	fs.copySync('libraries/fabrik', './fabrik_build/output/library');

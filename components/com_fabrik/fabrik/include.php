@@ -25,6 +25,7 @@ class FabrikAutoloader
 	public function __construct()
 	{
 		spl_autoload_register(array($this, 'controller'));
+		spl_autoload_register(array($this, 'helper'));
 
 		// @TODO - at some point allow auto-loading of these as per Fabble
 		/*
@@ -224,8 +225,34 @@ class FabrikAutoloader
 			}
 		}
 	}
+
+	/**
+	 * Load helper file
+	 **/
+	private function helper($class)
+	{
+		if (!strstr($class, 'Fabrik\Helper'))
+		{
+			return;
+		}
+
+		$class = str_replace('\\', '/', $class);
+		$path = preg_replace('#Fabrik\/Helpers\/#', JPATH_SITE . '/libraries/fabrik/fabrik/Helpers/', $class);
+		$path  = $path . '.php';
+
+		if (file_exists($path))
+		{
+			require_once $path;
+		}
+	}
 }
 
-// PSR-4 Auto-loader.
-//$loader     = require JPATH_LIBRARIES . '/fabrik/vendor/autoload.php';
+/*
+ * If the Fabrik library package has been installed, or we have full github code, we can use Composer autoload
+ */
+if (file_exists(JPATH_LIBRARIES . '/fabrik/vendor/autoload.php'))
+{
+	$loader = require JPATH_LIBRARIES . '/fabrik/vendor/autoload.php';
+}
+
 $autoLoader = new FabrikAutoloader();
