@@ -1856,7 +1856,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 		else
 		{
-			$rollOver = is_string($txt) ? $txt : '';
+			$rollOver = (string)$txt;
 		}
 
 		return $rollOver;
