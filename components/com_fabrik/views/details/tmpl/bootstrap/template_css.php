@@ -12,14 +12,14 @@ header('Content-type: text/css');
 $c = (int) $_REQUEST['c'];
 $view = isset($_REQUEST['view']) ? $_REQUEST['view'] : 'form';
 $rowid = isset($_REQUEST['rowid']) ? $_REQUEST['rowid'] : '';
-echo '
+
 $form = $view . '_' . $c;
 
 if ($rowid !== '')
 {
 	$form .= '_' . $rowid;
 }
-
+echo '
 .row-fluid:before,
 .row-fluid:after {
 	display: table;
