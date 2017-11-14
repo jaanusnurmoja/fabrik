@@ -1733,9 +1733,9 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		}
 
 		$storage = $this->getStorage();
-		$file    = $storage->clean(JPATH_SITE . '/' . $filename);
-		$thumb   = $storage->clean(JPATH_SITE . '/' . $storage->_getThumb($filename));
-		$cropped = $storage->clean(JPATH_SITE . '/' . $storage->_getCropped($filename));
+		$file    = $storage->clean($filename);
+		$thumb   = $storage->clean($storage->_getThumb($filename));
+		$cropped = $storage->clean($storage->_getCropped($filename));
 
 		$logMsg = 'Delete files: ' . $file . ' , ' . $thumb . ', ' . $cropped . '; user = ' . $this->user->get('id');
 		JLog::add($logMsg, JLog::WARNING, 'com_fabrik.element.fileupload');
@@ -3157,6 +3157,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		$rowId       = $input->get('rowid', '', 'string');
 		$repeatCount = $input->getInt('repeatcount', 0);
 		$ajaxIndex   = $input->getStr('ajaxIndex', '');
+		$linkOnly    = $input->getStr('linkOnly', '0') === '1';
 		$listModel   = $this->getListModel();
 		$row         = $listModel->getRow($rowId, false, true);
 
@@ -3218,6 +3219,17 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		}
 
 		$filePath    = $storage->getFullPath($filePath);
+
+		/*
+		 * Special case, usually for S3, which allows custom JS to call this function with AJAX, specify &linkOnly=1,
+		 * and get back the presigned URL to a file in a Private bucket.
+		 */
+		if ($linkOnly)
+		{
+			echo $storage->preRenderPath($filePath);
+			exit;
+		}
+
 		$fileContent = $storage->read($filePath);
 
 		if ($fileContent !== false)
