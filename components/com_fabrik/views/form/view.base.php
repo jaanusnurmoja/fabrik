@@ -436,7 +436,7 @@ class FabrikViewFormBase extends FabrikView
 		if ($this->showPrint)
 		{
 			$text            = FabrikHelperHTML::image('print');
-			$this->printLink = '<a href="#" class="btn btn-default" class="printlink" onclick="window.print();return false;">' . $text . '</a>';
+			$this->printLink = '<a href="#" class="btn btn-default fabrikPrintIcon" onclick="window.print();return false;">' . $text . '</a>';
 		}
 
 		if ($input->get('tmpl') != 'component')
@@ -799,6 +799,7 @@ class FabrikViewFormBase extends FabrikView
 		$minRepeat      = array();
 		$showMaxRepeats = array();
 		$minMaxErrMsg   = array();
+		$numRepeatEls   = array();
 
 		foreach ($this->groups as $g)
 		{

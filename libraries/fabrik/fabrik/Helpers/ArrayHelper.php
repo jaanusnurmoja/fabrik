@@ -485,6 +485,57 @@ class ArrayHelper
     }
 
 	/**
+	 * Wrapper for standard array_chunk that allows for flipping a grid.  So without flipping, chunking ...
+	 *
+	 * 1, 2, 3, 4, 5
+	 *
+	 * ... into a chunksize of 2 becomes ...
+	 *
+	 * 1, 2
+	 * 3, 4
+	 * 5
+	 *
+	 * With flipping, it becomes ...
+	 *
+	 * 1, 4
+	 * 2, 5
+	 * 3
+	 *
+	 * This is useful for building Bootstrap style grids from unchunked arrays.
+	 *
+	 * @param      $array
+	 * @param      $cols
+	 * @param bool $flip
+	 *
+	 * @return array
+	 *
+	 * @since 3.8
+	 */
+    public static function chunk($array, $cols, $flip = false)
+    {
+	    function getChunkFlipper($array, $cols) {
+		    $rows = ceil(count($array) / $cols);
+		    return function($x) use ($array, $cols, $rows){
+			    return ($x % $cols) * $cols + floor($x / $cols);
+		    };
+	    }
+
+	    if ($flip)
+	    {
+		    $chunked     = array();
+		    $chunker = getChunkFlipper($array, $cols);
+		    for ($x = 0; $x < count($array); $x++)
+		    {
+			    $chunked[] = $array[$chunker($x)];
+		    }
+
+		    return array_chunk($chunked, $cols);
+	    }
+
+	    return array_chunk($array, $cols);
+    }
+
+	/**
 	 *
 	 * Allows reordering subgrouped arrays; 
 	 * needed i.e when we have multiple repeated joins both related to one parent (usually list's main) table

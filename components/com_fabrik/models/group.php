@@ -543,7 +543,8 @@ class FabrikFEModelGroup extends FabModel
 		$element->column .= '" ';
 		$spans           = $this->columnSpans();
 		$spanKey         = $rowIx % $colCount;
-		$element->span   = $element->hidden ? '' : FArrayHelper::getValue($spans, $spanKey, FabrikHelperHTML::getGridSpan(floor(12 / $colCount)));
+		$default = floor(12 / $colCount);
+		$element->span   = $element->hidden ? '' : FArrayHelper::getValue($spans, $spanKey, FabrikHelperHTML::getGridSpan((int)floor(12 / $colCount)));
 
 		if (!$element->hidden)
 		{
@@ -597,7 +598,7 @@ class FabrikFEModelGroup extends FabModel
 				if (strstr($w, '%'))
 				{
 					$w = (int) str_replace('%', '', $w);
-					$w = floor(($w / 100) * 12);
+					$w = (int) floor(($w / 100) * 12);
 				}
 
 				$w = ' ' . FabrikHelperHTML::getGridSpan($w);
@@ -964,36 +965,38 @@ class FabrikFEModelGroup extends FabModel
             
 			if (JString::stristr($label, "{Add/Edit}")) 
 			{
-                $replace = $formModel->isNewRecord() ? FText::_('COM_FABRIK_ADD') : FText::_('COM_FABRIK_EDIT');
-                $label = str_replace("{Add/Edit}", $replace, $label);
-            }
-            
-			$groupTable->label = $label;
-            $group->title = $w->parseMessageForPlaceHolder($groupTable->label, $formModel->data, false);
-            $group->title = FText::_($group->title);
-            $group->name = $groupTable->name;
-            $group->displaystate = ($group->canRepeat == 1 && $formModel->isEditable()) ? 1 : 0;
-            $group->maxRepeat = (int)$params->get('repeat_max');
-            $group->minRepeat = $params->get('repeat_min', '') === '' ? 1 : (int)$params->get('repeat_min', '');
-            $group->numRepeatElement = $params->get('repeat_num_element', '');
-            $group->showMaxRepeats = $params->get('show_repeat_max', '0') == '1';
-            $group->minMaxErrMsg = $params->get('repeat_error_message', '');
-            $group->minMaxErrMsg = FText::_($group->minMaxErrMsg);
-            $group->canAddRepeat = $this->canAddRepeat();
-            $group->canDeleteRepeat = $this->canDeleteRepeat();
-            $intro = FabrikString::translate($params->get('intro'));
-            $group->intro = $formModel->parseIntroOutroPlaceHolders($intro, $group->editable, $formModel->isNewRecord());
-            $outro = FText::_($params->get('outro'));
-            $group->outro = $formModel->parseIntroOutroPlaceHolders($outro, $group->editable, $formModel->isNewRecord());
-            $group->columns = $params->get('group_columns', 1);
-            $group->splitPage = $this->isSplitPage();
+				$replace = $formModel->isNewRecord() ? FText::_('COM_FABRIK_ADD') : FText::_('COM_FABRIK_EDIT');
+				$label   = str_replace("{Add/Edit}", $replace, $label);
+			}
+
+			$groupTable->label       = $label;
+			$group->title            = $w->parseMessageForPlaceHolder($groupTable->label, $formModel->data, false);
+			$group->title            = FText::_($group->title);
+			$group->name             = $groupTable->name;
+			$group->displaystate     = ($group->canRepeat == 1 && $formModel->isEditable()) ? 1 : 0;
+			$group->maxRepeat        = (int) $params->get('repeat_max');
+			$group->minRepeat        = $params->get('repeat_min', '') === '' ? 1 : (int) $params->get('repeat_min', '');
+			$group->numRepeatElement = $params->get('repeat_num_element', '');
+			$group->showMaxRepeats   = $params->get('show_repeat_max', '0') == '1';
+			$group->minMaxErrMsg     = $params->get('repeat_error_message', '');
+			$group->minMaxErrMsg     = FText::_($group->minMaxErrMsg);
+			$group->canAddRepeat     = $this->canAddRepeat();
+			$group->canDeleteRepeat  = $this->canDeleteRepeat();
+			$intro                   = FabrikString::translate($params->get('intro'));
+			$group->intro            = $formModel->parseIntroOutroPlaceHolders($intro, $group->editable, $formModel->isNewRecord());
+			$outro                   = FText::_($params->get('outro'));
+			$group->outro            = $formModel->parseIntroOutroPlaceHolders($outro, $group->editable, $formModel->isNewRecord());
+			$group->columns          = $params->get('group_columns', 1);
+			$group->splitPage        = $this->isSplitPage();
+			$group->showLegend       = $this->showLegend($group);
 			$group->start = in_array($params->get('repeat_table_part', 0), array(0, 1));
 			$group->end = in_array($params->get('repeat_table_part', 0), array(0, 3));
-            $group->showLegend = $this->showLegend($group);
-            $group->labels = $params->get('labels_above', -1);
-            $group->dlabels = $params->get('labels_above_details', -1);
-            
-			if ($this->canRepeat()) 
+			$group->labels           = $params->get('labels_above', -1);
+			$group->dlabels          = $params->get('labels_above_details', -1);
+			$group->classArray       = array();
+			$group->class            = '';
+
+			if ($this->canRepeat())
 			{
                 $group->tmpl = $params->get('repeat_template', 'repeatgroup');
             } 
