@@ -305,7 +305,10 @@ class FabrikViewFormBase extends FabrikView
 		$params = $model->getParams();
 		$view = $model->isEditable() === false ? 'details' : 'form';
 
-		if ($params->get('process-jplugins', 2) == 1 || ($params->get('process-jplugins', 2) == 2 && $model->isEditable() === false))
+		if ($params->get('process-jplugins', 2) == 1
+			|| ($params->get('process-jplugins', 2) == 2 && $model->isEditable() === false)
+			|| ($params->get('process-jplugins', 2) == 3 && $model->isEditable() === true)
+		)
 		{
 			$cloak = $view === 'details' && $this->app->input->get('format') !== 'pdf';
 			FabrikHelperHTML::runContentPlugins($text, $cloak);
@@ -1074,16 +1077,23 @@ class FabrikViewFormBase extends FabrikView
 		$multiPageSession = $model->sessionModel && $model->sessionModel->last_page > 0;
 		$form->clearMultipageSessionButton = $multiPageSession ? $btnLayout->render($layoutData) : '';
 
-		$layoutData = (object) array(
-			'type' => 'button',
-			'class' => 'button',
-			'name' => 'Goback',
-			'label' => $goBackLabel,
-			'attributes' => $model->isAjax() ? '' : FabrikWorker::goBackAction(),
-			'formModel' => $model
-		);
+		if (!$this->isMambot)
+		{
+			$layoutData = (object) array(
+				'type' => 'button',
+				'class' => 'button',
+				'name' => 'Goback',
+				'label' => $goBackLabel,
+				'attributes' => $model->isAjax() ? '' : FabrikWorker::goBackAction(),
+				'formModel' => $model
+			);
 
-		$form->gobackButton = $params->get('goback_button', 0) ? $btnLayout->render($layoutData) : '';
+			$form->gobackButton = $params->get('goback_button', 0) ? $btnLayout->render($layoutData) : '';
+		}
+		else
+		{
+			$form->gobackButton = '';
+		}
 
 		if ($model->isEditable() && $params->get('submit_button', 1))
 		{

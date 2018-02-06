@@ -13,9 +13,9 @@ defined('_JEXEC') or die('Restricted access');
 
 jimport('joomla.application.component.modelform');
 
+use Fabrik\Helpers\Pagination;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
-use Fabrik\Helpers\Pagination;
 
 require_once COM_FABRIK_FRONTEND . '/models/list-advanced-search.php';
 
@@ -5286,6 +5286,16 @@ class FabrikFEModelList extends JModelForm
 	 */
 	public function storeRequestData($request)
 	{
+		/**
+		 * If we're processing a record count for related data, don't store the filter.  Corner case when you have
+		 * multiple list plugins, and one has related data to another, and they happen to use that element
+		 * in a plugin filter
+		 */
+		if (!$this->app->input->get('fabrik_incsessionfilters', true))
+		{
+			return;
+		}
+
 		$package = $this->app->getUserState('com_fabrik.package', 'fabrik');
 		$input = $this->app->input;
 		$registry = $this->session->get('registry');
@@ -8129,6 +8139,17 @@ class FabrikFEModelList extends JModelForm
 	 */
 	public function doCalculations()
 	{
+		/*
+		if ($this->config->get('dbtype') === 'pdomysql')
+		{
+			echo $this->cacheDoCalculations($this, $this->getId());
+		}
+		else
+		{
+			$cache = FabrikWorker::getCache($this);
+			$cache->call(array(get_class($this), 'cacheDoCalculations'), $this, $this->getId());
+		}
+		*/
 		$cache = FabrikWorker::getCache($this);
 		$cache->call(array(get_class($this), 'cacheDoCalculations'), $this->getId());
 	}
@@ -10246,13 +10267,11 @@ class FabrikFEModelList extends JModelForm
 				}
 			}
 		}
+
 		// $$$ rob needs the item id for when sef urls are turned on
-		if ($input->get('option') !== 'com_' . $package)
+		if (!array_key_exists('Itemid', $querystring))
 		{
-			if (!array_key_exists('Itemid', $querystring))
-			{
-				$qs['Itemid'] = $itemId;
-			}
+			$qs['Itemid'] = $itemId;
 		}
 
 		if (empty($url))
