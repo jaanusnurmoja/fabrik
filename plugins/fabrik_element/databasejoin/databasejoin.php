@@ -55,6 +55,13 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	protected $optionVals = array();
 
 	/**
+	 * Option values
+	 *
+	 * @var array
+	 */
+	protected $optionLabels = array();
+
+	/**
 	 * Linked form data
 	 *
 	 * @var array
@@ -3403,6 +3410,13 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			return $v;
 		}
 
+		$ckey = serialize($v);
+
+		if (isset($this->optionLabels[$ckey]))
+		{
+			return $this->optionLabels[$ckey];
+		}
+
 		if ($this->isJoin())
 		{
 			/*
@@ -3417,6 +3431,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			{
 				if ($v == $defaultLabel)
 				{
+					$this->optionLabels[$ckey] = $v;
 					return $v;
 				}
 			}
@@ -3438,6 +3453,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 			if (is_array($rows) && array_key_exists($v, $rows))
 			{
+				$this->optionLabels[$ckey] = $rows[$v]->text;
 				return $rows[$v]->text;
 			}
 		}
@@ -3447,6 +3463,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if (!$query)
 		{
+			$this->optionLabels[$ckey] = '';
 			return '';
 		}
 		$key = $this->getJoinValueColumn();
@@ -3483,10 +3500,12 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if (!$r)
 		{
+			$this->optionLabels[$ckey] = $defaultLabel;
 			return $defaultLabel;
 		}
 
 		$r = isset($r->text) ? $r->text : $defaultLabel;
+		$this->optionLabels[$ckey] = $r;
 
 		return $r;
 	}

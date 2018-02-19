@@ -11275,7 +11275,7 @@ class FabrikFEModelList extends JModelForm
 
 			if ($document->getType() === 'pdf')
 			{
-				$this->tmpl = $params->get('pdf_template', $this->tmpl);
+				$this->tmpl = $input->get('pdf_template', $params->get('pdf_template', $this->tmpl));
 			}
 
 			// Migration test
