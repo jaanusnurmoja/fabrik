@@ -98,6 +98,19 @@ class FabrikControllerForm extends JControllerLegacy
 			$modelName = 'form';
 		}
 
+		$extraQS = FabrikWorker::getMenuOrRequestVar('extra_query_string', '', $this->isMambot, 'menu');
+		$extraQS = ltrim($extraQS, '&?');
+		$extraQS = FabrikString::encodeqs($extraQS);
+
+		if (!empty($extraQS))
+		{
+			foreach (explode('&', $extraQS) as $qsStr)
+			{
+				$parts = explode('=', $qsStr);
+				$input->set($parts[0], $parts[1]);
+			}
+		}
+
 		$viewType = $document->getType();
 
 		// Set the default view name from the Request
@@ -118,7 +131,7 @@ class FabrikControllerForm extends JControllerLegacy
 		$model->getData();
 
 		// If we can't edit the record redirect to details view
-		if ($model->checkAccessFromListSettings() <= 1)
+		if (!$this->isMambot && $model->checkAccessFromListSettings() <= 1)
 		{
 			$app = JFactory::getApplication();
 			$input = $app->input;
@@ -130,6 +143,11 @@ class FabrikControllerForm extends JControllerLegacy
 			else
 			{
 				$url = 'index.php?option=com_' . $package . '&view=details&formid=' . $input->getInt('formid') . '&rowid=' . $input->get('rowid', '', 'string');
+
+				if (!empty($extraQS))
+				{
+					$url .= '&' . $extraQS;
+				}
 			}
 
 			// So we can determine in form PHP plugin's that the original request was for a form.
@@ -154,7 +172,9 @@ class FabrikControllerForm extends JControllerLegacy
 
 		if ($user->get('id') == 0
 			|| $listParams->get('list_disable_caching', '0') === '1'
-			|| in_array($input->get('format'), array('raw', 'csv', 'pdf')))
+			|| in_array($input->get('format'), array('raw', 'csv', 'pdf'))
+			|| $input->get('fabrik_social_profile_hash', '') !== ''
+		)
 		{
 			$view->display();
 		}
@@ -473,10 +493,9 @@ class FabrikControllerForm extends JControllerLegacy
 
 		if (!$validated)
 		{
-			$this->savepage();
-
 			if ($this->isMambot)
 			{
+				$this->savepage();
 				$this->setRedirect($this->getRedirectURL($model, false));
 			}
 			else

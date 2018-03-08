@@ -15,14 +15,24 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
 
         watchSubmit: function () {
             var form = jQuery('#emailtable');
+            var self = this;
             form.submit(function (event) {
                 if (typeof WFEditor !== 'undefined') {
                     WFEditor.getContent('message');
                 }
+                else if (typeof tinymce !== 'undefined') {
+                    if (tinyMCE.activeEditor) {
+                        tinyMCE.activeEditor.save();
+                    }
+                }
+                var url = Fabrik.liveSite + '/index.php';
+                if (self.options.additionalQS !== '') {
+                    url += '?' + self.options.additionalQS;
+                }
                 Fabrik.loader.start(form);
                 jQuery.ajax({
                     type  : 'POST', // define the type of HTTP verb we want to use (POST for our form)
-                    url   : 'index.php', // the url where we want to POST
+                    url   : url, // the url where we want to POST
                     //data  : jQuery(this).serialize(), // our data object
                     data: new FormData(this),
                     encode: true,
@@ -72,9 +82,8 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
         },
 
         buttonAction: function () {
-            var url = 'index.php?option=com_fabrik&controller=list.email&task=popupwin&tmpl=component&ajax=1&id=' +
-                    this.listid + '&renderOrder=' + this.options.renderOrder,
-                self = this;
+            var url = this.options.popupUrl;
+            var self = this;
             this.listform.getElements('input[name^=ids]').each(function (id) {
                 if (id.get('value') !== false && id.checked !== false) {
                     url += '&ids[]=' + id.get('value');
@@ -86,7 +95,7 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
             else {
                 url += '&checkAll=0';
             }
-            url += '&format=partial';
+            url += '&task=popupwin';
             var id = 'email-list-plugin';
             this.windowopts = {
                 id             : id,

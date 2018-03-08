@@ -30,6 +30,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             'inlineMessage' : true,
             'print'         : false,
             'toggleSubmit'  : false,
+            'toggleSubmitTip': 'must validate',
             'mustValidate'  : false,
             'lang'          : false,
             'debounceDelay' : 500,
@@ -55,12 +56,15 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             this.formElements = $H({});
             this.hasErrors = $H({});
             this.mustValidateEls = $H({});
+            this.toggleSubmitTipAdded = false;
             this.elements = this.formElements;
             this.duplicatedGroups = $H({});
             this.addingOrDeletingGroup = false;
-
+            this.addedGroups = [];
+	        this.watchRepeatNumsDone = false;
             this.fx = {};
             this.fx.elements = [];
+            this.fx.hidden = [];
             this.fx.validations = {};
             this.setUpAll();
             this._setMozBoxWidths();
@@ -102,6 +106,15 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
 
         setUpAll: function () {
             this.setUp();
+
+	        // add a wrapper if we're going to be using the tooltip, as can't do tooltip on disabled elements
+	        if (this.options.ajaxValidation && this.options.toggleSubmit && this.options.toggleSubmitTip !== '') {
+		        var submit = this._getButton('Submit');
+		        if (typeOf(submit) !== 'null') {
+			        jQuery(submit).wrap('<div data-toggle="tooltip" title="you must validate" class="fabrikSubmitWrapper" style="display: inline-block"></div>div>');
+		        }
+	        }
+
             this.winScroller = new Fx.Scroll(window);
             if (this.form) {
                 if (this.options.ajax || this.options.submitOnEnter === false) {
@@ -137,9 +150,32 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 this.watchGoBackButton();
             }
 
+
             this.watchPrintButton();
             this.watchPdfButton();
             this.watchTabs();
+            this.watchRepeatNums();
+        },
+
+        watchRepeatNums: function () {
+	        Fabrik.addEvent('fabrik.form.elements.added', function (form) {
+	            if (form.id === this.id && !this.watchRepeatNumsDone) {
+		            Object.each(this.options.numRepeatEls, function (name, key) {
+			            if (name !== '') {
+				            var el = this.formElements.get(name);
+				            if (el) {
+                                el.addNewEventAux(el.getChangeEvent(), function(event) {
+                                    var v = el.getValue();
+                                    this.options.minRepeat[key] = v.toInt();
+	                                this.options.maxRepeat[key] = v.toInt();
+	                                this.duplicateGroupsToMin();
+                                }.bind(this, el, key));
+				            }
+			            }
+		            }.bind(form));
+		            this.watchRepeatNumsDone = true;
+	            }
+	        }.bind(this));
         },
 
         /**
@@ -152,14 +188,15 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     window.print();
                 } else {
                     // Build URL as we could have changed the rowid via ajax pagination
-                    /*
-                    var url = 'index.php?option=com_' + Fabrik.package + '&view=details&tmpl=component&formid=' + this.id +
-                        '&listid=' + this.options.listid + '&rowid=' + this.options.rowid + '&iframe=1&print=1';
-                    */
                     var url = jQuery(e.target).prop('href');
                     url = url.replace(/&rowid=\d+/, '&rowid=' + this.options.rowid);
                     if (this.options.lang !== false) {
-                        url += '&lang=' + this.options.lang;
+                        if (url.test(/\?/)) {
+	                        url += '&lang=' + this.options.lang;
+                        }
+                        else {
+	                        url += '?lang=' + this.options.lang;
+                        }
                     }
                     window.open(
                         url,
@@ -177,10 +214,15 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             this.form.getElements('*[data-role="open-form-pdf"]').addEvent('click', function (e) {
                 e.stop();
                 // Build URL as we could have changed the rowid via ajax pagination.
+                // @FIXME for SEF
                 var url = e.event.currentTarget.href.replace(/(rowid=\d*)/, 'rowid=' + this.options.rowid);
                 if (this.options.lang !== false) {
-                    url += '&lang=' + this.options.lang;
-                }
+	                if (url.test(/\?/)) {
+		                url += '&lang=' + this.options.lang;
+	                }
+	                else {
+		                url += '?lang=' + this.options.lang;
+	                }                }
                 window.location = url;
             }.bind(this));
         },
@@ -400,10 +442,16 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                         // strange fix for ie8
                         // http://fabrik.unfuddle.com/projects/17220/tickets/by_number/703?cycle=true
                         document.id(id).getElements('.fabrikinput').setStyle('opacity', '1');
+                        this.showGroupTab(id);
+                        // if it was hidden by group's "Show Group" setting ("Yes, but hidden"), need to show()
+                        fxElement.show();
                     }
                     break;
                 case 'hide':
                     fxElement.fade('hide').addClass('fabrikHide');
+                    if (groupfx) {
+                        this.hideGroupTab(id);
+                    }
                     break;
                 case 'fadein':
                     fxElement.removeClass('fabrikHide');
@@ -411,6 +459,10 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                         fx.css.element.show();
                         fx.css.start({'opacity': [0, 1]});
                     }
+	                if (groupfx) {
+		                this.showGroupTab(id);
+                        fxElement.show();
+	                }
                     break;
                 case 'fadeout':
                     if (fx.css.lastMethod !== 'fadeout') {
@@ -419,6 +471,9 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                             fxElement.addClass('fabrikHide');
                         });
                     }
+	                if (groupfx) {
+		                this.hideGroupTab(id);
+	                }
                     break;
                 case 'slide in':
                     fx.slide.slideIn();
@@ -466,7 +521,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     break;
             }
             fx.lastMethod = method;
-            Fabrik.fireEvent('fabrik.form.doelementfx', [this]);
+            Fabrik.fireEvent('fabrik.form.doelementfx', [this, method, id, groupfx]);
         },
 
         /**
@@ -479,8 +534,11 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
          * @return tab | false
          */
         getGroupTab: function (groupId) {
-            if (document.id('group' + groupId).getParent().hasClass('tab-pane')) {
-                var tabid = document.id('group' + groupId).getParent().id;
+            if (!groupId.test(/^group/)) {
+                groupId = 'group' + groupId;
+            }
+            if (document.id(groupId).getParent().hasClass('tab-pane')) {
+                var tabid = document.id(groupId).getParent().id;
                 var tab_anchor = this.form.getElement('a[href=#' + tabid + ']');
                 return tab_anchor.getParent();
             }
@@ -553,8 +611,13 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
          * button which resets the form and submits it using the removeSession task.
          */
         watchClearSession: function () {
+	        if (this.options.multipage_save === 0) {
+		        return;
+	        }
+
             var self = this,
                 form = jQuery(this.form);
+
             form.find('.clearSession').on('click', function (e) {
                 e.preventDefault();
                 form.find('input[name=task]').val('removeSession');
@@ -616,7 +679,9 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
         _doPageNav: function (e, dir) {
             var self = this, url, d;
             if (this.options.editable) {
-                this.form.getElement('.fabrikMainError').addClass('fabrikHide');
+                if (typeOf(this.form.getElement('.fabrikMainError')) !== 'null') {
+                    this.form.getElement('.fabrikMainError').addClass('fabrikHide');
+                }
 
                 // If tip shown at bottom of long page and next page shorter we need to move the tip to
                 // the top of the page to avoid large space appearing at the bottom of the page.
@@ -1001,7 +1066,9 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             d.set('task', 'form.ajax_validate');
             d.set('fabrik_ajax', '1');
             d.set('format', 'raw');
-
+            if (this.options.lang !== false) {
+                d.set('lang', this.options.lang);
+            }
             d = this._prepareRepeatsForAjax(d);
 
             // $$$ hugh - nasty hack, because validate() in form model will always use _0 for
@@ -1010,14 +1077,10 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             if (el.origId) {
                 origid = el.origId + '_0';
             }
-            //var origid = el.origId ? el.origId : id;
             el.options.repeatCounter = el.options.repeatCounter ? el.options.repeatCounter : 0;
-            var url = 'index.php?option=com_fabrik&form_id=' + this.id;
-            if (this.options.lang !== false) {
-                url += '&lang=' + this.options.lang;
-            }
+
             var myAjax = new Request({
-                url       : url,
+                url       : '',
                 method    : this.options.ajaxmethod,
                 data      : d,
                 onComplete: function (e) {
@@ -1034,7 +1097,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
          * @private
          */
         _completeValidaton: function (r, id, origid) {
-            r = JSON.decode(r);
+            r = JSON.parse(r);
             if (typeOf(r) === 'null') {
                 this._showElementError(['Oups'], id);
                 this.result = true;
@@ -1160,13 +1223,14 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
 
         updateMainError: function () {
             var myfx, activeValidations;
-            var mainEr = this.form.getElement('.fabrikMainError');
-            mainEr.set('html', this.options.error);
+            if (typeOf(this.form.getElement('.fabrikMainError')) !== 'null') {
+                this.form.getElement('.fabrikMainError').set('html', this.options.error);
+            }
             activeValidations = this.form.getElements('.fabrikError').filter(
                 function (e, index) {
                     return !e.hasClass('fabrikMainError');
                 });
-            if (activeValidations.length > 0 && mainEr.hasClass('fabrikHide')) {
+            if (activeValidations.length > 0 && this.form.getElement('.fabrikMainError').hasClass('fabrikHide')) {
                 this.showMainError(this.options.error);
             }
             if (activeValidations.length === 0) {
@@ -1175,14 +1239,16 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
         },
 
         hideMainError: function () {
-            var mainEr = this.form.getElement('.fabrikMainError');
-            myfx = new Fx.Tween(mainEr, {
-                property  : 'opacity',
-                duration  : 500,
-                onComplete: function () {
-                    mainEr.addClass('fabrikHide');
-                }
-            }).start(1, 0);
+            if (typeOf(this.form.getElement('.fabrikMainError')) !== 'null') {
+                var mainEr = this.form.getElement('.fabrikMainError');
+                myfx = new Fx.Tween(mainEr, {
+                    property  : 'opacity',
+                    duration  : 500,
+                    onComplete: function () {
+                        mainEr.addClass('fabrikHide');
+                    }
+                }).start(1, 0);
+            }
         },
 
         showMainError: function (msg) {
@@ -1190,13 +1256,15 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             if (Fabrik.bootstrapped && this.options.ajaxValidation) {
                 return;
             }
-            var mainEr = this.form.getElement('.fabrikMainError');
-            mainEr.set('html', msg);
-            mainEr.removeClass('fabrikHide');
-            myfx = new Fx.Tween(mainEr, {
-                property: 'opacity',
-                duration: 500
-            }).start(0, 1);
+            if (typeOf(this.form.getElement('.fabrikMainError')) !== 'null') {
+                var mainEr = this.form.getElement('.fabrikMainError');
+                mainEr.set('html', msg);
+                mainEr.removeClass('fabrikHide');
+                myfx = new Fx.Tween(mainEr, {
+                    property: 'opacity',
+                    duration: 500
+                }).start(0, 1);
+            }
         },
 
         /** @since 3.0 get a form button name */
@@ -1262,7 +1330,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             btnName = typeof btnName !== 'undefined' ? btnName : 'Submit';
             var btn = this._getButton(btnName);
             if (!btn) {
-                btn = new Element('button', {'name': 'Submit', 'type': 'submit'});
+                btn = new Element('button', {'name': btnName, 'type': 'submit'});
             }
             this.doSubmit(new Event.Mock(btn, 'click'), btn);
         },
@@ -1272,6 +1340,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 e.stop();
                 return false;
             }
+            this.toggleSubmit(false);
             this.submitBroker.submit(function () {
                 if (this.options.showLoader) {
                     Fabrik.loader.start(this.getBlock(), Joomla.JText._('COM_FABRIK_LOADING'));
@@ -1283,6 +1352,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     Fabrik.loader.stop(this.getBlock());
                     // Update global status error
                     this.updateMainError();
+                    this.toggleSubmit(true);
 
                     // Return otherwise ajax upload may still occur.
                     return;
@@ -1295,6 +1365,18 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                         'type' : 'hidden'
                     }));
                 }
+                hiddenElements = [];
+                // insert hidden element of hidden elements (!) used by validation code for "skip if hidden" option
+                jQuery.each(this.formElements, function (id, el) {
+                   if (el.element && jQuery(el.element).closest('.fabrikHide').length !== 0) {
+                       hiddenElements.push(id);
+                   }
+                });
+                this.form.adopt(new Element('input', {
+                    'name' : 'hiddenElements',
+                    'value': JSON.stringify(hiddenElements),
+                    'type' : 'hidden'
+                }));
                 if (this.options.ajax) {
                     // Do ajax val only if onSubmit val ok
                     if (this.form) {
@@ -1313,118 +1395,258 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                         }
                         data.fabrik_ajax = '1';
                         data.format = 'raw';
-                        var myajax = new Request.JSON({
-                            'url'   : this.form.action,
-                            'data'  : data,
-                            'method': this.options.ajaxmethod,
-                            onError : function (text, error) {
-                                fconsole(text + ': ' + error);
-                                this.showMainError(error);
-                                Fabrik.loader.stop(this.getBlock(), 'Error in returned JSON');
-                            }.bind(this),
 
-                            onFailure : function (xhr) {
-                                fconsole(xhr);
-                                Fabrik.loader.stop(this.getBlock(), 'Ajax failure');
-                            }.bind(this),
-                            onComplete: function (json, txt) {
-                                if (typeOf(json) === 'null') {
-                                    // Stop spinner
-                                    Fabrik.loader.stop(this.getBlock(), 'Error in returned JSON');
-                                    fconsole('error in returned json', json, txt);
-                                    return;
+                        // if HTML 5, use FormData so we can do uploads from popups via AJAX
+                        // poop, doesn't work in Edge or Safari, punt till they implement FormData correctly
+                        if (false && window.FormData) {
+                            fd = new FormData(this.form);
+
+                            jQuery.each(data, function(k, v) {
+                                if (fd.has(k)) {
+                                    if (typeOf(fd.get(k)) !== 'object') {
+                                        fd.set(k, v);
+                                    }
                                 }
-                                // Process errors if there are some
-                                var errfound = false;
-                                if (json.errors !== undefined) {
+                                else {
+                                    fd.set(k, v);
+                                }
+                            });
 
-                                    // For every element of the form update error message
-                                    $H(json.errors).each(function (errors, key) {
-                                        if (this.formElements.has(key) && errors.flatten().length > 0) {
-                                            errfound = true;
-                                            if (this.formElements[key].options.inRepeatGroup) {
-                                                for (e = 0; e < errors.length; e++) {
-                                                    if (errors[e].flatten().length > 0) {
-                                                        var this_key = key.replace(/(_\d+)$/, '_' + e);
-                                                        this._showElementError(errors[e], this_key);
+                            data = fd;
+                            var self = this;
+
+                            jQuery.ajax({
+                                'url': this.form.action,
+                                'data': data,
+                                'method': this.options.ajaxmethod,
+                                'processData': false,
+                                'contentType': false
+                            })
+                                .fail(function (text, error) {
+                                    fconsole(text + ': ' + error);
+                                    self.showMainError(error);
+                                    Fabrik.loader.stop(self.getBlock(), 'Error in returned JSON');
+                                    self.toggleSubmit(true);
+                                })
+                                .done(function (json, txt) {
+                                    json = JSON.parse(json);
+                                    self.toggleSubmit(true);
+                                    if (typeOf(json) === 'null') {
+                                        // Stop spinner
+                                        Fabrik.loader.stop(self.getBlock(), 'Error in returned JSON');
+                                        fconsole('error in returned json', json, txt);
+                                        return;
+                                    }
+                                    // Process errors if there are some
+                                    jQuery(self.form.getElements('[data-role=fabrik_tab]')).removeClass('fabrikErrorGroup')
+                                    var errfound = false;
+                                    if (json.errors !== undefined) {
+
+                                        // For every element of the form update error message
+                                        $H(json.errors).each(function (errors, key) {
+                                            if (self.formElements.has(key) && errors.flatten().length > 0) {
+                                                errfound = true;
+                                                if (self.formElements[key].options.inRepeatGroup) {
+                                                    for (e = 0; e < errors.length; e++) {
+                                                        if (errors[e].flatten().length > 0) {
+                                                            var this_key = key.replace(/(_\d+)$/, '_' + e);
+                                                            self._showElementError(errors[e], this_key);
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            else {
-                                                this._showElementError(errors, key);
-                                            }
-                                        }
-                                    }.bind(this));
-                                }
-                                // Update global status error
-                                this.updateMainError();
-
-                                if (errfound === false) {
-                                    var clear_form = false;
-                                    if (this.options.rowid === '' && btn.name !== 'apply') {
-                                        // We're submitting a new form - so always clear
-                                        clear_form = true;
-                                    }
-                                    Fabrik.loader.stop(this.getBlock());
-                                    var savedMsg = (typeOf(json.msg) !== 'null' && json.msg !== undefined && json.msg !== '') ? json.msg : Joomla.JText._('COM_FABRIK_FORM_SAVED');
-                                    if (json.baseRedirect !== true) {
-                                        clear_form = json.reset_form;
-                                        if (json.url !== undefined) {
-                                            if (json.redirect_how === 'popup') {
-                                                var width = json.width ? json.width : 400;
-                                                var height = json.height ? json.height : 400;
-                                                var x_offset = json.x_offset ? json.x_offset : 0;
-                                                var y_offset = json.y_offset ? json.y_offset : 0;
-                                                var title = json.title ? json.title : '';
-                                                Fabrik.getWindow({
-                                                    'id'      : 'redirect',
-                                                    'type'    : 'redirect',
-                                                    contentURL: json.url,
-                                                    caller    : this.getBlock(),
-                                                    'height'  : height,
-                                                    'width'   : width,
-                                                    'offset_x': x_offset,
-                                                    'offset_y': y_offset,
-                                                    'title'   : title
-                                                });
-                                            }
-                                            else {
-                                                if (json.redirect_how === 'samepage') {
-                                                    window.open(json.url, '_self');
+                                                else {
+                                                    self._showElementError(errors, key);
                                                 }
-                                                else if (json.redirect_how === 'newpage') {
-                                                    window.open(json.url, '_blank');
+                                            }
+                                        });
+                                    }
+                                    // Update global status error
+                                    self.updateMainError();
+
+                                    if (errfound === false) {
+                                        var clear_form = false;
+                                        if (self.options.rowid === '' && btn.name !== 'apply') {
+                                            // We're submitting a new form - so always clear
+                                            clear_form = true;
+                                        }
+                                        Fabrik.loader.stop(self.getBlock());
+                                        var savedMsg = (typeOf(json.msg) !== 'null' && json.msg !== undefined && json.msg !== '') ? json.msg : Joomla.JText._('COM_FABRIK_FORM_SAVED');
+                                        if (json.baseRedirect !== true) {
+                                            clear_form = json.reset_form;
+                                            if (json.url !== undefined) {
+                                                if (json.redirect_how === 'popup') {
+                                                    var width = json.width ? json.width : 400;
+                                                    var height = json.height ? json.height : 400;
+                                                    var x_offset = json.x_offset ? json.x_offset : 0;
+                                                    var y_offset = json.y_offset ? json.y_offset : 0;
+                                                    var title = json.title ? json.title : '';
+                                                    Fabrik.getWindow({
+                                                        'id'      : 'redirect',
+                                                        'type'    : 'redirect',
+                                                        contentURL: json.url,
+                                                        caller    : self.getBlock(),
+                                                        'height'  : height,
+                                                        'width'   : width,
+                                                        'offset_x': x_offset,
+                                                        'offset_y': y_offset,
+                                                        'title'   : title
+                                                    });
+                                                }
+                                                else {
+                                                    if (json.redirect_how === 'samepage') {
+                                                        window.open(json.url, '_self');
+                                                    }
+                                                    else if (json.redirect_how === 'newpage') {
+                                                        window.open(json.url, '_blank');
+                                                    }
+                                                }
+                                            } else {
+                                                if (!json.suppressMsg) {
+                                                    alert(savedMsg);
                                                 }
                                             }
                                         } else {
+                                            clear_form = json.reset_form !== undefined ? json.reset_form : clear_form;
                                             if (!json.suppressMsg) {
                                                 alert(savedMsg);
                                             }
                                         }
+                                        // Query the list to get the updated data
+                                        Fabrik.fireEvent('fabrik.form.submitted', [self, json]);
+                                        if (btn.name !== 'apply') {
+                                            if (clear_form) {
+                                                self.clearForm();
+                                            }
+                                            // If the form was loaded in a Fabrik.Window close the window.
+                                            if (Fabrik.Windows[self.options.fabrik_window_id]) {
+                                                Fabrik.Windows[self.options.fabrik_window_id].close();
+                                            }
+                                        }
                                     } else {
-                                        clear_form = json.reset_form !== undefined ? json.reset_form : clear_form;
-                                        if (!json.suppressMsg) {
-                                            alert(savedMsg);
-                                        }
+                                        Fabrik.fireEvent('fabrik.form.submit.failed', [self, json]);
+                                        // Stop spinner
+                                        Fabrik.loader.stop(self.getBlock(), Joomla.JText._('COM_FABRIK_VALIDATION_ERROR'));
                                     }
-                                    // Query the list to get the updated data
-                                    Fabrik.fireEvent('fabrik.form.submitted', [this, json]);
-                                    if (btn.name !== 'apply') {
-                                        if (clear_form) {
-                                            this.clearForm();
-                                        }
-                                        // If the form was loaded in a Fabrik.Window close the window.
-                                        if (Fabrik.Windows[this.options.fabrik_window_id]) {
-                                            Fabrik.Windows[this.options.fabrik_window_id].close();
-                                        }
+                                });
+                        }
+                        else {
+                            var myajax = new Request.JSON({
+                                'url': this.form.action,
+                                'data': data,
+                                'method': this.options.ajaxmethod,
+                                onError: function (text, error) {
+                                    fconsole(text + ': ' + error);
+                                    this.showMainError(error);
+                                    Fabrik.loader.stop(this.getBlock(), 'Error in returned JSON');
+                                    this.toggleSubmit(true);
+                                }.bind(this),
+
+                                onFailure: function (xhr) {
+                                    fconsole(xhr);
+                                    Fabrik.loader.stop(this.getBlock(), 'Ajax failure');
+                                    this.toggleSubmit(true);
+                                }.bind(this),
+                                onComplete: function (json, txt) {
+                                    this.toggleSubmit(true);
+                                    if (typeOf(json) === 'null') {
+                                        // Stop spinner
+                                        Fabrik.loader.stop(this.getBlock(), 'Error in returned JSON');
+                                        fconsole('error in returned json', json, txt);
+                                        return;
                                     }
-                                } else {
-                                    Fabrik.fireEvent('fabrik.form.submit.failed', [this, json]);
-                                    // Stop spinner
-                                    Fabrik.loader.stop(this.getBlock(), Joomla.JText._('COM_FABRIK_VALIDATION_ERROR'));
-                                }
-                            }.bind(this)
-                        }).send();
+                                    // Process errors if there are some
+                                    jQuery(this.form.getElements('[data-role=fabrik_tab]')).removeClass('fabrikErrorGroup')
+                                    var errfound = false;
+                                    if (json.errors !== undefined) {
+
+                                        // For every element of the form update error message
+                                        $H(json.errors).each(function (errors, key) {
+                                            if (this.formElements.has(key) && errors.flatten().length > 0) {
+                                                errfound = true;
+                                                if (this.formElements[key].options.inRepeatGroup) {
+                                                    for (e = 0; e < errors.length; e++) {
+                                                        if (errors[e].flatten().length > 0) {
+                                                            var this_key = key.replace(/(_\d+)$/, '_' + e);
+                                                            this._showElementError(errors[e], this_key);
+                                                        }
+                                                    }
+                                                }
+                                                else {
+                                                    this._showElementError(errors, key);
+                                                }
+                                            }
+                                        }.bind(this));
+                                    }
+                                    // Update global status error
+                                    this.updateMainError();
+
+                                    if (errfound === false) {
+                                        var clear_form = false;
+                                        if (this.options.rowid === '' && btn.name !== 'apply') {
+                                            // We're submitting a new form - so always clear
+                                            clear_form = true;
+                                        }
+                                        Fabrik.loader.stop(this.getBlock());
+                                        var savedMsg = (typeOf(json.msg) !== 'null' && json.msg !== undefined && json.msg !== '') ? json.msg : Joomla.JText._('COM_FABRIK_FORM_SAVED');
+                                        if (json.baseRedirect !== true) {
+                                            clear_form = json.reset_form;
+                                            if (json.url !== undefined) {
+                                                if (json.redirect_how === 'popup') {
+                                                    var width = json.width ? json.width : 400;
+                                                    var height = json.height ? json.height : 400;
+                                                    var x_offset = json.x_offset ? json.x_offset : 0;
+                                                    var y_offset = json.y_offset ? json.y_offset : 0;
+                                                    var title = json.title ? json.title : '';
+                                                    Fabrik.getWindow({
+                                                        'id': 'redirect',
+                                                        'type': 'redirect',
+                                                        contentURL: json.url,
+                                                        caller: this.getBlock(),
+                                                        'height': height,
+                                                        'width': width,
+                                                        'offset_x': x_offset,
+                                                        'offset_y': y_offset,
+                                                        'title': title
+                                                    });
+                                                }
+                                                else {
+                                                    if (json.redirect_how === 'samepage') {
+                                                        window.open(json.url, '_self');
+                                                    }
+                                                    else if (json.redirect_how === 'newpage') {
+                                                        window.open(json.url, '_blank');
+                                                    }
+                                                }
+                                            } else {
+                                                if (!json.suppressMsg) {
+                                                    alert(savedMsg);
+                                                }
+                                            }
+                                        } else {
+                                            clear_form = json.reset_form !== undefined ? json.reset_form : clear_form;
+                                            if (!json.suppressMsg) {
+                                                alert(savedMsg);
+                                            }
+                                        }
+                                        // Query the list to get the updated data
+                                        Fabrik.fireEvent('fabrik.form.submitted', [this, json]);
+                                        if (btn.name !== 'apply') {
+                                            if (clear_form) {
+                                                this.clearForm();
+                                            }
+                                            // If the form was loaded in a Fabrik.Window close the window.
+                                            if (Fabrik.Windows[this.options.fabrik_window_id]) {
+                                                Fabrik.Windows[this.options.fabrik_window_id].close();
+                                            }
+                                        }
+                                    } else {
+                                        Fabrik.fireEvent('fabrik.form.submit.failed', [this, json]);
+                                        // Stop spinner
+                                        Fabrik.loader.stop(this.getBlock(), Joomla.JText._('COM_FABRIK_VALIDATION_ERROR'));
+                                    }
+                                }.bind(this)
+                            }).send();
+                        }
                     }
                 }
                 Fabrik.fireEvent('fabrik.form.submit.end', [this]);
@@ -1574,6 +1796,24 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
         },
 
         /**
+         * not currently used in our code, provided as a helper function for custom JS
+         *
+         * @param groupId
+         * @returns {boolean}
+         */
+        mockDuplicateGroup: function(groupId) {
+            var add_btn = this.form.getElement('#group' + groupId + ' .addGroup');
+
+            if (typeOf(add_btn) !== 'null') {
+                var add_e = new Event.Mock(add_btn, 'click');
+                this.duplicateGroup(add_e, false);
+                return true;
+            }
+
+            return false;
+        },
+
+        /**
          * When editing a new form and when min groups set we need to duplicate each group
          * by the min repeat value.
          */
@@ -1612,7 +1852,9 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 }
 
                 var min = this.options.minRepeat[groupId].toInt();
+                var max = this.options.maxRepeat[groupId].toInt();
                 var group = this.form.getElement('#group' + groupId);
+                var subGroup;
 
                 /**
                  * $$$ hugh - added ability to override min count
@@ -1627,7 +1869,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     // Create mock event
                     deleteButton = this.form.getElement('#group' + groupId + ' .deleteGroup');
                     deleteEvent = typeOf(deleteButton) !== 'null' ? new Event.Mock(deleteButton, 'click') : false;
-                    var subGroup = group.getElement('.fabrikSubGroup');
+                    subGroup = group.getElement('.fabrikSubGroup');
                     // Remove only group
                     this.deleteGroup(deleteEvent, group, subGroup);
 
@@ -1643,6 +1885,18 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                             this.duplicateGroup(add_e, false);
                         }
                     }
+                }
+                else if (max > 0 && repeat_rows > max) {
+	                // Delete groups
+	                for (i = repeat_rows; i > max; i--) {
+		                var b = jQuery(this.form.getElements('#group' + groupId + ' .deleteGroup')).last()[0];
+		                var del_btn = jQuery(b).find('[data-role=fabrik_delete_group]')[0];
+		                subGroup = jQuery(group.getElements('.fabrikSubGroup')).last()[0];
+		                if (typeOf(del_btn) !== 'null') {
+		                    var del_e = new Event.Mock(del_btn, 'click');
+			                this.deleteGroup(del_e, group, subGroup);
+		                }
+	                }
                 }
 
                 this.setRepeatGroupIntro(group, groupId);
@@ -1697,10 +1951,12 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 Fabrik.fireEvent('fabrik.form.group.delete.end', [this, e, i, delIndex]);
             } else {
                 var toel = subGroup.getPrevious();
+                /*
                 var myFx = new Fx.Tween(subGroup, {
                     'property': 'opacity',
                     duration  : 300,
                     onComplete: function () {
+                    */
                         if (subgroups.length > 1) {
                             subGroup.dispose();
                         }
@@ -1732,8 +1988,10 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                             }
                         }.bind(this));
                         Fabrik.fireEvent('fabrik.form.group.delete.end', [this, e, i, delIndex]);
+                        /*
                     }.bind(this)
                 }).start(1, 0);
+                */
                 if (toel) {
                     // Only scroll the window if the previous element is not visible
                     var win_scroll = document.id(window).getScroll().y;
@@ -2039,6 +2297,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             Fabrik.fireEvent('fabrik.form.group.duplicate.end', [this, e, i, c]);
             this.setRepeatGroupIntro(group, i);
             this.repeatGroupMarkers.set(i, this.repeatGroupMarkers.get(i) + 1);
+            this.addedGroups.push('group' + i);
         },
 
         /**
@@ -2253,7 +2512,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
 
         addMustValidate: function (el) {
             if (this.options.ajaxValidation && this.options.toggleSubmit) {
-                this.mustValidateEls.set(el.element.id, el.options.mustValidate);
+	            this.mustValidateEls.set(el.element.id, el.options.mustValidate);
                 if (el.options.mustValidate) {
                     this.options.mustValidate = true;
                     this.toggleSubmit(false);
@@ -2267,11 +2526,24 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 if (on === true) {
                     submit.disabled = '';
                     submit.setStyle('opacity', 1);
+	                if (this.options.toggleSubmitTip !== '') {
+		                jQuery(this.form).find('.fabrikSubmitWrapper').tooltip('destroy');
+		                this.toggleSubmitTipAdded = false;
+	                }
                 }
                 else {
                     submit.disabled = 'disabled';
                     submit.setStyle('opacity', 0.5);
+	                if (this.options.toggleSubmitTip !== '') {
+	                    if (!this.toggleSubmitTipAdded) {
+		                    //jQuery(this.form).find('.fabrikSubmitWrapper').data('toggle', 'tooltip');
+		                    //jQuery(this.form).find('.fabrikSubmitWrapper').attr('title', 'Your form cannot be saved until all inputs have been validated');
+		                    jQuery(this.form).find('.fabrikSubmitWrapper').tooltip();
+		                    this.toggleSubmitTipAdded = true;
+	                    }
+	                }
                 }
+                Fabrik.fireEvent('fabrik.form.togglesubmit', [this, on]);
             }
         }
     });

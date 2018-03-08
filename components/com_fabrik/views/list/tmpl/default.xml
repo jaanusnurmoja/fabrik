@@ -59,7 +59,14 @@
 				label="COM_FABRIK_MENU_LIST_TMPL_LABEL"
 				description="COM_FABRIK_MENU_LIST_TMPL_DESC"
 			/>
-				
+
+			<field name="fabriklayout"
+				   type="fabriktemplate"
+				   view="form"
+				   label="COM_FABRIK_MENU_LIST_FORM_TMPL_LABEL"
+				   description="COM_FABRIK_MENU_LIST_FORM_TMPL_DESC"
+			/>
+
 			<field name="resetfilters"
 				type="radio"
 				class="btn-group"
@@ -129,6 +136,7 @@
 								<option value="lessthanequals">LESS THAN OR EQUALS</option>
 								<option value="in">IN</option>
 								<option value="not_in">NOT IN</option>
+								<option value="thisyear">COM_FABRIK_THIS_YEAR</option>
 								<option value="earlierthisyear">COM_FABRIK_EARLIER_THIS_YEAR</option>
 								<option value="laterthisyear">COM_FABRIK_LATER_THIS_YEAR</option>
 								<option value="yesterday">COM_FABRIK_YESTERDAY</option>

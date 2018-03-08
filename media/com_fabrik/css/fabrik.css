@@ -520,6 +520,11 @@ table .fabrik___heading span.heading{
 	white-space: nowrap;
 }
 
+div.fabrik___heading{
+	white-space: nowrap;
+	font-weight: bold;
+}
+
 table.fabrikList td,
 table.fabrikList th{
 	padding: 5px;
@@ -562,6 +567,11 @@ td.repeat-reduce ul.fabrikRepeatData li {
 /*********************************************************/
 /************  Misc. Workarounds *************************/
 /*********************************************************/
+
+/** add a top margin for read only elements **/
+.fabrikElementReadOnly {
+	margin-top: 5px;
+}
 
 /** Workaround for Gantry's date class stomping on our date element class **/
 .fabrikGroup ul li.date {
@@ -699,4 +709,5 @@ form.fabrikForm label.radio {
 
 @media print {
 	a[href]:after { content: none !important; }
+	.fabrikPrintIcon { display: none !important; }
 }

@@ -94,28 +94,9 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 		{
 			// $default = $this->getDefaultValue($data, $repeatCounter);
 			$this->swapValuesForLabels($data);
-
-			// $$$ hugh need to remove repeated joined data which is not part of this repeatCount
-			$groupModel = $this->getGroup();
-
-			if ($groupModel->isJoin())
-			{
-				if ($groupModel->canRepeat())
-				{
-					foreach ($data as $name => $values)
-					{
-						// $$$ Paul - Because $data contains stuff other than placeholders, we have to exclude e.g. fabrik_repeat_group
-						// $$$ hugh - @FIXME we should probably get the group's elements and iterate through those rather than $data
-						if (is_array($values) && count($values) > 1 & isset($values[$repeatCounter]) && $name != 'fabrik_repeat_group')
-						{
-							$data[$name] = $data[$name][$repeatCounter];
-						}
-					}
-				}
-			}
-
 			$this->setStoreDatabaseFormat($data, $repeatCounter);
-			$default = $w->parseMessageForPlaceHolder($params->get('calc_calculation'), $data, true, true);
+			$default = $w->parseMessageForRepeats($params->get('calc_calculation'), $data, $this, $repeatCounter);
+			$default = $w->parseMessageForPlaceHolder($default, $data, true, true);
 
 			//  $$$ hugh - standardizing on $data but need need $d here for backward compat
 			$d = $data;
@@ -281,46 +262,6 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 	}
 
 	/**
-	 * Swap values for labels
-	 *
-	 * @param   array  &$d  Data
-	 *
-	 * @return  void
-	 */
-	protected function swapValuesForLabels(&$d)
-	{
-		$groups = $this->getFormModel()->getGroupsHiarachy();
-
-		foreach (array_keys($groups) as $gkey)
-		{
-			$group = $groups[$gkey];
-			$elementModels = $group->getPublishedElements();
-
-			for ($j = 0; $j < count($elementModels); $j++)
-			{
-				$elementModel = $elementModels[$j];
-				$elKey = $elementModel->getFullName(true, false);
-				$v = FArrayHelper::getValue($d, $elKey);
-
-				if (is_array($v))
-				{
-					$origData = FArrayHelper::getValue($d, $elKey, array());
-
-					foreach (array_keys($v) as $x)
-					{
-						$origVal = FArrayHelper::getValue($origData, $x);
-						$d[$elKey][$x] = $elementModel->getLabelForValue($v[$x], $origVal, true);
-					}
-				}
-				else
-				{
-					$d[$elKey] = $elementModel->getLabelForValue($v, FArrayHelper::getValue($d, $elKey), true);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Allows the element to pre-process a rows data before and join merging of rows
 	 * occurs. Used in calc element to do calcs on actual row rather than merged row
 	 *
@@ -334,15 +275,11 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 	public function preFormatFormJoins($data, $row)
 	{
 		$params = $this->getParams();
-		$format = trim($params->get('calc_format_string'));
 		$element_data = $data;
 
 		if ($params->get('calc_on_save_only', 0))
 		{
-			if ($format != '')
-			{
-				$element_data = sprintf($format, $element_data);
-			}
+			$element_data = $this->getFormattedValue($element_data);
 
 			return parent::preFormatFormJoins($element_data, $row);
 		}
@@ -373,10 +310,7 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 
 			FabrikWorker::logEval($res, 'Eval exception : ' . $element->name . '::preFormatFormJoins() : ' . $cal . ' : %s');
 
-			if ($format != '')
-			{
-				$res = sprintf($format, $res);
-			}
+			$res = $this->getFormattedValue($res);
 
 			// $$$ hugh - need to set _raw, might be needed if (say) calc is being used as 'use_as_row_class'
 			// See comments in formatData() in table model, we might could move this to a renderRawListData() method.
@@ -418,13 +352,7 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 		$params = $this->getParams();
 		$element = $this->getElement();
 		$data = $this->getFormModel()->data;
-		$value = $this->getValue($data, $repeatCounter);
-		$format = $params->get('calc_format_string');
-
-		if ($format != '')
-		{
-			$value = sprintf($format, $value);
-		}
+		$value = $this->getFormattedValue($this->getValue($data, $repeatCounter));
 
 		$name = $this->getHTMLName($repeatCounter);
 		$id = $this->getHTMLId($repeatCounter);
@@ -456,8 +384,11 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 			$str[] = '<input type="hidden" class="fabrikinput" name="' . $name . '" id="' . $id . '" value="' . $value . '" />';
 		}
 
-		$opts = array('alt' => FText::_('PLG_ELEMENT_CALC_LOADING'), 'style' => 'display:none;padding-left:10px;', 'class' => 'loader');
-		$str[] = FabrikHelperHTML::image('ajax-loader.gif', 'form', @$this->tmpl, $opts);
+		if (in_array($this->app->input->get('format', 'html'), array('html', 'partial')))
+		{
+			$opts  = array('alt' => FText::_('PLG_ELEMENT_CALC_LOADING'), 'style' => 'display:none;padding-left:10px;', 'class' => 'loader');
+			$str[] = FabrikHelperHTML::image('ajax-loader.gif', 'form', @$this->tmpl, $opts);
+		}
 
 		return implode("\n", $str);
 	}
@@ -518,11 +449,12 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 		$input = $this->app->input;
 		$this->setId($input->getInt('element_id'));
 		$this->loadMeForAjax();
-		$params = $this->getParams();
-		$w = new FabrikWorker;
-		$filter = JFilterInput::getInstance();
-		$d = $filter->clean($_REQUEST, 'array');
-		$formModel = $this->getFormModel();
+		$params        = $this->getParams();
+		$w             = new FabrikWorker;
+		$filter        = JFilterInput::getInstance();
+		$d             = $filter->clean($_REQUEST, 'array');
+		$formModel     = $this->getFormModel();
+		$repeatCounter = $this->app->input->get('repeatCounter', '0');
 		$formModel->addEncrytedVarsToArray($d);
 		$this->getFormModel()->data = $d;
 		$this->swapValuesForLabels($d);
@@ -532,43 +464,11 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 		// $$$ hugh - trying to standardize on $data so scripts know where data is
 		$data = $d;
 		$calc = $w->parseMessageForPlaceHolder($calc, $d);
-		$c = FabrikHelperHTML::isDebug() ? eval($calc): @eval($calc);
-		$c = preg_replace('#(\/\*.*?\*\/)#', '', $c);
+		$c    = FabrikHelperHTML::isDebug() ? eval($calc) : @eval($calc);
+		$c    = preg_replace('#(\/\*.*?\*\/)#', '', $c);
+		$c    = $this->getFormattedValue($c);
+
 		echo $c;
-	}
-
-	/**
-	 * When running parseMessageForPlaceholder on data we need to set the none-raw value of things like birthday/time
-	 * elements to that stored in the listModel::storeRow() method
-	 *
-	 * @param   array  &$data          Form data
-	 * @param   int    $repeatCounter  Repeat group counter
-	 *
-	 * @return  void
-	 */
-	protected function setStoreDatabaseFormat(&$data, $repeatCounter = 0)
-	{
-		$formModel = $this->getFormModel();
-		$groups = $formModel->getGroupsHiarachy();
-
-		foreach ($groups as $groupModel)
-		{
-			$elementModels = $groupModel->getPublishedElements();
-
-			foreach ($elementModels as $elementModel)
-			{
-				$fullKey = $elementModel->getFullName(true, false);
-				$value = $data[$fullKey];
-
-				if ($this->getGroupModel()->canRepeat() && is_array($value))
-				{
-					$value = FArrayHelper::getValue($value, $repeatCounter);
-				}
-
-				// For radio buttons and dropdowns otherwise nothing is stored for them??
-				$data[$fullKey] = $elementModel->storeDatabaseFormat($value, $data);
-			}
-		}
 	}
 
 	/**
@@ -682,6 +582,25 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 	}
 
 	/**
+	 * Get the formatted value
+	 *
+	 * @param  $value
+	 *
+	 * @since 3.5
+	 */
+	public function getFormattedValue($value)
+	{
+		$format = $this->getFormatString();
+
+		if (!empty($format))
+		{
+			$value = sprintf($format, $value);
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Get JS code for ini element list js
 	 * Overwritten in plugin classes
 	 *
@@ -738,7 +657,7 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 				$key = $listRef . $row->__pk_val;
 				$row->rowid = $row->__pk_val;
 
-				$return->$key = $this->_getV(ArrayHelper::fromObject($row), 0);
+				$return->$key = $this->getFormattedValue($this->_getV(ArrayHelper::fromObject($row), 0));
 			}
 		}
 
@@ -767,6 +686,8 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 			$value = $this->_getV($data, $repeatCounter);
 		}
 
+		$value = $this->getFormattedValue($value);
+
 		return $value;
 	}
 
@@ -785,4 +706,29 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 
 		return 'TEXT';
 	}
+
+    /**
+     * Is the element consider to be empty for purposes of rendering on the form,
+     * i.e. for assigning classes, etc.  Can be overridden by individual elements.
+     *
+     * @param   array $data          Data to test against
+     * @param   int   $repeatCounter Repeat group #
+     *
+     * @return  bool
+     */
+    public function dataConsideredEmpty($data, $repeatCounter)
+    {
+        $parts = explode("\n", $data);
+
+        // see if all it contains is the "\n" and loader gif added in render ...
+        if (count($parts) === 2)
+        {
+            if (empty($parts[0]) && strstr($parts[1], 'loader'))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

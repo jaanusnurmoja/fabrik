@@ -11,14 +11,14 @@ defined('JPATH_BASE') or die;
 
 $d = $displayData;
 $usersConfig = JComponentHelper::getParams('com_fabrik');
-$icon        = $usersConfig->get('error_icon', 'exclamation-sign') . '.png';
+$icon        = $usersConfig->get('error_icon', 'warning');
 ?>
 <span class="fabrikErrorMessage">
 
 <?php
 if ($d->err !== '') :
 	?>
-	<a href="#" class="fabrikTip" title="<span><?php echo $d->err;?></span>" opts="{notice:true}">
+	<a href="#" class="fabrikTip" title="<span><?php echo $d->err;?></span>" opts='{"notice":true}'>
 	<?php echo FabrikHelperHTML::image($icon, 'form', $d->tmpl);?>
 	</a>
 <?php

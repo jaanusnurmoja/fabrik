@@ -11,6 +11,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         initialize: function (element, options) {
             this.setPlugin('calc');
             this.parent(element, options);
+            this.observeGroupIds = [];
         },
 
         attachedToForm: function () {
@@ -35,6 +36,19 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     }
                 }.bind(this));
             }
+
+            Fabrik.addEvent('fabrik.form.group.duplicate.end', function(form, event, groupId) {
+                if (jQuery.inArray(groupId, this.observeGroupIds) !== -1) {
+                    this.calc();
+                }
+            }.bind(this));
+
+	        Fabrik.addEvent('fabrik.form.group.delete.end', function(form, event, groupId) {
+		        if (jQuery.inArray(groupId, this.observeGroupIds) !== -1) {
+			        this.calc();
+		        }
+	        }.bind(this));
+
             this.parent();
         },
 
@@ -70,10 +84,15 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                             o2 = o + '_' + v2;
                             if (this.form.formElements[o2]) {
                                 // $$$ hugh - think we can add this one as sticky ...
-                                this.form.formElements[o2].addNewEvent(this.form.formElements[o2].getChangeEvent(),
+                                this.form.formElements[o2].addNewEvent(
+                                    this.form.formElements[o2].getChangeEvent(),
                                     function (e) {
                                         this.calc(e);
-                                    }.bind(this));
+                                    }.bind(this)
+                                );
+                                if (jQuery.inArray(k, this.observeGroupIds) === -1) {
+                                    this.observeGroupIds.push(k);
+                                }
                             }
                         }
                     }.bind(this));
@@ -103,13 +122,14 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             // For placeholders lets set repeat joined groups to their full element name
 
             var data = {
-                'option'    : 'com_fabrik',
-                'format'    : 'raw',
-                'task'      : 'plugin.pluginAjax',
-                'plugin'    : 'calc',
-                'method'    : 'ajax_calc',
-                'element_id': this.options.id,
-                'formid'    : this.form.id
+	            'option'       : 'com_fabrik',
+	            'format'       : 'raw',
+	            'task'         : 'plugin.pluginAjax',
+	            'plugin'       : 'calc',
+	            'method'       : 'ajax_calc',
+	            'element_id'   : this.options.id,
+	            'formid'       : this.form.id,
+	            'repeatCounter': this.options.repeatCounter
             };
             data = Object.append(formData, data);
             Fabrik.loader.start(this.element.getParent(), Joomla.JText._('COM_FABRIK_LOADING'));

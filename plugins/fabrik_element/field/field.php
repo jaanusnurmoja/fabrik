@@ -36,7 +36,10 @@ class PlgFabrik_ElementField extends PlgFabrik_Element
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$data = FabrikWorker::JSONtoData($data, true);
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
+
+        $data = FabrikWorker::JSONtoData($data, true);
 		$params = $this->getParams();
 
 		foreach ($data as &$d)
@@ -305,6 +308,7 @@ class PlgFabrik_ElementField extends PlgFabrik_Element
 			$opts->use_input_mask = true;
 			$opts->input_mask = $inputMask;
 			$opts->input_mask_definitions = $params->get('text_input_mask_definitions', '{}');
+			$opts->input_mask_autoclear = $params->get('text_input_mask_autoclear', '0') === '1';
 		}
 		else
 		{
@@ -529,9 +533,9 @@ class PlgFabrik_ElementField extends PlgFabrik_Element
 		$url = 'index.php';
 		$this->lang->load('com_fabrik.plg.element.field', JPATH_ADMINISTRATOR);
 
-		if (!$this->canView())
+		if (!$this->getListModel()->canView() || !$this->canView())
 		{
-			$this->app->enqueueMessage(FText::_('PLG_ELEMENT_FIELD_NO_PERMISSION'));
+			$this->app->enqueueMessage(FText::_('JERROR_ALERTNOAUTHOR'));
 			$this->app->redirect($url);
 			exit;
 		}
@@ -659,6 +663,7 @@ class PlgFabrik_ElementField extends PlgFabrik_Element
 		$layout = $this->getLayout('qr');
 		$displayData = new stdClass;
 		$displayData->src = $src;
+		$displayData->data = $thisRow;
 
 		return $layout->render($displayData);
 	}

@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
+use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
@@ -95,8 +95,13 @@ class PlgFabrik_Validationrule extends FabrikPlugin
 			return false;
 		}
 
+		if (!$this->shouldValidateHidden($data, $repeatCounter))
+		{
+			return false;
+		}
+
 		$params = $this->getParams();
-		$condition = $params->get($this->pluginName . '-validation_condition');
+		$condition = trim($params->get($this->pluginName . '-validation_condition'));
 
 		if ($condition == '')
 		{
@@ -137,6 +142,8 @@ class PlgFabrik_Validationrule extends FabrikPlugin
 			$post = null;
 		}
 
+		// unused by us, but available for user's to use
+		$formModel = $this->elementModel->getFormModel();
 		$condition = trim($w->parseMessageForPlaceHolder($condition, $post));
 		FabrikWorker::clearEval();
 		$res = @eval($condition);
@@ -227,6 +234,30 @@ class PlgFabrik_Validationrule extends FabrikPlugin
 		}
 
 		return false;
+	}
+
+	/*
+	* Should the validation be run - based on whether the element was hidden by an FX
+	*
+	* @return boolean
+	*/
+	protected function shouldValidateHidden($data, $repeatCounter)
+	{
+		$params = $this->getParams();
+		$validateHidden = $params->get('validate_hidden', '1') === '1';
+
+		// if validate hidden is set, just return true, we don't care about the state
+		if ($validateHidden)
+		{
+			return true;
+		}
+
+		$name = $this->elementModel->getHTMLId($repeatCounter);
+		$hiddenElements = ArrayHelper::getValue($this->formModel->formData, 'hiddenElements', '[]');
+		$hiddenElements = json_decode($hiddenElements);
+
+		return !in_array($name, $hiddenElements);
+
 	}
 
 	/**

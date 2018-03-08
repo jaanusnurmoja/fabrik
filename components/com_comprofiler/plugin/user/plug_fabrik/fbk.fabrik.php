@@ -21,7 +21,7 @@ class getFabrikTab extends cbTabHandler {
 		$this->cbTabHandler();
 	}
 
-	function getDisplayTab($tab,$user,$ui)
+	function __construct($tab,$user,$ui)
 	{
 		// $$$ hugh - added privacy option, so you can restrict who sees the tab, requested on forums:
 		// http://fabrikar.com/forums/showthread.php?p=128127#post128127
@@ -80,6 +80,9 @@ class getFabrikTab extends cbTabHandler {
 		foreach ($user as $k=>$v) {
 			if (strstr( $txt, "{\$my->$k}" )) {
 				$txt = str_replace("{\$my->$k}", $v, $txt);
+			}
+			else if (strstr( $txt, "[\$my->$k]" )) {
+				$txt = str_replace("[\$my->$k]", $v, $txt);
 			}
 			// $$$ hugh - might as well stuff the entire CB user object in the session
 			$session->set('fabrik.plugin.' . $social_hash . '.' . $k, $v);

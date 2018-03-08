@@ -38,11 +38,13 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 this.refreshEditor();
             }.bind(this));
 
+            /*
             Fabrik.addEvent('fabrik.form.elements.added', function (form) {
                 if (form.isMultiPage()) {
                     this.refreshEditor();
                 }
             }.bind(this));
+            */
 
             Fabrik.addEvent('fabrik.form.submit.start', function (form) {
                 if (this.options.wysiwyg && form.options.ajax) {
@@ -177,7 +179,10 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
          * and not id.
          */
         getCloneName: function () {
-            var name = this.options.isGroupJoin ? this.options.htmlId : this.options.element;
+            // there's something messing up when wysiwyg in repeat and we delete before adding
+            //var name = this.options.isGroupJoin ? this.options.htmlId : this.options.element;
+	        //var name = this.options.wysiwyg ? this.options.htmlId : this.options.element
+            var name = this.options.wysiwyg && this.options.isGroupJoin ? this.options.htmlId : this.options.element;
             return name;
         },
 

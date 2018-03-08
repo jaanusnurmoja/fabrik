@@ -175,8 +175,10 @@ class FabrikFEModelImportcsv extends JModelForm
 		/* Track errors message- so if from frontend menu redirect 
 		    to current url rather than throwing exception
 		 */
-		$errmsg = ''; 
-		
+		$errmsg = '';
+		$app      = JFactory::getApplication();
+		$input    = $app->input;
+
 		if (!(bool) ini_get('file_uploads'))
 		{
             $errmsg = FText::_('COM_FABRIK_ERR_UPLOADS_DISABLED');
@@ -184,10 +186,9 @@ class FabrikFEModelImportcsv extends JModelForm
 		}
 		else
 		{
-		    $app      = JFactory::getApplication();
-		    $input    = $app->input;
+
 		    $userFile = $input->files->get('jform');
-		}    
+		}
 
 		if (!$userFile)
 		{
@@ -383,14 +384,15 @@ class FabrikFEModelImportcsv extends JModelForm
 	 * sanitize Headings
 	 *
 	 * @param  array &$row
-	 *
+	*
 	 * @return void
 	 */
 	private function sanitizeHeadings(&$row)
 	{
 		$model       = $this->getlistModel();
 		$tableParams = $model->getParams();
-		$mode        = $tableParams->get('csvfullname');
+		// note that when creating a new list via import, this will default to 0 (and get cleaned)
+		$mode        = $tableParams->get('csvfullname', '0');
 
 		foreach ($row as $key => &$heading)
 		{
@@ -409,10 +411,27 @@ class FabrikFEModelImportcsv extends JModelForm
 				$heading = JString::substr($heading, 3);
 			}
 
-			if ($mode != 2)
+			if ($mode == '0')
+			{
+				/*
+				 * $$$ hugh - if we are creating a list from a CSV import, we need to
+				 * totally sanitize the name into a valid element name.  So clean it, boil consecutive
+				 * __ down to single (avoid accidentally getting a ___ in the name), and remove leading
+				 * and trailing _.
+				 *
+				 * Also do this if mode is 0.
+				 *
+				 * Possible gotcha if they have element names with double __ created by hand.
+				 */
+				$heading = FabrikString::clean($heading);
+				$heading = preg_replace('/__+/', '_', $heading);
+				$heading = trim($heading, '_');
+			}
+			else if ($mode != 2)
 			{
 				// $$$ rob replacing with this as per thread - http://fabrikar.com/forums/showthread.php?p=83304
-				$heading = str_replace(' ', '_', $heading);
+				// $heading = str_replace(' ', '_', $heading);
+
 			}
 
 			if (!empty($this->matchedHeadings) && !in_array($heading, $this->matchedHeadings))

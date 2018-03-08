@@ -14,8 +14,8 @@ defined('_JEXEC') or die('Restricted access');
 
 require_once 'fabmodeladmin.php';
 
-use \Joomla\Utilities\ArrayHelper;
-use \Joomla\Registry\Registry;
+use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Fabrik Admin List Model
@@ -299,6 +299,7 @@ class FabrikAdminModelList extends FabModelAdmin
 				$aConditions[] = JHTML::_('select.option', 'in', 'IN');
 				$aConditions[] = JHTML::_('select.option', 'not_in', 'NOT IN');
 				$aConditions[] = JHTML::_('select.option', 'exists', 'EXISTS');
+				$aConditions[] = JHTML::_('select.option', 'thisyear', FText::_('COM_FABRIK_THIS_YEAR'));
 				$aConditions[] = JHTML::_('select.option', 'earlierthisyear', FText::_('COM_FABRIK_EARLIER_THIS_YEAR'));
 				$aConditions[] = JHTML::_('select.option', 'laterthisyear', FText::_('COM_FABRIK_LATER_THIS_YEAR'));
 
@@ -314,7 +315,7 @@ class FabrikAdminModelList extends FabModelAdmin
 				break;
 		}
 
-		$dd = str_replace("\n", "", JHTML::_('select.genericlist', $aConditions, $name, 'class="inputbox input-small"  size="1" ', 'value', 'text', ''));
+		$dd = str_replace("\n", "", JHTML::_('select.genericlist', $aConditions, $name, 'class="inputbox input-medium"  size="1" ', 'value', 'text', ''));
 
 		if ($addSlashes)
 		{
@@ -400,13 +401,13 @@ class FabrikAdminModelList extends FabModelAdmin
 		$filterOpts               = new stdClass;
 		$filterOpts->filterJoinDd = $this->getFilterJoinDd(false, 'jform[params][filter-join][]');
 		$filterOpts->filterCondDd = $this->getFilterConditionDd(false, 'jform[params][filter-conditions][]', 2);
-		$filterOpts->filterAccess = JHtml::_('access.level', 'jform[params][filter-access][]', $item->access, 'class="input-small"');
+		$filterOpts->filterAccess = JHtml::_('access.level', 'jform[params][filter-access][]', $item->access, 'class="input-medium"', false);
 		$filterOpts->filterAccess = str_replace(array("\n", "\r"), '', $filterOpts->filterAccess);
 		$filterOpts->j3           = FabrikWorker::j3();
 		$filterOpts               = json_encode($filterOpts);
 
 		$formModel    = $this->getFormModel();
-		$attribs      = 'class="inputbox input-small" size="1"';
+		$attribs      = 'class="inputbox input-medium" size="1"';
 		$filterfields = $formModel->getElementList('jform[params][filter-fields][]', '', false, false, true, 'name', $attribs);
 		$filterfields = addslashes(str_replace(array("\n", "\r"), '', $filterfields));
 
@@ -646,7 +647,8 @@ class FabrikAdminModelList extends FabModelAdmin
 		$params = new Registry($row->get('params'));
 
 		$isView = $this->setIsView($params);
-		$data['params']['isView'] = (string) $isView;
+		$data['params']['isview'] = (string) $isView;
+
 
 		$this->setState('list.id', $id);
 		$this->setState('list.form_id', $row->get('form_id'));
@@ -695,6 +697,9 @@ class FabrikAdminModelList extends FabModelAdmin
 			// Mysql will force db table names to lower case even if you set the db name to upper case - so use clean()
 			$newTable = FabrikString::clean($newTable);
 
+			// can't have table names ending in _
+			$newTable = rtrim($newTable, '_');
+
 			// Check the entered database table doesn't already exist
 			if ($newTable != '' && $this->databaseTableExists($newTable))
 			{
@@ -715,6 +720,17 @@ class FabrikAdminModelList extends FabModelAdmin
 			$groupData          = FabrikWorker::formDefaults('group');
 			$groupData['name']  = $row->label;
 			$groupData['label'] = $row->label;
+
+			$params = new Registry($row->get('params'));
+			$this->setIsView($params);
+
+			if ($params->get('isview', '') === '1')
+			{
+				$this->app->enqueueMessage(FText::_('COM_FABRIK_LIST_VIEW_SET_ALTER_NO'));
+				$params->set('alter_existing_db_cols', '0');
+			}
+
+			$row->params = $params->toString();
 
 			if ($newTable == '')
 			{
@@ -859,7 +875,18 @@ class FabrikAdminModelList extends FabModelAdmin
 			foreach ($elementModels as $element)
 			{
 				// Int and DATETIME elements cant have a index size attribute
-				$colType = $element->getFieldDescription();
+
+				try
+				{
+					$colType = $element->getFieldDescription();
+				}
+				catch (exception $e)
+				{
+					// some corner case, like an unpublished join to a non existent database, so make something up
+					$map[$element->getFullName(false, false)] = '';
+					$map[$element->getElement()->get('id')]   = '';
+					continue;
+				}
 
 				if (JString::stristr($colType, 'int'))
 				{
@@ -1567,6 +1594,12 @@ class FabrikAdminModelList extends FabModelAdmin
 		$group->set('created_by_alias', $this->user->get('username'));
 		$group->set('published', ArrayHelper::getValue($data, 'published', 1));
 		$opts                          = ArrayHelper::getValue($data, 'params', new stdClass);
+
+		if (is_array($opts))
+		{
+			$opts = ArrayHelper::toObject($opts);
+		}
+
 		$opts->repeat_group_button     = $isRepeat ? 1 : 0;
 		$opts->repeat_group_show_first = 1;
 		$group->set('params', json_encode($opts));

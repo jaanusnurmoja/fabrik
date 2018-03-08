@@ -56,11 +56,18 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 		$w = new FabrikWorker;
 		($params->get('cronemail_return', '') != '') ? $MailFrom = $params->get('cronemail_return') : $MailFrom = $this->app->get('mailfrom');
 		($params->get('cronemail_from', '') != '') ? $FromName = $params->get('cronemail_from') : $FromName = $this->app->get('fromname');
+		($params->get('cronemail_replyto', '') != '') ? $replyTo = $params->get('cronemail_replyto') : $replyTo = $this->app->get('replyto');
+		($params->get('cronemail_replytoname', '') != '') ? $replyToName = $params->get('cronemail_replytoname') : $replyToName = $this->app->get('replytoname');
 		$subject   = $params->get('subject', 'Fabrik cron job');
 		$eval      = $params->get('cronemail-eval');
 		$condition = $params->get('cronemail_condition', '');
-		$updates   = array();
+		$nodups    = $params->get('cronemail_no_dups', '0') === '1';
+		$testMode  = $this->isTestMode();
+		$sentIds   = array();
+		$failedIds   = array();
+		$sentTos = array();
 		$this->log = '';
+		$x = 0;
 
 		foreach ($data as $group)
 		{
@@ -68,6 +75,7 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 			{
 				foreach ($group as $row)
 				{
+					$x++;
 					$row = ArrayHelper::fromObject($row);
 
 					if (!empty($condition))
@@ -76,6 +84,11 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 
 						if (eval($this_condition) === false)
 						{
+							if ($testMode)
+							{
+								$this->app->enqueueMessage($x . ': Condition returned false');
+							}
+
 							continue;
 						}
 					}
@@ -83,6 +96,23 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 					foreach ($to as $thisTo)
 					{
 						$thisTo = trim($w->parseMessageForPlaceHolder($thisTo, $row));
+
+						if ($nodups)
+						{
+							if (in_array($thisTo, $sentTos))
+							{
+								if ($testMode)
+								{
+									$this->app->enqueueMessage($x . ': Found dupe, skipping: ' . $thisTo);
+								}
+
+								continue;
+							}
+							else
+							{
+								$sentTos[] = $thisTo;
+							}
+						}
 
 						if (FabrikWorker::isEmail($thisTo))
 						{
@@ -94,32 +124,63 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 							}
 
 							$thisSubject = $w->parseMessageForPlaceHolder($subject, $row);
-							$mail        = JFactory::getMailer();
-							$res         = $mail->sendMail($MailFrom, $FromName, $thisTo, $thisSubject, $thisMsg, true);
 
-							if (!$res)
+							if ($testMode)
 							{
-								$this->log .= "\n failed sending to $thisTo";
+								$this->app->enqueueMessage($x . ': Would send subject: ' . $thisSubject);
+								$this->app->enqueueMessage($x . ': Would send to: ' . $thisTo);
 							}
 							else
 							{
-								$this->log .= "\n sent to $thisTo";
+								$res = FabrikWorker::sendMail(
+									$MailFrom,
+									$FromName,
+									$thisTo,
+									$thisSubject,
+									$thisMsg,
+									true,
+									null,
+									null,
+									null,
+									$replyTo,
+									$replyToName
+								);
+
+								if (!$res)
+								{
+									//$this->log .= "\n failed sending to $thisTo";
+									FabrikWorker::log('plg.cron.email.information', 'Failed sending to: ' . $thisTo);
+									$failedIds[] = $row['__pk_val'];
+								}
+								else
+								{
+									//$this->log .= "\n sent to $thisTo";
+									FabrikWorker::log('plg.cron.email.information', 'Sent to: ' . $thisTo);
+									$sentIds[] = $row['__pk_val'];
+								}
 							}
 						}
 						else
 						{
-							$this->log .= "\n $thisTo is not an email address";
+							if ($testMode)
+							{
+								$this->app->enqueueMessage('Not an email address: ' . $thisTo);
+							}
+							else
+							{
+								FabrikWorker::log('plg.cron.email.information', 'Not an email address: ' . $thisTo);
+								$failedIds[] = $row['__pk_val'];
+							}
 						}
 					}
-
-					$updates[] = $row['__pk_val'];
 				}
 			}
 		}
 
-		$field = $params->get('cronemail-updatefield');
+		$sentIds = array_unique($sentIds);
+		$field   = $params->get('cronemail-updatefield');
 
-		if (!empty($updates) && trim($field) != '')
+		if (!empty($sentIds) && trim($field) != '')
 		{
 			// Do any update found
 			/** @var FabrikFEModelList $listModel */
@@ -137,15 +198,44 @@ class PlgFabrik_Cronemail extends PlgFabrik_Cron
 			$field    = str_replace('___', '.', $field);
 			$fabrikDb = $listModel->getDb();
 			$query    = $fabrikDb->getQuery(true);
-			$query->update($table->db_table_name)->set($field . ' = ' . $fabrikDb->quote($value))
-				->where($table->db_primary_key . ' IN (' . implode(',', $updates) . ')');
-			$this->log .= "\n update query: $query";
-			$fabrikDb->setQuery($query);
-			$fabrikDb->execute();
+			$query
+				->update($table->db_table_name)
+				->set($field . ' = ' . $fabrikDb->quote($value))
+				->where($table->db_primary_key . ' IN (' . implode(',', $sentIds) . ')');
+
+			if (!$testMode)
+			{
+				$this->log .= "\n update query: " . (string)$query;
+				$fabrikDb->setQuery($query);
+				$fabrikDb->execute();
+			}
+			else
+			{
+				$this->app->enqueueMessage('Would run update query: ' . (string)$query);
+			}
 		}
 
-		$this->log .= "\n updates " . count($updates) . " records";
+		//$this->log .= "\n mails sent: " . count($sentIds) . " records";
 
-		return count($updates);
+		$field = $params->get('cronemail-update-code');
+
+		if (trim($field) != '')
+		{
+			if (!$testMode)
+			{
+				@eval($field);
+			}
+			else
+			{
+				$this->app->enqueueMessage('Skipping update code');
+			}
+		}
+
+		return count($sentIds);
+	}
+
+	private function isTestMode()
+	{
+		return $this->app->isClient('administrator') && $this->getParams()->get('cronemail_test_mode', '0') === '1';
 	}
 }

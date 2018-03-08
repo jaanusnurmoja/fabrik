@@ -66,7 +66,7 @@ class PlgFabrik_FormPHP extends PlgFabrik_Form
 
 			if ($this->html === false)
 			{
-				return JError::raiseWarning(E_WARNING, 'php form plugin failed');
+				return false;
 			}
 		}
 
@@ -193,7 +193,7 @@ class PlgFabrik_FormPHP extends PlgFabrik_Form
 		{
 			if ($this->_runPHP() === false)
 			{
-				return JError::raiseWarning(E_WARNING, 'php form plugin failed');
+				return false;
 			}
 		}
 
@@ -215,7 +215,7 @@ class PlgFabrik_FormPHP extends PlgFabrik_Form
 		{
 			if ($this->_runPHP(null, $groups) === false)
 			{
-				return JError::raiseWarning(E_WARNING, 'php form plugin failed');
+				return false;
 			}
 		}
 
@@ -237,7 +237,7 @@ class PlgFabrik_FormPHP extends PlgFabrik_Form
 		{
 			if ($this->_runPHP(null, $groups) === false)
 			{
-				return JError::raiseWarning(E_WARNING, 'php form plugin failed');
+				return false;
 			}
 		}
 
@@ -302,6 +302,38 @@ class PlgFabrik_FormPHP extends PlgFabrik_Form
 
 		return true;
 	}
+
+	/**
+	 * Run for each element's canUse.  Return false to make an element read only
+	 *
+	 * @param  array  $args  array containing element model being tested
+	 *
+	 * @return  bool
+	 */
+	public function onElementCanUse($args)
+	{
+		$params = $this->getParams();
+
+		if ($params->get('only_process_curl') == 'onElementCanUse')
+		{
+			$formModel = $this->getModel();
+			$elementModel = FArrayHelper::getValue($args, 0, false);
+			if ($elementModel)
+			{
+				$w          = new FabrikWorker;
+				$code       = $w->parseMessageForPlaceHolder($params->get('curl_code', ''), $formModel->data, true, true);
+				$php_result = eval($code);
+
+				if ($php_result === false)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
 
 	/**
 	 * Run during form rendering, when all the form's JS is assembled and ready
