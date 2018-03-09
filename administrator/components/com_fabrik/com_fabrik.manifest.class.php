@@ -59,6 +59,8 @@ class Com_FabrikInstallerScript
 		$row->password    = $app->get('password');
 		$row->database    = $app->get('db');
 		$row->description = 'site database';
+		$row->params      = '';
+		$row->checked_out = 0;
 		$row->published   = 1;
 		$row->default     = 1;
 		$res              = $db->insertObject('#__fabrik_connections', $row, 'id');
@@ -121,7 +123,7 @@ class Com_FabrikInstallerScript
 		jimport('joomla.filesystem.file');
 		$componentFrontend = 'components/com_fabrik';
 
-		if (compare_version($this->getVersion(), '3.8', '<')) {
+		if (version_compare($this->getVersion(), '3.8', '<')) {
             $docTypes = array('fabrikfeed', 'pdf', 'partial');
 
             foreach ($docTypes as $docType) {
@@ -199,15 +201,15 @@ class Com_FabrikInstallerScript
 		if (!JFolder::exists(JPATH_ROOT . '/' . $dest))
 		{
 			JFolder::create(JPATH_ROOT . '/' . $dest);
+		}
 
-			$moveRes = JFolder::copy($componentFrontend . '/fabrik', $dest, JPATH_SITE, true, false);
+		$moveRes = JFolder::copy($componentFrontend . '/fabrik', $dest, JPATH_SITE, true, false);
 
-			if ($moveRes !== true)
-			{
-				echo "<p style=\"color:red\">failed to moved " . $componentFrontend . '/fabrik to ' . $dest . '</p>';
+		if ($moveRes !== true)
+		{
+			echo "<p style=\"color:red\">failed to moved " . $componentFrontend . '/fabrik to ' . $dest . '</p>';
 
-				return false;
-			}
+			return false;
 		}
 
 		return true;

@@ -70,6 +70,7 @@ define(['jquery', 'fab/fabrik', 'fullcalendar'], function (jQuery, Fabrik, fc) {
 	                    url += '&endDate=' + end.format();
                         new Request({
                             url        : url,
+                            data       : this.options.urlfilters,
                             evalScripts: true,
                             onSuccess  : function (e, json) {
                                 if (typeOf(json) !== 'null') {
@@ -417,22 +418,33 @@ define(['jquery', 'fab/fabrik', 'fullcalendar'], function (jQuery, Fabrik, fc) {
         deleteEntry: function (calEvent) {
             if (window.confirm(Joomla.JText._('PLG_VISUALIZATION_FULLCALENDAR_CONF_DELETE'))) {
                 this.ajax.deleteEvent.options.data = {'id': calEvent.rowid, 'listid': calEvent.listid};
+                var result = Fabrik.fireEvent('fabrik.viz.fullcalendar.deleteentry', [this, calEvent]).eventResults;
+                for (i = 0; i < result.length; i++) {
+                    if (typeOf(result[i] === 'object'))
+                    {
+                        jQuery.extend(this.ajax.deleteEvent.options.data, result[i]);
+                    }
+                }
                 this.ajax.deleteEvent.send();
             }
         },
 
         clickEntry: function (calEvent) {
-            if (calEvent.customURL !== '') {
-                window.open(calEvent.customURL, '_blank');
-            }
-            else if (this.options.showFullDetails === false) {
-                var feModal = jQuery('#fabrikEvent_modal.modal');
-				feModal.find('.modal-title').html(jQuery('#' + calEvent.id).attr('data-title'));
-				feModal.find('.modal-body').html(jQuery('#' + calEvent.id).attr('data-content'));
-				feModal.find('.modal-footer .calEventButtons').html(jQuery('#' + calEvent.id).attr('data-buttons'));
-                feModal.modal('show');
-            } else {
-                this.viewEntry(calEvent);
+            var res = Fabrik.fireEvent('fabrik.viz.fullcalendar.clickentry', [this, calEvent]).eventResults;
+            // if the event returns false, do nothing
+            if (typeOf(res) === 'null' || res.length === 0 || !res.contains(false)) {
+                if (calEvent.customURL !== '') {
+                    window.open(calEvent.customURL, '_blank');
+                }
+                else if (this.options.showFullDetails === false) {
+                    var feModal = jQuery('#fabrikEvent_modal.modal');
+                    feModal.find('.modal-title').html(jQuery('#' + calEvent.id).attr('data-title'));
+                    feModal.find('.modal-body').html(jQuery('#' + calEvent.id).attr('data-content'));
+                    feModal.find('.modal-footer .calEventButtons').html(jQuery('#' + calEvent.id).attr('data-buttons'));
+                    feModal.modal('show');
+                } else {
+                    this.viewEntry(calEvent);
+                }
             }
         },
 

@@ -402,7 +402,7 @@ class JDocumentRendererHead extends JDocumentRendererHtmlHead
 		$app = JFactory::getApplication();
 		$uri = parse_url($app->input->server->get('HTTP_REFERER', '', 'string'));
 		$key = $uri['path'];
-		$qs = ArrayHelper::getValue($uri, 'query', '');
+		$qs = FArrayHelper::getValue($uri, 'query', '');
 
 		if (!empty($qs))
 		{

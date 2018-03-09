@@ -11,9 +11,9 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
+use Fabrik\Helpers\LayoutFile;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
-use Fabrik\Helpers\LayoutFile;
 
 jimport('joomla.application.component.model');
 jimport('joomla.filesystem.file');
@@ -1022,8 +1022,8 @@ class PlgFabrik_Element extends FabrikPlugin
 			$this->access->$key = in_array($params->get($prop, $default), $groups);
 		}
 
-		// Override with check on lookup element's value = logged in user id.
-		if ($params->get('view_access_user', '') !== '' && $view == 'form')
+		// If no group access, can override with check on lookup element's value = logged in user id.
+		if (!$this->access->$key && $params->get('view_access_user', '') !== '' && $view == 'form')
 		{
 			$formModel = $this->getFormModel();
 			$data      = $formModel->getData();
@@ -1041,7 +1041,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 				if ($lookUp)
 				{
-					$fullName           = $lookUp->getFullName(false, true);
+					$fullName           = $lookUp->getFullName(true, true);
 					$value              = $formModel->getElementData($fullName, true);
 					$this->access->$key = ($this->user->get('id') == $value) ? true : false;
 				}
@@ -1349,6 +1349,17 @@ class PlgFabrik_Element extends FabrikPlugin
 		$titlePart = $this->getValue($data, $repeatCounter, $opts);
 
 		return is_array($titlePart) ? implode(', ', $titlePart) : $titlePart;
+	}
+
+	/**
+	 * Should the element ignore a form or list row copy, and use the default regardless
+	 *
+	 * @return bool
+	 */
+	public function defaultOnCopy()
+	{
+		$params = $this->getParams();
+		return $params->get('default_on_copy', '0') === '1';
 	}
 
 	/**
@@ -1695,6 +1706,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$displayData->j3         = FabrikWorker::j3();
 		$displayData->hidden     = $this->isHidden();
 		$displayData->label      = FText::_($element->label);
+		$displayData->altLabel   = $this->getListHeading();
 		$displayData->hasLabel   = $this->get('hasLabel');
 		$displayData->view       = $this->app->input->get('view', 'form');
 		$displayData->tip        = $this->tipHtml($model->data);
@@ -1756,12 +1768,18 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	protected function labelPaths()
 	{
+		// base built-in layouts
 		$basePath       = COM_FABRIK_BASE . 'components/com_fabrik/layouts/element';
 		$pluginPath     = COM_FABRIK_BASE . '/plugins/fabrik_element/' . $this->getPluginName() . '/layouts';
+		// Custom per template layouts
+		$view = $this->getFormModel()->isEditable() ? 'form' : 'details';
+		$tmplPath = COM_FABRIK_FRONTEND . '/views/'. $view . '/tmpl/' . $this->getFormModel()->getTmpl() . '/layouts/element/';
+		$tmplElPath = COM_FABRIK_FRONTEND . '/views/'. $view . '/tmpl/' . $this->getFormModel()->getTmpl() . '/layouts/element/' . $this->getFullName(true, false);
+		// Custom per theme layouts
 		$perThemePath   = JPATH_THEMES . '/' . $this->app->getTemplate() . '/html/layouts/com_fabrik/element';
 		$perElementPath = JPATH_THEMES . '/' . $this->app->getTemplate() . '/html/layouts/com_fabrik/element/' . $this->getFullName(true, false);
 
-		return array($basePath, $pluginPath, $perThemePath, $perElementPath);
+		return array($basePath, $pluginPath, $tmplPath, $tmplElPath, $perThemePath, $perElementPath);
 	}
 
 	/**
@@ -1840,7 +1858,8 @@ class PlgFabrik_Element extends FabrikPlugin
 		}
 		else
 		{
-			$rollOver = is_string($txt) ? $txt : '';
+			// defensive coding for corner case of calcs with JSON data
+			$rollOver = is_scalar($txt) ? (string)$txt : '';
 		}
 
 		return $rollOver;
@@ -2449,7 +2468,9 @@ class PlgFabrik_Element extends FabrikPlugin
 			// $$$ rob changed from span wrapper to div wrapper as element's content may contain divs which give html error
 
 			// Placeholder to be updated by ajax code
-			$v = html_entity_decode($this->getROElement($data, $repeatCounter));
+			// @TODO the entity decode causes problems on RO with tooltips
+			$v = $this->getROElement($data, $repeatCounter);
+			$v = html_entity_decode($v);
 			//$v = $v == '' ? '&nbsp;' : $v;
 			// if(is_array($v)) $v = implode($v);
 
@@ -3882,7 +3903,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		{
 			$w    = new FabrikWorker;
 			$data = empty($data) ? $this->getFormModel()->getData() : $data;
-			$pop  = $w->parseMessageForPlaceHolder($pop, $data);
+			$pop  = $w->parseMessageForPlaceHolder($pop, $data, false);
 
 			$key = md5($pop) . '-' . md5(serialize($data));
 
@@ -4509,7 +4530,7 @@ class PlgFabrik_Element extends FabrikPlugin
 						case FABRIKFILTER_QUERY:
 							$value = '(' . $value . ')';
 							break;
-						case FABRKFILTER_NOQUOTES:
+						case FABRIKFILTER_NOQUOTES:
 							$value = $value;
 							break;
 						default:
@@ -4575,7 +4596,7 @@ class PlgFabrik_Element extends FabrikPlugin
 					break;
 			}
 			// $$$ hugh - if 'noquotes' (3) selected, strip off the quotes again!
-			if ($eval == FABRKFILTER_NOQUOTES)
+			if ($eval == FABRIKFILTER_NOQUOTES)
 			{
 				// $$$ hugh - darn, this is stripping the ' of the end of things like "select & from foo where bar = '123'"
 				$value = JString::ltrim($value, "'");
@@ -4685,7 +4706,15 @@ class PlgFabrik_Element extends FabrikPlugin
 		{
 			$db     = FabrikWorker::getDbo();
 			$secret = $this->config->get('secret');
-			$key    = 'AES_DECRYPT(' . $key . ', ' . $db->q($secret) . ')';
+			$matches = array();
+			if (preg_match('/LOWER\((.*)\)/', $key, $matches))
+			{
+				$key = 'LOWER(CONVERT(AES_DECRYPT(' . $matches[1] . ', ' . 	$db->q($secret) . ') USING utf8))';
+			}
+			else
+			{
+				$key = 'AES_DECRYPT(' . $key . ', ' . $db->q($secret) . ')';
+			}
 		}
 	}
 
@@ -5477,7 +5506,39 @@ class PlgFabrik_Element extends FabrikPlugin
 			if ($plugin->hasSubElements)
 			{
 				// http://fabrikar.com/forums/index.php?threads/calculation-split-on-problem.40122/
-				$val->label = ($type != 'median') ? $plugin->getLabelForValue($val->label) : $plugin->getLabelForValue($key, $key);
+				$labelParts = explode(' & ', $val->label);
+				if (count($labelParts) > 1)
+				{
+					$label = $labelParts[1];
+				}
+				else
+				{
+					$label = $labelParts[0];
+				}
+
+				$label = FabrikWorker::JSONtoData($label);
+				$ls = array();
+
+				if (is_array($label))
+				{
+					foreach ($label as $l)
+					{
+						$ls[] = ($type != 'median') ? $plugin->getLabelForValue($l) : $plugin->getLabelForValue($key, $key);
+					}
+				}
+				else
+				{
+					$ls[] = ($type != 'median') ? $plugin->getLabelForValue($label) : $plugin->getLabelForValue($key, $key);
+				}
+
+				if (count($labelParts > 1))
+				{
+					$val->label = $labelParts[0] . ' & ' . implode(',', $ls);
+				}
+				else
+				{
+					$val->label = impode(',', $ls);
+				}
 			}
 			else
 			{
@@ -6701,7 +6762,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function onCopyRow($val)
 	{
-		return $val;
+		return $this->defaultOnCopy() ? $this->default : $val;
 	}
 
 	/**
@@ -6713,7 +6774,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	 */
 	public function onSaveAsCopy($val)
 	{
-		return $val;
+		return $this->defaultOnCopy() ? $this->default : $val;
 	}
 
 	/**
@@ -6958,6 +7019,15 @@ class PlgFabrik_Element extends FabrikPlugin
 		{
 			return $val;
 		}
+
+		// if we're copying a row, format won't be applied
+		$formModel = $this->getFormModel();
+
+		if (isset($formModel->formData) && array_key_exists('fabrik_copy_from_table', $formModel->formData))
+		{
+			return $val;
+		}
+
 		// Might think about rounding to decimal_length, but for now let MySQL do it
 		$decimalLength = (int) $params->get('decimal_length', 2);
 
@@ -7436,7 +7506,10 @@ class PlgFabrik_Element extends FabrikPlugin
 
 					if ($c !== false)
 					{
+						// added noRowClass and rowClass for use in div templates that need to split those out
+						$data[$groupKey][$i]->noRowClass = $data[$groupKey][$i]->class;
 						$data[$groupKey][$i]->class .= ' ' . FabrikString::getRowClass($c, $this->element->name);
+						$data[$groupKey][$i]->rowClass = FabrikString::getRowClass($c, $this->element->name);
 					}
 				}
 			}
@@ -7772,11 +7845,10 @@ class PlgFabrik_Element extends FabrikPlugin
 			foreach ($idsToKeep as $parentId => $ids)
 			{
 				$query->clear();
-				$query->delete($join->table_join)->where($pID . ' = ' . $parentId);
-
+				$query->delete($join->table_join)->where($db->quoteName($pID) . ' = ' . $parentId);
 				if (!empty($ids))
 				{
-					$query->where('id NOT IN ( ' . implode($ids, ',') . ')');
+					$query->where($db->quoteName('id') . ' NOT IN ( ' . implode($ids, ',') . ')');
 				}
 
 				$db->setQuery($query);
@@ -7800,7 +7872,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	 *
 	 * @return  string
 	 */
-	public function internalValidataionText()
+	public function internalValidationText()
 	{
 		return '';
 	}
@@ -7997,5 +8069,83 @@ class PlgFabrik_Element extends FabrikPlugin
 	public function setValidationFailedData(&$data)
 	{
 		return;
+	}
+
+	/**
+	 * Swap values for labels
+	 *
+	 * @param   array  &$d  Data
+	 *
+	 * @return  void
+	 */
+	protected function swapValuesForLabels(&$d)
+	{
+		$groups = $this->getFormModel()->getGroupsHiarachy();
+
+		foreach (array_keys($groups) as $gkey)
+		{
+			$group = $groups[$gkey];
+			$elementModels = $group->getPublishedElements();
+
+			for ($j = 0; $j < count($elementModels); $j++)
+			{
+				$elementModel = $elementModels[$j];
+				$elKey = $elementModel->getFullName(true, false);
+				$v = FArrayHelper::getValue($d, $elKey);
+
+				if (is_array($v))
+				{
+					$origData = FArrayHelper::getValue($d, $elKey, array());
+
+					foreach (array_keys($v) as $x)
+					{
+						$origVal = FArrayHelper::getValue($origData, $x);
+						$d[$elKey][$x] = $elementModel->getLabelForValue($v[$x], $origVal, true);
+					}
+				}
+				else
+				{
+					$d[$elKey] = $elementModel->getLabelForValue($v, FArrayHelper::getValue($d, $elKey), true);
+				}
+			}
+		}
+	}
+
+	/**
+	 * When running parseMessageForPlaceholder on data we need to set the none-raw value of things like birthday/time
+	 * elements to that stored in the listModel::storeRow() method
+	 *
+	 * @param   array  &$data          Form data
+	 * @param   int    $repeatCounter  Repeat group counter
+	 *
+	 * @return  void
+	 */
+	protected function setStoreDatabaseFormat(&$data, $repeatCounter = 0)
+	{
+		$formModel = $this->getFormModel();
+		$groups = $formModel->getGroupsHiarachy();
+
+		foreach ($groups as $groupModel)
+		{
+			$elementModels = $groupModel->getPublishedElements();
+
+			foreach ($elementModels as $elementModel)
+			{
+				$fullKey = $elementModel->getFullName(true, false);
+				$value = $data[$fullKey];
+
+				if ($groupModel->canRepeat() && is_array($value))
+				{
+					foreach ($value as $k => $v)
+					{
+						$data[$fullKey][$k] = $elementModel->storeDatabaseFormat($v, $data);
+					}
+				}
+				else
+				{
+					$data[$fullKey] = $elementModel->storeDatabaseFormat($value, $data);
+				}
+			}
+		}
 	}
 }
