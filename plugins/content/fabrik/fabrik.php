@@ -233,6 +233,7 @@ class PlgContentFabrik extends JPlugin
 					break;
 				case 'limit':
 					$limit = $m[1];
+					break;
 				case 'usekey':
 					$useKey = $m[1];
 					break;
@@ -392,6 +393,9 @@ class PlgContentFabrik extends JPlugin
 				// Set row id for things like user element
 				$origRowId = $input->get('rowid');
 				$input->set('rowid', $rowId);
+				
+				// Allow plugin to reference the origin rowid in the URL
+				$input->set('origRowId', $origRowId);
 
 				// Set detail view for things like youtube element
 				$origView = $input->get('view');
@@ -420,6 +424,7 @@ class PlgContentFabrik extends JPlugin
 
 				$input->set('rowid', $origRowId);
 				$input->set('view', $origView);
+				$input->set('origRowId', '');
 				$this->resetRequest();
 			}
 

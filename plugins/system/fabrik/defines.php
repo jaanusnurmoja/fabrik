@@ -29,7 +29,7 @@ define("COM_FABRIK_LIVESITE_ROOT", JURI::getInstance()->toString(array('scheme',
 define("FABRIKFILTER_TEXT", 0);
 define("FABRIKFILTER_EVAL", 1);
 define("FABRIKFILTER_QUERY", 2);
-define("FABRKFILTER_NOQUOTES", 3);
+define("FABRIKFILTER_NOQUOTES", 3);
 
 /** @var delimiter used to define separator in csv export */
 define("COM_FABRIK_CSV_DELIMITER", ",");
@@ -54,19 +54,30 @@ JLoader::register('JElement', JPATH_SITE . '/administrator/components/com_fabrik
 // JLoader::import('components.com_fabrik.classes.field', JPATH_SITE . '/administrator', 'administrator.');
 // JLoader::import('components.com_fabrik.classes.form', JPATH_SITE . '/administrator', 'administrator.');
 
+// Avoid errors during update, if plugin has been updated but component hasn't, use old helpers
+if (JFile::exists(COM_FABRIK_FRONTEND . '/helpers/legacy/aliases.php'))
+{
+	if (!($app->input->get('option', '') === 'com_installer' && $app->input->get('task', '') === 'update.update'))
+	{
+		require_once COM_FABRIK_FRONTEND . '/helpers/legacy/aliases.php';
+	}
+}
+else
+{
+	$helpers = JFolder::files(COM_FABRIK_FRONTEND . '/helpers/', '.php');
+	foreach ($helpers as $helper)
+	{
+		require_once(COM_FABRIK_FRONTEND . '/helpers/' . $helper);
+	}
+}
+
 require_once JPATH_ADMINISTRATOR . '/components/com_fabrik/tables/fabtable.php';
 require_once COM_FABRIK_FRONTEND . '/models/fabrik.php';
-require_once COM_FABRIK_FRONTEND . '/helpers/arrayhelper.php';
-require_once COM_FABRIK_FRONTEND . '/helpers/html.php';
-require_once COM_FABRIK_FRONTEND . '/models/parent.php';
-
-require_once COM_FABRIK_FRONTEND . '/helpers/parent.php';
-require_once COM_FABRIK_FRONTEND . '/helpers/string.php';
 require_once COM_FABRIK_FRONTEND . '/models/plugin.php';
 require_once COM_FABRIK_FRONTEND . '/models/element.php';
 require_once COM_FABRIK_FRONTEND . '/models/plugin-form.php';
 require_once COM_FABRIK_FRONTEND . '/models/elementlist.php';
-require_once COM_FABRIK_FRONTEND . '/views/FabrikView.php';
+//require_once COM_FABRIK_FRONTEND . '/views/FabrikView.php';
 
 if ($app->isAdmin())
 {

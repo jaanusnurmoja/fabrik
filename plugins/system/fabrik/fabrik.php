@@ -37,7 +37,7 @@ class PlgSystemFabrik extends JPlugin
 	public function __construct(&$subject, $config)
 	{
 		// Could be component was uninstalled but not the plugin
-		if (!JFile::exists(JPATH_SITE . '/components/com_fabrik/helpers/file.php'))
+		if (!JFile::exists(JPATH_SITE . '/components/com_fabrik/fabrik.php'))
 		{
 			return;
 		}
@@ -64,9 +64,32 @@ class PlgSystemFabrik extends JPlugin
 		}
 		else
 		{
-			JLoader::import($base . '.field', JPATH_SITE . '/administrator', 'administrator.');
-			JLoader::import($base . '.form', JPATH_SITE . '/administrator', 'administrator.');
+			$loaded = true;
+
+		    if (version_compare($version->RELEASE, '3.8', '<'))
+            {
+                $loaded = JLoader::import($base . '.field', JPATH_SITE . '/administrator', 'administrator.');
+            }
+			else
+            {
+                $loaded = JLoader::import($base . '.FormField', JPATH_SITE . '/administrator', 'administrator.');
+            }
+
+            if (!$loaded)
+            {
+	            if ($app->isAdmin() && $app->input->get('option') === 'com_fabrik')
+	            {
+		            $app->enqueueMessage('Fabrik cannot find files required for this version of Joomla.  <b>DO NOT</b> use the Fabrik backend admin until this is resolved.  Please visit <a href="http://fabrikar.com/forums">our web site</a> and check for announcements about this version', 'error');
+	            }
+            }
 		}
+
+        // The fabrikfeed doc type has been deprecated.  For backward compat, change it use standard J! feed instead
+        if (version_compare($version->RELEASE, '3.8', '>=')) {
+            if ($app->input->get('format') === 'fabrikfeed') {
+                $app->input->set('format', 'feed');
+            }
+        }
 
 		if (version_compare($version->RELEASE, '3.1', '<='))
 		{
@@ -75,8 +98,6 @@ class PlgSystemFabrik extends JPlugin
 			JLoader::import($base . '.layout.file', JPATH_SITE . '/administrator', 'administrator.');
 			JLoader::import($base . '.layout.helper', JPATH_SITE . '/administrator', 'administrator.');
 		}
-
-		require_once JPATH_SITE . '/components/com_fabrik/helpers/file.php';
 
 		if (!file_exists(JPATH_LIBRARIES . '/fabrik/include.php'))
 		{
@@ -122,7 +143,7 @@ class PlgSystemFabrik extends JPlugin
 
 	/**
 	 * Store head script in session js store,
-	 * used by partial document type to exclude scripts already loaded
+	 * used by partial document type to exclude scripts already loaded, when building modal windows
 	 *
 	 * @return  void
 	 */
@@ -136,7 +157,28 @@ class PlgSystemFabrik extends JPlugin
 		if (!empty($key))
 		{
 			$key = 'fabrik.js.head.cache.' . $key;
-			$scripts = json_encode($doc->_scripts);
+
+			// if this is 'html', it's a main page load, so clear the cache for this page and start again
+			if ($app->input->get('format', 'html') === 'html')
+			{
+				$session->clear($key);
+			}
+
+			$scripts = $doc->_scripts;
+			$existing = $session->get($key);
+
+			/**
+			 * if we already have scripts for this page, merge the new ones.  For example, this might be an AJAX
+			 * call loading an element, so we just want to add any new scripts to the list, not blow it away and replace
+			 */
+			if (!empty($existing))
+			{
+				$existing = json_decode($existing);
+				$existing = ArrayHelper::fromObject($existing);
+				$scripts = array_merge($scripts, $existing);
+			}
+
+			$scripts = json_encode($scripts);
 			$session->set($key, $scripts);
 		}
 	}
@@ -264,6 +306,20 @@ class PlgSystemFabrik extends JPlugin
 		$this->setBigSelects();
 	}
 
+    /**
+     * If a command line like finder_indexer.php is run, it won't call onAfterInitialise, and will then run content
+     * plugins, and ours will bang out because "Fabrik system plugin has not been run".  So onStartIndex, initialize
+     * our plugin.
+     *
+     * @since   3.8
+     *
+     * @return  void
+     */
+	public function onStartIndex()
+    {
+        $this->onAfterInitialise();
+    }
+
 	/**
 	 * From Global configuration setting, set big select for main J database
 	 *
@@ -273,8 +329,11 @@ class PlgSystemFabrik extends JPlugin
 	 */
 	protected function setBigSelects()
 	{
-		$db = JFactory::getDbo();
-		FabrikWorker::bigSelects($db);
+		if (class_exists('FabrikWorker'))
+		{
+			$db = JFactory::getDbo();
+			FabrikWorker::bigSelects($db);
+		}
 	}
 
 	/**
@@ -362,8 +421,7 @@ class PlgSystemFabrik extends JPlugin
 		$input->set('resetfilters', 1);
 
 		// Ensure search doesn't go over memory limits
-		$memory    = ini_get('memory_limit');
-		$memory    = (int) FabrikString::rtrimword($memory, 'M') * 1000000;
+		$memory    = FabrikWorker::getMemoryLimit();
 		$usage     = array();
 		$memSafety = 0;
 

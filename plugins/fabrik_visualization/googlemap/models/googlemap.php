@@ -11,12 +11,13 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
+use Fabrik\Helpers\Googlemap;
+use Fabrik\Helpers\Lizt;
 use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
 
 require_once JPATH_SITE . '/components/com_fabrik/models/visualization.php';
-require_once JPATH_SITE . '/components/com_fabrik/helpers/googlemap.php';
 
 /**
  * Fabrik Google Map Plug-in Model
@@ -200,9 +201,10 @@ class FabrikModelGooglemap extends FabrikFEModelVisualization
 		$opts->zoomStyle            = (int) $params->get('fb_gm_zoom_control_style', 0);
 		$opts->zoom                 = $params->get('fb_gm_zoom', 1);
 		$opts->show_radius          = $params->get('fb_gm_use_radius', '1') == '1' ? true : false;
+		$opts->heatmap              = $params->get('fb_gm_heatmap', '0') == '1' ? true : false;
 		$opts->radius_defaults      = (array) $params->get('fb_gm_radius_default');
 		$opts->radius_fill_colors   = (array) $params->get('fb_gm_radius_fill_color');
-		$opts->styles               = FabGoogleMapHelper::styleJs($params);
+		$opts->styles               = Googlemap::styleJs($params);
 		$config                     = JComponentHelper::getParams('com_fabrik');
 		$apiKey                     = $config->get('google_api_key', '');
 		$opts->key                  = empty($apiKey) ? false : $apiKey;
@@ -254,7 +256,7 @@ class FabrikModelGooglemap extends FabrikFEModelVisualization
 				continue;
 			}
 
-			$mapsElements = FabrikHelperList::getElements($listModel, array('plugin' => 'googlemap', 'published' => 1));
+			$mapsElements = Lizt::getElements($listModel, array('plugin' => 'googlemap', 'published' => 1));
 			$coordColumn = $mapsElements[0]->getFullName(false, false);
 			$table = $listModel->getTable();
 
@@ -377,13 +379,15 @@ class FabrikModelGooglemap extends FabrikFEModelVisualization
 			* which isn't set for list display, which then wouldn't get rendered unless we do this.
 			*/
 
+			/*
 			if (FabrikString::usesElementPlaceholders($template))
 			{
 				$listModel->formatAll(true);
 			}
+            */
 
 			$template_nl2br = FArrayHelper::getValue($templates_nl2br, $c, '1') == '1';
-			$mapsElements = FabrikHelperList::getElements($listModel, array('plugin' => 'googlemap', 'published' => 1));
+			$mapsElements = Lizt::getElements($listModel, array('plugin' => 'googlemap', 'published' => 1));
 			$coordColumn = $mapsElements[0]->getFullName(true, false) . "_raw";
 
 			// Are we using random start location for icons?
@@ -393,7 +397,13 @@ class FabrikModelGooglemap extends FabrikFEModelVisualization
 			$input->set('limit' . $listId, $recLimit);
 			$listModel->setLimits(0, $recLimit);
 			$listModel->getPagination(0, 0, $recLimit);
-			$data = $listModel->getData();
+			$data = $listModel->getData(
+			    array (
+			        'rollover' => false,
+                    'custom_layout' => false,
+                    'add_box_and_links' => strstr($template, '{fabrik_')
+                )
+            );
 			$this->txt = array();
 			$k = 0;
 
@@ -429,7 +439,17 @@ class FabrikModelGooglemap extends FabrikFEModelVisualization
 
 					$rowData = ArrayHelper::fromObject($row);
 					$rowData['rowid'] = $rowData['__pk_val'];
+
+					$matches = array();
+
+					// alllow {coords:X} to specify number of decimal points to show
+					if (preg_match('/\{coords:(\d+)\}/', $template, $matches))
+					{
+						$rowData[trim($matches[0],'{}')] = sprintf('%.' . $matches[1] . 'f', $v[0]) . ',' . sprintf('%.' . $matches[1] . 'f', $v[1]);
+					}
+
 					$rowData['coords'] = $v[0] . ',' . $v[1];
+
 					$rowData['nav_url'] = "http://maps.google.com/maps?q=loc:" . $rowData['coords'] . "&navigate=yes";
 					$html = $w->parseMessageForPlaceHolder($template, $rowData);
 					FabrikHelperHTML::runContentPlugins($html, true);

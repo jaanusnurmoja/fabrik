@@ -280,14 +280,14 @@ define(['jquery'], function (jQuery) {
             var added = document.id(this.options.element + '_additions').value;
             var json = {'val': val, 'label': label};
             if (added !== '') {
-                a = JSON.decode(added);
+                a = JSON.parse(added);
             } else {
                 a = [];
             }
             a.push(json);
             var s = '[';
             for (var i = 0; i < a.length; i++) {
-                s += JSON.encode(a[i]) + ',';
+                s += JSON.stringify(a[i]) + ',';
             }
             s = s.substring(0, s.length - 1) + ']';
             document.id(this.options.element + '_additions').value = s;
@@ -402,6 +402,7 @@ define(['jquery'], function (jQuery) {
                 this.element.addClass('chzn-select');
                 this.element.getParent().getElement('.chzn-container').destroy();
                 jQuery('#' + this.element.id).chosen();
+                jQuery(this.element).addClass('chzn-done');
                 var changeEvent = this.getChangeEvent();
                 jQuery('#' + this.options.element).on('change', {changeEvent: changeEvent}, function (event) {
                     document.id(this.id).fireEvent(event.data.changeEvent, new Event.Mock(event.data.changeEvent,
@@ -576,23 +577,26 @@ define(['jquery'], function (jQuery) {
          * @param {number} left
          */
         moveTip: function (top, left) {
-            var t = this.tips(), tip, origPos;
+            var t = this.tips(), tip, origPos, popover;
             if (t.length > 0) {
                 t = jQuery(t[0]);
-                tip = t.data('popover').$tip;
-                if (tip) {
-                    origPos = tip.data('origPos');
-                    if (origPos === undefined) {
-                        origPos = {
-                            'top' : parseInt(t.data('popover').$tip.css('top'), 10) + top,
-                            'left': parseInt(t.data('popover').$tip.css('left'), 10) + left
-                        };
-                        tip.data('origPos', origPos);
+                popover = t.data('popover');
+                if (popover) {
+                    tip = popover.$tip;
+                    if (tip) {
+                        origPos = tip.data('origPos');
+                        if (origPos === undefined) {
+                            origPos = {
+                                'top': parseInt(t.data('popover').$tip.css('top'), 10) + top,
+                                'left': parseInt(t.data('popover').$tip.css('left'), 10) + left
+                            };
+                            tip.data('origPos', origPos);
+                        }
+                        tip.css({
+                            'top': origPos.top - top,
+                            'left': origPos.left - left
+                        });
                     }
-                    tip.css({
-                        'top': origPos.top - top,
-                        'left': origPos.left - left
-                    });
                 }
             }
         },

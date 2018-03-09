@@ -11,8 +11,8 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \Joomla\Registry\Registry;
-use \Joomla\Utilities\ArrayHelper;
+use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 /**
  *  Plugin element to render list of data looked up from a database table
@@ -53,6 +53,13 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 * @var array
 	 */
 	protected $optionVals = array();
+
+	/**
+	 * Option values
+	 *
+	 * @var array
+	 */
+	protected $optionLabels = array();
 
 	/**
 	 * Linked form data
@@ -577,6 +584,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				}
 
 				$this->autocomplete_where = $this->getJoinValueColumn() . ' IN (' . implode(', ', $quoteV) . ')';
+			}
+			else
+			{
+				// avoid unconstrained query
+				$this->autocomplete_where = '7 = -7';
 			}
 		}
 		// $$$ rob 18/06/2012 cache the option vals on a per query basis (was previously incwhere but this was not ok
@@ -1157,7 +1169,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		{
 			$val = $this->parseThisTable($params->get($this->concatLabelParam), $join);
 			$w   = new FabrikWorker;
-			$val = $w->parseMessageForPlaceHolder($val, array(), false);
+			$val = $w->parseMessageForPlaceHolder($val, array(), false, false, null, false);
 
 			return 'CONCAT_WS(\'\', ' . $val . ')';
 		}
@@ -1275,6 +1287,9 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$id      = $this->getHTMLId($repeatCounter);
 		$html    = array();
 
+        $layout                        = $this->getLayout('form-final');
+        $displayData                   = new stdClass;
+
 		if (!$formModel->isEditable() || !$this->isEditable())
 		{
 			// Read only element formatting...
@@ -1338,7 +1353,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 				return '';
 			}
 
-			$targetIds = $targetIds === false ? $default : $targetIds;
+			$targetIds = FArrayHelper::emptyIsh($targetIds, true) ? $default : $targetIds;
 
 			// $$$ hugh - trying to fix issue with read only multiselects submitting wrong values
 			$formModel->tmplData[$id . '_raw'] = $targetIds;
@@ -1363,7 +1378,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 			$this->addReadOnlyLinks($defaultLabels, $targetIds);
 
-			$html[] = count($defaultLabels) < 2 ? implode(' ', $defaultLabels) : '<ul><li>' . implode('<li>', $defaultLabels) . '</li></ul>';
+			$displayData->control = count($defaultLabels) < 2 ? implode(' ', $defaultLabels) : '<ul><li>' . implode('<li>', $defaultLabels) . '</li></ul>';
+            $displayData->frontEndSelect = '';
 		}
 		else
 		{
@@ -1391,18 +1407,21 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 						break;
 				}
 
-				$html[] = $this->renderFrontEndSelect($data, $repeatCounter);
+				$displayData->control = implode("\n", $html);
+                $displayData->frontEndSelect = $this->renderFrontEndSelect($data, $repeatCounter);
 			}
 			elseif ($this->canView())
 			{
 				$oData = ArrayHelper::toObject($data);
-				$html[] = $this->renderListData($default, $oData);
+				$displayData->control = $this->renderListData($default, $oData);
+				$displayData->frontEndSelect = '';
 			}
 		}
 
-		$html[] = $this->renderDescription($tmp, $default);
+		$displayData->description = $this->renderDescription($tmp, $default);
 
-		return implode("\n", $html);
+        return $layout->render($displayData);
+		//return implode("\n", $html);
 	}
 
 	/**
@@ -1459,8 +1478,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if ($params->get('join_desc_column', '') !== '')
 		{
-			$layout                        = $this->getLayout('form-description');
 			$displayData                   = new stdClass;
+			$descDivLayout = 'fabrik-element-' . $this->getPluginName() . '-form-description-div';
+			FabrikHelperHTML::jLayoutJs($descDivLayout, $descDivLayout, $displayData, array($this->layoutBasePath()));
+			$layout                        = $this->getLayout('form-description');
 			$displayData->opts             = $options;
 			$displayData->default          = FArrayHelper::getValue($default, 0);
 			$displayData->editable         = $this->isEditable();
@@ -1689,7 +1710,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$placeholder      = ' placeholder="' . htmlspecialchars($params->get('placeholder', ''), ENT_COMPAT) . '"';
 		$autoCompleteName = str_replace('[]', '', $thisElName) . '-auto-complete';
 		$html[]           = '<input type="text" size="' . $params->get('dbjoin_autocomplete_size', '20') . '" name="' . $autoCompleteName . '" id="' . $id
-			. '-auto-complete" value="' . FArrayHelper::getValue($label, 0) . '"' . $class . $placeholder . '/>';
+			. '-auto-complete" value="' . htmlspecialchars(FArrayHelper::getValue($label, 0)) . '"' . $class . $placeholder . '/>';
 
 		// $$$ rob - class property required when cloning repeat groups - don't remove
 		$html[] = '<input type="hidden" tabindex="-1" class="fabrikinput" name="' . $thisElName . '" id="' . $id . '" value="'
@@ -1718,7 +1739,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		$targetIds  = $this->multiOptionTargetIds($data, $repeatCounter);
 		$class      = 'fabrikinput inputbox ' . $params->get('bootstrap_class', '');
 
-		if ($targetIds !== false)
+		if (!FArrayHelper::emptyIsh($targetIds, true))
 		{
 			$default = $targetIds;
 		}
@@ -1726,9 +1747,15 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		if ($this->isEditable())
 		{
 			$multiSize     = (int) $params->get('dbjoin_multilist_size', 6);
+			$multiMax      = $params->get('dbjoin_multiselect_max', '0');
 			$advancedClass = $this->getAdvancedSelectClass();
 			$attributes    = 'class="' . $class . ' ' . $advancedClass . '" size="' . $multiSize . '" multiple="true"';
-			//$attributes    .= ' data-chosen-options=\'{"max_selected_options":3}\'';
+
+			if (!empty($advancedClass) && (int)$multiMax > 0)
+			{
+				$attributes .= ' data-chosen-options=\'{"max_selected_options":' . $multiMax . '}\'';
+			}
+
 			$html[]        = JHTML::_('select.genericlist', $tmp, $elName, $attributes, 'value', 'text', $default, $id);
 		}
 		else
@@ -1766,7 +1793,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			// If its a new record we don't want to look up defaults in the look up table as they will not exist
 			$targetIds = $this->multiOptionTargetIds($data, $repeatCounter);
 
-			if ($targetIds !== false)
+			if (!FArrayHelper::emptyIsh($targetIds, true))
 			{
 				$default = $targetIds;
 			}
@@ -2021,7 +2048,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					}
 				}
 
-				$val = $this->renderListData($value, new stdClass);
+				$oData = new stdClass;
+				$val = $this->renderListData($value, $oData);
 			}
 		}
 
@@ -2044,7 +2072,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$groupModel = $this->getGroupModel();
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
+
+        $groupModel = $this->getGroupModel();
 		$labelData  = array();
 
 		if (!$groupModel->isJoin() && $groupModel->canRepeat())
@@ -2397,8 +2428,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					{
 						if (stristr($joinLabel, "CONCAT"))
 						{
-							$join = $this->getJoinModel()->getJoin();
+							//$join = $this->getJoinModel()->getJoin();
+							$join      = $this->getJoin();
 							$to        = $this->getDbName();
+							$joinLabel = str_replace($join->table_join_alias, $to, $joinLabel);
 							$joinLabel = str_replace($join->table_join, $to, $joinLabel);
 						}
 					}
@@ -2701,9 +2734,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	{
 		$db        = $this->getDb();
 		$query     = $db->getQuery(true);
-		$join      = $this->getJoinModel()->getJoin();
+		//$join      = $this->getJoinModel()->getJoin();
+		$join      = $this->getJoin();
 		$joinTable = $db->qn($join->table_join);
 		$shortName = $db->qn($this->getElement()->name);
+		$tableAlias = $join->table_join;
 
 		if (is_null($groupBy))
 		{
@@ -2721,13 +2756,15 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		{
 			$jKey  = $this->getLabelOrConcatVal();
 			$jKey  = !strstr($jKey, 'CONCAT') ? $label : $jKey;
-			$label = str_replace($join->table_join, $to, $jKey);
+			$label = str_replace($join->table_join_alias, $to, $jKey);
+			$label = str_replace($join->table_join, $to, $label);
+			$tableAlias = $to;
 		}
 
-		$query->select($joinTable . '.parent_id, ' . $v . ' AS value, ' . $label . ' AS text')->from($joinTable)
+		$query->select($joinTable . '.parent_id, ' . $v . ' AS `value`, ' . $label . ' AS `text`')->from($joinTable)
 			->join('LEFT', $to . ' ON ' . $key . ' = ' . $joinTable . '.' . $shortName);
 
-		$this->buildQueryWhere(array(), true, null, array('mode' => 'filter'), $query);
+		$this->buildQueryWhere(array(), true, $tableAlias, array('mode' => 'filter'), $query);
 
 		if (!is_null($condition) && !is_null($value))
 		{
@@ -2890,8 +2927,12 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if ($this->getParams()->get('database_join_display_type', 'dropdown') == 'auto-complete')
 		{
-			$autoOpts                            = array();
-			$autoOpts['max']                     = $this->getParams()->get('autocomplete_rows', '10');
+            $usersConfig           = JComponentHelper::getParams('com_fabrik');
+            $autoOpts                            = array();
+			$autoOpts['max']                     = $this->getParams()->get(
+			    'dbjoin_autocomplete_rows',
+                $usersConfig->get('autocomplete_max_rows', '10')
+            );
 			$autoOpts['storeMatchedResultsOnly'] = true;
 			FabrikHelperHTML::autoComplete($id, $this->getElement()->get('id'), $this->getFormModel()->getId(), 'databasejoin', $autoOpts);
 		}
@@ -3356,6 +3397,13 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			return $v;
 		}
 
+		$ckey = serialize($v);
+
+		if (isset($this->optionLabels[$ckey]))
+		{
+			return $this->optionLabels[$ckey];
+		}
+
 		if ($this->isJoin())
 		{
 			/*
@@ -3370,6 +3418,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			{
 				if ($v == $defaultLabel)
 				{
+					$this->optionLabels[$ckey] = $v;
 					return $v;
 				}
 			}
@@ -3391,6 +3440,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 			if (is_array($rows) && array_key_exists($v, $rows))
 			{
+				$this->optionLabels[$ckey] = $rows[$v]->text;
 				return $rows[$v]->text;
 			}
 		}
@@ -3400,6 +3450,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if (!$query)
 		{
+			$this->optionLabels[$ckey] = '';
 			return '';
 		}
 		$key = $this->getJoinValueColumn();
@@ -3436,10 +3487,12 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		if (!$r)
 		{
+			$this->optionLabels[$ckey] = $defaultLabel;
 			return $defaultLabel;
 		}
 
 		$r = isset($r->text) ? $r->text : $defaultLabel;
+		$this->optionLabels[$ckey] = $r;
 
 		return $r;
 	}
@@ -3646,8 +3699,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 */
 	public function buildQueryElementConcat($jKey, $addAs = true)
 	{
-		$join      = $this->getJoinModel()->getJoin();
+		//$join      = $this->getJoinModel()->getJoin();
+		$join      = $this->getJoin();
 		$joinTable = $join->table_join;
+		$joinAlias = $join->table_join_alias;
 		$params    = $this->getParams();
 		$jKey      = $this->getLabelOrConcatVal();
 		$where     = $this->buildQueryWhere(array(), true, $params->get('join_db_name'));
@@ -3669,6 +3724,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			* (say) a field name 'foobar', etc.
 			* Also ... I think we need to NOT do this inside a subquery!
 			*/
+			$jKey = str_replace($joinAlias, 'lookup', $jKey);
 			$jKey = str_replace($joinTable, 'lookup', $jKey);
 		}
 
@@ -3893,7 +3949,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					$idName .= '.' . $repeatCounter;
 				}
 
-				$default = (array) FArrayHelper::getNestedValue($data, $idName, 'not found');
+				$default = (array) FArrayHelper::getNestedValue($data, $idName, '');
 
 				return $default;
 			}

@@ -76,6 +76,7 @@ class FabrikFEModelElementValidator extends FabModel
 		$validateIn = FArrayHelper::getValue($validations, 'validate_in', array());
 		$validationOn = FArrayHelper::getValue($validations, 'validation_on', array());
 		$mustValidate = FArrayHelper::getValue($validations, 'must_validate', array());
+		$validateHidden = FArrayHelper::getValue($validations, 'validate_hidden', array());
 
 		$pluginManager = FabrikWorker::getPluginManager();
 		$pluginManager->getPlugInGroup('validationrule');
@@ -111,6 +112,7 @@ class FabrikFEModelElementValidator extends FabModel
 					$plugIn->getParams()->set('validate_in', FArrayHelper::getValue($validateIn, $i, 'both'));
 					$plugIn->getParams()->set('validation_on', FArrayHelper::getValue($validationOn, $i, 'both'));
 					$plugIn->getParams()->set('must_validate', FArrayHelper::getValue($mustValidate, $i, '0'));
+					$plugIn->getParams()->set('validate_hidden', FArrayHelper::getValue($validateHidden, $i, '1'));
 					$plugIn->js();
 					$c++;
 				}
@@ -246,7 +248,7 @@ class FabrikFEModelElementValidator extends FabModel
 	{
 		$validations = $this->findAll();
 
-		if (!empty($validations) || $this->elementModel->internalValidataionText() !== '')
+		if (!empty($validations) || $this->elementModel->internalValidationText() !== '')
 		{
 			return true;
 		}
@@ -273,7 +275,7 @@ class FabrikFEModelElementValidator extends FabModel
 				$texts[] = $validation->getHoverText($c, $tmpl);
 			}
 
-			$internal = $this->elementModel->internalValidataionText();
+			$internal = $this->elementModel->internalValidationText();
 
 			if ($internal !== '')
 			{

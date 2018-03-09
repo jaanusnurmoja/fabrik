@@ -123,24 +123,24 @@ Element.implement({
 	 */
 
 	hide: function () {
-		if (Fabrik.bootstrapVersion('modal') === '3.x') {
+		if (Fabrik.bootstrapVersion('modal') >= 3) {
 			return;
 		}
-		if (this.hasClass("mootools-noconflict")) {
+		if (this.hasClass('mootools-noconflict')) {
 			return this;
 		}
 		mHide.apply(this, arguments);
 	},
 
 	show: function (v) {
-		if (this.hasClass("mootools-noconflict")) {
+		if (this.hasClass('mootools-noconflict')) {
 			return this;
 		}
 		mShow.apply(this, v);
 	},
 
 	slide: function (v) {
-		if (this.hasClass("mootools-noconflict")) {
+		if (this.hasClass('mootools-noconflict')) {
 			return this;
 		}
 		mSlide.apply(this, v);
@@ -152,8 +152,10 @@ Element.implement({
  * some common js include to put them in!
  */
 
+/*
 function fconsole(thing) {
 	if (typeof(window.console) !== "undefined") {
 		console.log(thing);
 	}
 }
+*/

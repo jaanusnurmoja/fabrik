@@ -105,6 +105,7 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
             var id = this.element.id + '-popupwin';
             this.windowopts = {
                 'id'             : id,
+                'data'           : this.form.getFormElementData(),
                 'title'          : Joomla.JText._('PLG_ELEMENT_DBJOIN_ADD'),
                 'contentType'    : 'xhr',
                 'loadMethod'     : 'xhr',
@@ -402,6 +403,24 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                         self.element.fireEvent('blur', new Event.Mock(self.element, 'blur'));
                     }
 
+                    if (self.options.showDesc)
+                    {
+                        var c = self.getContainer().getElement('.dbjoin-description');
+                        jQuery(c).empty();
+                        var descDiv = jQuery(Fabrik.jLayouts['fabrik-element-' + self.getPlugin() + '-form-description-div'])[0];
+                        var i = 0;
+                        json.each(function (o) {
+                            var $desc = jQuery(descDiv).clone();
+                            $desc.removeClass('description-0');
+                            $desc.addClass('description-' + i++);
+                            if (self.options.value === o.value) {
+                                $desc.css('display','');
+                            }
+                            $desc.html(o.description);
+                            jQuery(c).append($desc);
+                        });
+                    }
+
                     self.activePopUp = false;
                     Fabrik.fireEvent('fabrik.dbjoin.update', [self, json]);
                 }
@@ -636,7 +655,7 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                     return;
                 }
                 if (typeOf(val) === 'string') {
-                    val = JSON.decode(val);
+                    val = JSON.parse(val);
                 }
                 var h = this.form.getFormData();
                 if (typeOf(h) === 'object') {
@@ -679,7 +698,7 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                         }
                     } else {
                         if (typeOf(val) === 'string') {
-                            val = val === '' ? [] : JSON.decode(val);
+                            val = val === '' ? [] : JSON.parse(val);
                         }
                         if (typeOf(val) !== 'array') {
                             val = [val];
@@ -767,7 +786,7 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
 		            case 'auto-complete':
 		            case 'radio':
 		            default:
-		                if (typeof this.options.value === 'string') {
+		                if (!jQuery.isArray(this.options.value)) {
 		                    return this.options.value;
                         }
 		                else if (this.options.value.length !== 0) {
@@ -956,7 +975,7 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                         // rob previously we we doing appendInfo() but that didnt get the concat
                         // labels for the database join
                         if (this.options.displayType === 'auto-complete') {
-                            if (this.activePopup) {
+                            if (this.activePopUp) {
                                 // Need to get v if auto-complete and updating from posted popup form
                                 // as we only want to get ONE
                                 // option back inside update();
@@ -1031,13 +1050,15 @@ define(['jquery', 'fab/element', 'fab/encoder', 'fab/fabrik', 'fab/autocomplete-
                             (typeOf(js) === 'function') ? js.delay(700, this, this) : eval(js);
                         }.bind(this));
                     }
-                    if (this.element) {
-                        this.element.addEvent(action, function (e) {
-                            if (e) {
-                                e.stop();
-                            }
-                            (typeOf(js) === 'function') ? js.delay(0, this, this) : eval(js);
-                        }.bind(this));
+                    else {
+                        if (this.element) {
+                            this.element.addEvent(action, function (e) {
+                                if (e) {
+                                    e.stop();
+                                }
+                                (typeOf(js) === 'function') ? js.delay(0, this, this) : eval(js);
+                            }.bind(this));
+                        }
                     }
                     break;
             }

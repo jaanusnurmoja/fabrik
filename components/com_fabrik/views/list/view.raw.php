@@ -47,8 +47,8 @@ class FabrikViewList extends FabrikViewListBase
 		$table = $model->getTable();
 		$params = $model->getParams();
 		$rowId = $input->getString('rowid', '', 'string');
-		list($this->headings, $groupHeadings, $this->headingClass, $this->cellClass) = $this->get('Headings');
 		$data = $model->render();
+		list($this->headings, $groupHeadings, $this->headingClass, $this->cellClass) = $this->get('Headings');
 		$this->emptyDataMessage = $this->get('EmptyDataMsg');
 		$nav = $model->getPagination();
 		$form = $model->getFormModel();
@@ -118,6 +118,7 @@ class FabrikViewList extends FabrikViewListBase
 		$tmpl = $input->get('tmpl', $this->getTmpl());
 		$d['htmlnav'] = $params->get('show-table-nav', 1) ? $nav->getListFooter($model->getId(), $tmpl) : '';
 		$d['calculations'] = $model->getCalculations();
+		$d['hasFilters'] = $model->gotOptionalFilters();
 
 		// $$$ hugh - see if we have a message to include, set by a list plugin
 		$context = 'com_' . $this->package . '.list' . $model->getRenderContext() . '.msg';

@@ -20,7 +20,12 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
                 if (typeof WFEditor !== 'undefined') {
                     WFEditor.getContent('message');
                 }
-                var url = 'index.php';
+                else if (typeof tinymce !== 'undefined') {
+                    if (tinyMCE.activeEditor) {
+                        tinyMCE.activeEditor.save();
+                    }
+                }
+                var url = Fabrik.liveSite + '/index.php';
                 if (self.options.additionalQS !== '') {
                     url += '?' + self.options.additionalQS;
                 }
@@ -77,9 +82,8 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
         },
 
         buttonAction: function () {
-            var url = 'index.php?option=com_fabrik&controller=list.email&task=popupwin&tmpl=component&ajax=1&id=' +
-                    this.listid + '&renderOrder=' + this.options.renderOrder,
-                self = this;
+            var url = this.options.popupUrl;
+            var self = this;
             this.listform.getElements('input[name^=ids]').each(function (id) {
                 if (id.get('value') !== false && id.checked !== false) {
                     url += '&ids[]=' + id.get('value');
@@ -91,10 +95,7 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
             else {
                 url += '&checkAll=0';
             }
-            url += '&format=partial';
-            if (this.options.additionalQS !== '') {
-                url += '&' + this.options.additionalQS;
-            }
+            url += '&task=popupwin';
             var id = 'email-list-plugin';
             this.windowopts = {
                 id             : id,
