@@ -11,9 +11,9 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
+use Fabrik\Helpers\LayoutFile;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
-use Fabrik\Helpers\LayoutFile;
 
 jimport('joomla.application.component.model');
 jimport('joomla.filesystem.file');
@@ -2481,7 +2481,9 @@ class PlgFabrik_Element extends FabrikPlugin
 			// $$$ rob changed from span wrapper to div wrapper as element's content may contain divs which give html error
 
 			// Placeholder to be updated by ajax code
-			$v = html_entity_decode($this->getROElement($data, $repeatCounter));
+			// @TODO the entity decode causes problems on RO with tooltips
+			$v = $this->getROElement($data, $repeatCounter);
+			$v = html_entity_decode($v);
 			//$v = $v == '' ? '&nbsp;' : $v;
 			// if(is_array($v)) $v = implode($v);
 
@@ -4541,7 +4543,7 @@ class PlgFabrik_Element extends FabrikPlugin
 						case FABRIKFILTER_QUERY:
 							$value = '(' . $value . ')';
 							break;
-						case FABRKFILTER_NOQUOTES:
+						case FABRIKFILTER_NOQUOTES:
 							$value = $value;
 							break;
 						default:
@@ -4607,7 +4609,7 @@ class PlgFabrik_Element extends FabrikPlugin
 					break;
 			}
 			// $$$ hugh - if 'noquotes' (3) selected, strip off the quotes again!
-			if ($eval == FABRKFILTER_NOQUOTES)
+			if ($eval == FABRIKFILTER_NOQUOTES)
 			{
 				// $$$ hugh - darn, this is stripping the ' of the end of things like "select & from foo where bar = '123'"
 				$value = JString::ltrim($value, "'");
@@ -5517,7 +5519,39 @@ class PlgFabrik_Element extends FabrikPlugin
 			if ($plugin->hasSubElements)
 			{
 				// http://fabrikar.com/forums/index.php?threads/calculation-split-on-problem.40122/
-				$val->label = ($type != 'median') ? $plugin->getLabelForValue($val->label) : $plugin->getLabelForValue($key, $key);
+				$labelParts = explode(' & ', $val->label);
+				if (count($labelParts) > 1)
+				{
+					$label = $labelParts[1];
+				}
+				else
+				{
+					$label = $labelParts[0];
+				}
+
+				$label = FabrikWorker::JSONtoData($label);
+				$ls = array();
+
+				if (is_array($label))
+				{
+					foreach ($label as $l)
+					{
+						$ls[] = ($type != 'median') ? $plugin->getLabelForValue($l) : $plugin->getLabelForValue($key, $key);
+					}
+				}
+				else
+				{
+					$ls[] = ($type != 'median') ? $plugin->getLabelForValue($label) : $plugin->getLabelForValue($key, $key);
+				}
+
+				if (count($labelParts > 1))
+				{
+					$val->label = $labelParts[0] . ' & ' . implode(',', $ls);
+				}
+				else
+				{
+					$val->label = impode(',', $ls);
+				}
 			}
 			else
 			{
@@ -8114,13 +8148,17 @@ class PlgFabrik_Element extends FabrikPlugin
 				$fullKey = $elementModel->getFullName(true, false);
 				$value = $data[$fullKey];
 
-				if ($this->getGroupModel()->canRepeat() && is_array($value))
+				if ($groupModel->canRepeat() && is_array($value))
 				{
-					$value = FArrayHelper::getValue($value, $repeatCounter);
+					foreach ($value as $k => $v)
+					{
+						$data[$fullKey][$k] = $elementModel->storeDatabaseFormat($v, $data);
+					}
 				}
-
-				// For radio buttons and dropdowns otherwise nothing is stored for them??
-				$data[$fullKey] = $elementModel->storeDatabaseFormat($value, $data);
+				else
+				{
+					$data[$fullKey] = $elementModel->storeDatabaseFormat($value, $data);
+				}
 			}
 		}
 	}

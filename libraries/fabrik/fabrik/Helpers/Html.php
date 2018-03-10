@@ -13,18 +13,18 @@ namespace Fabrik\Helpers;
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
-use \JComponentHelper;
-use \stdClass;
-use \JModelLegacy;
-use \JHtmlBootstrap;
-use \JVersion;
-use \JUri;
-use \JRoute;
-use \JHtml;
-use \JFactory;
-use \JFile;
-use \JText;
-use \JBrowser;
+use JBrowser;
+use JComponentHelper;
+use JFactory;
+use JFile;
+use JHtml;
+use JHtmlBootstrap;
+use JModelLegacy;
+use JRoute;
+use JText;
+use JUri;
+use JVersion;
+use stdClass;
 
 jimport('joomla.filesystem.file');
 
@@ -1843,9 +1843,9 @@ EOD;
 	 */
 	public static function debug($content, $title = 'output:')
 	{
-		$config = JComponentHelper::getParams('com_fabrik');
-		$app    = JFactory::getApplication();
-		$input  = $app->input;
+		$config  = JComponentHelper::getParams('com_fabrik');
+		$app     = JFactory::getApplication();
+		$input   = $app->input;
 
 		if ($config->get('use_fabrikdebug') == 0)
 		{
@@ -1862,15 +1862,21 @@ EOD;
 			return;
 		}
 
+		$jconfig = JFactory::getConfig();
+		$secret = $jconfig->get('secret');
+
 		echo '<div class="fabrikDebugOutputTitle">' . $title . '</div>';
 		echo '<div class="fabrikDebugOutput fabrikDebugHidden">';
 
 		if (is_object($content) || is_array($content))
 		{
-			echo '<pre>' . htmlspecialchars(print_r($content, true)) . '</pre>';
+		    $content = print_r($content, true);
+			$content = str_replace($secret, 'xxxxxxxxx', $content);
+			echo '<pre>' . htmlspecialchars($content) . '</pre>';
 		}
 		else
 		{
+		    $content = str_replace($secret, 'xxxxxxxxx', $content);
 			// Remove any <pre> tags provided by e.g. JQuery::dump
 			$content = preg_replace('/(^\s*<pre( .*)?>)|(<\/pre>\s*$)/i', '', $content);
 			echo '<pre>' . htmlspecialchars($content) . '</pre>';
@@ -2344,8 +2350,11 @@ EOT;
 
 		foreach ($bits as $key => $val)
 		{
-			$val = str_replace('"', "'", $val);
-			$p .= $key . '="' . $val . '" ';
+		    if (!\FabrikWorker::isJSON($val))
+            {
+			    $val = str_replace('"', "'", $val);
+			    $p .= $key . '="' . $val . '" ';
+			}
 		}
 
 		return $p;

@@ -35,8 +35,8 @@ class FabrikViewFullcalendar extends JViewLegacy
 		$input       = $app->input;
 		$model       = $this->getModel();
 		$usersConfig = JComponentHelper::getParams('com_fabrik');
-		$id          = $input->get('id', $usersConfig->get('visualizationid', $input->get('visualizationid', 0)));
-		$model->setId($id);
+		$this->id    = $input->get('id', $usersConfig->get('visualizationid', $input->get('visualizationid', 0)));
+		$model->setId($this->id);
 		$this->row = $model->getVisualization();
 
 		if (!$model->canView())
@@ -75,10 +75,15 @@ class FabrikViewFullcalendar extends JViewLegacy
 		$tmplPath     = JPATH_ROOT . '/plugins/fabrik_visualization/fullcalendar/views/fullcalendar/tmpl/' . $tpl;
 		$this->_setPath('template', $tmplPath);
 
-		// Store the file in the tmp folder so it can be attached
+		// @TODO create a viz model getLayout() that sets this path precedence
 		$layout             = FabrikHelperHTML::getLayout(
 			'fabrik-visualization-fullcalendar-event-modal-popup',
-			array(JPATH_ROOT . '/plugins/fabrik_visualization/fullcalendar/layouts')
+			array(
+				JPATH_ROOT . '/plugins/fabrik_visualization/fullcalendar/layouts',
+				$tmplPath . '/layouts',
+				JPATH_THEMES . '/' . JFactory::getApplication()->getTemplate() . '/html/layouts/com_fabrik',
+				JPATH_THEMES . '/' . JFactory::getApplication()->getTemplate() . '/html/layouts/com_fabrik/visualization'
+			)
 		);
 		$displayData       = new stdClass;
 		$displayData->id   = 'fabrikEvent_modal';
@@ -106,6 +111,9 @@ class FabrikViewFullcalendar extends JViewLegacy
 
 		// Adding custom.css, just for the heck of it
 		FabrikHelperHTML::stylesheetFromPath('plugins/fabrik_visualization/fullcalendar/views/fullcalendar/tmpl/' . $tpl . '/custom.css');
+		FabrikHelperHTML::stylesheetFromPath(
+			'plugins/fabrik_visualization/fullcalendar/views/fullcalendar/tmpl/' . $tpl . '/custom_css.php?c=' . $this->containerId . '&id=' . $this->id
+		);
 	}
 
 	/**

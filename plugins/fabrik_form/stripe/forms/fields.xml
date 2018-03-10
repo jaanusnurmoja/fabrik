@@ -203,6 +203,18 @@
 		<fieldset name="plg-form-stripe-customers"
 		          label="PLG_FORM_STRIPE_CUSTOMERS">
 
+			<field name="stripe_webhook_link"
+				   type="stripewebhook"
+				   label="PLG_FORM_STRIPE_WEBHOOK_LINK_LABEL"
+				   description="PLG_FORM_STRIPE_WEBHOOK_LINK_DESC"
+				   repeat="true"/>
+
+			<field name="stripe_webhook_secret"
+				   type="text"
+				   label="PLG_FORM_STRIPE_WEBHOOK_SECRET_LABEL"
+				   description="PLG_FORM_STRIPE_WEBHOOK_SECRET_DESC"
+				   repeat="true"/>
+
 			<field description="PLG_FORM_STRIPE_CUSTOMERS_CONNECTION_DESC"
 			       label="PLG_FORM_STRIPE_CUSTOMERS_CONNECTION_LABEL"
 			       name="stripe_customers_connection"

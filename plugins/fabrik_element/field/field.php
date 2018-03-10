@@ -11,6 +11,7 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Helper\MediaHelper;
 use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
@@ -234,22 +235,30 @@ class PlgFabrik_ElementField extends PlgFabrik_Element
 			$opts = $this->linkOpts();
 			$title = $params->get('link_title', '');
 
-			if (FabrikWorker::isEmail($value) || JString::stristr($value, 'http'))
+			if ((new MediaHelper)->isImage($value))
 			{
+				$alt = empty($title) ? '' : 'alt="' . strip_tags($w->parseMessageForPlaceHolder($title, $data)) . '"';
+				$value = '<img src="' . $value . '" ' . $alt . ' />';
 			}
-			elseif (JString::stristr($value, 'www.'))
+			else
 			{
-				$value = 'http://' . $value;
+				if (FabrikWorker::isEmail($value) || JString::stristr($value, 'http'))
+				{
+				}
+				elseif (JString::stristr($value, 'www.'))
+				{
+					$value = 'http://' . $value;
+				}
+
+				if ($title !== '')
+				{
+					$opts['title'] = strip_tags($w->parseMessageForPlaceHolder($title, $data));
+				}
+
+				$label = FArrayHelper::getValue($opts, 'title', '') !== '' ? $opts['title'] : $value;
+
+				$value = FabrikHelperHTML::a($value, $label, $opts);
 			}
-
-			if ($title !== '')
-			{
-				$opts['title'] = strip_tags($w->parseMessageForPlaceHolder($title, $data));
-			}
-
-			$label = FArrayHelper::getValue($opts, 'title', '') !== '' ? $opts['title'] : $value;
-
-			$value = FabrikHelperHTML::a($value, $label, $opts);
 		}
 	}
 
@@ -533,9 +542,9 @@ class PlgFabrik_ElementField extends PlgFabrik_Element
 		$url = 'index.php';
 		$this->lang->load('com_fabrik.plg.element.field', JPATH_ADMINISTRATOR);
 
-		if (!$this->canView())
+		if (!$this->getListModel()->canView() || !$this->canView())
 		{
-			$this->app->enqueueMessage(FText::_('PLG_ELEMENT_FIELD_NO_PERMISSION'));
+			$this->app->enqueueMessage(FText::_('JERROR_ALERTNOAUTHOR'));
 			$this->app->redirect($url);
 			exit;
 		}
@@ -663,6 +672,7 @@ class PlgFabrik_ElementField extends PlgFabrik_Element
 		$layout = $this->getLayout('qr');
 		$displayData = new stdClass;
 		$displayData->src = $src;
+		$displayData->data = $thisRow;
 
 		return $layout->render($displayData);
 	}
