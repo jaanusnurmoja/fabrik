@@ -262,46 +262,6 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 	}
 
 	/**
-	 * Swap values for labels
-	 *
-	 * @param   array  &$d  Data
-	 *
-	 * @return  void
-	 */
-	protected function swapValuesForLabels(&$d)
-	{
-		$groups = $this->getFormModel()->getGroupsHiarachy();
-
-		foreach (array_keys($groups) as $gkey)
-		{
-			$group = $groups[$gkey];
-			$elementModels = $group->getPublishedElements();
-
-			for ($j = 0; $j < count($elementModels); $j++)
-			{
-				$elementModel = $elementModels[$j];
-				$elKey = $elementModel->getFullName(true, false);
-				$v = FArrayHelper::getValue($d, $elKey);
-
-				if (is_array($v))
-				{
-					$origData = FArrayHelper::getValue($d, $elKey, array());
-
-					foreach (array_keys($v) as $x)
-					{
-						$origVal = FArrayHelper::getValue($origData, $x);
-						$d[$elKey][$x] = $elementModel->getLabelForValue($v[$x], $origVal, true);
-					}
-				}
-				else
-				{
-					$d[$elKey] = $elementModel->getLabelForValue($v, FArrayHelper::getValue($d, $elKey), true);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Allows the element to pre-process a rows data before and join merging of rows
 	 * occurs. Used in calc element to do calcs on actual row rather than merged row
 	 *
@@ -424,8 +384,11 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 			$str[] = '<input type="hidden" class="fabrikinput" name="' . $name . '" id="' . $id . '" value="' . $value . '" />';
 		}
 
-		$opts = array('alt' => FText::_('PLG_ELEMENT_CALC_LOADING'), 'style' => 'display:none;padding-left:10px;', 'class' => 'loader');
-		$str[] = FabrikHelperHTML::image('ajax-loader.gif', 'form', @$this->tmpl, $opts);
+		if (in_array($this->app->input->get('format', 'html'), array('html', 'partial')))
+		{
+			$opts  = array('alt' => FText::_('PLG_ELEMENT_CALC_LOADING'), 'style' => 'display:none;padding-left:10px;', 'class' => 'loader');
+			$str[] = FabrikHelperHTML::image('ajax-loader.gif', 'form', @$this->tmpl, $opts);
+		}
 
 		return implode("\n", $str);
 	}
@@ -506,40 +469,6 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 		$c    = $this->getFormattedValue($c);
 
 		echo $c;
-	}
-
-	/**
-	 * When running parseMessageForPlaceholder on data we need to set the none-raw value of things like birthday/time
-	 * elements to that stored in the listModel::storeRow() method
-	 *
-	 * @param   array  &$data          Form data
-	 * @param   int    $repeatCounter  Repeat group counter
-	 *
-	 * @return  void
-	 */
-	protected function setStoreDatabaseFormat(&$data, $repeatCounter = 0)
-	{
-		$formModel = $this->getFormModel();
-		$groups = $formModel->getGroupsHiarachy();
-
-		foreach ($groups as $groupModel)
-		{
-			$elementModels = $groupModel->getPublishedElements();
-
-			foreach ($elementModels as $elementModel)
-			{
-				$fullKey = $elementModel->getFullName(true, false);
-				$value = $data[$fullKey];
-
-				if ($this->getGroupModel()->canRepeat() && is_array($value))
-				{
-					$value = FArrayHelper::getValue($value, $repeatCounter);
-				}
-
-				// For radio buttons and dropdowns otherwise nothing is stored for them??
-				$data[$fullKey] = $elementModel->storeDatabaseFormat($value, $data);
-			}
-		}
 	}
 
 	/**
@@ -777,4 +706,29 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
 
 		return 'TEXT';
 	}
+
+    /**
+     * Is the element consider to be empty for purposes of rendering on the form,
+     * i.e. for assigning classes, etc.  Can be overridden by individual elements.
+     *
+     * @param   array $data          Data to test against
+     * @param   int   $repeatCounter Repeat group #
+     *
+     * @return  bool
+     */
+    public function dataConsideredEmpty($data, $repeatCounter)
+    {
+        $parts = explode("\n", $data);
+
+        // see if all it contains is the "\n" and loader gif added in render ...
+        if (count($parts) === 2)
+        {
+            if (empty($parts[0]) && strstr($parts[1], 'loader'))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

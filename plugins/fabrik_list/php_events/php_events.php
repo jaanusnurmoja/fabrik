@@ -38,6 +38,21 @@ class PlgFabrik_ListPhp_Events extends PlgFabrik_List
 	}
 
 	/**
+	 * onStoreRequestData method - run when filter data is stored to the session
+	 *
+	 * @param   &$args  Array  Additional options passed into the method when the plugin is called
+	 *
+	 * @return bool currently ignored
+	 */
+
+	public function onStoreRequestData(&$args)
+	{
+		$params = $this->getParams();
+
+		return $this->doEvaluate($params->get('list_phpevents_onstorerequestdata'), $args);
+	}
+
+	/**
 	 * Called when the list HTML filters are loaded
 	 *
 	 * @return  void
@@ -71,7 +86,7 @@ class PlgFabrik_ListPhp_Events extends PlgFabrik_List
 	 * @return bool currently ignored
 	 */
 
-	public function onPreLoadData()
+	public function onPreLoadData(&$args)
 	{
 		$params = $this->getParams();
 
@@ -90,7 +105,7 @@ class PlgFabrik_ListPhp_Events extends PlgFabrik_List
 	{
 		$params = $this->getParams();
 
-		return $this->doEvaluate($params->get('list_phpevents_onloaddata'));
+		return $this->doEvaluate($params->get('list_phpevents_onloaddata'), $args);
 	}
 
 	/**
@@ -197,14 +212,31 @@ class PlgFabrik_ListPhp_Events extends PlgFabrik_List
 	}
 
 	/**
+	 * On build query where
+	 *
+	 * @param   &$args  Array  Additional options passed into the method when the plugin is called
+
+	 * @return boolean
+	 */
+	public function onGetPluginRowHeadings(&$args)
+	{
+		$params = $this->getParams();
+
+		return $this->doEvaluate($params->get('list_phpevents_ongetpluginrowheadings'), $args);
+	}
+
+
+	/**
 	 * Evaluate supplied PHP
+	 *
+	 * @param   &$args  Array  Additional options passed into the method when the plugin is called
 	 *
 	 * @param   string  $code  Php code
 	 *
 	 * @return bool
 	 */
 
-	protected function doEvaluate($code)
+	protected function doEvaluate($code, &$args = array())
 	{
 		$model = $this->getModel();
 		$w = new FabrikWorker;

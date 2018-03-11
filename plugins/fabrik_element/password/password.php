@@ -186,7 +186,7 @@ class PlgFabrik_ElementPassword extends PlgFabrik_Element
 		 */
 		$value     = urldecode($this->getValue($_REQUEST, $repeatCounter));
 		$name      = $this->getFullName(true, false);
-		$checkName = str_replace($element->name, $element->name . '_check', $name);
+		$checkName = $name . '_check';
 
 		/**
 		 * $$$ hugh - there must be a better way of doing this, but ...
@@ -215,7 +215,7 @@ class PlgFabrik_ElementPassword extends PlgFabrik_Element
 			}
 		}
 
-		if ($checkValue != $value)
+		if ($input->get('fabrik_confirmation', '') !== '2' && $checkValue != $value)
 		{
 			$this->validationError = FText::_('PLG_ELEMENT_PASSWORD_PASSWORD_CONFIRMATION_DOES_NOT_MATCH');
 
@@ -232,7 +232,7 @@ class PlgFabrik_ElementPassword extends PlgFabrik_Element
 			}
 
 			// $$$ rob add rowid test as well as if using row=-1 and usekey=field $k may have a value
-			if (($rowId === '' || empty($rowId)) && $keyVal === 0 && $value === '')
+			if (($rowId === '' || empty($rowId)) && ($keyVal === 0 || $keyVal === '') && $value === '')
 			{
 				/**
 				 * Why are we using .= here, but nowhere else?
@@ -241,6 +241,9 @@ class PlgFabrik_ElementPassword extends PlgFabrik_Element
 
 				return false;
 			}
+
+			// need to set the fullname back in case confirmation plugin is being used
+			$this->setFullName($name, true, false);
 
 			return true;
 		}
@@ -302,7 +305,7 @@ class PlgFabrik_ElementPassword extends PlgFabrik_Element
 	 *
 	 * @return  string
 	 */
-	public function internalValidataionText()
+	public function internalValidationText()
 	{
 		return FText::_('PLG_ELEMENT_PASSWORD_VALIDATION_TIP');
 	}

@@ -67,6 +67,21 @@
 				<option value="1">JYES</option>
 		</field>
 
+		<field name="fabrik_home_404"
+			   class="radio btn-group"
+			   type="radio"
+			   default="0"
+			   label="COM_FABRIK_FIELD_HOME_404_LABEL"
+			   description="COM_FABRIK_FIELD_HOME_404_DESC">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+
+		<field name="fabrik_truncate_length"
+			   type="text"
+			   label="COM_FABRIK_TRUNCATE_LENGTH_LABEL"
+			   description="COM_FABRIK_TRUNCATE_LENGTH_DESC" />
+
 	</fieldset>
 	<fieldset label="COM_FABRIK_LISTS" name="lists">
 
@@ -160,6 +175,17 @@
 		       default=""
 		       description="COM_FABRIK_FIELD_CSV_DELIMITER_OVERRIDE_DESC"
 		       label="COM_FABRIK_FIELD_CSV_DELIMITER_OVERRIDE_LABEL" />
+
+		<field name="fabrik_check_custom_list_layout"
+			   type="radio"
+			   default="0"
+			   class="radio btn-group"
+			   description="COM_FABRIK_FIELD_CHECK_CUSTOM_LIST_LAYOUT_DESC"
+			   label="COM_FABRIK_FIELD_CHECK_CUSTOM_LIST_LAYOUT_LABEL"
+			   menu="hide" >
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
 
 	</fieldset>
 
@@ -350,7 +376,9 @@
 			menu="hide"
 			class="radio btn-group">
 				<option value="0">JNO</option>
-				<option value="1">JYES</option>
+				<option value="1">COM_FABRIK_DETAILS_AND_FORM_VIEW</option>
+				<option value="2">COM_FABRIK_FORM_VIEW_ONLY</option>
+				<option value="3">COM_FABRIK_DETAILS_VIEW_ONLY</option>
 		</field>
 
 		<field name="error_icon"
@@ -465,9 +493,25 @@
 
 		<field name="autocomplete_min_trigger_chars"
 			size="3"
-			default="1"
+			default="3"
 			description="COM_FABRIK_AUTOCOMPLETE_MIN_TRIGGER_CHARS_DESC"
 			label="COM_FABRIK_AUTOCOMPLETE_MIN_TRIGGER_CHARS_LABEL" />
+
+		<field name="autocomplete_autoload_single"
+			   size="3"
+			   default="0"
+			   description="COM_FABRIK_AUTOCOMPLETE_AUTOLOAD_SINGLE_DESC"
+			   label="COM_FABRIK_AUTOCOMPLETE_AUTOLOAD_SINGLE_LABEL"
+			   type="radio">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+
+		<field name="autocomplete_max_rows"
+			   size="3"
+			   default="10"
+			   description="COM_FABRIK_AUTOCOMPLETE_MAX_ROWS_DESC"
+			   label="COM_FABRIK_AUTOCOMPLETE_MAX_ROWS_LABEL" />
 
 		<field name="requirejs_base_uri"
 			size="50"

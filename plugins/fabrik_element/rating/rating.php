@@ -31,7 +31,7 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 	 *
 	 * @var string
 	 */
-	protected $fieldDesc = 'TINYINT(%s)';
+	protected $fieldDesc = 'DECIMAL(3,2)';
 
 	/**
 	 * Db table field size
@@ -79,7 +79,10 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$params = $this->getParams();
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
+
+        $params = $this->getParams();
 		$formId = $this->getFormModel()->getId();
 		$listId = $this->getListModel()->getId();
 		$rowId  = isset($thisRow->__pk_val) ? $thisRow->__pk_val : $thisRow->id;
@@ -99,40 +102,14 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 
 		for ($i = 0; $i < count($data); $i++)
 		{
-			$avg   = $this->_renderListData($data[$i], $thisRow);
-			$atpl  = '';
-			$a2    = '';
-			$str   = array();
-			$str[] = '<div style="width:101px;position:relative;">';
-
-			for ($s = 0; $s < $avg; $s++)
-			{
-				$r                             = $s + 1;
-				$a                             = str_replace('{r}', $r, $atpl);
-				$imgOpts                       = array('icon-class' => 'starRating rate_' . $r);
-				$imgOpts['data-fabrik-rating'] = $r;
-				$img                           = FabrikHelperHTML::image("star.png", 'list', @$this->tmpl, $imgOpts);
-				$str[]                         = $a . $img . $a2;
-			}
-
-			for ($s = $avg; $s < 5; $s++)
-			{
-				$r                             = $s + 1;
-				$a                             = str_replace('{r}', $r, $atpl);
-				$imgOpts                       = array('icon-class' => 'starRating rate_' . $r);
-				$imgOpts['data-fabrik-rating'] = $r;
-				$img                           = FabrikHelperHTML::image("star-empty.png", 'list', @$this->tmpl, $imgOpts);
-
-				$str[] = $a . $img . $a2;
-			}
-
-			if ($params->get('rating-mode') != 'creator-rating')
-			{
-				$str[] = '<div class="ratingMessage">' . $avg . '</div>';
-			}
-
-			$str[]    = '</div>';
-			$data[$i] = implode("\n", $str);
+			$layout                      = $this->getLayout('list');
+			$layoutData                  = new stdClass;
+			$layoutData->avg             = $this->_renderListData($data[$i], $thisRow);;
+			$layoutData->canRate         = $canRate;
+			$layoutData->ratingNoneFirst = $params->get('rating-nonefirst');
+			$layoutData->css             = $canRate ? 'cursor:pointer;' : '';;
+			$layoutData->tmpl            = @$this->tmpl;
+			$data[$i]                    = $layout->render($layoutData);
 		}
 
 		$data = json_encode($data);
@@ -222,7 +199,7 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 		$float     = (int) $params->get('rating_float', 0);
 		$this->avg = number_format($r, $float);
 
-		return array(round($r), $t);
+		return array($this->avg, $t);
 	}
 
 	/**
@@ -438,24 +415,24 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 		$rating    = $input->getInt('rating');
 
 		$this->doRating($listId, $formId, $rowId, $rating);
+		$this->getRatingAverage('', $listId, $formId, $rowId);
 
-		/*
-		if ($params->get('rating-mode') == 'creator-rating')
+		/**
+		 * Store in main table (so lists can sort on it, etc).  But ... only if it's not a join.
+		 * @TODO - figure out how to do this for joined groups
+		 */
+		if (!$this->getGroupModel()->isJoin())
 		{
-			// @todo FIX for joins as well
-
-			// Store in elements table as well
 			$db = $listModel->getDb();
 			$element = $this->getElement();
 			$query = $db->getQuery(true);
-			$query->update($list->db_table_name)
-			->set($element->name . '=' . $rating)->where($list->db_primary_key . ' = ' . $db->q($rowId));
+			$query->update($db->quoteName($list->db_table_name))
+				->set($db->quoteName($element->name) . '=' . $db->quote($this->avg))
+				->where($list->db_primary_key . ' = ' . $db->quote($rowId));
 			$db->setQuery($query);
 			$db->execute();
 		}
-		*/
 
-		$this->getRatingAverage('', $listId, $formId, $rowId);
 		echo $this->avg;
 	}
 
@@ -471,8 +448,16 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 	{
 		$cookieName = "rating-table_{$listId}_row_{$rowId}" . FabrikString::filteredIp();
 		jimport('joomla.utilities.utility');
+		$version = new JVersion;
 
-		return JApplication::getHash($cookieName);
+		if (version_compare($version->RELEASE, '3.1', '>'))
+		{
+			return JApplicationHelper::getHash($cookieName);
+		}
+		else
+		{
+			return JApplication::getHash($cookieName);
+		}
 	}
 
 	/**
@@ -487,7 +472,7 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 			->setQuery(
 				"
 			CREATE TABLE IF NOT EXISTS  `#__fabrik_ratings` (
-			`user_id` VARCHAR( 255 ) NOT NULL ,
+			`user_id` VARCHAR( 40 ) NOT NULL ,
 			`listid` INT( 6 ) NOT NULL ,
 			`formid` INT( 6 ) NOT NULL ,
 			`row_id` INT( 6 ) NOT NULL ,
@@ -603,13 +588,24 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 		$opts->elid       = $this->getElement()->id;
 		$opts->userid     = (int) $this->user->get('id');
 		$opts->formid     = $formId;
-		$opts->canRate    = (bool) $this->canRate();
+
+		if ($opts->editable && $params->get('rating-rate-in-form', '1') === '0')
+		{
+			$opts->canRate = false;
+		}
+		else
+		{
+			$opts->canRate = (bool) $this->canRate();
+		}
+
 		$opts->mode       = $params->get('rating-mode');
 		$opts->doAjax     = $params->get('rating-mode') != 'creator-rating';
 		$opts->view       = $input->get('view');
 		$opts->rating     = $value;
 		$opts->listid     = $listId;
 		$opts->defaultVal = '0';
+		$opts->starIcon   = FabrikHelperHTML::icon("icon-star",  '', '', true);
+		$opts->starIconEmpty = FabrikHelperHTML::icon("icon-star-empty", '', '', true);
 
 		JText::script('PLG_ELEMENT_RATING_NO_RATING');
 
@@ -624,29 +620,24 @@ class PlgFabrik_ElementRating extends PlgFabrik_Element
 	 */
 	public function elementListJavascript()
 	{
-		$params          = $this->getParams();
-		$id              = $this->getHTMLId();
-		$listModel       = $this->getlistModel();
-		$list            = $listModel->getTable();
-		$opts            = new stdClass;
-		$opts->listid    = $list->id;
-		$imagePath       = JUri::root() . '/plugins/fabrik_element/rating/images/';
-		$opts->imagepath = $imagePath;
-		$opts->elid      = $this->getElement()->id;
+		$params              = $this->getParams();
+		$id                  = $this->getHTMLId();
+		$listModel           = $this->getlistModel();
+		$list                = $listModel->getTable();
+		$opts                = new stdClass;
+		$opts->listid        = $list->id;
+		$opts->imagepath     = JUri::root() . '/plugins/fabrik_element/rating/images/';
+		$opts->elid          = $this->getElement()->id;
+		$opts->canRate       = $params->get('rating-mode') == 'creator-rating' ? true : $this->canRate();
+		$opts->doAjax        = $params->get('rating-mode') != 'creator-rating';
+		$opts->ajaxloader    = FabrikHelperHTML::image("ajax-loader.gif", 'list', @$this->tmpl, array(), true);
+		$opts->listRef       = $listModel->getRenderContext();
+		$opts->formid        = $listModel->getFormModel()->getId();
+		$opts->userid        = (int) $this->user->get('id');
+		$opts->mode          = $params->get('rating-mode');
+		$opts->starIcon      = FabrikHelperHTML::icon("icon-star", '', '', true);
+		$opts->starIconEmpty = FabrikHelperHTML::icon("icon-star-empty", '', '', true);
 
-		if (!FabrikWorker::j3())
-		{
-			$opts->insrc  = FabrikHelperHTML::image("star.png", 'list', @$this->tmpl, array(), true);
-			$opts->outsrc = FabrikHelperHTML::image("star-empty.png", 'list', @$this->tmpl, array(), true);
-		}
-
-		$opts->canRate    = $params->get('rating-mode') == 'creator-rating' ? true : $this->canRate();
-		$opts->doAjax     = $params->get('rating-mode') != 'creator-rating';
-		$opts->ajaxloader = FabrikHelperHTML::image("ajax-loader.gif", 'list', @$this->tmpl, array(), true);
-		$opts->listRef    = $listModel->getRenderContext();
-		$opts->formid     = $listModel->getFormModel()->getId();
-		$opts->userid     = (int) $this->user->get('id');
-		$opts->mode       = $params->get('rating-mode');
 		$opts             = json_encode($opts);
 
 		return "new FbRatingList('$id', $opts);\n";

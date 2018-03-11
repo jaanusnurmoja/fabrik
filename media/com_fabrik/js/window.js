@@ -52,6 +52,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
 
         options: {
             id               : 'FabrikWindow',
+            data             : {},
             title            : '&nbsp;',
             container        : false,
             loadMethod       : 'html',
@@ -125,7 +126,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
          * Center the modal window
          */
         center: function () {
-            var source = this.window.find('*[data-draggable]').length === 0 ? this.window : this.window.find('*[data-draggable]'),
+            var source = this.window,
                 pxWidth = this.windowDimensionInPx('width'),
                 pxHeight = this.windowDimensionInPx('height'),
                 w = source.width(),
@@ -433,7 +434,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
                     Fabrik.loader.start(self.contentEl);
                     new jQuery.ajax({
                         'url'   : this.options.contentURL,
-                        'data'  : {'fabrik_window_id': this.options.id},
+                        'data'  : jQuery.extend(this.options.data, {'fabrik_window_id': this.options.id}),
                         'method': 'post',
                     }).success(function (r) {
                         Fabrik.loader.stop(self.contentEl);

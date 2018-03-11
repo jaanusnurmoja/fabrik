@@ -256,7 +256,7 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
                 } else {
                     v = v2 = input.val();
                 }
-                if (v !== '' && v2 !== '') {
+                if (typeof v !== 'undefined' && v !== null && v !== '' && v2 !== '') {
                     show = true;
                     clone = label.clone();
                     clone.find('*[data-filter-clear]').data('filter-clear', filter.name);
@@ -271,6 +271,21 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
                 this.container.find('*[data-modal-state-container]').hide();
             }
             this.watchClearOne();
+        },
+
+        /**
+         * Update CSS after an AJAX filter
+         */
+        updateFilterCSS: function(data) {
+            var c = this.container.find('.clearFilters');
+            if (c) {
+                if (data.hasFilters) {
+                    c.addClass('hasFilters');
+                }
+                else {
+                    c.removeClass('hasFilters');
+                }
+            }
         }
 
     });

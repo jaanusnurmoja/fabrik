@@ -231,18 +231,20 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$must_validate = (array) FArrayHelper::getNestedValue($item->params, 'validations.must_validate', array());
 		$in            = (array) FArrayHelper::getNestedValue($item->params, 'validations.validate_in', array());
 		$on            = (array) FArrayHelper::getNestedValue($item->params, 'validations.validation_on', array());
+		$hidden        = (array) FArrayHelper::getNestedValue($item->params, 'validations.validate_hidden', array());
 
 		$return = array();
 
 		for ($i = 0; $i < count($plugins); $i++)
 		{
-			$o                = new stdClass;
-			$o->plugin        = $plugins[$i];
-			$o->published     = FArrayHelper::getValue($published, $i, 1);
-			$o->show_icon     = FArrayHelper::getValue($icons, $i, 1);
-			$o->must_validate = FArrayHelper::getValue($must_validate, $i, 1);
-			$o->validate_in   = FArrayHelper::getValue($in, $i, 'both');
-			$o->validation_on = FArrayHelper::getValue($on, $i, 'both');
+			$o                  = new stdClass;
+			$o->plugin          = $plugins[$i];
+			$o->published       = FArrayHelper::getValue($published, $i, 1);
+			$o->show_icon       = FArrayHelper::getValue($icons, $i, 1);
+			$o->must_validate   = FArrayHelper::getValue($must_validate, $i, 1);
+			$o->validate_in     = FArrayHelper::getValue($in, $i, 'both');
+			$o->validation_on   = FArrayHelper::getValue($on, $i, 'both');
+			$o->validate_hidden = FArrayHelper::getValue($hidden, $i, 1);
 			$return[]         = $o;
 		}
 
@@ -367,6 +369,7 @@ class FabrikAdminModelElement extends FabModelAdmin
 		$nameChanged  = $data['name'] !== $elementModel->getElement()->name;
 		$elementModel->getElement()->bind($data);
 		$listModel = $elementModel->getListModel();
+		$isView = (bool)$listModel->isView();
 
 		if ($data['id'] == '')
 		{
@@ -375,7 +378,14 @@ class FabrikAdminModelElement extends FabModelAdmin
 
 			if ($listModel->canAddFields() === false && $listModel->noTable() === false)
 			{
-				$this->setError(FText::_('COM_FABRIK_ERR_CANT_ADD_FIELDS'));
+				if ($isView)
+				{
+					$this->app->enqueueMessage(FText::_('COM_FABRIK_LIST_VIEW_SCHEMA_NOT_ALTERED'));
+				}
+				else
+				{
+					$this->setError(FText::_('COM_FABRIK_ERR_CANT_ADD_FIELDS'));
+				}
 			}
 
 			if (!FabrikWorker::validElementName($data['name']))
@@ -387,7 +397,14 @@ class FabrikAdminModelElement extends FabModelAdmin
 		{
 			if ($listModel->canAlterFields() === false && $nameChanged && $listModel->noTable() === false)
 			{
-				$this->setError(FText::_('COM_FABRIK_ERR_CANT_ALTER_EXISTING_FIELDS'));
+				if ($isView)
+				{
+					$this->app->enqueueMessage(FText::_('COM_FABRIK_LIST_VIEW_SCHEMA_NOT_ALTERED'));
+				}
+				else
+				{
+					$this->setError(FText::_('COM_FABRIK_ERR_CANT_ALTER_EXISTING_FIELDS'));
+				}
 			}
 
 			if ($nameChanged && !FabrikWorker::validElementName($data['name'], false))
@@ -507,6 +524,9 @@ class FabrikAdminModelElement extends FabModelAdmin
 
 		if ($new)
 		{
+		    // Can't have elements starting with _
+		    $name = ltrim($name, '_');
+		    $data['name'] = $name;
 			// Have to forcefully set group id otherwise list model id is blank
 			$elementModel->getElement()->group_id = $data['group_id'];
 		}

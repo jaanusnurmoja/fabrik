@@ -132,7 +132,16 @@ class FabrikFEModelListfilter extends FabModel
 		// $$$ rob 20/03/2011 - request resetfilters should overwrite menu option - otherwise filter then nav will remove filter.
 		if (
 			!$input->get('incfilters', 0)
-			&& ($input->get('filterclear') == 1 || FabrikWorker::getMenuOrRequestVar('resetfilters', 0, false, 'request') == 1)
+			&& (
+			    $input->get('filterclear') == 1
+                || FabrikWorker::getMenuOrRequestVar(
+                    'resetfilters',
+                    0,
+                    false,
+                    'request',
+                    array('listid' => $this->listModel->getId())
+                ) == 1
+            )
 			&& $this->activeTable())
 		{
 			$this->clearFilters();
@@ -574,7 +583,10 @@ class FabrikFEModelListfilter extends FabModel
 
 			if (is_object($menu))
 			{
-				if ($menu->params->get('resetfilters') == 1)
+				$menuListId = ArrayHelper::getValue($menu->query, 'listid', '');
+				$thisListId = $this->listModel->getId();
+
+				if ($menuListId == $thisListId && $menu->params->get('resetfilters') == 1)
 				{
 					return true;
 				}
@@ -649,7 +661,7 @@ class FabrikFEModelListfilter extends FabModel
 				{
 					if (is_numeric($search) && $condition == '=')
 					{
-						$eval = FABRKFILTER_NOQUOTES;
+						$eval = FABRIKFILTER_NOQUOTES;
 					}
 				}
 
@@ -1015,7 +1027,7 @@ class FabrikFEModelListfilter extends FabModel
 				{
 					if (is_numeric($val) && $condition == '=')
 					{
-						$eval = FABRKFILTER_NOQUOTES;
+						$eval = FABRIKFILTER_NOQUOTES;
 					}
 				}
 			}
@@ -1089,6 +1101,8 @@ class FabrikFEModelListfilter extends FabModel
 		if (is_string($value))
 		{
 			$value = trim($value);
+			// $$$ hugh - allow {$my->id} (etc) here, maybe allow other placeholders?
+			$value = FabrikWorker::replaceWithUserData($value);
 		}
 
 		$k2 = FabrikString::safeColNameToArrayKey($key);
@@ -1325,7 +1339,7 @@ class FabrikFEModelListfilter extends FabModel
 					{
 						if (is_numeric($value) && $request['condition'][$i] == '=')
 						{
-							$eval = FABRKFILTER_NOQUOTES;
+							$eval = FABRIKFILTER_NOQUOTES;
 						}
 					}
 				}
@@ -1551,7 +1565,7 @@ class FabrikFEModelListfilter extends FabModel
 						{
 							if (is_numeric($search) && $condition == '=')
 							{
-								$eval = FABRKFILTER_NOQUOTES;
+								$eval = FABRIKFILTER_NOQUOTES;
 							}
 						}
 					}

@@ -122,7 +122,7 @@ module.exports = function (grunt) {
 						},
 					]
 				}
-			},
+			}
 		}
 	});
 
@@ -198,6 +198,11 @@ module.exports = function (grunt) {
 			dest = 'fabrik_build/output/pkg_fabrik_sink/packages/' +  config.fileName.replace('{version}', version);
 			zipPromises.push(zipPlugin(config.path, dest));
 		}
+        for (i = 0; i < buildConfig.libraries.length; i++) {
+            config = buildConfig.libraries[i];
+            dest = 'fabrik_build/output/pkg_fabrik_sink/packages/' +  config.fileName.replace('{version}', version);
+            zipPromises.push(zipPlugin(config.path, dest));
+        }
 
 		buildPHPDocs(grunt);
 		uploadPHPDocs(grunt);
@@ -206,6 +211,7 @@ module.exports = function (grunt) {
 			'to update the db download entries');
 
 		simpleGit.tags(function (err, tags) {
+			console.log('git tags err: ' + err);
 			if (tags.all.indexOf(version) !== -1) {
 				// A previous tag with the same version exists - remove it and reset latest version #
 				shell.exec('git tag -d ' + version);
@@ -245,7 +251,7 @@ var zipPlugin = function (source, dest) {
 			var output = fs.createWriteStream(dest);
 
 			output.on('close', function () {
-				//console.log(dest + ': ' + archive.pointer() + ' total bytes');
+				console.log(dest + ': ' + archive.pointer() + ' total bytes');
 				resolve();
 			});
 
@@ -284,6 +290,7 @@ var refreshFiles = function () {
 	fs.mkdirsSync('./fabrik_build/output/component/site/fabrikfeed');
 	fs.mkdirsSync('./fabrik_build/output/component/site/pdf');
 	fs.mkdirsSync('./fabrik_build/output/component/site/partial');
+    fs.mkdirsSync('./fabrik_build/output/component/site/Document');
 	fs.mkdirsSync('./fabrik_build/output/component/media');
 	fs.mkdirsSync('./fabrik_build/output/library');
 
@@ -291,8 +298,13 @@ var refreshFiles = function () {
 	fs.copySync('libraries/joomla/document/fabrikfeed', './fabrik_build/output/component/site/fabrikfeed');
 	fs.copySync('libraries/joomla/document/pdf', './fabrik_build/output/component/site/pdf');
 	fs.copySync('libraries/joomla/document/partial', './fabrik_build/output/component/site/partial');
+    fs.copySync('libraries/src/Document/PartialDocument.php', './fabrik_build/output/component/site/Document/PartialDocument.php');
+    fs.copySync('libraries/src/Document/PdfDocument.php', './fabrik_build/output/component/site/Document/PdfDocument.php');
+    fs.copySync('libraries/src/Document/Renderer/Partial', './fabrik_build/output/component/site/Document/Renderer/Partial');
+    fs.copySync('libraries/src/Document/Renderer/Pdf', './fabrik_build/output/component/site/Document/Renderer/Pdf');
+    fs.copySync('libraries/fabrik/fabrik/Helpers', './fabrik_build/output/component/site/fabrik/fabrik/Helpers');
 
-	// Library folder
+    // Library folder
 	fs.copySync('libraries/fabrik', './fabrik_build/output/library');
 
 	fs.copySync('administrator/components/com_fabrik/', './fabrik_build/output/component/admin', {

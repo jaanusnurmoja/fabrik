@@ -11,6 +11,8 @@
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
+use Fabrik\Helpers\Pdf;
+use Fabrik\Helpers\StringHelper;
 use Joomla\Utilities\ArrayHelper;
 
 require_once COM_FABRIK_FRONTEND . '/models/plugin-list.php';
@@ -112,6 +114,23 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 		$opts               = $this->getElementJSOptions();
 		$opts->renderOrder  = $this->renderOrder;
 		$opts->additionalQS = $w->parseMessageForPlaceHolder($params->get('list_email_additional_qs', ''));
+
+		$url = 'index.php?option=com_fabrik';
+		$url .= '&view=list';
+		$url .= '&controller=list.email';
+		//$url .= '&task=popupwin';
+		$url .= '&tmpl=component';
+		$url .= '&ajax=1';
+		$url .= '&id=' . $this->getModel()->getId();
+		$url .= '&renderOrder=' . $this->renderOrder;
+		$url .= '&format=partial';
+
+		if (!empty($opts->additionalQS))
+		{
+			$url .= '&' . $opts->additionalQS;
+		}
+
+		$opts->popupUrl = JRoute::_($url, false);
 		$opts               = json_encode($opts);
 		$this->jsInstance   = "new FbListEmail($opts)";
 
@@ -502,6 +521,11 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 						$process = isset($row->$to);
 						$mailTo  = $row->$to;
 					}
+					else if ($toType == 'eval')
+					{
+						$process = true;
+						$mailTo = $this->_evalTo($row);
+					}
 					else
 					{
 						$process = true;
@@ -664,6 +688,11 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 
 		$thisMsg = $w->parseMessageForPlaceholder($thisMsg, $row);
 
+		if (!$sendSMS && $params->get('wysiwyg', true))
+		{
+			Pdf::fullPaths($thisMsg);
+		}
+
 		if ($sendSMS)
 		{
 			return $this->sendSMS($mailTo, $thisMsg, $row);
@@ -731,6 +760,30 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 
 		return $to;
 	}
+
+	/**
+	 * Eval to address
+	 *
+	 * param  object  row  row data
+	 * @return string
+	 * @throws Exception
+	 */
+	private function _evalTo($row)
+	{
+		$toType = $this->_toType();
+		$to = '';
+
+		if ($toType == 'eval')
+		{
+			$params = $this->getParams();
+			$php = $params->get('emailtable_to_eval');
+			$to = FabrikHelperHTML::isDebug() ? eval($php) : @eval($php);
+			FabrikWorker::logEval($to, 'Eval exception : listEmail::_evalTo() : %s');
+		}
+
+		return $to;
+	}
+
 
 	/**
 	 * Get the email address(es) specified in the admin's 'Email to
@@ -915,6 +968,11 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 			$mergedMsg = $coverMessage . $mergedMsg;
 		}
 
+		if ($params->get('wysiwyg', true))
+		{
+			Pdf::fullPaths($coverMessage);
+		}
+
 		if ($toHow == 'single')
 		{
 			foreach ($thisTos as $toKey => $thisTo)
@@ -1085,7 +1143,7 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 
 		if ($params->get('wysiwyg', true))
 		{
-			$editor = JFactory::getEditor();
+			$editor = \JEditor::getInstance($this->config->get('editor'));
 
 			return $editor->display('message', $msg, '100%', '200px', 75, 10, true, 'message');
 		}
@@ -1132,7 +1190,7 @@ class PlgFabrik_ListEmail extends PlgFabrik_List
 			$gateway = $params->get('emailtable_sms_gateway', 'kapow.php');
 			$input   = new JFilterInput;
 			$gateway = $input->clean($gateway, 'CMD');
-			require_once JPATH_ROOT . '/components/com_fabrik/helpers/sms_gateways/' . JString::strtolower($gateway);
+            require_once JPATH_ROOT . '/libraries/fabrik/fabrik/Helpers/sms_gateways/' . StringHelper::strtolower($gateway);
 			$gateway               = JFile::stripExt($gateway);
 			$this->gateway         = new $gateway;
 			$this->gateway->params = $params;

@@ -12,9 +12,11 @@
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\Utilities\ArrayHelper;
+use Fabrik\Helpers\Googlemap;
+use Fabrik\Helpers\Image\Image;
 
 require_once JPATH_SITE . '/components/com_fabrik/models/element.php';
-require_once JPATH_SITE . '/components/com_fabrik/helpers/googlemap.php';
+
 
 /**
  * Plugin element to render a Google map
@@ -64,7 +66,10 @@ class PlgFabrik_ElementGooglemap extends PlgFabrik_Element
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		$listModel = $this->getListModel();
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
+
+        $listModel = $this->getListModel();
 		$params = $this->getParams();
 		$w = (int) $params->get('fb_gm_table_mapwidth');
 		$h = (int) $params->get('fb_gm_table_mapheight');
@@ -101,7 +106,7 @@ class PlgFabrik_ElementGooglemap extends PlgFabrik_Element
 			}
 		}
 
-		return $this->renderListDataFinal($data);
+		return $this->renderListDataFinal($data, $opts);
 	}
 
 	/**
@@ -329,7 +334,7 @@ class PlgFabrik_ElementGooglemap extends PlgFabrik_Element
 					|| $geocode_on_load == 3
 				);
 		$opts->auto_center = (bool) $params->get('fb_gm_auto_center', false);
-		$opts->styles = FabGoogleMapHelper::styleJs($params);
+		$opts->styles = Googlemap::styleJs($params);
 
 		if ($opts->geocode == '2')
 		{
@@ -764,7 +769,6 @@ class PlgFabrik_ElementGooglemap extends PlgFabrik_Element
 		}
 
 		// Serve cached file from remote url
-		require_once COM_FABRIK_FRONTEND . '/helpers/image.php';
 		$src .= implode('&', $attribs);
 		$folder = 'cache/com_fabrik/staticmaps/';
 		$file = implode('.', $attribs) . '.png';
@@ -775,7 +779,7 @@ class PlgFabrik_ElementGooglemap extends PlgFabrik_Element
 
 		if ((!$tableView && $params->get('fb_gm_staticmap') == '1') || ($tableView && $params->get('fb_gm_staticmap_tableview', '0') === '1'))
 		{
-			$displayData->src = Fabimage::cacheRemote($src, $folder, $file);
+			$displayData->src = Image::cacheRemote($src, $folder, $file);
 
 			// if cacheImage returned false, probably an issue with permissions on the cache folder, so punt to direct URL
 			if ($displayData->src === false)

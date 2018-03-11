@@ -68,7 +68,10 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 	 */
 	public function renderListData($data, stdClass &$thisRow, $opts = array())
 	{
-		if ($data == '')
+        $profiler = JProfiler::getInstance('Application');
+        JDEBUG ? $profiler->mark("renderListData: {$this->element->plugin}: start: {$this->element->name}") : null;
+
+        if ($data == '')
 		{
 			return parent::renderListData($data, $thisRow, $opts);
 		}
@@ -291,7 +294,7 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 			$name .= '[date]';
 		}
 
-		$class          = 'fabrikinput inputbox inout ' . $params->get('bootstrap_class', 'input-small');
+		$class          = 'fabrikinput inputbox input ' . $params->get('bootstrap_class', 'input-small');
 		$element->width = (int) $element->width < 0 ? 1 : (int) $element->width;
 		$calOpts        = array('class' => $class, 'size' => $element->width, 'maxlength' => '19');
 
@@ -352,7 +355,8 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		$btnLayout  = FabrikHelperHTML::getLayout('fabrik-button');
 		$layoutData = (object) array(
 			'class' => 'timeButton',
-			'label' => FabrikHelperHTML::image($file, 'form', @$this->tmpl, $opts)
+			'label' => FabrikHelperHTML::image($file, 'form', @$this->tmpl, $opts),
+			'aria'	=> ' aria-label="' . FText::_('PLG_ELEMENT_DATE_ARIA_LABEL_TIME') . '"'
 		);
 
 		$str[] = $btnLayout->render($layoutData);
@@ -794,7 +798,8 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 			$layoutData = (object) array(
 				'class' => 'calendarbutton',
 				'id'    => $id . '_cal_img',
-				'label' => $img
+				'label' => $img,
+				'aria'	=> ' aria-label="' . FText::_('PLG_ELEMENT_DATE_ARIA_LABEL_DATE') . '"'
 			);
 			$img        = $btnLayout->render($layoutData);
 			$html[]     = '<div class="input-append">';
@@ -1086,7 +1091,7 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		if ($formModel->isNewRecord() && $value !== '')
 		{
 			// OK for : Default to current  = no Local time = yes
-			if (!$defaultToday)
+			if (!$defaultToday && !$formModel->failedValidation())
 			{
 				$date = new DateTime($date, $timeZone);
 				return $date->format('Y-m-d H:i:s');
@@ -1175,9 +1180,15 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 				{
 					$v = str_replace(array("'", '"'), '', $v);
 				}
+
+				$filterType = FABRIKFILTER_NOQUOTES;
+			}
+			else
+			{
+				$filterType = FabrikWorker::isNullDate($value) ? FABRIKFILTER_TEXT : $eval;
 			}
 
-			return parent::getFilterValue($value, $condition, FABRIKFILTER_QUERY);
+			return parent::getFilterValue($value, $condition, $filterType);
 		}
 
 		$params       = $this->getParams();
@@ -2184,40 +2195,40 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		switch ($condition)
 		{
 			case 'thisyear':
-				$query = ' YEAR(' . $key . ') = YEAR(NOW()) ';
+				$query = ' YEAR(' . $this->addConvert($key) . ') = YEAR(NOW()) ';
 				break;
 			case 'earlierthisyear':
-				$query = ' (DAYOFYEAR(' . $key . ') <= DAYOFYEAR(NOW()) AND YEAR(' . $key . ') = YEAR(NOW())) ';
+				$query = ' (DAYOFYEAR(' . $this->addConvert($key) . ') <= DAYOFYEAR(NOW()) AND YEAR(' . $this->addConvert($key) . ') = YEAR(NOW())) ';
 				break;
 			case 'laterthisyear':
-				$query = ' (DAYOFYEAR(' . $key . ') >= DAYOFYEAR(NOW()) AND YEAR(' . $key . ') = YEAR(NOW())) ';
+				$query = ' (DAYOFYEAR(' . $this->addConvert($key) . ') >= DAYOFYEAR(NOW()) AND YEAR(' . $this->addConvert($key) . ') = YEAR(NOW())) ';
 				break;
 			case 'today':
-				$query = ' (' . $key . ' >= CURDATE() AND ' . $key . ' < CURDATE() + INTERVAL 1 DAY) ';
+				$query = ' (' . $this->addConvert($key) . ' >= CURDATE() AND ' . $this->addConvert($key) . ' < CURDATE() + INTERVAL 1 DAY) ';
 				break;
 			case 'yesterday':
-				$query = ' (' . $key . ' >= CURDATE() - INTERVAL 1 DAY AND ' . $key . ' < CURDATE()) ';
+				$query = ' (' . $this->addConvert($key) . ' >= CURDATE() - INTERVAL 1 DAY AND ' . $this->addConvert($key) . ' < CURDATE()) ';
 				break;
 			case 'tomorrow':
-				$query = ' (' . $key . ' >= CURDATE() + INTERVAL 1 DAY  AND ' . $key . ' < CURDATE() + INTERVAL 2 DAY ) ';
+				$query = ' (' . $this->addConvert($key) . ' >= CURDATE() + INTERVAL 1 DAY  AND ' . $this->addConvert($key) . ' < CURDATE() + INTERVAL 2 DAY ) ';
 				break;
 			case 'thismonth':
-				$query = ' (' . $key . ' >= DATE_ADD(LAST_DAY(DATE_SUB(now(), INTERVAL 1 MONTH)), INTERVAL 1 DAY)  AND ' . $key
+				$query = ' (' . $this->addConvert($key) . ' >= DATE_ADD(LAST_DAY(DATE_SUB(now(), INTERVAL 1 MONTH)), INTERVAL 1 DAY)  AND ' . $this->addConvert($key)
 					. ' <= LAST_DAY(NOW()) ) ';
 				break;
 			case 'lastmonth':
-				$query = ' (' . $key . ' >= DATE_ADD(LAST_DAY(DATE_SUB(now(), INTERVAL 2 MONTH)), INTERVAL 1 DAY)  AND ' . $key
+				$query = ' (' . $this->addConvert($key) . ' >= DATE_ADD(LAST_DAY(DATE_SUB(now(), INTERVAL 2 MONTH)), INTERVAL 1 DAY)  AND ' . $this->addConvert($key)
 					. ' <= LAST_DAY(DATE_SUB(NOW(), INTERVAL 1 MONTH)) ) ';
 				break;
 			case 'nextmonth':
-				$query = ' (' . $key . ' >= DATE_ADD(LAST_DAY(now()), INTERVAL 1 DAY)  AND ' . $key
+				$query = ' (' . $this->addConvert($key) . ' >= DATE_ADD(LAST_DAY(now()), INTERVAL 1 DAY)  AND ' . $this->addConvert($key)
 					. ' <= DATE_ADD(LAST_DAY(NOW()), INTERVAL 1 MONTH) ) ';
 				break;
 			case 'nextweek1':
-				$query = ' (YEARWEEK(' . $key . ',1) = YEARWEEK(DATE_ADD(NOW(), INTERVAL 1 WEEK), 1))';
+				$query = ' (YEARWEEK(' . $this->addConvert($key) . ',1) = YEARWEEK(DATE_ADD(NOW(), INTERVAL 1 WEEK), 1))';
 				break;
 			case 'birthday':
-				$query = '(MONTH(' . $key . ') = MONTH(CURDATE()) AND  DAY(' . $key . ') = DAY(CURDATE())) ';
+				$query = '(MONTH(' . $this->addConvert($key) . ') = MONTH(CURDATE()) AND  DAY(' . $this->addConvert($key) . ') = DAY(CURDATE())) ';
 				break;
 
 			default:
@@ -2278,6 +2289,11 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 	 */
 	public function onCopyRow($val)
 	{
+		if ($this->defaultOnCopy())
+		{
+			$val = $this->getFrontDefaultValue();
+		}
+
 		if (!FabrikWorker::isDate($val))
 		{
 			return $val;
@@ -2299,6 +2315,18 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		}
 
 		return $val;
+	}
+
+	/**
+	 * Called when save as copy form button clicked
+	 *
+	 * @param   mixed $val value to copy into new record
+	 *
+	 * @return  mixed  value to copy into new record
+	 */
+	public function onSaveAsCopy($val)
+	{
+		return $this->onCopyRow($val);
 	}
 
 	/**
@@ -2516,7 +2544,7 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 		$id2                           = $this->getFilterHtmlId(1);
 		$opts                          = new stdClass;
 		$opts->calendarSetup           = $this->_CalendarJSOpts($id);
-		$opts->calendarSetup->ifFormat = $params->get('date_table_format', '%Y-%m-%d');
+		$opts->calendarSetup->ifFormat = $params->get('date_table_format', 'Y-m-d');
 		$opts->calendarSetup->ifFormat = FabDate::dateFormatToStrftimeFormat($opts->calendarSetup->ifFormat);
 		$opts->type    = $type;
 		$opts->ids     = $type == 'field' ? array($id) : array($id, $id2);
@@ -2618,6 +2646,28 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 
 		return $this->default;
 	}
+
+	/*
+	 * If date is stored as UTC, wrap the necessary CONVERT_TZ() around the key name to offset it, so 'foo'
+	 * becomes 'CONVERT_TZ(foo, "+0:00", "+5:00")'.  If storing as local, leave key intact.  Used when building things
+	 * like pre-filter queries for "today".
+	 */
+	protected function addConvert($key)
+	{
+		$params       = $this->getParams();
+		$storeAsLocal = (int) $params->get('date_store_as_local', 0);
+
+		if ($params->get('date_store_as_local', '0') !== '1')
+		{
+			$timeZone = new DateTimeZone($this->config->get('offset'));
+			$zoneDate = new DateTime('now', $timeZone);
+			$tzStr    = $zoneDate->format('P');
+			$key = 'CONVERT_TZ(' . $key . ', "+0:00", "' . $tzStr . '")';
+		}
+
+		return $key;
+	}
+
 }
 
 /**
