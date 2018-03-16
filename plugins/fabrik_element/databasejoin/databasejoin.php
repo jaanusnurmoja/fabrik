@@ -585,6 +585,11 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 				$this->autocomplete_where = $this->getJoinValueColumn() . ' IN (' . implode(', ', $quoteV) . ')';
 			}
+			else
+			{
+				// avoid unconstrained query
+				$this->autocomplete_where = '7 = -7';
+			}
 		}
 		// $$$ rob 18/06/2012 cache the option vals on a per query basis (was previously incwhere but this was not ok
 		// for auto-completes in repeating groups
@@ -2443,8 +2448,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 					{
 						if (stristr($joinLabel, "CONCAT"))
 						{
-							$join = $this->getJoinModel()->getJoin();
+							//$join = $this->getJoinModel()->getJoin();
+							$join      = $this->getJoin();
 							$to        = $this->getDbName();
+							$joinLabel = str_replace($join->table_join_alias, $to, $joinLabel);
 							$joinLabel = str_replace($join->table_join, $to, $joinLabel);
 						}
 					}
@@ -2748,7 +2755,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	{
 		$db        = $this->getDb();
 		$query     = $db->getQuery(true);
-		$join      = $this->getJoinModel()->getJoin();
+		//$join      = $this->getJoinModel()->getJoin();
+		$join      = $this->getJoin();
 		$joinTable = $db->qn($join->table_join);
 		$shortName = $db->qn($this->getElement()->name);
 		$tableAlias = $join->table_join;
@@ -2769,7 +2777,8 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 		{
 			$jKey  = $this->getLabelOrConcatVal();
 			$jKey  = !strstr($jKey, 'CONCAT') ? $label : $jKey;
-			$label = str_replace($join->table_join, $to, $jKey);
+			$label = str_replace($join->table_join_alias, $to, $jKey);
+			$label = str_replace($join->table_join, $to, $label);
 			$parentID	= $this->parentID();
 			$tableAlias = $to;
 		}
@@ -3712,8 +3721,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 	 */
 	public function buildQueryElementConcat($jKey, $addAs = true)
 	{
-		$join      = $this->getJoinModel()->getJoin();
+		//$join      = $this->getJoinModel()->getJoin();
+		$join      = $this->getJoin();
 		$joinTable = $join->table_join;
+		$joinAlias = $join->table_join_alias;
 		$params    = $this->getParams();
 		$jKey      = $this->getLabelOrConcatVal();
 		$where     = $this->buildQueryWhere(array(), true, $params->get('join_db_name'));
@@ -3735,6 +3746,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			* (say) a field name 'foobar', etc.
 			* Also ... I think we need to NOT do this inside a subquery!
 			*/
+			$jKey = str_replace($joinAlias, 'lookup', $jKey);
 			$jKey = str_replace($joinTable, 'lookup', $jKey);
 		}
 		$parentID	= $this->parentID();
