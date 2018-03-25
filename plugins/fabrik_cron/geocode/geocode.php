@@ -115,7 +115,10 @@ class PlgFabrik_CronGeocode extends PlgFabrik_Cron
 		$geocode_country_element = $geocode_country_element_long ? FabrikString::shortColName($geocode_country_element_long) : '';
 		$geocode_when = $params->get('geocode_when', '1');
 
-		$gmap = new GeoCode;
+		$config = JComponentHelper::getParams('com_fabrik');
+		$verifyPeer = (bool) $config->get('verify_peer', '1');
+
+		$gmap = new GeoCode($verifyPeer);
 
 		// Run through our table data
 		$total_encoded = 0;
@@ -218,7 +221,7 @@ class PlgFabrik_CronGeocode extends PlgFabrik_Cron
 						{
 							// OK!  Lets try and geocode it ...
 							$total_attempts++;
-							$full_addr = urlencode($full_addr);
+							$full_addr = urlencode(html_entity_decode($full_addr, ENT_QUOTES));
 							$res = $gmap->getLatLng($full_addr, 'array', $apiKey);
 
 							if ($res['status'] == 'OK')
