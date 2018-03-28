@@ -23,7 +23,7 @@ $tr = $this->_row->id;
 		if ($showCell == true)
 		{
 			$rowspans = isset($this->rowSpans) ? $this->rowSpans[$heading][$tr][$pkValue] : array();
-			$rowspan = 'rowspan="' . count($rowspans) . '"';			
+			$rowspan = count($rowspans) > 0 ? 'rowspan="' . count($rowspans) . '"' : ''			
 		}
 		else
 		{
