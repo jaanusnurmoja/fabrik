@@ -2838,6 +2838,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	 * @param   int $repeatCounter group counter
 	 *
 	 * @return  string
+	  . '_{{row-count-placeholder}}'
 	 */
 	public function getHTMLId($repeatCounter = 0)
 	{
@@ -2857,7 +2858,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			{
 				$joinModel = $groupModel->getJoinModel();
 				$joinTable = $joinModel->getJoin();
-				$fullName  = $joinTable->table_join . '___' . $element->name;
+				$fullName  = $joinTable->table_join . '___' . $element->name .  '_' . $repeatCounter;
 			}
 			else
 			{
@@ -2869,12 +2870,13 @@ class PlgFabrik_Element extends FabrikPlugin
 			{
 				$fullName .= '_ro';
 			}
-
+/*
 			if ($groupModel->canRepeat())
 			{
 				$fullName .= '_' . $repeatCounter;
 			}
 
+			*/
 			$this->HTMLids[$repeatCounter] = $fullName;
 		}
 
@@ -2887,6 +2889,7 @@ class PlgFabrik_Element extends FabrikPlugin
 	 * @param   int $repeatCounter group counter
 	 *
 	 * @return  string
+	 [{{row-count-placeholder}}]
 	 */
 	public function getHTMLName($repeatCounter = 0)
 	{
@@ -2898,19 +2901,19 @@ class PlgFabrik_Element extends FabrikPlugin
 		{
 			$joinModel = $groupModel->getJoinModel();
 			$joinTable = $joinModel->getJoin();
-			$fullName  = $joinTable->table_join . '___' . $element->name;
+			$fullName  = $joinTable->table_join . '___' . $element->name .  '[' . $repeatCounter. ']';
 		}
 		else
 		{
 			$fullName = $table->db_table_name . '___' . $element->name;
 		}
-
+/*
 		if ($groupModel->canRepeat())
 		{
-			// $$$ rob - always use repeatCounter in html names - avoids ajax post issues with mootools1.1
+			// $$$ rob - always use repeatCounter in html names - avoids ajax post issues with mootools1.1 
 			$fullName .= '[' . $repeatCounter . ']';
 		}
-
+*/
 		if ($this->hasSubElements)
 		{
 			$fullName .= '[]';

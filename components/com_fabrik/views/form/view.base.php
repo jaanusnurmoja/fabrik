@@ -142,6 +142,7 @@ class FabrikViewFormBase extends FabrikView
 
 		$params = $model->getParams();
 		$this->setTitle($w, $params);
+		$this->db_table_name = $model->getTableName();
 
 		FabrikHelperHTML::debug($params->get('note'), 'note');
 		$params->def('icons', $this->app->get('icons'));
@@ -169,6 +170,29 @@ class FabrikViewFormBase extends FabrikView
 		JDEBUG ? $profiler->mark('form view before group view got') : null;
 
 		$this->groups = $model->getGroupView($tmpl);
+		
+		foreach ($this->groups as $pkey => $p)
+		{
+			$this->groups[$pkey]->isMain = $p->joinFromTable == $this->db_table_name || !$p->joinId;
+			
+			if ($p->joinId)
+			{
+				foreach ($this->groups as $ckey => $c)
+				{
+					if ($c->joinId)
+					{
+						$this->groups[$pkey]->childs = array();
+					
+						if ($c->joinFromTable == $p->tableJoin)
+						{
+							$this->groups[$pkey]->childs[$ckey] = $c;
+							$this->groups[$ckey]->parent = $p->id;
+						}
+					}
+				}
+			}
+		}
+		
 		$this->_repeatGroupButtons($tmpl);
 
 		JDEBUG ? $profiler->mark('form view after group view got') : null;
@@ -520,7 +544,7 @@ class FabrikViewFormBase extends FabrikView
 			array(
 				'FloatingTips' => $mediaFolder . '/tipsBootStrapMock.js',
 				'FbForm' => $mediaFolder . '/form.js',
-				'Fabrik' => $mediaFolder . '/fabrik.js'
+				'Fabrik' => $mediaFolder . '/fabrik.js',
 			),
 			FabrikHelperHTML::framework());
 		$shim                  = array();

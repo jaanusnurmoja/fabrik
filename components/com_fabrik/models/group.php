@@ -996,6 +996,10 @@ class FabrikFEModelGroup extends FabModel
 			$group->dlabels          = $params->get('labels_above_details', -1);
 			$group->classArray       = array();
 			$group->class            = '';
+			$group->joinId			 = $this->getJoinId();
+			$group->tableJoin		 = $this->getJoinModel()->getJoin()->table_join;
+			$group->joinFromTable	 = $this->getJoinModel()->getJoin()->join_from_table;
+			
 
 			if ($this->canRepeat())
 			{
