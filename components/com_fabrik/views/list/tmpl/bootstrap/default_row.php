@@ -34,7 +34,7 @@ if ($rowintro != '' && $this->_row->data->$rowintro != '')
 		if ($showCell == true)
 		{
 			$rowspans = isset($this->rowSpans) ? $this->rowSpans[$heading][$tr][$pkValue] : array();
-			$rowspan = count($rowspans) > 0 ? 'rowspan="' . count($rowspans) . '"' : ''			
+			$rowspan = count($rowspans) > 0 ? 'rowspan="' . count($rowspans) . '"' : '';			
 		}
 		else
 		{
