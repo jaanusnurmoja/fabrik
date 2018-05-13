@@ -45,7 +45,7 @@ endif;
 
     <div class="fabrikStripeBottomText">
 		<?php echo $d->bottomText; ?>
-    </div
+    </div>
 
 <?php
 if ($d->useUpdateButton) :
