@@ -5427,8 +5427,9 @@ class FabrikFEModelList extends JModelForm
 					{
 						$matchSql[] = 'MATCH(' . implode(',', $fields) . ')' . ' ' . $condition . ' (' . $db->q($value) . ' IN BOOLEAN MODE)';
 					}
-
-					$this->filters['sqlCond'][$i] = '(' . implode(' OR ', $matchSql) . ')';
+					$mode = $this->app->input->get('search-mode-advanced', 'all');
+					$join = $mode === 'none' ? ' AND ' : ' OR ';
+					$this->filters['sqlCond'][$i] = '(' . implode($join, $matchSql) . ')';
 				}
 				else
 				{
@@ -6527,18 +6528,11 @@ class FabrikFEModelList extends JModelForm
 			|| ($params->get('search-mode', '0') == 'OR'))
 		{
 			// One field to search them all (and in the darkness bind them)
-			//$requestKey = $this->getFilterModel()->getSearchAllRequestKey();
-			//$v = $this->getFilterModel()->getSearchAllValue('html');
 			$o = new stdClass;
-			//$searchLabel = FText::_($params->get('search-all-label', 'COM_FABRIK_SEARCH'));
-			//$class = FabrikWorker::j3() ? 'fabrik_filter search-query input-medium' : 'fabrik_filter';
 			$o->id = 'searchall_' . $this->getRenderContext();
 			$o->displayValue = '';
-			//$o->filter = '<input type="search" size="20" placeholder="' . $searchLabel . '"title="' . $searchLabel . '" value="' . $v
-			//. '" class="' . $class . '" name="' . $requestKey . '" id="' . $id . '" />';
-
 			$displayData = new stdClass;
-			$displayData->id = $id;
+			$displayData->id = $o->id;
 			$displayData->searchLabel = FText::_($params->get('search-all-label', 'COM_FABRIK_SEARCH'));;
 			$displayData->class = FabrikWorker::j3() ? 'fabrik_filter search-query input-medium' : 'fabrik_filter';
 			$displayData->v = $this->getFilterModel()->getSearchAllValue('html');
@@ -6557,9 +6551,6 @@ class FabrikFEModelList extends JModelForm
 					'search-mode-advanced',
 					$params->get('search-mode-advanced-default', 'all')
 				);
-
-				//$o->filter .= '&nbsp;'
-				//		. JHTML::_('select.genericList', $searchOpts, 'search-mode-advanced', "class='fabrik_filter'", 'value', 'text', $mode);
 			}
 			else
 			{
@@ -9338,6 +9329,16 @@ class FabrikFEModelList extends JModelForm
 		$keyIdentifier = $this->getKeyIndetifier($row);
 		$row = ArrayHelper::fromObject($row);
 		$link = $this->parseMessageForRowHolder($link, $row);
+
+		// special case, if someone is using a link element placeholder as a custom link
+		if (FabrikWorker::isJSON($link))
+		{
+			$test = FabrikWorker::JSONtoData($link);
+			if (is_object($test) && isset($test->link))
+			{
+				$link = $test->link;
+			}
+		}
 
 		if (preg_match('/([\?&]rowid=)/', htmlspecialchars_decode($link)))
 		{
