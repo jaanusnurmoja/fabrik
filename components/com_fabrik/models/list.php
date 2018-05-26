@@ -2320,12 +2320,28 @@ class FabrikFEModelList extends JModelForm
 		$rowId = $this->getSlug($row);
 		$isAjax = $this->isAjaxLinks() ? '1' : '0';
 		$isCustom = $customLink !== '';
+		$isIcon = false;
+		
+		/* Check if the data component is html, if it is an icon lnk and image parse it out */
+		if (class_exists('DOMDocument')) {
+			$html = new DOMDocument;
+			$html->loadHTML($data);
+			$a = $html->getElementsByTagName('a')->item(0);
+			$img = $html->getElementsByTagName('img')->item(0);
+			if (isset($html) && isset($a) && isset($img)) {
+				$isIcon = true;
+			}
+		}
 
 		$paths = array(
 			COM_FABRIK_FRONTEND . '/views/list/tmpl/' . $this->getTmpl() . '/layouts/element/' . $elementModel->getFullName(true, false)
 		);
 
-		$layout                  = $this->getLayout('element.fabrik-element-custom-link', $paths);
+		if ($isIcon === true ) {
+			$layout = $this->getLayout('element.fabrik-element-custom-icon-link', $paths);
+		} else {
+			$layout = $this->getLayout('element.fabrik-element-custom-link', $paths);
+		}
 		$displayData             = new stdClass;
 		$displayData->loadMethod = $loadMethod;
 		$displayData->dataList   = $dataList;
@@ -2335,9 +2351,18 @@ class FabrikFEModelList extends JModelForm
 		$displayData->class      = $class;
 		$displayData->link       = $link;
 		$displayData->rowId      = $rowId;
-		$displayData->data       = $data;
 		$displayData->target     = $target;
-		$data                    = $layout->render($displayData);
+
+		if  ($isIcon) {
+			$displayData->data_original = $a->nodeValue;
+			$displayData->opts = $a->getAttribute('opts');
+			$displayData->data = $a->ownerDocument->saveHTML($img);
+			$displayData->title = $a->getAttribute('title');
+		} else {
+			$displayData->data = $data;
+		}
+		
+		$data = $layout->render($displayData);
 
 		return $data;
 	}
@@ -7086,10 +7111,13 @@ class FabrikFEModelList extends JModelForm
 			$edit = false;
 		}
 
-		if ($this->canSelectRows() || $this->canEditARow() || $details || $edit || $filtersUnderHeadingsAndGo)
+		$pluginManager = FabrikWorker::getPluginManager();
+		$pluginManager->runPlugins('button', $this, 'list', array('heading' => true));
+		$pluginHeadings = array_filter($pluginManager->data);
+
+		if (!empty($pluginHeadings) || $this->canSelectRows() || $this->canEditARow() || $details || $edit || $filtersUnderHeadingsAndGo)
 		{
 			// 3.0 actions now go in one column
-			$pluginManager = FabrikWorker::getPluginManager();
 			$headingButtons = array();
 
 			if ($this->deletePossible())
@@ -7097,12 +7125,9 @@ class FabrikFEModelList extends JModelForm
 				$headingButtons[] = $this->deleteButton('', true);
 			}
 
-			$pluginManager->runPlugins('button', $this, 'list', array('heading' => true));
-			$res = array_filter($pluginManager->data);
-
 			if (FabrikWorker::j3())
 			{
-				$headingButtons = array_merge($headingButtons, $res);
+				$headingButtons = array_merge($headingButtons, $pluginHeadings);
 
 				if (empty($headingButtons))
 				{
@@ -7123,12 +7148,12 @@ class FabrikFEModelList extends JModelForm
 			}
 			else
 			{
-				foreach ($res as &$r)
+				foreach ($pluginHeadings as &$r)
 				{
 					$r = $this->actionMethod() == 'dropdown' ? '<li>' . $r . '</li>' : $r;
 				}
 
-				$headingButtons = array_merge($headingButtons, $res);
+				$headingButtons = array_merge($headingButtons, $pluginHeadings);
 				$aTableHeadings['fabrik_actions'] = empty($headingButtons) ? '' : '<ul class="fabrik_action">' . implode("\n", $headingButtons) . '</ul>';
 			}
 

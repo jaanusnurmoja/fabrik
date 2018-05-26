@@ -1125,7 +1125,7 @@ class Worker
 	 * only want to use for stricty internal use that won't ever get shown to the user
 	 *
 	 * @return array
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public static function unsafeReplacements()
 	{
@@ -1143,7 +1143,7 @@ class Worker
 	 * Get an associative array of replacements strings and values
 	 *
 	 * @return array
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public static function globalReplacements()
 	{
@@ -1882,7 +1882,7 @@ class Worker
 			try
 			{
 				$fabrikDb->execute();
-			} catch (Exception $e)
+			} catch (\Exception $e)
 			{
 				// Fail silently
 			}
@@ -2051,7 +2051,7 @@ class Worker
 		try
 		{
 			$dt = new DateTime($d);
-		} catch (Exception $e)
+		} catch (\Exception $e)
 		{
 			return false;
 		}
@@ -2263,7 +2263,7 @@ class Worker
 		{
 			$mailer->addRecipient($recipient, $recipientName);
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			return false;
 		}
@@ -2272,7 +2272,7 @@ class Worker
 		{
 			$mailer->addCc($cc);
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			// not sure if we should bail if Cc is bad, for now just soldier on
 		}
@@ -2281,7 +2281,7 @@ class Worker
 		{
 			$mailer->addBcc($bcc);
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			// not sure if we should bail if Bcc is bad, for now just soldier on
 		}
@@ -2292,7 +2292,7 @@ class Worker
 			{
 				$mailer->addAttachment($attachment);
 			}
-			catch (Exception $e)
+			catch (\Exception $e)
 			{
 				// most likely file didn't exist, ignore
 			}
@@ -2311,7 +2311,7 @@ class Worker
 				{
 					$mailer->addReplyTo($replyTo[$i], $replyToName[$i]);
 				}
-				catch (Exception $e)
+				catch (\Exception $e)
 				{
 					// carry on
 				}
@@ -2323,7 +2323,7 @@ class Worker
 			{
 				$mailer->addReplyTo($replyTo, $replyToName);
 			}
-			catch (Exception $e)
+			catch (\Exception $e)
 			{
 				// carry on
 			}
@@ -2337,7 +2337,7 @@ class Worker
 		{
 			$mailer->setSender(array($from, $fromName, $autoReplyTo));
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			return false;
 		}
@@ -2378,7 +2378,7 @@ class Worker
 		{
 			$ret = $mailer->Send();
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			return false;
 		}
