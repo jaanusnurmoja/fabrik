@@ -2153,7 +2153,20 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 			$myFileName = FArrayHelper::getValue($myFileName, $repeatCounter, '');
 		}
 
-		$myFileDir = array_key_exists($elNameRaw, $aData) && is_array($aData[$elNameRaw]) ? @$aData[$elNameRaw]['ul_end_dir'] : '';
+		if (array_key_exists($elNameRaw, $aData))
+		{
+			if (is_array($aData[$elNameRaw]))
+			{
+				$myFileDir = ArrayHelper::getValue($aData[$elNameRaw], 'ul_end_dir', '');
+			}
+		}
+		else
+		{
+			if (is_array($aData[$elName]))
+			{
+				$myFileDir = ArrayHelper::getValue($aData[$elName], 'ul_end_dir', '');
+			}
+		}
 
 		if (is_array($myFileDir))
 		{
@@ -2227,7 +2240,11 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 
 		if ($isAjax)
 		{
-			if (isset($value->file))
+			if (is_array($value) && array_key_exists('file', $value))
+			{
+				$value = $value['file'];
+			}
+			else if (is_object($value) && isset($value->file))
 			{
 				$value = $value->file;
 			}
@@ -2418,6 +2435,8 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		if ($params->get('fileupload_storage_type', 'filesystemstorage') == 'filesystemstorage' && $params->get('upload_allow_folderselect') == '1')
 		{
 			$rDir    = JPATH_SITE . '/' . $params->get('ul_directory');
+			$w        = new FabrikWorker;
+			$rDir = $w->parseMessageForPlaceHolder($rDir);
 			$folders = JFolder::folders($rDir);
 			$str[]   = FabrikHelperHTML::folderAjaxSelect($folders);
 
