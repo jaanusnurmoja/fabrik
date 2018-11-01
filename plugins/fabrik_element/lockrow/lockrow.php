@@ -84,11 +84,11 @@ class PlgFabrik_ElementLockrow extends PlgFabrik_Element {
 				{
 					if ($expire_minutes < 0)
 					{
-						$this->app->enqueueMessage(FText::sprintf('PLG_ELEMENT_LOCKROW_SUBMIT_WRONG_LOCK_EXPIRED_MSG', abs($expire_minutes)));
+						$this->app->enqueueMessage(FText::sprintf('PLG_ELEMENT_LOCKROW_SUBMIT_WRONG_LOCK_EXPIPRED_MSG', abs($expire_minutes)));
 					}
 					else
 					{
-						$this->app->enqueueMessage(FText::sprintf('PLG_ELEMENT_LOCKROW_SUBMIT_WRONG_LOCK_MSG', $expire_minutes));
+						$this->app->enqueueMessage(FText::sprintf('PLG_ELEMENT_LOCKROW_SUBMIT_WRONG_LOCK_MSG', abs($expire_minutes)));
 					}
 
 					return true;
@@ -309,7 +309,7 @@ class PlgFabrik_ElementLockrow extends PlgFabrik_Element {
 					}
 					else
 					{
-						$app->enqueueMessage(FText::sprintf('PLG_ELEMENT_LOCKROW_OWN_LOCKED_MSG', $expire_minutes));
+						$app->enqueueMessage(FText::sprintf('PLG_ELEMENT_LOCKROW_OWN_LOCKED_MSG', abs($expire_minutes)));
 
 						return "";
 					}
@@ -335,7 +335,7 @@ class PlgFabrik_ElementLockrow extends PlgFabrik_Element {
 		}
 		else
 		{
-			$app->enqueueMessage(FText::_('PLG_ELEMENT_LOCKROW_LOCK_LOCKING_MSG'));
+			$app->enqueueMessage(FText::sprintf('PLG_ELEMENT_LOCKROW_LOCK_LOCKING_MSG', $ttl));
 		}
 
 		if (!isset($lockstr))
@@ -404,7 +404,7 @@ class PlgFabrik_ElementLockrow extends PlgFabrik_Element {
 
 		if ($params->get('lockrow_show_icon_read_only', '1') === '0')
 		{
-			$showIcon = $this->getListModel()->canEdit($data);
+			$showIcon = $this->getListModel()->canEdit($thisRow);
 
 			// show icon if we are the lock owner
 			if (!$showIcon)
@@ -417,7 +417,7 @@ class PlgFabrik_ElementLockrow extends PlgFabrik_Element {
 		{
 			$layout           = $this->getLayout('list');
 			$layoutData       = new StdClass();
-			$layoutData->tmpl = $this->tmpl;
+			$layoutData->tmpl = isset($this->tmpl) ? $this->tmpl : '';
 			$imagepath        = COM_FABRIK_LIVESITE . '/plugins/fabrik_element/lockrow/images/';
 			if ($this->showLocked($data))
 			{
@@ -427,7 +427,7 @@ class PlgFabrik_ElementLockrow extends PlgFabrik_Element {
 			}
 			else
 			{
-				$layoutData->icon  = $params->get('lockrow_locked_icon', 'unlock');
+				$layoutData->icon  = $params->get('lockrow_unlocked_icon', 'unlock');
 				$layoutData->alt   = 'Not Locked';
 				$layoutData->class = 'fabrikElement_lockrow_unlocked';
 			}
