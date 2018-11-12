@@ -712,7 +712,21 @@ class FabrikViewFormBase extends FabrikView
 			$groupedJs->$groupId = $elementJs;
 		}
 
-		$script[] = json_encode($groupedJs);
+		$json = json_encode($groupedJs);
+
+		/*
+		 * Ran across an issue where encrypted fields that don't decrypt properly, for example if you do an
+		 * Akeeba clone with Kickstart that changes the secret, will cause a JSON_ERROR_UTF8 because the data
+		 * is binary blob.  Should really handle the error better, but for now just make sure there's an error message
+		 * so we (support staff) at least know what's going on.
+		 */
+		if ($json === false)
+		{
+			$this->app->enqueueMessage('JSON encode error! ' . json_last_error_msg());
+			return false;
+		}
+
+		$script[] = $json;
 		$script[] = "\t);";
 		$script[] = $actions;
 		$script[] = $vstr;
@@ -1251,6 +1265,12 @@ class FabrikViewFormBase extends FabrikView
 			// Used for validations
 			$fields[] = '<input type="hidden" name="fabrik_repeat_group[' . $group->id . ']" value="' . $c . '" id="fabrik_repeat_group_'
 				. $group->id . '_counter" />';
+
+			// Used for validations
+			$added = $input->get('fabrik_repeat_group_added', array(), 'array');
+			$added = ArrayHelper::getValue($added, $group->id, '0');
+			$fields[] = '<input type="hidden" name="fabrik_repeat_group_added[' . $group->id . ']" value="' . $added . '" id="fabrik_repeat_group_'
+				. $group->id . '_added" />';
 		}
 
 		// $$$ hugh - testing social_profile_hash stuff
