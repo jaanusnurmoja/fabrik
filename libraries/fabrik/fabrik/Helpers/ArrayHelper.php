@@ -635,5 +635,35 @@ class ArrayHelper
 
         return $output;
     }
+
+	/*
+	https://stackoverflow.com/questions/8587341/recursive-function-to-generate-multidimensional-array-from-database-result/8587437
+	
+	* Take the array of all elements and the id of the current parent (initially 0/nothing/null/whatever).
+	 */
+
+	 public static function buildTree($allParentsWithChildren, $dataGroup, $key) 
+	{
+		// Cos I want to return an array
+		
+		$tree = $dataGroup[$key];
+		$dataGroupTree = array();
+
+		// Loop through all elements.
+		// foreach ($allParentsWithChildren[$key] as $gKey => $group) 
+		foreach ($allParentsWithChildren[$key] as $fKey => $fields)
+		{
+			if (isset($fields['parentKeyFor']))
+			{
+				foreach ($fields['parentKeyFor'] as $gKey => $parentKeysFor)
+				{
+					$dataGroupTree[$gKey] = ArrayHelper::buildTree($allParentsWithChildren, $dataGroup, $gKey);					
+				}
+			}
+		}
+		
+		if ($dataGroupTree) $tree['joins'] = $dataGroupTree;
+		return $tree;
+	}
 	
 }

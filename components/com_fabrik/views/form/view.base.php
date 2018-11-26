@@ -12,7 +12,8 @@
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\Registry\Registry;
-use Joomla\Utilities\ArrayHelper;
+//use Joomla\Utilities\ArrayHelper;
+use Fabrik\Helpers\ArrayHelper;
 
 jimport('joomla.application.component.view');
 
@@ -171,28 +172,295 @@ class FabrikViewFormBase extends FabrikView
 
 		$this->groups = $model->getGroupView($tmpl);
 		
-		foreach ($this->groups as $pkey => $p)
+		$this->groups = $model->getGroupView($tmpl);
+		$model = $this->getModel('form');
+
+	if ($_GET['testmode'] == 'json')
+	{
+		$details = new stdClass;
+		$details->rowid = $this->rowid;
+		$details->data = array();
+		
+
+		$this->joinGroups = array();
+		$allJoinGroups = array();
+		$detElements = array();
+		$dataGroup = array();
+		
+		$flatData = $model->getData();
+		$rearrData = array();
+		
+		foreach ($flatData as $k => $v)
 		{
-			$this->groups[$pkey]->isMain = $p->joinFromTable == $this->db_table_name || !$p->joinId;
-			
-			if ($p->joinId)
+			$te = explode('___', $k);
+			$element = new stdClass;
+			if (strstr($te[1], '_raw')) 
 			{
-				foreach ($this->groups as $ckey => $c)
+				$element->element_raw = $v;
+			}
+			
+			$element->value = $v;
+
+			$e = str_replace('_raw', '', $te[1]);
+			$rearrData[$te[0]][$e] = $element;
+		}
+
+
+		foreach ($this->groups as $pKey => $p)
+		{
+			$properties = array();
+			$joinFields = array();
+
+			if (isset($p->joinId) && !empty($p->joinId))
+			{
+				foreach ($rearrData[$p->tableJoin] as $e => $v)
 				{
-					if ($c->joinId)
+					if ($p->canRepeat)
 					{
-						$this->groups[$pkey]->childs = array();
-					
-						if ($c->joinFromTable == $p->tableJoin)
+						foreach ($p->subgroups as $sgk => $sgv)
 						{
-							$this->groups[$pkey]->childs[$ckey] = $c;
-							$this->groups[$ckey]->parent = $p->id;
+							if (!isset($sgv[$e]))
+							{
+								$p->subgroups[$sgk][$e] = new stdClass;
+								$p->subgroups[$sgk][$e]->element_raw = is_array($rearrData[$p->tableJoin][$e]->element_raw) ? $rearrData[$p->tableJoin][$e]->element_raw[$sgk] : $rearrData[$p->tableJoin][$e]->element_raw;
+								$p->subgroups[$sgk][$e]->value = is_array($rearrData[$p->tableJoin][$e]->value) ? $rearrData[$p->tableJoin][$e]->value[$sgk] : $rearrData[$p->tableJoin][$e]->value;
+							}						
 						}
 					}
+					else
+					{
+						if (!isset($p->elements[$e]))
+						{
+							$p->elements[$e] = new stdClass;
+							$p->elements[$e]->element_raw = $rearrData[$p->tableJoin][$e]->element_raw;
+							$p->elements[$e]->value = $rearrData[$p->tableJoin][$e]->value;
+						}						
+					}
+				}
+
+				$properties['groupId'] = $p->id;
+				$properties['title'] = $p->title;
+				$properties['joinId'] = $p->joinId;
+				$p->isMain = $p->joinFromTable == $this->db_table_name;
+				
+				if ($p->canRepeat)
+				{
+					foreach ($p->subgroups as $sgKey => $sGroup)
+					{
+						$tableSgKey = $p->tableJoin . '.' . $sgKey;
+						$dataGroup[$tableSgKey] = array();
+						$dataGroup[$tableSgKey]['repeatKey'] = $sgKey;
+						$dataGroup[$tableSgKey]['properties'] = $properties;
+						
+						
+						foreach ($sGroup as $sgElKey => $sgElement)
+						{
+							$dataGroup[$tableSgKey][$p->tableJoin . '.' . $sgElKey] = array();
+							$dataGroup[$tableSgKey][$p->tableJoin . '.' . $sgElKey]['elementName'] = $sgElKey;
+							$dataGroup[$tableSgKey][$p->tableJoin . '.' . $sgElKey]['element_raw'] = is_array($sgElement->element_raw) ? $sgElement->element_raw[$sgKey] : $sgElement->element_raw;
+							$dataGroup[$tableSgKey][$p->tableJoin . '.' . $sgElKey]['value'] = is_array($sgElement->value) ? $sgElement->value[$sgKey] : $sgElement->value;
+							if (explode('___', $sgElement->primary)[1] == $sgElKey)
+							{
+								$dataGroup[$tableSgKey][$p->tableJoin . '.' . $sgElKey]['isPK'] = true;
+							}
+
+							//$joinGroup->subgroups[$sgKey][$sgElKey]->displayValue = $sgElement->element_ro;
+						}
+						$dataGroup[$tableSgKey]['parentKeyTable'] = $p->joinFromTable;
+						$dataGroup[$tableSgKey]['parentKeyField'] = $p->tableKey;
+						$dataGroup[$tableSgKey]['parentKeyFull'] = $p->joinFromTable . '.' . $p->tableKey;
+						$dataGroup[$tableSgKey]['thisTable'] = $p->tableJoin;
+						$dataGroup[$tableSgKey]['thisKeyField'] = $p->tableJoinKey;
+						$dataGroup[$tableSgKey]['thisKeyFull'] = $p->tableJoin . '.' . $p->tableJoinKey;
+					}
+				}
+
+				else
+				{
+					$tableSgKey = $p->tableJoin;
+					$dataGroup[$tableSgKey] = array();
+					
+					foreach ($p->elements as $elKey => $element)
+					{
+						$dataGroup[$tableSgKey][$tableSgKey . '.' . $elKey] = array();
+						$dataGroup[$tableSgKey][$tableSgKey . '.' . $elKey]['elementName'] = $elKey;
+						$dataGroup[$tableSgKey][$tableSgKey . '.' . $elKey]['element_raw'] = $element->element_raw;
+						$dataGroup[$tableSgKey][$tableSgKey . '.' . $elKey]['value'] = is_array($element->value) && count($element->value) == 1 ? array_shift($element->value) : $element->value;
+						if (explode('___', $element->primary)[1] == $elKey)
+						{
+							$dataGroup[$tableSgKey][$tableSgKey . '.' . $elKey]['isPK'] = true;
+						}
+				
+						//$joinGroup->elements[$elKey]->displayValue = $element->element_ro;
+					}
+				$dataGroup[$tableSgKey]['parentKeyTable'] = $p->joinFromTable;
+				$dataGroup[$tableSgKey]['parentKeyField'] = $p->tableKey;
+				$dataGroup[$tableSgKey]['parentKeyFull'] = $p->joinFromTable . '.' . $p->tableKey;
+				$dataGroup[$tableSgKey]['thisTable'] = $p->tableJoin;
+				$dataGroup[$tableSgKey]['thisKeyField'] = $p->tableJoinKey;
+				$dataGroup[$tableSgKey]['thisKeyFull'] = $p->tableJoin . '.' . $p->tableJoinKey;
+				}
+				
+				//$allJoinGroups[$p->tableJoin] = $dataGroup->{$p->tableJoin};
+				//$subGroupKey = $k;
+		
+
+			}
+			else
+			{
+				$properties['id'] = $model->getId();
+				$properties['title'] = $form->label;
+				$detElements['thisTable'] = $this->db_table_name;
+				$detElements['primaryKeyValue'] = $this->rowid;
+				$tableSgKey = $this->db_table_name;
+
+				foreach ($p->elements as $gElKey => $element)
+				{
+					$detElements[$tableSgKey . '.' . $gElKey] = array();
+					$detElements[$tableSgKey . '.' . $gElKey]['elementName'] = $gElKey;
+					$detElements[$tableSgKey . '.' . $gElKey]['element_raw'] = $element->element_raw;
+					$detElements[$tableSgKey . '.' . $gElKey]['value'] = $element->value;
+					if (explode('___', $element->primary)[1] == $gElKey)
+					{
+						$detElements[$tableSgKey . '.' . $gElKey]['isPK'] = true;
+					}
+				}
+				
+				$dataGroup[$tableSgKey] = $detElements;				
+			}
+
+
+			if (!isset($dataGroup[$tableSgKey]['properties']))
+			{
+				$dataGroup[$tableSgKey]['properties'] = $properties;
+			}				
+
+		}
+
+		$flatData = $model->getData();
+		$parentKeysFor = array();
+		foreach ($dataGroup as $k => $v)
+		{
+			if (isset($v['thisKeyFull']))
+			{
+				$fk = $v['thisKeyFull'];
+				$dataFk = $v['thisTable'] . '___' . $v['thisKeyField'];
+				$repeat = $v['repeatKey'];
+/* 				if (!isset($v[$fk]))
+				{
+					$dataGroup[$k][$fk]['elementName'] = $v['thisKeyField'];
+					$dataGroup[$k][$fk]['element_raw'] = is_array($flatData[$dataFk . '_raw']) ? $flatData[$dataFk . '_raw'][$repeat] : $flatData[$dataFk . '_raw'];
+					$dataGroup[$k][$fk]['value'] = is_array($flatData[$dataFk]) ? $flatData[$dataFk][$repeat] : $flatData[$dataFk];
+				}
+ */			}
+			
+			foreach ($v as $eKey => $element)
+			{
+				if (isset($element['isPK']))
+				{
+					$v['primaryKey'] = $v[$eKey]['elementName'];
+					if (!isset($v['primaryKeyValue']))
+					{
+						$dataGroup[$k]['primaryKeyValue'] = $dataGroup[$k][$eKey]['element_raw'];
+					}
+				}
+				if ($v['parentKeyTable'] && $eKey == $dataGroup[$k]['thisKeyFull'])
+				{
+					$vpkTable = $v['parentKeyTable'];
+					$epkFull = $v['parentKeyFull'];
+					$dataGroup[$k]['parentKeyValue'] = $dataGroup[$k][$eKey]['element_raw'];
+					$dataGroup[$vpkTable][$epkFull]['parentKeyFor'][$k]['foreignKey'] = $eKey;
+					$dataGroup[$vpkTable][$epkFull]['parentKeyFor'][$k]['parentKey'] = $epkFull;
+					$dataGroup[$vpkTable][$epkFull]['parentKeyFor'][$k]['parentTable'] = $vpkTable;
+					$parentKeysFor[$epkFull] = $dataGroup[$vpkTable][$epkFull];
 				}
 			}
 		}
 		
+ 		$child = 'childData';
+		//$encoded = json_encode($datagroup);
+		//$datagroup = json_decode($encoded, true);
+		//$mergeJoinGroups = call_user_func_array('array_merge', $allJoinGroups);
+/* 		$subGroupKey = key($dataGroup);
+		$parentTable = $dataGroup[$subGroupKey]['parentKeyTable'];
+		$parentKey = $dataGroup[$subGroupKey]['parentKeyField'];
+		$parentKeyVal = $dataGroup[$subGroupKey]['parentKeyValue'];
+		$thisTable = $dataGroup[$subGroupKey]['thisTable'];
+		$thisKey = $dataGroup[$subGroupKey]['thisKeyField'];
+		$
+ */
+		$parentFields = array();
+		$allParentsWithChildren = array();
+		$allChildGroups = array();
+		$allParentsWithoutMain = array();
+		$mainGroup = null;
+		
+		foreach ($dataGroup as $dgName => $dgElements)
+		{
+			foreach ($dgElements as $dgElName => $dgElement)
+			{
+				$allParentsWithChildren[$dgName][$dgElName] = $dgElement;
+				if (isset($dgElement['parentKeyFor']))
+				{
+					$parentFields[$dgName][$dgElName] = $dgElement;
+					foreach ($dgElement['parentKeyFor'] as $chKey => $child)
+					{
+						$allParentsWithChildren[$chKey] = $dataGroup[$chKey];
+						$allChildGroups[$chKey] = $child['foreignKey'];
+					}
+				}
+				
+				if (!in_array($dgName, array_keys($allChildGroups)))
+				{
+					$mainGroup[$dgName] = $allParentsWithChildren[$dgName];
+				}
+			}
+		}
+/* 		$primaryKeyValue = $dataGroup[$this->db_table_name]['[primaryKeyValue]'];
+		$parentKey = $dataGroup[$this->db_table_name]['parentKeyFull'];
+		$thisKey = $dataGroup[$this->db_table_name]['thisKeyFull'];
+ */		
+		$dataGroupTree = array();
+		$key = key($mainGroup);
+		$mainGroupWithTree = $mainGroup;
+		foreach ($mainGroupWithTree[$key] as $fKey => $fields)
+		{
+			if (isset($fields['parentKeyFor']))
+			{
+				foreach ($fields['parentKeyFor'] as $gKey => $parentKeysFor)
+				{
+					$dataGroupTree[$gKey] = ArrayHelper::buildTree($allParentsWithChildren, $dataGroup, $gKey);					
+				}
+			}
+		}
+		
+		if ($dataGroupTree) $mainGroupWithTree[$key]['joins'] = $dataGroupTree;
+
+/* 	public function structured()
+	{
+		$rows = self::massid();
+		$tree = self::buildTree($rows);
+		return $tree;
+	}
+ */
+		$restructured = array();
+		$restructured[$key] = $dataGroup[$key];
+		$restructured[$key]['joins'] = $dataGroupTree;
+
+		
+		$details->data = $mainGroupWithTree;
+		
+		$this->details = $details;
+		
+		
+
+		//echo '<pre>';
+		print json_encode($this->details);
+		exit;
+		/// IF LÕPP
+	}
+
+			
 		$this->_repeatGroupButtons($tmpl);
 
 		JDEBUG ? $profiler->mark('form view after group view got') : null;
@@ -1451,4 +1719,5 @@ class FabrikViewFormBase extends FabrikView
 
 		$aHiddenFields = array_merge($aHiddenFields, array_values($fields));
 	}
+	
 }
