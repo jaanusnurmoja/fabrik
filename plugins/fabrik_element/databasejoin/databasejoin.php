@@ -732,8 +732,10 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		foreach ($aDdObjs as &$o)
 		{
-			// For values like '1"'
-			// $$$ hugh - added second two params so we set double_encode false
+			// decode first, to decode all hex entities (like &#39;)
+			$o->text = html_entity_decode($o->text, ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+			// Encode if necessary
 			if ($this->getDisplayType() != 'radio' && $this->getDisplayType() != 'checkbox')
 			{
 				$o->text = htmlspecialchars($o->text, ENT_NOQUOTES, 'UTF-8', false);
@@ -1535,7 +1537,15 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 			{
 				for ($i = 0; $i < count($defaultLabels); $i++)
 				{
-					$url               = $popUrl . FArrayHelper::getValue($defaultValues, $i, '');
+					$value = FArrayHelper::getValue($defaultValues, $i, '');
+
+					// joins in repeat groups
+					if (is_object($value))
+					{
+						$value = FArrayHelper::getValue($value, 0, '');
+					}
+
+					$url               = $popUrl . $value;
 					$defaultLabels[$i] = '<a href="' . JRoute::_($url) . '">' . FArrayHelper::getValue($defaultLabels, $i) . '</a>';
 				}
 			}
@@ -2264,7 +2274,18 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 			foreach ($rows as &$r)
 			{
-				$r->text = strip_tags(FText::_($r->text));
+				// translate
+				$r->text = FText::_($r->text);
+
+				// decode first, to decode all hex entities (like &#39;)
+				$r->text = html_entity_decode($r->text, ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+				// Encode if necessary
+				if (!in_array($element->get('filter_type'), array('checkbox')))
+				{
+					$r->text = strip_tags($r->text);
+					$r->text = htmlspecialchars($r->text, ENT_NOQUOTES, 'UTF-8', false);
+				}
 			}
 
 			$this->getFilterDisplayValues($default, $rows);
@@ -2392,6 +2413,7 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 			return $rows;
 		}
+
 		/*
 		 * list of all tables that have been joined to -
 		* if duplicated then we need to join using a table alias
@@ -2826,9 +2848,9 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
 
 		$db->setQuery($query, $offset, $limit);
 		$sql     = (string) $query;
+		FabrikHelperHTML::debug($sql, 'join checkboxRows:');
 		$groupBy = FabrikString::shortColName($groupBy);
 		$rows    = $db->loadObjectList($groupBy);
-		//ksort($rows);
 
 		return $rows;
 	}

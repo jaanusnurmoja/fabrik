@@ -504,6 +504,13 @@ class FabrikFEModelList extends JModelForm
      */
 	protected $localPdf = false;
 
+
+	/**
+	 * Used to allow getData() to get the query from finesseDataI() for debug if an exception is thrown
+	 * @var string
+	 */
+	protected $queryDebug = '';
+
 	/**
 	 * Load form
 	 *
@@ -925,15 +932,19 @@ class FabrikFEModelList extends JModelForm
 		{
 			$item = $this->getTable();
 			$msg = 'Fabrik has generated an incorrect query for the list ' . $item->label . ': <br />';
+
+			// If Fabrik debug, show msg
 			if (FabrikHelperHTML::isDebug(true))
 			{
 				$msg .= '<br /><pre>' . $e->getMessage() . '</pre>';
 			}
 
+			// Only show actual query if J! is in debug mode
 			if ($this->config->get('debug'))
             {
-
+				$msg .= '<br /><pre>' . (string)$this->queryDebug . '</pre><br />';
             }
+
 			throw new RuntimeException($msg, 500);
 		}
 
@@ -963,6 +974,7 @@ class FabrikFEModelList extends JModelForm
 		$fabrikDb = $this->getDb();
 		$this->setBigSelects();
 		$query = $this->buildQuery();
+		$this->queryDebug = $query;
 //echo $query;
 		// $$$ rob - if merging joined data then we don't want to limit
 		// the query as we have already done so in buildQuery()
@@ -4492,12 +4504,67 @@ class FabrikFEModelList extends JModelForm
 	}
 
 	/**
+	 *
+	 */
+
+	protected function checkMenuAccess()
+	{
+		if (!array_key_exists('menu_access', $this->access))
+		{
+			$this->access->menu_access = true;
+
+			if (!$this->app->isClient('administrator'))
+			{
+				$params = $this->getParams();
+
+				if ($params->get('menu_access_only', '0') === '1')
+				{
+					$itemId = $this->app->input->getInt('Itemid', '');
+
+					if (empty($itemId))
+					{
+						$this->access->menu_access = false;
+					}
+					else
+					{
+
+						$component = JComponentHelper::getComponent('com_fabrik');
+						$package   = $this->app->getUserState('com_fabrik.package', 'fabrik');
+						$db        = FabrikWorker::getDbo(true);
+						$id        = (int) $this->getId();
+						$query     = $db->getQuery(true);
+						$query->select('id')
+							->from('#__menu')
+							->where('component_id = ' . (int) $component->id)
+							->where('type = "component"')
+							->where('link = "index.php?option=com_' . $package . '&view=list&listid=' . (int) $id . '"');
+						$db->setQuery($query);
+						$menuIds = $db->loadColumn();
+
+						if (!in_array($itemId, $menuIds))
+						{
+							$this->access->menu_access = false;
+						}
+					}
+				}
+			}
+		}
+
+		return $this->access->menu_access;
+	}
+
+	/**
 	 * Check user can view the list
 	 *
 	 * @return  bool  can view or not
 	 */
 	public function canView()
 	{
+		if (!$this->checkMenuAccess())
+		{
+			return false;
+		}
+
 		if (!array_key_exists('view', $this->access))
 		{
 			$groups = $this->user->getAuthorisedViewLevels();
@@ -5315,7 +5382,8 @@ class FabrikFEModelList extends JModelForm
 		 * multiple list plugins, and one has related data to another, and they happen to use that element
 		 * in a plugin filter
 		 */
-		if (!$this->app->input->get('fabrik_incsessionfilters', true))
+		if (!$this->app->input->get('fabrik_incsessionfilters', true)
+			|| !$this->app->input->get('fabrik_storesessionfilters', true))
 		{
 			return;
 		}
@@ -11302,7 +11370,15 @@ class FabrikFEModelList extends JModelForm
 					/* $$$ rob 10/03/2012 changed menu param to listlayout to avoid the list menu item
 					 * options also being used for the form/details view template
 					*/
-					$this->tmpl = FabrikWorker::getMenuOrRequestVar('listlayout', $this->tmpl, $this->isMambot);
+					$this->tmpl = FabrikWorker::getMenuOrRequestVar(
+						'listlayout',
+						$this->tmpl,
+						$this->isMambot,
+						'menu',
+						array(
+							'listid' => $this->getId()
+						)
+					);
 				}
 			}
 
@@ -11311,14 +11387,12 @@ class FabrikFEModelList extends JModelForm
 				$this->tmpl = FabrikWorker::j3() ? 'bootstrap' : 'default';
 			}
 
+			/*
 			if ($this->app->scope !== 'mod_fabrik_list')
 			{
-				/* $$$ rob 10/03/2012 changed menu param to listlayout to avoid the list menu item
-				 * options also being used for the form/details view template
-				*/
-				// $this->tmpl = FabrikWorker::getMenuOrRequestVar('fabriklayout', $this->tmpl, $this->isMambot);
 				$this->tmpl = FabrikWorker::getMenuOrRequestVar('listlayout', $this->tmpl, $this->isMambot);
 			}
+			*/
 
 			if ($document->getType() === 'pdf')
 			{

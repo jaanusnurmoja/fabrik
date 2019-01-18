@@ -1011,7 +1011,11 @@ EOD;
 			// Require js test - list with no cal loading ajax form with cal
 			if (version_compare(JVERSION, '3.7', '>='))
 			{
-				self::calendar();
+				/**
+				 * don't do this in the framework any more, as the new jdate element means we can't include the old
+                 * date JS if a jdate is being used, so the old date element now calls calendar() when it needs it
+                 */
+				//self::calendar();
 			}
 			else
 			{
@@ -2029,7 +2033,7 @@ EOD;
 
 		$json = self::autoCompleteOptions($htmlId, $elementId, $formId, $plugin, $opts);
 		$str  = json_encode($json);
-		JText::script('COM_FABRIK_NO_RECORDS');
+		JText::script('COM_FABRIK_NO_AUTOCOMPLETE_RECORDS');
 		JText::script('COM_FABRIK_AUTOCOMPLETE_AJAX_ERROR');
 		$jsFile = 'autocomplete';
 		$className = 'AutoComplete';

@@ -14,9 +14,6 @@ use Twilio\Options;
 use Twilio\Values;
 use Twilio\Version;
 
-/**
- * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
- */
 class SimList extends ListResource {
     /**
      * Construct the SimList
@@ -131,7 +128,8 @@ class SimList extends ListResource {
     /**
      * Constructs a SimContext
      * 
-     * @param string $sid The sid
+     * @param string $sid A 34 character string that uniquely identifies this
+     *                    resource.
      * @return \Twilio\Rest\Wireless\V1\SimContext 
      */
     public function getContext($sid) {

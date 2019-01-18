@@ -25,7 +25,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             'ajaxValidation': false,
             'showLoader'    : false,
             'customJsAction': '',
-            'plugins'       : [],
+            'plugins'       : {},
             'ajaxmethod'    : 'post',
             'inlineMessage' : true,
             'print'         : false,
@@ -49,7 +49,6 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             this.id = id;
             this.result = true; //set this to false in window.fireEvents to stop current action (e.g. stop form submission)
             this.setOptions(options);
-            this.plugins = this.options.plugins;
             this.options.pages = $H(this.options.pages);
             this.subGroups = $H({});
             this.currentPage = this.options.start_page;
@@ -68,9 +67,12 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             this.fx.validations = {};
             this.setUpAll();
             this._setMozBoxWidths();
-            (function () {
-                this.duplicateGroupsToMin();
-            }.bind(this)).delay(1000);
+
+            if (this.options.editable) {
+                (function () {
+                    this.duplicateGroupsToMin();
+                }.bind(this)).delay(1000);
+            }
 
             // Delegated element events
             this.events = {};
@@ -1047,6 +1049,12 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                     return;
                 }
             }
+
+            if (!el.shouldAjaxValidate())
+            {
+                return;
+            }
+
             Fabrik.fireEvent('fabrik.form.element.validation.start', [this, el, e]);
             if (this.result === false) {
                 this.result = true;
@@ -1310,7 +1318,14 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             var apply = this._getButton('apply');
 
             if (!submit && !apply) {
-                return;
+                // look for a button element set to submit
+                if (this.form.getElement('button[type=submit]'))
+                {
+                    submit = this.form.getElement('button[type=submit]');
+                }
+                else {
+                    return;
+                }
             }
             var del = this._getButton('delete'),
                 copy = this._getButton('Copy');
@@ -1656,6 +1671,7 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                                         }
                                         // Query the list to get the updated data
                                         Fabrik.fireEvent('fabrik.form.submitted', [this, json]);
+
                                         if (btn.name !== 'apply') {
                                             if (clear_form) {
                                                 this.clearForm();
@@ -1665,6 +1681,8 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                                                 Fabrik.Windows[this.options.fabrik_window_id].close();
                                             }
                                         }
+
+                                        Fabrik.fireEvent('fabrik.form.submitted.end', [this, json]);
                                     } else {
                                         Fabrik.fireEvent('fabrik.form.submit.failed', [this, json]);
                                         // Stop spinner
@@ -1981,6 +1999,11 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             this.subGroups.set(i, subGroup.clone());
             if (subgroups.length <= 1) {
                 this.hideLastGroup(i, subGroup);
+                this.formElements.each(function (e, k) {
+                    if (e.groupid === i && typeOf(e.element) !== 'null') {
+                        this.removeMustValidate(e);
+                    }
+                }.bind(this));
                 document.id('fabrik_repeat_group_' + i + '_added').value = '0';
                 Fabrik.fireEvent('fabrik.form.group.delete.end', [this, e, i, delIndex]);
             } else {
@@ -2169,6 +2192,13 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
 
                 this.repeatGroupMarkers.set(i, this.repeatGroupMarkers.get(i) + 1);
                 document.id('fabrik_repeat_group_' + i + '_added').value = '1';
+
+                this.formElements.each(function (e, k) {
+                    if (e.groupid === i && typeOf(e.element) !== 'null') {
+                        this.addMustValidate(e);
+                    }
+                }.bind(this));
+
                 return;
             }
 
@@ -2561,6 +2591,17 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
             }
         },
 
+        removeMustValidate: function (el) {
+            if (this.options.ajaxValidation && this.options.toggleSubmit) {
+                delete this.mustValidateEls[el.element.id];
+                if (el.options.mustValidate) {
+                    if (!this.mustValidateEls.hasValue(true)) {
+                        this.toggleSubmit(true);
+                    }
+                }
+            }
+        },
+
         toggleSubmit: function (on) {
             var submit = this._getButton('Submit');
             if (typeOf(submit) !== 'null') {
@@ -2586,6 +2627,14 @@ define(['jquery', 'fab/encoder', 'fab/fabrik', 'lib/debounce/jquery.ba-throttle-
                 }
                 Fabrik.fireEvent('fabrik.form.togglesubmit', [this, on]);
             }
+        },
+
+        addPlugins: function (a) {
+            var self = this;
+            jQuery.each(a, function (k, p) {
+                p.form = self;
+            });
+            this.plugins = a;
         }
     });
 

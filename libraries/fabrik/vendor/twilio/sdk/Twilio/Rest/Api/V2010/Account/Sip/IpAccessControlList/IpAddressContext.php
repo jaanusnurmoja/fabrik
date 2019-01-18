@@ -19,9 +19,11 @@ class IpAddressContext extends InstanceContext {
      * Initialize the IpAddressContext
      * 
      * @param \Twilio\Version $version Version that contains the resource
-     * @param string $accountSid The account_sid
-     * @param string $ipAccessControlListSid The ip_access_control_list_sid
-     * @param string $sid The sid
+     * @param string $accountSid The unique sid that identifies this account
+     * @param string $ipAccessControlListSid The IpAccessControlList Sid that
+     *                                       identifies the IpAddress resources to
+     *                                       fetch
+     * @param string $sid A string that identifies the IpAddress resource to fetch
      * @return \Twilio\Rest\Api\V2010\Account\Sip\IpAccessControlList\IpAddressContext 
      */
     public function __construct(Version $version, $accountSid, $ipAccessControlListSid, $sid) {
@@ -41,6 +43,7 @@ class IpAddressContext extends InstanceContext {
      * Fetch a IpAddressInstance
      * 
      * @return IpAddressInstance Fetched IpAddressInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function fetch() {
         $params = Values::of(array());
@@ -65,6 +68,7 @@ class IpAddressContext extends InstanceContext {
      * 
      * @param array|Options $options Optional Arguments
      * @return IpAddressInstance Updated IpAddressInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function update($options = array()) {
         $options = new Values($options);
@@ -72,6 +76,7 @@ class IpAddressContext extends InstanceContext {
         $data = Values::of(array(
             'IpAddress' => $options['ipAddress'],
             'FriendlyName' => $options['friendlyName'],
+            'CidrPrefixLength' => $options['cidrPrefixLength'],
         ));
 
         $payload = $this->version->update(
@@ -94,6 +99,7 @@ class IpAddressContext extends InstanceContext {
      * Deletes the IpAddressInstance
      * 
      * @return boolean True if delete succeeds, false otherwise
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function delete() {
         return $this->version->delete('delete', $this->uri);

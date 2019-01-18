@@ -2265,7 +2265,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$element->hidden         = $this->isHidden();
 		$element->id             = $this->getHTMLId($c);
 		$element->className      = 'fb_el_' . $element->id;
-		$element->containerClass = $this->containerClass($element);
+		//$element->containerClass = $this->containerClass($element);
 		$element->element        = $this->preRenderElement($model->data, $c);
 
 		// Ensure that view data property contains the same html as the group's element
@@ -2284,6 +2284,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$element->errorTag   = $this->addErrorHTML($c, $tmpl);
 		$element->element_ro = $this->getROElement($model->data, $c);
 		$element->value      = $this->getValue($model->data, $c);
+		$element->containerClass = $this->containerClass($element);
 
 		$elName = $this->getFullName(true, false);
 
@@ -2406,7 +2407,9 @@ class PlgFabrik_Element extends FabrikPlugin
 			$c[] = 'fabrikError';
 		}
 
-		$c[] = $this->getParams()->get('containerclass');
+		$c[] = $this->getParams()->get('containerclass', '');
+
+		$c[] = $this->getRowClassRO($element);
 
 		return implode(' ', $c);
 	}
@@ -3156,7 +3159,8 @@ class PlgFabrik_Element extends FabrikPlugin
 		$filters   = $listModel->getFilterArray();
 
 		// $$$ rob test for db join fields
-		$elName = $this->getFilterFullName();
+		//$elName = $this->getFilterFullName();
+		$elName = $this->getFullName(true, false);
 		$elid   = $this->getElement()->id;
 		$f      = JFilterInput::getInstance();
 		$data   = $f->clean($_REQUEST, 'array');
@@ -3349,6 +3353,22 @@ class PlgFabrik_Element extends FabrikPlugin
 			}
 
 			$this->getFilterDisplayValues($default, $rows);
+
+			foreach ($rows as &$r)
+			{
+				// translate
+				$r->text = FText::_($r->text);
+
+				// decode first, to decode all hex entities (like &#39;)
+				$r->text = html_entity_decode($r->text, ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+				// Encode if necessary
+				if (!in_array($element->get('filter_type'), array('checkbox')))
+				{
+					$r->text = strip_tags($r->text);
+					$r->text = htmlspecialchars($r->text, ENT_NOQUOTES, 'UTF-8', false);
+				}
+			}
 		}
 
 		switch ($element->filter_type)
@@ -7526,6 +7546,26 @@ class PlgFabrik_Element extends FabrikPlugin
 			}
 		}
 	}
+
+	/**
+	 * Set row class
+	 *
+	 * @param   object  $element  element object
+	 *
+	 * @return  null
+	 */
+	public function getRowClassRO($element)
+	{
+		$rowClass = $this->getParams()->get('use_as_row_class', '0');
+
+		if ($rowClass === '1')
+		{
+			return FabrikString::getRowClass($element->value, $this->element->name);
+		}
+
+		return '';
+	}
+
 
 	/**
 	 * Unset the element models access

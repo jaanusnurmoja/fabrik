@@ -39,7 +39,8 @@ class FeedbackSummaryInstance extends InstanceResource {
      * @param mixed[] $payload The response payload
      * @param string $accountSid The unique id of the Account responsible for
      *                           creating this Call
-     * @param string $sid The sid
+     * @param string $sid A string that uniquely identifies this feedback summary
+     *                    resource
      * @return \Twilio\Rest\Api\V2010\Account\Call\FeedbackSummaryInstance 
      */
     public function __construct(Version $version, array $payload, $accountSid, $sid = null) {
@@ -90,6 +91,7 @@ class FeedbackSummaryInstance extends InstanceResource {
      * Fetch a FeedbackSummaryInstance
      * 
      * @return FeedbackSummaryInstance Fetched FeedbackSummaryInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function fetch() {
         return $this->proxy()->fetch();
@@ -99,6 +101,7 @@ class FeedbackSummaryInstance extends InstanceResource {
      * Deletes the FeedbackSummaryInstance
      * 
      * @return boolean True if delete succeeds, false otherwise
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function delete() {
         return $this->proxy()->delete();

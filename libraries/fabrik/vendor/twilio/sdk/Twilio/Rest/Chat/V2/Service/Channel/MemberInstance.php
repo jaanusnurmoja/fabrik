@@ -28,6 +28,7 @@ use Twilio\Version;
  * @property integer lastConsumedMessageIndex
  * @property \DateTime lastConsumptionTimestamp
  * @property string url
+ * @property string attributes
  */
 class MemberInstance extends InstanceResource {
     /**
@@ -35,9 +36,10 @@ class MemberInstance extends InstanceResource {
      * 
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
-     * @param string $serviceSid The service_sid
-     * @param string $channelSid The channel_sid
-     * @param string $sid The sid
+     * @param string $serviceSid The unique id of the Service this member belongs
+     *                           to.
+     * @param string $channelSid The unique id of the Channel for this member.
+     * @param string $sid Key that uniquely defines the member to fetch.
      * @return \Twilio\Rest\Chat\V2\Service\Channel\MemberInstance 
      */
     public function __construct(Version $version, array $payload, $serviceSid, $channelSid, $sid = null) {
@@ -56,6 +58,7 @@ class MemberInstance extends InstanceResource {
             'lastConsumedMessageIndex' => Values::array_get($payload, 'last_consumed_message_index'),
             'lastConsumptionTimestamp' => Deserialize::dateTime(Values::array_get($payload, 'last_consumption_timestamp')),
             'url' => Values::array_get($payload, 'url'),
+            'attributes' => Values::array_get($payload, 'attributes'),
         );
 
         $this->solution = array(
@@ -89,6 +92,7 @@ class MemberInstance extends InstanceResource {
      * Fetch a MemberInstance
      * 
      * @return MemberInstance Fetched MemberInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function fetch() {
         return $this->proxy()->fetch();
@@ -98,6 +102,7 @@ class MemberInstance extends InstanceResource {
      * Deletes the MemberInstance
      * 
      * @return boolean True if delete succeeds, false otherwise
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function delete() {
         return $this->proxy()->delete();
@@ -108,6 +113,7 @@ class MemberInstance extends InstanceResource {
      * 
      * @param array|Options $options Optional Arguments
      * @return MemberInstance Updated MemberInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function update($options = array()) {
         return $this->proxy()->update($options);

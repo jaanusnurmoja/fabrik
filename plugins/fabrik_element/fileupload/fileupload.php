@@ -2242,6 +2242,8 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 			$myFileName = FArrayHelper::getValue($myFileName, $repeatCounter, '');
 		}
 
+		$myFileDir = '';
+
 		if (array_key_exists($elNameRaw, $aData))
 		{
 			if (is_array($aData[$elNameRaw]))
@@ -2251,7 +2253,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		}
 		else
 		{
-			if (is_array($aData[$elName]))
+			if (array_key_exists($elName, $aData) && is_array($aData[$elName]))
 			{
 				$myFileDir = ArrayHelper::getValue($aData[$elName], 'ul_end_dir', '');
 			}
@@ -2492,6 +2494,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 		$allRenders = implode('<br/>', $allRenders);
 		$allRenders .= ($allRenders == '') ? '' : '<br/>';
 		$capture = '';
+		$accept = '';
 		$fileTypes = implode(',', $this->_getAllowedExtension(false));
 
 		switch ($device_capture)
@@ -2499,25 +2502,31 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 			case 1:
 				$capture = ' capture="camera"';
 			case 2:
-				$capture = ' accept="image/*"' . $capture;
+				$accept = ' accept="image/*"';
+				break;
+			case 7:
+				$capture = ' capture="user"';
+				$accept = ' accept="image/*"';
+				break;
+			case 8:
+				$capture = ' capture="environment"';
+				$accept = ' accept="image/*"';
 				break;
 			case 3:
 				$capture = ' capture="microphone"';
 			case 4:
-				$capture = ' accept="audio/*"' . $capture;
+				$accept = ' accept="audio/*"';
 				break;
 			case 5:
 				$capture = ' capture="camcorder"';
 			case 6:
-				$capture = ' accept="video/*"' . $capture;
+				$accept = ' accept="video/*"';
 				break;
 			default:
-				$capture = $fileTypes;
-				$capture = $capture ? ' accept=".' . $capture . '"' : '';
+				$capture = '';
+				$accept = ' accept="' . $fileTypes . '"';
 				break;
 		}
-
-		$accept = !empty($fileTypes) ? ' accept="' . $fileTypes . '" ' : ' ';
 
 		$str[] = $allRenders . '<input class="fabrikinput" name="' . $name . '" type="file" ' . $accept . ' id="' . $id . '" ' . $capture . ' />' . "\n";
 
@@ -3459,7 +3468,10 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 			header('Accept-Ranges: bytes');
 			header('Content-Length: ' . $thisFileInfo['filesize']);
 			header('Content-Type: ' . $thisFileInfo['mime_type']);
-			header('Content-Disposition: attachment; filename="' . $thisFileInfo['filename'] . '"');
+			if ($params->get('fu_open_in_browser', '0') == '0' )
+                        {
+                            header('Content-Disposition: attachment; filename="' . $thisFileInfo['filename'] . '"');
+                        }
 
 			// Serve up the file
 			$storage->stream($filePath);

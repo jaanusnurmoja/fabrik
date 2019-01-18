@@ -2,14 +2,17 @@
 <form>
 	<fields name="params">
 
+
+		<field name="fusionchart_description"
+			   type="note"
+			   class="alert alert-info"
+			   close="true"
+			   description="PLG_VISUALIZATION_FUSIONCHART_DESCRIPTION" />
+
 		<fieldset name="options"
 		          repeat="1"
 		          repeatcontrols="1"
 		          label="COM_FABRIK_OPTIONS">
-
-			<field name="deprecated"
-			       type="spacer"
-			       label="COM_FABRIK_DEPRECATED_PLUGIN"/>
 
 			<field description="PLG_VISUALIZATION_FUSIONCHART_CONNECTION_LABEL_DESC"
 			       label="PLG_VISUALIZATION_FUSIONCHART_CONNECTION_LABEL"
@@ -128,15 +131,18 @@
 
 		<fieldset label="PLG_VISUALIZATION_FUSIONCHART_SPACER_GRAPH_ATTRIBUTES"
 		          name="graph_attributes">
-			<field default="free_old"
-			       description="PLG_VISUALIZATION_FUSIONCHART_VERSION_DESC"
-			       label="PLG_VISUALIZATION_FUSIONCHART_VERSION_LABEL"
-			       name="fusionchart_version"
-			       type="list">
-				<option value="free_old">Default</option>
-				<option value="free_22">Free 2.2</option>
-				<option value="pro_30">Pro 3.0</option>
-			</field>
+
+			<field name="fusionchart_library"
+					type="folderlist"
+					label="PLG_VISUALIZATION_FUSIONCHART_CHART_LIB_LABEL"
+					description="PLG_VISUALIZATION_FUSIONCHART_CHART_LIB_LABEL"
+					directory="/plugins/fabrik_visualization/fusionchart/libs"
+					hide_none="true"
+					hide_default="false"
+					recursive="false"
+					default="fusionchart-suite-xt"
+			/>
+
 			<field label="PLG_VISUALIZATION_FUSIONCHART_CHART_TYPE_LABEL"
 			       name="fusionchart_type"
 			       type="list">
@@ -147,6 +153,8 @@
 				<option value="COLUMN3D">Column 3D</option>
 				<option value="DOUGHNUT2D">Doughnut 2D</option>
 				<option value="DOUGHNUT3D">Doughnut 3D</option>
+				<option value="FUNNEL2D">Funnel 2D</option>
+				<option value="FUNNEL3D">Funnel 3D</option>
 				<option value="LINE">Line</option>
 				<option value="PIE2D">Pie 2D</option>
 				<option value="PIE3D">Pie 3D</option>
@@ -170,6 +178,8 @@
 				<option value="SCROLLLINE2D">Scroll Line 2D</option>
 				<option value="SCROLLSTACKEDCOLUMN2D">Scroll Stacked Column 2D</option>
 				<option value="SCATTER">Scatter</option>
+				<option value="SPLINE">Spline</option>
+				<option value="SPLINEAREA">Spline Area</option>
 			</field>
 
 			<field default="1"
@@ -275,6 +285,16 @@
 			       label="PLG_VISUALIZATION_FUSIONCHART_TREND_ISZONE_LABEL"
 			       name="fusionchart_trendiszone"
 			       type="radio">
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
+			</field>
+
+			<field default="0"
+				   class="btn-group"
+				   description="PLG_VISUALIZATION_FUSIONCHART_TREND_MERGE_DESC"
+				   label="PLG_VISUALIZATION_FUSIONCHART_TREND_MERGE_LABEL"
+				   name="fusionchart_trendmerge"
+				   type="radio">
 				<option value="0">JNO</option>
 				<option value="1">JYES</option>
 			</field>
@@ -783,6 +803,36 @@
 			       name="fusionchart_chart_bottommargin"
 			       size="3"
 			       type="text"/>
+
+		</fieldset>
+
+		<fieldset label="PLG_VISUALIZATION_FUSIONCHART_EXPORT"
+				  name="export">
+
+			<field default="0"
+				   class="btn-group"
+				   description="PLG_VISUALIZATION_FUSIONCHART_EXPORT_DESC"
+				   label="PLG_VISUALIZATION_FUSIONCHART_EXPORT_LABEL"
+				   name="fusionchart_export"
+				   type="radio">
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
+			</field>
+
+			<field class="input-large"
+				   description="PLG_VISUALIZATION_FUSIONCHART_EXPORT_PATH_DESC"
+				   label="PLG_VISUALIZATION_FUSIONCHART_EXPORT_PATH_LABEL"
+				   name="fusionchart_export_path"
+				   size="3"
+				   type="text"/>
+
+			<field class="input-large"
+				   description="PLG_VISUALIZATION_FUSIONCHART_EXPORT_FILENAME_DESC"
+				   label="PLG_VISUALIZATION_FUSIONCHART_EXPORT_FILENAME_LABEL"
+				   name="fusionchart_export_filename"
+				   size="3"
+				   type="text"/>
+
 
 		</fieldset>
 

@@ -18,8 +18,11 @@ class CredentialList extends ListResource {
      * Construct the CredentialList
      * 
      * @param Version $version Version that contains the resource
-     * @param string $accountSid The account_sid
-     * @param string $credentialListSid The credential_list_sid
+     * @param string $accountSid The unique id of the Account that is responsible
+     *                           for this resource.
+     * @param string $credentialListSid The unique id that identifies the
+     *                                  credential list that includes this
+     *                                  credential
      * @return \Twilio\Rest\Api\V2010\Account\Sip\CredentialList\CredentialList 
      */
     public function __construct(Version $version, $accountSid, $credentialListSid) {
@@ -120,9 +123,10 @@ class CredentialList extends ListResource {
     /**
      * Create a new CredentialInstance
      * 
-     * @param string $username The username
-     * @param string $password The password
+     * @param string $username The username for this credential.
+     * @param string $password The password will not be returned in the response.
      * @return CredentialInstance Newly created CredentialInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function create($username, $password) {
         $data = Values::of(array('Username' => $username, 'Password' => $password, ));
@@ -145,7 +149,7 @@ class CredentialList extends ListResource {
     /**
      * Constructs a CredentialContext
      * 
-     * @param string $sid The sid
+     * @param string $sid The unique id that identifies the resource to fetch.
      * @return \Twilio\Rest\Api\V2010\Account\Sip\CredentialList\CredentialContext 
      */
     public function getContext($sid) {

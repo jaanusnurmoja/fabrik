@@ -34,7 +34,7 @@ class IpAccessControlListInstance extends InstanceResource {
      * @param mixed[] $payload The response payload
      * @param string $accountSid A 34 character string that uniquely identifies
      *                           this resource.
-     * @param string $sid Fetch by unique ip-access-control-list Sid
+     * @param string $sid A string that identifies the resource to fetch
      * @return \Twilio\Rest\Api\V2010\Account\Sip\IpAccessControlListInstance 
      */
     public function __construct(Version $version, array $payload, $accountSid, $sid = null) {
@@ -76,6 +76,7 @@ class IpAccessControlListInstance extends InstanceResource {
      * Fetch a IpAccessControlListInstance
      * 
      * @return IpAccessControlListInstance Fetched IpAccessControlListInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function fetch() {
         return $this->proxy()->fetch();
@@ -86,6 +87,7 @@ class IpAccessControlListInstance extends InstanceResource {
      * 
      * @param string $friendlyName A human readable description of this resource
      * @return IpAccessControlListInstance Updated IpAccessControlListInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function update($friendlyName) {
         return $this->proxy()->update($friendlyName);
@@ -95,6 +97,7 @@ class IpAccessControlListInstance extends InstanceResource {
      * Deletes the IpAccessControlListInstance
      * 
      * @return boolean True if delete succeeds, false otherwise
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function delete() {
         return $this->proxy()->delete();

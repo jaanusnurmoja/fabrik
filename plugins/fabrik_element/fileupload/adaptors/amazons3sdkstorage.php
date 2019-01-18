@@ -369,7 +369,7 @@ class Amazons3sdkstorage extends FabrikStorageAdaptor
 	 * @return  bool  returns false if error
 	 */
 
-	public function stream($filepath, $chunkSize = 1024 * 1024)
+	public function stream($filepath, $chunkSize = 1048576)
 	{
 		/**
 		 * Use the S3 stream wrapper, so we can treat the file "normally", through the s3:// protocol
@@ -614,10 +614,10 @@ class Amazons3sdkstorage extends FabrikStorageAdaptor
 		$thumbdir = rtrim($thumbdir, '/\\') . '/';
 
 		$file = $w->parseMessageForPlaceHolder($file);
-		$file = str_replace($ulDir, $thumbdir, $file);
 
 		$f = basename($file);
 		$dir = dirname($file);
+		$dir = str_replace($ulDir, $thumbdir, $dir);
 
 		// Jaanus added: create also thumb suffix as for filesystemstorage
 		$ext = JFile::getExt($f);
@@ -661,10 +661,10 @@ class Amazons3sdkstorage extends FabrikStorageAdaptor
 		$thumbdir = $w->parseMessageForPlaceHolder($thumbdir);
 
 		$file = $w->parseMessageForPlaceHolder($file);
-		$file = str_replace($ulDir, $thumbdir, $file);
 
 		$f = basename($file);
 		$dir = dirname($file);
+		$dir = str_replace($ulDir, $thumbdir, $dir);
 		$file = $dir . '/' . $f;
 
 		if ($origFile === $file)

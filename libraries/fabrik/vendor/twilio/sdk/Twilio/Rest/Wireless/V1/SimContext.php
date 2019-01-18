@@ -18,8 +18,6 @@ use Twilio\Values;
 use Twilio\Version;
 
 /**
- * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
- * 
  * @property \Twilio\Rest\Wireless\V1\Sim\UsageRecordList usageRecords
  * @property \Twilio\Rest\Wireless\V1\Sim\DataSessionList dataSessions
  */
@@ -31,7 +29,8 @@ class SimContext extends InstanceContext {
      * Initialize the SimContext
      * 
      * @param \Twilio\Version $version Version that contains the resource
-     * @param string $sid The sid
+     * @param string $sid A 34 character string that uniquely identifies this
+     *                    resource.
      * @return \Twilio\Rest\Wireless\V1\SimContext 
      */
     public function __construct(Version $version, $sid) {
@@ -47,6 +46,7 @@ class SimContext extends InstanceContext {
      * Fetch a SimInstance
      * 
      * @return SimInstance Fetched SimInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function fetch() {
         $params = Values::of(array());
@@ -65,6 +65,7 @@ class SimContext extends InstanceContext {
      * 
      * @param array|Options $options Optional Arguments
      * @return SimInstance Updated SimInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function update($options = array()) {
         $options = new Values($options);
@@ -96,6 +97,16 @@ class SimContext extends InstanceContext {
         );
 
         return new SimInstance($this->version, $payload, $this->solution['sid']);
+    }
+
+    /**
+     * Deletes the SimInstance
+     * 
+     * @return boolean True if delete succeeds, false otherwise
+     * @throws TwilioException When an HTTP error occurs.
+     */
+    public function delete() {
+        return $this->version->delete('delete', $this->uri);
     }
 
     /**

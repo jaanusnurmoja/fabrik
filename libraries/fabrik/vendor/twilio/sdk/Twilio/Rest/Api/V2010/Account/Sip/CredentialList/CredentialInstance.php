@@ -31,9 +31,12 @@ class CredentialInstance extends InstanceResource {
      * 
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
-     * @param string $accountSid The account_sid
-     * @param string $credentialListSid The credential_list_sid
-     * @param string $sid The sid
+     * @param string $accountSid The unique id of the Account that is responsible
+     *                           for this resource.
+     * @param string $credentialListSid The unique id that identifies the
+     *                                  credential list that includes this
+     *                                  credential
+     * @param string $sid The unique id that identifies the resource to fetch.
      * @return \Twilio\Rest\Api\V2010\Account\Sip\CredentialList\CredentialInstance 
      */
     public function __construct(Version $version, array $payload, $accountSid, $credentialListSid, $sid = null) {
@@ -80,6 +83,7 @@ class CredentialInstance extends InstanceResource {
      * Fetch a CredentialInstance
      * 
      * @return CredentialInstance Fetched CredentialInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function fetch() {
         return $this->proxy()->fetch();
@@ -90,6 +94,7 @@ class CredentialInstance extends InstanceResource {
      * 
      * @param array|Options $options Optional Arguments
      * @return CredentialInstance Updated CredentialInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function update($options = array()) {
         return $this->proxy()->update($options);
@@ -99,6 +104,7 @@ class CredentialInstance extends InstanceResource {
      * Deletes the CredentialInstance
      * 
      * @return boolean True if delete succeeds, false otherwise
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function delete() {
         return $this->proxy()->delete();

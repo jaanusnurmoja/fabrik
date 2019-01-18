@@ -18,7 +18,8 @@ abstract class RecordingOptions {
      * @param string $dateCreated Filter by date created
      * @param string $dateCreatedAfter Filter by date created
      * @param string $callSid Filter by call_sid
-     * @param string $conferenceSid The conference_sid
+     * @param string $conferenceSid The unique ID for the conference associated
+     *                              with the recording.
      * @return ReadRecordingOptions Options builder
      */
     public static function read($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE, $callSid = Values::NONE, $conferenceSid = Values::NONE) {
@@ -32,7 +33,8 @@ class ReadRecordingOptions extends Options {
      * @param string $dateCreated Filter by date created
      * @param string $dateCreatedAfter Filter by date created
      * @param string $callSid Filter by call_sid
-     * @param string $conferenceSid The conference_sid
+     * @param string $conferenceSid The unique ID for the conference associated
+     *                              with the recording.
      */
     public function __construct($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE, $callSid = Values::NONE, $conferenceSid = Values::NONE) {
         $this->options['dateCreatedBefore'] = $dateCreatedBefore;
@@ -43,7 +45,7 @@ class ReadRecordingOptions extends Options {
     }
 
     /**
-     * Only show recordings on the given date. Should be formatted as YYYY-MM-DD. You can also specify inequalities
+     * Only show recordings created on the given date. Should be formatted `YYYY-MM-DD`. You can also specify inequality: `DateCreated<=YYYY-MM-DD` will return recordings generated at or before midnight on a given date, and `DateCreated>=YYYY-MM-DD` returns recordings generated at or after midnight on a date.
      * 
      * @param string $dateCreatedBefore Filter by date created
      * @return $this Fluent Builder
@@ -54,7 +56,7 @@ class ReadRecordingOptions extends Options {
     }
 
     /**
-     * Only show recordings on the given date. Should be formatted as YYYY-MM-DD. You can also specify inequalities
+     * Only show recordings created on the given date. Should be formatted `YYYY-MM-DD`. You can also specify inequality: `DateCreated<=YYYY-MM-DD` will return recordings generated at or before midnight on a given date, and `DateCreated>=YYYY-MM-DD` returns recordings generated at or after midnight on a date.
      * 
      * @param string $dateCreated Filter by date created
      * @return $this Fluent Builder
@@ -65,7 +67,7 @@ class ReadRecordingOptions extends Options {
     }
 
     /**
-     * Only show recordings on the given date. Should be formatted as YYYY-MM-DD. You can also specify inequalities
+     * Only show recordings created on the given date. Should be formatted `YYYY-MM-DD`. You can also specify inequality: `DateCreated<=YYYY-MM-DD` will return recordings generated at or before midnight on a given date, and `DateCreated>=YYYY-MM-DD` returns recordings generated at or after midnight on a date.
      * 
      * @param string $dateCreatedAfter Filter by date created
      * @return $this Fluent Builder
@@ -76,7 +78,7 @@ class ReadRecordingOptions extends Options {
     }
 
     /**
-     * Only show recordings made during the call given by the indicated sid
+     * Only show recordings made during the call indicated by this call SID
      * 
      * @param string $callSid Filter by call_sid
      * @return $this Fluent Builder
@@ -87,9 +89,10 @@ class ReadRecordingOptions extends Options {
     }
 
     /**
-     * The conference_sid
+     * The unique ID for the conference associated with the recording, if the recording is of a conference.
      * 
-     * @param string $conferenceSid The conference_sid
+     * @param string $conferenceSid The unique ID for the conference associated
+     *                              with the recording.
      * @return $this Fluent Builder
      */
     public function setConferenceSid($conferenceSid) {

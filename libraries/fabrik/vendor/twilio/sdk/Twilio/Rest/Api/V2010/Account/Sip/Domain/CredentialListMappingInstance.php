@@ -30,9 +30,10 @@ class CredentialListMappingInstance extends InstanceResource {
      * 
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
-     * @param string $accountSid The account_sid
+     * @param string $accountSid The unique id of the Account that is responsible
+     *                           for this resource.
      * @param string $domainSid A string that uniquely identifies the SIP Domain
-     * @param string $sid The sid
+     * @param string $sid A string that identifies the resource to fetch
      * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\CredentialListMappingInstance 
      */
     public function __construct(Version $version, array $payload, $accountSid, $domainSid, $sid = null) {
@@ -80,6 +81,7 @@ class CredentialListMappingInstance extends InstanceResource {
      * Fetch a CredentialListMappingInstance
      * 
      * @return CredentialListMappingInstance Fetched CredentialListMappingInstance
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function fetch() {
         return $this->proxy()->fetch();
@@ -89,6 +91,7 @@ class CredentialListMappingInstance extends InstanceResource {
      * Deletes the CredentialListMappingInstance
      * 
      * @return boolean True if delete succeeds, false otherwise
+     * @throws TwilioException When an HTTP error occurs.
      */
     public function delete() {
         return $this->proxy()->delete();

@@ -300,7 +300,7 @@ class Filesystemstorage extends FabrikStorageAdaptor
 	 * @return  bool
 	 */
 
-	public function stream($filepath, $chunkSize = 1024 * 1024)
+	public function stream($filepath, $chunkSize = 1048576)
 	{
 		$buffer = '';
 		$handle = fopen($filepath, 'rb');
@@ -401,10 +401,10 @@ class Filesystemstorage extends FabrikStorageAdaptor
 		$thumbdir = str_replace($match, $replace, $typeDir);
 		$ulDir = $w->parseMessageForPlaceHolder($ulDir);
 		$thumbdir = $w->parseMessageForPlaceHolder($thumbdir);
-		$file = str_replace($ulDir, $thumbdir, $file);
 		$file = $w->parseMessageForPlaceHolder($file);
 		$f = basename($file);
 		$dir = dirname($file);
+		$dir = str_replace($ulDir, $thumbdir, $dir);
 		$ext = JFile::getExt($f);
 
 		// Remove extension
