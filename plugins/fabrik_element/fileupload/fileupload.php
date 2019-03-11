@@ -15,10 +15,10 @@ use Fabrik\Helpers\Image;
 use Fabrik\Helpers\Uploader;
 use Joomla\Utilities\ArrayHelper;
 
-define("FU_DOWNLOAD_SCRIPT_NONE", '0');
-define("FU_DOWNLOAD_SCRIPT_TABLE", '1');
-define("FU_DOWNLOAD_SCRIPT_DETAIL", '2');
-define("FU_DOWNLOAD_SCRIPT_BOTH", '3');
+if (!defined('FU_DOWNLOAD_SCRIPT_NONE')) define("FU_DOWNLOAD_SCRIPT_NONE", '0');
+if (!defined('FU_DOWNLOAD_SCRIPT_TABLE')) define("FU_DOWNLOAD_SCRIPT_TABLE", '1');
+if (!defined('FU_DOWNLOAD_SCRIPT_DETAIL')) define("FU_DOWNLOAD_SCRIPT_DETAIL", '2');
+if (!defined('FU_DOWNLOAD_SCRIPT_BOTH')) define("FU_DOWNLOAD_SCRIPT_BOTH", '3');
 
 $logLvl = JLog::ERROR + JLog::EMERGENCY + JLog::WARNING;
 JLog::addLogger(array('text_file' => 'fabrik.element.fileupload.log.php'), $logLvl, array('com_fabrik.element.fileupload'));
@@ -1438,11 +1438,11 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 				$imgData      = base64_decode($imgData);
 				$saveParams[] = $json;
 
-				// @todo allow uploading into front end designated folders?
-				$myFileDir = '';
-				$cropPath  = $storage->clean(JPATH_SITE . '/' . $params->get('fileupload_crop_dir') . '/' . $myFileDir . '/', false);
+                $destCropFile = $storage->_getCropped($filePath);
+                $destCropFile = $storage->getFullPath($destCropFile);
 				$w         = new FabrikWorker;
-				$cropPath  = $w->parseMessageForPlaceHolder($cropPath);
+                $destCropFile  = $w->parseMessageForPlaceHolder($destCropFile);
+                $cropPath = dirname($destCropFile);
 
 				if ($cropPath != '')
 				{
@@ -1456,6 +1456,8 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 					}
 				}
 
+
+				/*
 				$filePath     = $storage->clean(JPATH_SITE . '/' . $filePath);
 				$fileURL      = $storage->getFileUrl(str_replace(COM_FABRIK_BASE, '', $filePath));
 				$destCropFile = $storage->_getCropped($fileURL);
@@ -1468,6 +1470,7 @@ class PlgFabrik_ElementFileupload extends PlgFabrik_Element
 					$fileCounter++;
 					continue;
 				}
+				*/
 
 				$fileCounter++;
 

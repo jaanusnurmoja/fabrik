@@ -319,7 +319,7 @@ class PlgFabrik_ElementCascadingdropdown extends PlgFabrik_ElementDatabasejoin
 				}
 			}
 
-			return $defaultLabel . $this->loadingImg;
+			return $defaultLabel;
 		}
 
 		$html[] = $this->renderDescription($tmp, $default);
