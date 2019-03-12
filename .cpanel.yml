@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/np11988/public_html/lms/
+    - /home/np11988/repositories/fabrik/administrator -R * $DEPLOYPATH
+    - /home/np11988/repositories/fabrik/components -R * $DEPLOYPATH
+    - /home/np11988/repositories/fabrik/libraries -R * $DEPLOYPATH
+    - /home/np11988/repositories/fabrik/media -R * $DEPLOYPATH
+    - /home/np11988/repositories/fabrik/modules -R * $DEPLOYPATH
+    - /home/np11988/repositories/fabrik/plugins -R * $DEPLOYPATH
