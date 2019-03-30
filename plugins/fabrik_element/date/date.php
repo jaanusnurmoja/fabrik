@@ -882,7 +882,7 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 
 		// Used uniquely in reset();
 		$opts->defaultVal     = $this->getFrontDefaultValue();
-		$opts->showtime       = (!$element->hidden && $params->get('date_showtime', 0)) ? true : false;
+		$opts->showtime       = $params->get('date_showtime', 0) ? true : false;
 		$opts->whichTimePicker = $params->get('date_which_time_picker', 'wicked');
 		$opts->timelabel      = FText::_('PLG_ELEMENT_DATE_TIME_LABEL', true);
 		$opts->timePickerLabel = FText::_('PLG_ELEMENT_DATE_TIMEPICKER', true);
@@ -1037,24 +1037,48 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 	 */
 	public function setValuesFromEncryt(&$post, $key, $data)
 	{
-		$date = $data[0];
+        $group     = $this->getGroup();
 
-		if (FabrikWorker::isDate($date))
-		{
-			// Only apply date logic to actual date data, if blank for example we should leave blank
-			$date = JFactory::getDate($date);
-			$date = $date->toSql();
+        if ($group->canRepeat())
+        {
+            foreach ($data as &$d)
+            {
+                if (FabrikWorker::isDate($d)) {
+                    // Only apply date logic to actual date data, if blank for example we should leave blank
+                    $date = JFactory::getDate($d);
+                    $date = $date->toSql();
 
-			// Put in the correct format
-			list($dateOnly, $time) = explode(' ', $date);
-		}
-		else
-		{
-			$date = '';
-			$time = '';
-		}
+                    // Put in the correct format
+                    list($dateOnly, $time) = explode(' ', $date);
+                }
+                else {
+                    $date = '';
+                    $time = '';
+                }
 
-		$data = array('date' => $date, 'time' => $time);
+                $d = array('date' => $date, 'time' => $time);
+            }
+        }
+        else
+        {
+            $d = $data[0];
+
+            if (FabrikWorker::isDate($d)) {
+                // Only apply date logic to actual date data, if blank for example we should leave blank
+                $date = JFactory::getDate($d);
+                $date = $date->toSql();
+
+                // Put in the correct format
+                list($dateOnly, $time) = explode(' ', $date);
+            }
+            else {
+                $date = '';
+                $time = '';
+            }
+
+            $data = array('date' => $date, 'time' => $time);
+        }
+
 		parent::setValuesFromEncryt($post, $key, $data);
 	}
 
@@ -1233,7 +1257,7 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 			$this->resetToGMT = false;
 		}
 
-		$exactTime = $this->formatContainsTime($params->get('date_table_format'));
+		$exactTime = $params->get('date_showtime', 0) && $this->formatContainsTime($params->get('date_table_format'));
 
 		// $$$ rob if filtering in querystring and ranged value set then force filter type to range
 
@@ -1346,7 +1370,17 @@ class PlgFabrik_ElementDate extends PlgFabrik_ElementList
 						// $$$ rob turn into a ranged filter to search the entire day  values should be in sql format
 						$value     = (array) $value;
 						$condition = 'BETWEEN';
-						$value[1]  = $next->toSql();
+
+						if ($storeAsLocal)
+                        {
+                            $value[1]  = $next->toSql();
+                        }
+						else
+                        {
+                            $this->resetToGMT = true;
+                            $value[1]            = $this->toMySQLGMT($next);
+                            $this->resetToGMT = false;
+                        }
 
 						// Set a flat to stop getRangedFilterValue from adding an additional day to end value
 						$this->rangeFilterSet = true;

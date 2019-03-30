@@ -2282,7 +2282,9 @@ class Worker
 		}
 		catch (\Exception $e)
 		{
-			return false;
+            self::log('fabrik.helper.sendmail.error', 'Exception in addRecipient: ' . $e->getMessage(), false);
+
+            return false;
 		}
 
 		try
@@ -2291,6 +2293,8 @@ class Worker
 		}
 		catch (\Exception $e)
 		{
+            self::log('fabrik.helper.sendmail.warning', 'Exception in addCc: ' . $e->getMessage());
+
 			// not sure if we should bail if Cc is bad, for now just soldier on
 		}
 
@@ -2300,7 +2304,9 @@ class Worker
 		}
 		catch (\Exception $e)
 		{
-			// not sure if we should bail if Bcc is bad, for now just soldier on
+            self::log('fabrik.helper.sendmail.warning', 'Exception in addBcc: ' . $e->getMessage(), false);
+
+            // not sure if we should bail if Bcc is bad, for now just soldier on
 		}
 
 		if (!empty($attachment))
@@ -2311,7 +2317,9 @@ class Worker
 			}
 			catch (\Exception $e)
 			{
-				// most likely file didn't exist, ignore
+                self::log('fabrik.helper.sendmail.warning', 'Exception in addAttachment: ' . $e->getMessage(), false);
+
+                // most likely file didn't exist, ignore
 			}
 		}
 
@@ -2330,7 +2338,9 @@ class Worker
 				}
 				catch (\Exception $e)
 				{
-					// carry on
+                    self::log('fabrik.helper.sendmail.warning', 'Exception in addReplyTo: ' . $e->getMessage(), false);
+
+                    // carry on
 				}
 			}
 		}
@@ -2342,7 +2352,9 @@ class Worker
 			}
 			catch (\Exception $e)
 			{
-				// carry on
+                self::log('fabrik.helper.sendmail.warning', 'Exception in addReplyTo: ' . $e->getMessage(), false);
+
+                // carry on
 			}
 		}
 		else
@@ -2356,7 +2368,9 @@ class Worker
 		}
 		catch (\Exception $e)
 		{
-			return false;
+            self::log('fabrik.helper.sendmail.error', 'Exception in setSender: ' . $e->getMessage(), false);
+
+            return false;
 		}
 
 		/**
@@ -2397,12 +2411,16 @@ class Worker
 		}
 		catch (\Exception $e)
 		{
-			return false;
+            self::log('fabrik.helper.sendmail.error', 'Exception in Send: ' . $e->getMessage(), false);
+
+            return false;
 		}
 
         // if ACY mailing is installed, it returns an exception (!) rather than false
         if (get_parent_class($ret) === 'Exception')
         {
+            self::log('fabrik.helper.sendmail.error', 'Exception in Send: ' . $ret->getMessage(), false);
+
             $ret = false;
         }
 
