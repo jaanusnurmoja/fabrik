@@ -380,6 +380,13 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 					$formModel->updateFormData($chargeIdField, $this->charge->id, true, true);
 				}
 
+				$chargeReceiptURLField = $this->getFieldName('stripe_charge_receipt_url_element', '');
+
+				if (!empty($chargeReceiptURLField))
+				{
+					$formModel->updateFormData($chargeReceiptURLField, $this->charge->receipt_url, true, true);
+				}
+
 				$chargeEmailField = $this->getFieldName('stripe_charge_email_element', '');
 
 				if (!empty($chargeEmailField))
@@ -891,7 +898,7 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 			else
             {
                 $opts->failedValidation = false;
-                $layoutData->faiedValidation = false;
+                $layoutData->failedValidation = false;
             }
 
 			$this->html               = $layout->render($layoutData);
@@ -911,7 +918,7 @@ class PlgFabrik_FormStripe extends PlgFabrik_Form
 		$opts = json_encode($opts);
 
 		$this->formJavascriptClass($params, $formModel);
-		$formModel->formPluginJS['Stripe' . $this->renderOrder] = 'var stripe = new Stripe(' . $opts . ');';
+		$formModel->formPluginJS['Stripe' . $this->renderOrder] = 'new Stripe(' . $opts . ')';
 
 	}
 

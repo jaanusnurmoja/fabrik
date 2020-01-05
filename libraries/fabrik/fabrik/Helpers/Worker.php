@@ -1684,7 +1684,13 @@ class Worker
 		 * if there were any errors, but $error['message'] will be empty.  See comment in logEval()
 		 * below for details.
 		 */
-		@trigger_error("");
+		if (version_compare(PHP_VERSION, '7.0.0') >= 0) {
+			error_clear_last();
+		}
+		else
+		{
+			@trigger_error("");
+		}
 	}
 
 	/**
@@ -1697,10 +1703,12 @@ class Worker
 	 */
 	public static function logEval($val, $msg)
 	{
+		/*
 		if ($val !== false)
 		{
 			return;
 		}
+		*/
 
 		$error = error_get_last();
 		/**
@@ -2033,7 +2041,7 @@ class Worker
 	 */
 	public static function isNullDate($d)
 	{
-		$db         = self::getDbo();
+		$db         = self::getDbo(true);
 		$aNullDates = array('0000-00-000000-00-00', '0000-00-00 00:00:00', '0000-00-00', '', $db->getNullDate());
 
 		return in_array($d, $aNullDates);
@@ -2060,14 +2068,20 @@ class Worker
 			return false;
 		}
 
+		$cerl = error_reporting ();
+		error_reporting (0);
+
 		try
 		{
 			$dt = new DateTime($d);
 		} catch (\Exception $e)
 		{
+			error_reporting ($cerl);
+			self::clearEval();
 			return false;
 		}
 
+		error_reporting ($cerl);
 		return true;
 	}
 
@@ -2872,6 +2886,21 @@ class Worker
 
 		return $app->input->get('task') == 'form.process' || ($app->isAdmin() && $app->input->get('task') == 'process');
 	}
+
+	/**
+	 * Are we in an AJAX validation process task
+	 *
+	 * @since 3.9.2
+	 *
+	 * @return bool
+	 */
+	public static function inAJAXValidation()
+	{
+		$app = JFactory::getApplication();
+
+		return $app->input->get('task', '') === 'form.ajax_validate';
+	}
+
 
 	/**
 	 * Remove messages from JApplicationCMS

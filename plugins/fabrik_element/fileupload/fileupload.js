@@ -11,7 +11,9 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
         Extends   : FbFileElement,
         options : {
             folderSelect: false,
-            ajax_upload: false
+            ajax_upload: false,
+            ajax_show_widget: true,
+            isCarousel: false
         },
         initialize: function (element, options) {
             var self = this;
@@ -53,6 +55,12 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             this.doDeleteEvent = null;
             this.watchDeleteButton();
             this.watchTab();
+
+            if (this.options.isCarousel)
+            {
+                jQuery('.slickCarousel').slick();
+                jQuery('.slickCarouselImage').css('opacity', '1');
+            }
         },
 
         /**
@@ -234,7 +242,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
         },
 
         decloned: function (groupid) {
-            var i = jQuery('#form_' + this.form.id).find('input[name=fabrik_deletedimages[' + groupid + ']]');
+            var i = jQuery('#form_' + this.form.id).find('input[name="fabrik_deletedimages[' + groupid + ']"]');
             if (i.length > 0) {
                 this.makeDeletedImageField(groupid, this.options.value).inject(this.form.form);
             }
@@ -334,7 +342,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             var c = el.closest('.fabrikSubElementContainer');
             this.container = c;
 
-            if (this.options.canvasSupport !== false) {
+            if (this.options.ajax_show_widget && this.options.canvasSupport !== false) {
                 this.widget = new ImageWidget(this.options.modalId, {
 
                     'imagedim': {
@@ -432,7 +440,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                                 a = jQuery(document.createElement('span'));
                                 title = jQuery(document.createElement('a')).attr({
                                     'href': file.url,
-			      'target': '_blank'
+                                    'target': '_blank'
                                 }).text(file.name);
                             }
 
@@ -913,8 +921,8 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                             if (ctx === undefined) {
                                 ctx = this.CANVAS.ctx;
                             }
-                            this.withinCrop = true;
-                            if (this.withinCrop) {
+                            //this.withinCrop = true;
+                            if (this.overlay.withinCrop) {
                                 var top = {
                                     x: 0,
                                     y: 0

@@ -1634,7 +1634,7 @@ class FabrikFEModelGroup extends FabModel
 				$d = ArrayHelper::fromObject($d);
 			}
 
-			$repeatGroup = count($d);
+			$repeatGroup = is_scalar($d) ? 1 : count($d);
 		}
 		else
 		{

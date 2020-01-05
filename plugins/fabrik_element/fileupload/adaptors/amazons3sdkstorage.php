@@ -231,11 +231,15 @@ class Amazons3sdkstorage extends FabrikStorageAdaptor
 		// $$$ rob avoid urls like http://bucket.s3.amazonaws.com//home/users/path/to/file/Chrysanthemum.jpg
 		$filepath = JString::ltrim($filepath, '/');
 
+		// $$$ hugh - read content and use 'Body' instead of 'SourceFile', otherwise SDK locks file and we can't delete it
+		$fileContent = file_get_contents($tmpFile);
+
 		// Move the file
 		try
 		{
 			$s3Params = [
-				'SourceFile' => $tmpFile,
+				//'SourceFile' => $tmpFile,
+				'Body'       => $fileContent,
 				'Bucket' => $this->getBucketName(),
 				'Key' => $this->urlToKey($filepath),
 				'ACL' => $this->getAcl(),
@@ -619,12 +623,13 @@ class Amazons3sdkstorage extends FabrikStorageAdaptor
 
 		$f = basename($file);
 		$dir = dirname($file);
+		$dir = rtrim($dir, '/\\') . '/';
 		$dir = str_replace($ulDir, $thumbdir, $dir);
 
 		// Jaanus added: create also thumb suffix as for filesystemstorage
 		$ext = JFile::getExt($f);
 		$fclean = JFile::stripExt($f);
-		$file = $dir . '/' . $params->get('thumb_prefix') . $fclean . $params->get('thumb_suffix') . '.' . $ext;
+		$file = rtrim($dir, '/') . '/' . $params->get('thumb_prefix') . $fclean . $params->get('thumb_suffix') . '.' . $ext;
 
 		if ($origFile === $file)
 		{

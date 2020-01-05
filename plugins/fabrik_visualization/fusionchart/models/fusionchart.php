@@ -13,6 +13,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use FusionExport\ExportManager;
 use FusionExport\ExportConfig;
+use Joomla\Utilities\ArrayHelper;
 
 jimport('joomla.application.component.model');
 
@@ -43,16 +44,24 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 		$strParam = 'caption=' . $caption;
 
 		// Graph attributes
-		$strParam .= ';palette=' . $params->get('fusionchart_chart_palette', 1);
+
+		if ($params->get('fusionchart_theme'))
+		{
+			$strParam .= ';theme=' . $params->get('fusionchart_theme', '');
+		}
+		else
+		{
+			$strParam .= ';palette=' . $params->get('fusionchart_chart_palette', 1);
+
+			if ($params->get('fusionchart_palette_colors'))
+			{
+				$strParam .= ';paletteColors=' . $params->get('fusionchart_palette_colors', '');
+			}
+		}
 
 		if ($params->get('fusionchart_bgcolor'))
 		{
 			$strParam .= ';bgcolor=' . $params->get('fusionchart_bgcolor', '');
-		}
-
-		if ($params->get('fusionchart_palette_colors'))
-		{
-			$strParam .= ';paletteColors=' . $params->get('fusionchart_palette_colors', '');
 		}
 
 		if ($params->get('fusionchart_bgalpha'))
@@ -110,6 +119,11 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 			$strParam .= ';yAxisMaxValue=' . $params->get('fusionchart_yaxis_maxvalue', '');
 		}
 		// General Properties
+
+		if ($params->get('fusionchart_labelstep', '') !== '')
+		{
+			$strParam .= ';labelStep=' . $params->get('fusionchart_labelstep', '');
+		}
 
 		if ($params->get('fusionchart_shownames') == '0')
 		{
@@ -464,8 +478,8 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 
         foreach ($this->axisLabels as $axis_key => $axis_val)
         {
-            $this->axisLabels[$axis_key] = $worker->parseMessageForPlaceholder(
-                $axis_val,
+            $this->axisLabels[$axis_key] = (string)$worker->parseMessageForPlaceholder(
+	            (string)$axis_val,
                 null,
                 true
             );
@@ -535,10 +549,11 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 		// Setting Param string
 		$strParam = $this->getChartParams();
 
-		$label_step_ratios = (array) $params->get('fusion_label_step_ratio');
 		$x_axis_label = (array) $params->get('fusion_x_axis_label');
+		$x_axis_sort = (array) $params->get('fusion_x_axis_sort');
 		$chartElements = (array) $params->get('fusionchart_elementList');
 		$chartColours = (array) $params->get('fusionchart_elcolour');
+        $chartMSGroupBy = (array) $params->get('fusionchart_ms_group_by');
 		$listid = (array) $params->get('fusionchart_table');
 		$chartCumulatives = (array) $params->get('fusionchart_cumulative');
 		$elTypes = (array) $params->get('fusionchart_element_type');
@@ -550,6 +565,8 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 		$this->c = 0;
 		$gdata = array();
 		$glabels = array();
+		$gsorts = array();
+		$gmsgroupby = array();
 		$gaxislabels = array();
 		$gcolours = array();
 		$gfills = array();
@@ -559,7 +576,6 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 		$calculationData = array();
 		$calcfound = false;
 		$tmodels = array();
-		$labelStep = 0;
 
 		foreach ($listid as $tid)
 		{
@@ -599,19 +615,38 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 			* object if we call getPagination after render().  So call it first, then render() will
 			* get our cached pagination, rather than vice versa.
 			*/
-			$limit = (int) FArrayHelper::getValue($limits, $this->c, 0);
-			$listModel->setLimits(0, $limit);
-			$nav = $listModel->getPagination(0, 0, $limit);
-			$listModel->render();
-			$alldata = $listModel->getData();
-			$cals = $listModel->getCalculations();
+
+			$cals = array();
+
+			$alldata = $this->getQueryData();
+
+			if (!$alldata)
+			{
+				$limit = (int) FArrayHelper::getValue($limits, $this->c, 0);
+				$listModel->setLimits(0, $limit);
+				$nav = $listModel->getPagination(0, 0, $limit);
+				$listModel->render();
+				$alldata = $listModel->getData();
+				$cals = $listModel->getCalculations();
+			}
+
 			$column = $chartElements[$this->c];
+            $msGroupBy = FArrayHelper::getValue($chartMSGroupBy, $this->c, '');
 			$pref = substr($column, 0, 6);
 
 			$label = FArrayHelper::getValue($x_axis_label, $this->c, '');
+			$sort  = FArrayHelper::getValue($x_axis_sort, $this->c, $label);
+
+			if (empty($sort))
+			{
+				$sort = $label;
+			}
 
 			$tmpgdata = array();
 			$tmpglabels = array();
+			$tmpgsorts = array();
+			$tmpgmsgroupby = array();
+            $tmpaxislabels = array();
 			$colour = array_key_exists($this->c, $chartColours) ? str_replace("#", '', $chartColours[$this->c]) : '';
 
 			$gcolours[] = $colour;
@@ -661,57 +696,105 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 				// _raw fields are most likely to contain the value
 				$column = $column . '_raw';
 
-				foreach ($alldata as $group)
-				{
-					foreach ($group as $row)
-					{
-					    $this->setAxisLabel($row, $this->c);
+				foreach ($alldata as $group) {
+                    foreach ($group as $row) {
+                        $this->setAxisLabel($row, $this->c);
 
-						if (!array_key_exists($column, $row))
-						{
-							// Didn't find a _raw column - revert to orig
-							$column = $origColumn;
+                        if (!array_key_exists($column, $row)) {
+                            // Didn't find a _raw column - revert to orig
+                            $column = $origColumn;
 
-							if (!array_key_exists($column, $row))
-							{
-								JError::raiseWarning(E_NOTICE, $column . ': NOT FOUND - PLEASE CHECK IT IS PUBLISHED');
-								continue;
-							}
-						}
+                            if (!array_key_exists($column, $row)) {
+                                JError::raiseWarning(E_NOTICE, $column . ': NOT FOUND - PLEASE CHECK IT IS PUBLISHED');
+                                continue;
+                            }
+                        }
 
-						$tmpgdata[] = (trim($row->$column) == '') ? null : (float) $row->$column;
-						$tmpglabels[] = !empty($label) ? html_entity_decode(strip_tags($row->$label)) : '';
-						$tmpaxislabels[] = $this->getAxisLabel($this->c);
-					}
+                        $tmpgdata[] = (trim($row->$column) == '') ? null : (float)$row->$column;
+                        $tmpgmsgroupby[] = empty($msGroupBy) || (trim($row->$msGroupBy) == '') ? null : $row->$msGroupBy;
+                        $tmpglabels[] = !empty($label) ? trim(html_entity_decode(strip_tags($row->$label))) : '';
+	                    $tmpgsorts[] = !empty($sort) ? html_entity_decode(strip_tags($row->$sort)) : '';
+                        $tmpaxislabels[] = $this->getAxisLabel($this->c);
+                    }
+                }
 
-					if (!empty($tmpgdata))
-					{
-						$this->max[$this->c] = max($tmpgdata);
-						$this->min[$this->c] = min($tmpgdata);
-					}
+                if (!empty($tmpgdata))
+                {
+                    $this->max[$this->c] = max($tmpgdata);
+                    $this->min[$this->c] = min($tmpgdata);
+                }
 
-					$gdata[$this->c] = $tmpgdata;
-					$glabels[$this->c] = $tmpglabels;
-					$gaxislabels[$this->c] = $tmpaxislabels;
+                $gdata[$this->c] = $tmpgdata;
+                $glabels[$this->c] = $tmpglabels;
+				$gsorts[$this->c] = $tmpgsorts;
+                $gaxislabels[$this->c] = $tmpaxislabels;
+                $gmsgroupby[$this->c] = $tmpgmsgroupby;
 
-					// $$$ hugh - playing around with pie charts
-					$gsums[$this->c] = array_sum($tmpgdata);
+                // $$$ hugh - playing around with pie charts
+                $gsums[$this->c] = array_sum($tmpgdata);
 
-					// $$$ hugh - playing with 'cumulative' option
-					$this->gcumulatives[$this->c] = array();
+                // $$$ hugh - playing with 'cumulative' option
+                $this->gcumulatives[$this->c] = array();
 
-					while (!empty($tmpgdata))
-					{
-						$this->gcumulatives[$this->c][] = array_sum($tmpgdata);
-						array_pop($tmpgdata);
-					}
+                while (!empty($tmpgdata))
+                {
+                    $this->gcumulatives[$this->c][] = array_sum($tmpgdata);
+                    array_pop($tmpgdata);
+                }
 
-					$this->gcumulatives[$this->c] = array_reverse($this->gcumulatives[$this->c]);
-				}
+                $this->gcumulatives[$this->c] = array_reverse($this->gcumulatives[$this->c]);
+
 			}
 
 			$this->c++;
 		}
+
+		if (!empty($msGroupBy))
+        {
+            $tmps = array();
+            $tmpaxislabels = array();
+
+            foreach ($gmsgroupby[0] as $key => $groupby)
+            {
+            	$groupby = (string)$groupby;
+
+                if (!array_key_exists($groupby, $tmps))
+                {
+                    $tmps[$groupby] = array(
+                        'data' => array(),
+                        'labels' => array(),
+                        'sorts' => array(),
+                        'axislabels' => array()
+                    );
+                }
+
+                $tmps[$groupby]['data'][] = $gdata[0][$key];
+                $tmps[$groupby]['labels'][] = $glabels[0][$key];
+                $tmps[$groupby]['sorts'][] = $gsorts[0][$key];
+                $tmps[$groupby]['axislabels'][] = $gaxislabels[0][$key];
+            }
+
+            unset($gdata);
+            unset($glabels);
+            unset($gsorts);
+            unset($gaxislabels);
+
+            $key = 0;
+            foreach ($tmps as $tmp)
+            {
+                $gdata[] = $tmp['data'];
+                $glabels[] = $tmp['labels'];
+                $gsorts[] = $tmp['sorts'];
+                $gaxislabels[] = $tmp['axislabels'];
+                $elTypes[$key] = $elTypes[0];
+                $key++;
+            }
+
+            $params->set('fusionchart_element_type', $elTypes);
+            $params->set('fusionchart_axis_labels', array_keys($tmps));
+            $this->setAxisLabels();
+            $this->c = count($tmps);
+        }
 
 		if ($calcfound)
 		{
@@ -731,6 +814,7 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 		switch ($chartType)
 		{
 			// Single Series Charts
+			case 'MAPS':
 			case 'AREA2D':
 			case 'BAR2D':
 			case 'COLUMN2D':
@@ -750,7 +834,8 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 				{
 					$strParam .= ';pieBorderThickness=' . $params->get('fusionchart_borderthick', '');
 					$strParam .= ';pieBorderAlpha=' . $params->get('fusionchart_cnvalpha', '');
-					$strParam .= ';pieFillAlpha=' . FArrayHelper::getValue($params->get('fusionchart_elalpha', array()), 0);
+					$alphas = $params->get('fusionchart_elalpha', array());
+					$strParam .= ';pieFillAlpha=' . FArrayHelper::getValue($alphas,0);
 				}
 
 				if ($chartType == 'FUNNEL2D')
@@ -762,6 +847,10 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
                     $strParam .= ';is2D=0';
                     $chartType = 'FUNNEL';
                 }
+				else if ($chartType === 'MAPS')
+				{
+					$this->setChartColorRange();
+				}
 
 
 				$datasets = 0;
@@ -811,29 +900,26 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 					$labels = $glabels[$datasetKey];
 					$gsums = FArrayHelper::getValue($chartCumulatives, $datasetKey, '0') == '0' ? $gdata[$datasetKey] : $this->gcumulatives[$datasetKey];
 
+					$sums = array();
+					foreach ($labels as $lkey => $label)
+					{
+						if (!array_key_exists($label, $sums))
+						{
+							$sums[$label] = 0;
+						}
+
+						$sums[$label] += $gsums[$lkey];
+					}
+
 					// Scale to percentages
 					$tot_sum = array_sum($gsums);
 					$arrData = array();
-					$labelStep = 0;
-					$label_step_ratio = (int) FArrayHelper::getValue($label_step_ratios, $datasetKey, 1);
-
-					if ($label_step_ratio > 1)
-					{
-						$labelStep = (int) (count($gsums) / $label_step_ratio);
-						$strParam .= ';labelStep=' . $labelStep;
-					}
-					/* $$$tom: inverting array_combine as identical values in gsums will be
-					 * dropped otherwise. Should I do that differently?
-					* $$$ hugh - can't use array_combine, as empty labels end up dropping values
-					* $arrComb = array_combine($labels, $gsums);
-					* foreach ($arrComb as $key => $value) {
-					*/
 
 					if ($elTypes[$datasetKey] == 'trendonly')
 					{
 						$str_params = array();
-						$min = min($gsums);
-						$max = max($gsums);
+						$min = min($sums);
+						$max = max($sums);
 						list($min, $max) = $this->getTrendMinMax($min, $max, 0);
 						$this->addChartData($min, $str_params);
 						$this->addChartData($max, $str_params);
@@ -842,22 +928,15 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 					{
 						$data_count = 0;
 
-						foreach ($gsums as $key => $value)
+						foreach ($sums as $label => $value)
 						{
 							$data_count++;
 
-							$label = $labels[$key];
+							//$label = $labels[$key];
+							$keyName = $chartType === 'MAPS' ? 'id' : 'label';
 							$str_params = array(
-								'label' => $label
+								$keyName => $label
 							);
-
-							if ($labelStep)
-							{
-								if ($data_count != 1 && $data_count % $labelStep != 0)
-								{
-									$str_params['showName'] = false;
-								}
-							}
 
 							$this->addChartData($value, $str_params);
 						}
@@ -925,12 +1004,16 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 			case 'MSCOLUMN2D':
 			case 'MSCOLUMN3D':
 			case 'MSLINE':
+			case 'MSSPLINE':
 			case 'MSAREA2D':
+			case 'MSSTACKEDCOLUMN2D':
 			case 'MSCOMBIDY2D':
 			case 'MULTIAXISLINE':
 			case 'SCROLLAREA2D':
 			case 'SCROLLCOLUMN2D':
 			case 'SCROLLLINE2D':
+			case 'SCROLLCOMBI2D':
+			case 'SCROLLCOMBIDY2D':
 			case 'SCROLLSTACKEDCOLUMN2D':
 				if ($this->c > 0)
 				{
@@ -940,7 +1023,7 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 					}
 
 					// $$$ hugh - Dual-Y types
-					if ($chartType == 'MSCOMBIDY2D' || $chartType == 'MULTIAXISLINE')
+					if ($chartType == 'MSCOMBIDY2D' || $chartType == 'MULTIAXISLINE' || $chartType == 'SCROLLCOMBIDY2D')
 					{
 						$p_parents = array();
 						$s_parents = array();
@@ -961,39 +1044,36 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 						$strParam .= ';SYaxisName=' . implode(' ', $s_parents);
 					}
 
-					$label_step_ratio = (int) FArrayHelper::getValue($label_step_ratios, 0, 1);
+					$allLabels = array();
+					$allSorts = array();
 
-					if ($label_step_ratio > 1)
+					foreach ($glabels as $glabel)
 					{
-						$labelStep = (int) (count(explode(',', $gdata[0])) / $label_step_ratio);
-						$strParam .= ';labelStep=' . $labelStep;
+						$allLabels = array_unique(array_merge($allLabels, $glabel));
 					}
 
-					$labels = $glabels[0];
-                    $data_count = 0;
+					foreach ($gsorts as $gsort)
+					{
+						$allSorts = array_unique(array_merge($allSorts, $gsort));
+					}
 
-                    foreach ($labels as $catLabel) {
-                        $data_count++;
-                        $catParams = array();
+					array_multisort($allSorts, SORT_ASC, $allLabels);
+					//sort($allLabels);
+					$data_count = 0;
 
-                        if ($labelStep) {
-                            if ($data_count == 1 || $data_count % $labelStep == 0) {
-                                $catParams['ShowLabel'] = true;
-                            } else {
-                                $catParams['ShowLabel'] = false;
-                                $catLabel = '';
-                            }
-                        }
+					foreach ($allLabels as $catLabel) {
+						$data_count++;
+						$catParams = array();
 
-                        $this->addCategory($catLabel, $catParams);
-                    }
+						$this->addCategory($catLabel, $catParams);
+					}
 
 					foreach ($gdata as $key => $chartdata)
 					{
 						$cdata = FArrayHelper::getValue($chartCumulatives, $key, '0') == '0' ? $gdata[$key] : $this->gcumulatives[$key];
 						$datasetLabel = $this->axisLabels[$key];
 
-                        if ($chartType == 'MSCOMBIDY2D' || $chartType == 'MULTIAXISLINE') {
+                        if ($chartType == 'MSCOMBIDY2D' || $chartType == 'MULTIAXISLINE' || $chartType == 'SCROLLCOMBIDY2D') {
                             $extras = array(
                                 'parentYAxis' => $dual_y_parents[$key]
                             );
@@ -1031,19 +1111,84 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 						}
 						else
 						{
-							$data_count = 0;
+							$chartlabels = $glabels[$key];
 
-							foreach ($cdata as $value)
+							foreach ($cdata as $ckey => $value)
 							{
-								$data_count++;
+								$allLabelsKey = array_search($chartlabels[$ckey], $allLabels);
+								$dataset[$allLabelsKey] = $this->makeChartData($value);
+							}
 
-								$dataset[] = $this->makeChartData($value);
+							foreach ($allLabels as $allLabelsKey => $label)
+							{
+								if (!array_key_exists($allLabelsKey, $dataset))
+								{
+									$dataset[$allLabelsKey] = null;
+								}
 							}
 						}
 
 						$this->addDataset($dataset, $datasetLabel, $extras);
 					}
 				}
+				break;
+			case 'ZOOMLINE':
+			case 'ZOOMLINEDY':
+				$strParam .= ";dataseparator=|";
+				$strParam .= ";compactdatamode=1";
+		        $strParam .= ";pixelsPerPoint=40";
+
+				$allLabels = array();
+
+				foreach ($glabels as $glabel)
+				{
+					$allLabels = array_unique(array_merge($allLabels, $glabel));
+				}
+
+				$catParams = array();
+				$this->addZoomCategory(implode('|', $allLabels), $catParams);
+
+				foreach ($gdata as $key => $chartdata)
+				{
+					$datasetLabel = $this->axisLabels[$key];
+
+					if ($chartType == 'ZOOMLINEDY') {
+						$extras = array(
+							'parentYAxis' => $dual_y_parents[$key]
+						);
+					}
+					else
+					{
+						$extras = array();
+					}
+
+					$color = FArrayHelper::getValue($gcolours, $key, '');
+
+					if (!empty($color))
+					{
+						$extras['color'] = $color;
+					}
+
+					$dataset = array();
+					$chartlabels = $glabels[$key];
+
+					foreach ($chartdata as $ckey => $value)
+					{
+						$allLabelsKey = array_search($chartlabels[$ckey], $allLabels);
+						$dataset[$allLabelsKey] = $value;
+					}
+
+					foreach ($allLabels as $allLabelsKey => $label)
+					{
+						if (!array_key_exists($allLabelsKey, $dataset))
+						{
+							$dataset[$allLabelsKey] = null;
+						}
+					}
+
+					$this->addDataset(implode('|', $dataset), $datasetLabel, $extras);
+				}
+				break;
 		}
 
 		$this->c > 1 ? $this->trendLine($gdata) : $this->trendLine();
@@ -1404,6 +1549,16 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 		);
 	}
 
+	private function addZoomCategory($labels, $params)
+	{
+		if (!isset($this->chartData['categories']))
+		{
+			$this->chartData['categories'] = array();
+		}
+
+		$this->chartData['categories'][0]['category'] = $labels;
+	}
+
 	private function addDataset($dataset, $label, $params = array())
 	{
 		if (!isset($this->chartData['dataset']))
@@ -1426,13 +1581,20 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 	{
 		if ($value === null)
 		{
-			return $params;
+			if (empty($params))
+			{
+				return null;
+			}
+			else
+			{
+				return $params;
+			}
 		}
 		else
 		{
 			return array_merge(
 				array(
-					'value' => $value
+					'value' => (string)$value
 				),
 				$params
 			);
@@ -1467,6 +1629,21 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
 		$this->chartData['chart'] = $chartParams;
 	}
 
+	private function setChartColorRange()
+	{
+		$params = $this->getParams();
+
+		$colorrange = [
+			'minvalue' => $params->get('fusionchart_map_color_minvalue', "0"),
+			"startlabel" => $params->get('fusionchart_map_color_startlabel', "Low"),
+	        "endlabel" => $params->get('fusionchart_map_color_endlabel', "High"),
+	        "code" => $params->get('fusionchart_map_color_code', "#34baeb"),
+	        "gradient" => $params->get('fusionchart_map_color_gradient', "1")
+		];
+
+		$this->chartData['colorrange'] = $colorrange;
+	}
+
 	private function getChartData()
 	{
 		$chartData = json_encode($this->chartData);
@@ -1492,16 +1669,67 @@ class FabrikModelFusionchart extends FabrikFEModelVisualization
      */
     public function getRealChartType($chartType)
     {
+    	$params = $this->getParams();
+
         switch ($chartType)
         {
             case 'FUNNEL2D':
             case 'FUNNEL3D':
                 $chartType = 'FUNNEL';
                 break;
+	        case 'MAPS':
+	        	$chartType = strtolower($chartType . '/' . $params->get('fusionchart_map', 'world'));
+	        	break;
             default:
                 break;
         }
 
-        return $chartType;
+        return strtolower($chartType);
+    }
+
+    private function getQueryData()
+    {
+    	$params = $this->getParams();
+    	$query = $params->get('fusionchart_query', array());
+    	$query = \Joomla\Utilities\ArrayHelper::getValue((array)$query, $this->c, '');
+		$data = array();
+
+    	if (empty($query))
+	    {
+	    	return $this->getPHPData();
+	    }
+
+	    $connection = $params->get('fusionchart_connection');
+	    $connection = \Joomla\Utilities\ArrayHelper::getValue($connection, $this->c);
+	    $db = FabrikWorker::getDbo(false, $connection);
+		$db->setQuery($query);
+
+		try {
+			$data = $db->loadObjectList();
+		}
+		catch (Exception $e)
+		{
+			// meh
+		}
+
+		return array($data);
+    }
+
+    private function getPHPData()
+    {
+	    $params = $this->getParams();
+	    $code = $params->get('fusionchart_php', array());
+	    $code = \Joomla\Utilities\ArrayHelper::getValue((array)$code, $this->c);
+
+	    if (empty($code))
+	    {
+	    	return false;
+	    }
+
+	    FabrikWorker::clearEval();
+	    $data = FabrikHelperHTML::isDebug() ? eval($code) : @eval($code);
+	    FabrikWorker::logEval(false, 'Eval exception : fusionchart plugin : %s');
+
+	    return $data;
     }
 }

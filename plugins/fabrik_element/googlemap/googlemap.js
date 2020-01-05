@@ -348,10 +348,14 @@ define(['jquery', 'fab/element', 'lib/debounce/jquery.ba-throttle-debounce', 'fa
                     }.bind(this));
                 }
             }
+
             this.watchTab();
+
             Fabrik.addEvent('fabrik.form.page.change.end', function (form) {
                 this.redraw();
             }.bind(this));
+
+            Fabrik.fireEvent('fabrik.map.make.end', this);
         },
 
         calcRoute: function () {
@@ -588,6 +592,8 @@ define(['jquery', 'fab/element', 'lib/debounce/jquery.ba-throttle-debounce', 'fa
                 if (status !== google.maps.GeocoderStatus.OK || results.length === 0) {
                     fconsole(address + ' not found!');
                 } else {
+                    this.options.lat = results[0].geometry.location.lat();
+                    this.options.lon = results[0].geometry.location.lng();
                     this.marker.setPosition(results[0].geometry.location);
                     this.doSetCenter(results[0].geometry.location, this.map.getZoom(), false);
 
@@ -774,7 +780,7 @@ define(['jquery', 'fab/element', 'lib/debounce/jquery.ba-throttle-debounce', 'fa
             result.address_components.each(function (component) {
                 component.types.each(function (type) {
                     if (type === 'street_number') {
-                        if (this.options.reverse_geocode_fields.route) {
+                        if (this.options.reverse_geocode_fields.street_number || this.options.reverse_geocode_fields.route) {
                             streetNumber = component.long_name;
                         }
                     }
@@ -816,11 +822,14 @@ define(['jquery', 'fab/element', 'lib/debounce/jquery.ba-throttle-debounce', 'fa
                 }.bind(this));
             }.bind(this));
 
-            if (this.options.reverse_geocode_fields.route) {
+            if (this.options.reverse_geocode_fields.street_number) {
+                this.form.formElements.get(this.options.reverse_geocode_fields.street_number).update(streetNumber);
+                this.form.formElements.get(this.options.reverse_geocode_fields.route).update(streetRoute);            }
+            else if (this.options.reverse_geocode_fields.route) {
                 /**
                  * Create the street address.  I'm really not sure what the difference between 'route'
                  * and 'street_address' is in Google's component types, so for now just use 'street_address'
-                 * as the prrefence, use 'route' if no 'street_address', and prepend 'street_number'
+                 * as the preference, use 'route' if no 'street_address', and prepend 'street_number'
                  */
                 if (streetRoute !== '')
                 {

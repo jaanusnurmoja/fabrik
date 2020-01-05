@@ -1290,6 +1290,7 @@ class FabrikFEModelList extends JModelForm
 
 		JDEBUG ? $profiler->mark('elements rendered for table data') : null;
 		$this->groupTemplates = array();
+		$this->groupTemplatesExtra = array();
 
 		// Check if the data has a group by applied to it
 		$groupBy = $this->getGroupBy();
@@ -1316,6 +1317,8 @@ class FabrikFEModelList extends JModelForm
 			{
 				$groupTemplate = '{' . $requestGroupBy . '}';
 			}
+
+			$groupTemplateExtra = $tableParams->get('group_by_template_extra', '');
 
 			if ($tableParams->get('group_by_raw', '1') === '1')
 			{
@@ -1348,6 +1351,7 @@ class FabrikFEModelList extends JModelForm
 				{
 					$aGroupTitles[] = $sData;
 					$this->groupTemplates[$sData] = $w->parseMessageForPlaceHolder($groupTemplate, ArrayHelper::fromObject($data[$i]));
+					$this->groupTemplatesExtra[$sData] = $w->parseMessageForPlaceHolder($groupTemplateExtra, ArrayHelper::fromObject($data[$i]));
 					$groupedData[$sData] = array();
 				}
 
@@ -2271,6 +2275,12 @@ class FabrikFEModelList extends JModelForm
 
 		// Test for related data, filter once, go back to main list re-filter -
 		$bits[] = 'fabrik_incsessionfilters=0';
+
+		$args = new stdClass;
+		$args->bits = $bits;
+		FabrikWorker::getPluginManager()->runPlugins('onRelatedDataURL', $this, 'list', $args);
+		$bits = $args->bits;
+
 		$url .= implode('&', $bits);
 		$url = JRoute::_($url);
 
@@ -4491,6 +4501,24 @@ class FabrikFEModelList extends JModelForm
 	{
 		if (!array_key_exists('add', $this->access))
 		{
+			$pluginCanAdd = FabrikWorker::getPluginManager()->runPlugins('onCanAdd', $this, 'list');
+
+			// At least one plugin run, so plugin results take precedence over anything else.
+			if (!empty($pluginCanAdd))
+			{
+				// check 'false' first, so if any plugin denies, result is false
+				if (in_array(false, $pluginCanAdd, true))
+				{
+					return false;
+				}
+
+				if (in_array(true, $pluginCanAdd, true))
+				{
+					return true;
+				}
+
+			}
+
 			$input = $this->app->input;
 			$groups = $this->user->getAuthorisedViewLevels();
 			$this->access->add = in_array($this->getParams()->get('allow_add'), $groups);
@@ -5420,14 +5448,16 @@ class FabrikFEModelList extends JModelForm
 			}
 		}
 
+		$args = array (
+			'context' => $context,
+			'request' => $request
+		);
+
 		FabrikWorker::getPluginManager()->runPlugins(
 			'onStoreRequestData',
 			$this,
 			'list',
-			array (
-				'context' => $context,
-				'request' => $request
-			)
+			$args
 		);
 	}
 
@@ -5621,6 +5651,7 @@ class FabrikFEModelList extends JModelForm
 				// $$$ rob hehe if you set $i in the eval'd code all sorts of chaos ensues
 				$origi = $i;
 				$value = stripslashes(htmlspecialchars_decode($value, ENT_QUOTES));
+				FabrikWorker::clearEval();
 				$value = @eval($value);
 				FabrikWorker::logEval($value, 'Caught exception on eval of tableModel::getFilterArray() ' . $key . ': %s');
 				$i = $origi;
@@ -5779,6 +5810,14 @@ class FabrikFEModelList extends JModelForm
 		{
 			$showInList = $listElements->show_in_list;
 		}
+
+		$args = array(
+			$this,
+			&$showInList
+		);
+
+		$pluginManager = FabrikWorker::getPluginManager();
+		$pluginManager->runPlugins('onShowInList', $this, 'list', $args);
 
 		$showInList = (array) $input->get('fabrik_show_in_list', $showInList, 'array');
 
@@ -6422,6 +6461,13 @@ class FabrikFEModelList extends JModelForm
 		return '';
 	}
 
+	private function requireFilterMsg($default = '')
+	{
+		$params = $this->getParams();
+		$msg = $params->get('require-filter-msg', $default);
+
+		return FText::_($msg);
+	}
 	/**
 	 * Do we have all required filters, by both list level and element level settings.
 	 *
@@ -6431,14 +6477,14 @@ class FabrikFEModelList extends JModelForm
 	{
 		if ($this->listRequiresFiltering() && !$this->gotOptionalFilters())
 		{
-			$this->emptyMsg = FText::_('COM_FABRIK_SELECT_AT_LEAST_ONE_FILTER');
+			$this->emptyMsg = $this->requireFilterMsg('COM_FABRIK_SELECT_AT_LEAST_ONE_FILTER');
 
 			return false;
 		}
 
 		if ($this->hasRequiredElementFilters() && !$this->getRequiredFiltersFound())
 		{
-			$this->emptyMsg = FText::_('COM_FABRIK_PLEASE_SELECT_ALL_REQUIRED_FILTERS');
+			$this->emptyMsg = $this->requireFilterMsg('COM_FABRIK_PLEASE_SELECT_ALL_REQUIRED_FILTERS');
 
 			return false;
 		}
@@ -6555,7 +6601,7 @@ class FabrikFEModelList extends JModelForm
 		// If no filter keys, by definition we don't have required ones
 		if (!array_key_exists('key', $filters) || !is_array($filters['key']))
 		{
-			$this->emptyMsg = FText::_('COM_FABRIK_PLEASE_SELECT_ALL_REQUIRED_FILTERS');
+			$this->emptyMsg = $this->requireFilterMsg('COM_FABRIK_PLEASE_SELECT_ALL_REQUIRED_FILTERS');
 
 			return false;
 		}
@@ -6579,7 +6625,7 @@ class FabrikFEModelList extends JModelForm
 
 				if (!$found || $filters['origvalue'][$key] == '')
 				{
-					$this->emptyMsg = FText::_('COM_FABRIK_PLEASE_SELECT_ALL_REQUIRED_FILTERS');
+					$this->emptyMsg = $this->requireFilterMsg('COM_FABRIK_PLEASE_SELECT_ALL_REQUIRED_FILTERS');
 
 					return false;
 				}
@@ -11013,13 +11059,26 @@ class FabrikFEModelList extends JModelForm
 			{
 				if (is_array($v))
 				{
+					$notNull = false;
+
 					foreach ($v as &$v2)
 					{
-						$v2 = FabrikWorker::JSONtoData($v2);
+						if ($v2 !== null)
+						{
+							$notNull = true;
+							$v2 = FabrikWorker::JSONtoData($v2);
+						}
 					}
 
-					$v = json_encode($v);
-					$data[$gKey]->$k = $v;
+					if ($notNull)
+					{
+						$v               = json_encode($v);
+						$data[$gKey]->$k = $v;
+					}
+					else
+					{
+						$data[$gKey]->$k = "";
+					}
 				}
 			}
 		}

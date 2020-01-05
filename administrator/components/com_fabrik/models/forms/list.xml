@@ -281,6 +281,14 @@
 			       description="COM_FABRIK_FIELD_GROUP_BY_TEMPLATE_DESC"
 			/>
 
+			<field name="group_by_template_extra"
+				   type="textarea"
+				   cols="30"
+				   rows="4"
+				   label="COM_FABRIK_FIELD_GROUP_BY_TEMPLATE_EXTRA_LABEL"
+				   description="COM_FABRIK_FIELD_GROUP_BY_TEMPLATE_EXTRA_DESC"
+			/>
+
 			<field name="group_by_order_dir"
 			       type="ascendingdescending"
 			       label="COM_FABRIK_FIELD_ORDER_DIRECTION_LABEL"
@@ -504,6 +512,15 @@
 				<option value="0">JNO</option>
 				<option value="1">JYES</option>
 			</field>
+
+			<field name="require-filter-msg"
+				   type="text"
+				   default=""
+				   class="input-xlarge"
+				   size="20"
+				   label="COM_FABRIK_FIELD_REQUIRE_FILTER_MSG_LABEL"
+				   description="COM_FABRIK_FIELD_REQUIRE_FILTER_MSG_DESC"
+			/>
 
 			<field name="filter-dropdown-method"
 			       type="list"
