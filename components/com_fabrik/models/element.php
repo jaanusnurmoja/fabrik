@@ -1647,12 +1647,13 @@ class PlgFabrik_Element extends FabrikPlugin
 	 * Should the element be tipped?
 	 *
 	 * @param   string $mode Form/list render context
+	 * @param   array  $data data array
 	 *
 	 * @since    3.0.6
 	 *
 	 * @return  bool
 	 */
-	private function isTipped($mode = 'form')
+	private function isTipped($mode = 'form', $data = array())
 	{
 		$formModel = $this->getFormModel();
 
@@ -1663,7 +1664,7 @@ class PlgFabrik_Element extends FabrikPlugin
 
 		$params = $this->getParams();
 
-		if ($params->get('rollover', '') === '')
+		if (empty($this->getTipText($data)))
 		{
 			return false;
 		}
@@ -1722,7 +1723,7 @@ class PlgFabrik_Element extends FabrikPlugin
 		$displayData->view       = $this->app->input->get('view', 'form');
 		$displayData->tip        = $this->tipHtml($model->data);
 		$displayData->tipText    = $this->tipTextAndValidations('form', $model->data);
-		$displayData->rollOver   = $this->isTipped();
+		$displayData->rollOver   = $this->isTipped('form', $model->data);
 		$displayData->isEditable = $this->isEditable();
 		$displayData->tipOpts    = $this->tipOpts();
 
@@ -1861,7 +1862,7 @@ class PlgFabrik_Element extends FabrikPlugin
 			$displayData             = new stdClass;
 			$displayData->tipTitle   = $title;
 			$displayData->tipText    = $txt;
-			$displayData->rollOver   = $this->isTipped();
+			$displayData->rollOver   = $this->isTipped('form', $data);
 			$displayData->isEditable = $this->isEditable();
 			$displayData->tipOpts    = $this->tipOpts();
 
@@ -1915,12 +1916,12 @@ class PlgFabrik_Element extends FabrikPlugin
 		$lines = array();
 		$tmpl  = $this->getFormModel()->getTmpl();
 
-		if (($mode === 'list' || !$this->validator->hasValidations()) && !$this->isTipped($mode))
+		if (($mode === 'list' || !$this->validator->hasValidations()) && !$this->isTipped($mode, $data))
 		{
 			return '';
 		}
 
-		if ($this->isTipped($mode))
+		if ($this->isTipped($mode, $data))
 		{
 			$lines[] = '<li>' . FabrikHelperHTML::image('question-sign', 'form', $tmpl) . ' ' . $this->getTipText($data) . '</li>';
 		}
