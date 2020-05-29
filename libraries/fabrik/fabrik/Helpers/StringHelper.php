@@ -4,7 +4,7 @@
  *
  * @package     Joomla
  * @subpackage  Fabrik.helpers
- * @copyright   Copyright (C) 2005-2016  Media A-Team, Inc. - All rights reserved.
+ * @copyright   Copyright (C) 2005-2020  Media A-Team, Inc. - All rights reserved.
  * @license     GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 
@@ -600,13 +600,6 @@ class StringHelper extends \Joomla\String\StringHelper
 				list($thisKey, $val) = explode('=', $bit);
 
 				if ($thisKey !== $key)
-				{
-					$a[] = $bit;
-				}
-			}
-			else
-			{
-				if ($bit !== $key)
 				{
 					$a[] = $bit;
 				}
