@@ -15,10 +15,23 @@ class ApiCallMonitoringMiddleware extends AbstractMonitoringMiddleware
 {
 
     /**
+     * Api Call Attempt event keys for each Api Call event key
+     *
+     * @var array
+     */
+    private static $eventKeys = [
+        'FinalAwsException' => 'AwsException',
+        'FinalAwsExceptionMessage' => 'AwsExceptionMessage',
+        'FinalSdkException' => 'SdkException',
+        'FinalSdkExceptionMessage' => 'SdkExceptionMessage',
+        'FinalHttpStatusCode' => 'HttpStatusCode',
+    ];
+
+    /**
      * Standard middleware wrapper function with CSM options passed in.
      *
      * @param callable $credentialProvider
-     * @param mixed $options
+     * @param mixed  $options
      * @param string $region
      * @param string $service
      * @return callable
@@ -28,15 +41,13 @@ class ApiCallMonitoringMiddleware extends AbstractMonitoringMiddleware
         $options,
         $region,
         $service
-    )
-    {
+    ) {
         return function (callable $handler) use (
             $credentialProvider,
             $options,
             $region,
             $service
-        )
-        {
+        ) {
             return new static(
                 $handler,
                 $credentialProvider,
@@ -60,46 +71,36 @@ class ApiCallMonitoringMiddleware extends AbstractMonitoringMiddleware
      */
     public static function getResponseData($klass)
     {
-        if ($klass instanceof ResultInterface)
-        {
-            return [
-                'AttemptCount'       => self::getResultAttemptCount($klass),
+        if ($klass instanceof ResultInterface) {
+            $data = [
+                'AttemptCount' => self::getResultAttemptCount($klass),
                 'MaxRetriesExceeded' => 0,
             ];
-        }
-
-        if ($klass instanceof \Exception)
-        {
-            return [
-                'AttemptCount'       => self::getExceptionAttemptCount($klass),
+        } elseif ($klass instanceof \Exception) {
+            $data = [
+                'AttemptCount' => self::getExceptionAttemptCount($klass),
                 'MaxRetriesExceeded' => self::getMaxRetriesExceeded($klass),
             ];
+        } else {
+            throw new \InvalidArgumentException('Parameter must be an instance of ResultInterface or Exception.');
         }
 
-        throw new \InvalidArgumentException('Parameter must be an instance of ResultInterface or Exception.');
+        return $data + self::getFinalAttemptData($klass);
     }
 
-    private static function getResultAttemptCount(ResultInterface $result)
-    {
-        if (isset($result['@metadata']['transferStats']['http']))
-        {
+    private static function getResultAttemptCount(ResultInterface $result) {
+        if (isset($result['@metadata']['transferStats']['http'])) {
             return count($result['@metadata']['transferStats']['http']);
         }
         return 1;
     }
 
-    private static function getExceptionAttemptCount(\Exception $e)
-    {
+    private static function getExceptionAttemptCount(\Exception $e) {
         $attemptCount = 0;
-        if ($e instanceof MonitoringEventsInterface)
-        {
-            foreach ($e->getMonitoringEvents() as $event)
-            {
-                if (
-                    isset($event['Type']) &&
-                    $event['Type'] === 'ApiCallAttempt'
-                )
-                {
+        if ($e instanceof MonitoringEventsInterface) {
+            foreach ($e->getMonitoringEvents() as $event) {
+                if (isset($event['Type']) &&
+                    $event['Type'] === 'ApiCallAttempt') {
                     $attemptCount++;
                 }
             }
@@ -108,10 +109,41 @@ class ApiCallMonitoringMiddleware extends AbstractMonitoringMiddleware
         return $attemptCount;
     }
 
+    private static function getFinalAttemptData($klass)
+    {
+        $data = [];
+        if ($klass instanceof MonitoringEventsInterface) {
+            $finalAttempt = self::getFinalAttempt($klass->getMonitoringEvents());
+
+            if (!empty($finalAttempt)) {
+                foreach (self::$eventKeys as $callKey => $attemptKey) {
+                    if (isset($finalAttempt[$attemptKey])) {
+                        $data[$callKey] = $finalAttempt[$attemptKey];
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    private static function getFinalAttempt(array $events)
+    {
+        for (end($events); key($events) !== null; prev($events)) {
+            $current = current($events);
+            if (isset($current['Type'])
+                && $current['Type'] === 'ApiCallAttempt'
+            ) {
+                return $current;
+            }
+        }
+
+        return null;
+    }
+
     private static function getMaxRetriesExceeded($klass)
     {
-        if ($klass instanceof AwsException && $klass->isMaxRetriesExceeded())
-        {
+        if ($klass instanceof AwsException && $klass->isMaxRetriesExceeded()) {
             return 1;
         }
         return 0;
@@ -124,8 +156,7 @@ class ApiCallMonitoringMiddleware extends AbstractMonitoringMiddleware
         CommandInterface $cmd,
         RequestInterface $request,
         array $event
-    )
-    {
+    ) {
         $event = parent::populateRequestEventData($cmd, $request, $event);
         $event['Type'] = 'ApiCall';
         return $event;
@@ -137,10 +168,9 @@ class ApiCallMonitoringMiddleware extends AbstractMonitoringMiddleware
     protected function populateResultEventData(
         $result,
         array $event
-    )
-    {
+    ) {
         $event = parent::populateResultEventData($result, $event);
-        $event['Latency'] = (int)(floor(microtime(true) * 1000) - $event['Timestamp']);
+        $event['Latency'] = (int) (floor(microtime(true) * 1000) - $event['Timestamp']);
         return $event;
     }
 }

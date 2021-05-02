@@ -15,7 +15,7 @@ class MultipartStream implements StreamInterface
     private $boundary;
 
     /**
-     * @param array $elements Array of associative arrays, each containing a
+     * @param array  $elements Array of associative arrays, each containing a
      *                         required "name" key mapping to the form field,
      *                         name, a required "contents" key mapping to a
      *                         StreamInterface/resource/string, an optional
@@ -53,8 +53,7 @@ class MultipartStream implements StreamInterface
     private function getHeaders(array $headers)
     {
         $str = '';
-        foreach ($headers as $key => $value)
-        {
+        foreach ($headers as $key => $value) {
             $str .= "{$key}: {$value}\r\n";
         }
 
@@ -68,34 +67,29 @@ class MultipartStream implements StreamInterface
     {
         $stream = new AppendStream();
 
-        foreach ($elements as $element)
-        {
+        foreach ($elements as $element) {
             $this->addElement($stream, $element);
         }
 
         // Add the trailing boundary with CRLF
-        $stream->addStream(stream_for("--{$this->boundary}--\r\n"));
+        $stream->addStream(Utils::streamFor("--{$this->boundary}--\r\n"));
 
         return $stream;
     }
 
     private function addElement(AppendStream $stream, array $element)
     {
-        foreach (['contents', 'name'] as $key)
-        {
-            if (!array_key_exists($key, $element))
-            {
+        foreach (['contents', 'name'] as $key) {
+            if (!array_key_exists($key, $element)) {
                 throw new \InvalidArgumentException("A '{$key}' key is required");
             }
         }
 
-        $element['contents'] = stream_for($element['contents']);
+        $element['contents'] = Utils::streamFor($element['contents']);
 
-        if (empty($element['filename']))
-        {
+        if (empty($element['filename'])) {
             $uri = $element['contents']->getMetadata('uri');
-            if (substr($uri, 0, 6) !== 'php://')
-            {
+            if (substr($uri, 0, 6) !== 'php://') {
                 $element['filename'] = $uri;
             }
         }
@@ -107,9 +101,9 @@ class MultipartStream implements StreamInterface
             isset($element['headers']) ? $element['headers'] : []
         );
 
-        $stream->addStream(stream_for($this->getHeaders($headers)));
+        $stream->addStream(Utils::streamFor($this->getHeaders($headers)));
         $stream->addStream($body);
-        $stream->addStream(stream_for("\r\n"));
+        $stream->addStream(Utils::streamFor("\r\n"));
     }
 
     /**
@@ -119,8 +113,7 @@ class MultipartStream implements StreamInterface
     {
         // Set a default content-disposition header if one was no provided
         $disposition = $this->getHeader($headers, 'content-disposition');
-        if (!$disposition)
-        {
+        if (!$disposition) {
             $headers['Content-Disposition'] = ($filename === '0' || $filename)
                 ? sprintf('form-data; name="%s"; filename="%s"',
                     $name,
@@ -130,20 +123,16 @@ class MultipartStream implements StreamInterface
 
         // Set a default content-length header if one was no provided
         $length = $this->getHeader($headers, 'content-length');
-        if (!$length)
-        {
-            if ($length = $stream->getSize())
-            {
-                $headers['Content-Length'] = (string)$length;
+        if (!$length) {
+            if ($length = $stream->getSize()) {
+                $headers['Content-Length'] = (string) $length;
             }
         }
 
         // Set a default Content-Type if one was not supplied
         $type = $this->getHeader($headers, 'content-type');
-        if (!$type && ($filename === '0' || $filename))
-        {
-            if ($type = mimetype_from_filename($filename))
-            {
+        if (!$type && ($filename === '0' || $filename)) {
+            if ($type = MimeType::fromFilename($filename)) {
                 $headers['Content-Type'] = $type;
             }
         }
@@ -154,10 +143,8 @@ class MultipartStream implements StreamInterface
     private function getHeader(array $headers, $key)
     {
         $lowercaseHeader = strtolower($key);
-        foreach ($headers as $k => $v)
-        {
-            if (strtolower($k) === $lowercaseHeader)
-            {
+        foreach ($headers as $k => $v) {
+            if (strtolower($k) === $lowercaseHeader) {
                 return $v;
             }
         }

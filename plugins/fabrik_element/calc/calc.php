@@ -22,6 +22,37 @@ use Joomla\Utilities\ArrayHelper;
  */
 class PlgFabrik_ElementCalc extends PlgFabrik_Element
 {
+	/**
+	 * This really does get just the default value (as defined in the element's settings)
+	 *
+	 * @param   array  $data  Form data
+	 *
+	 * @return mixed
+	 */
+	public function getDefaultValue($data = array())
+	{
+		if (!isset($this->default))
+		{
+			$w = new FabrikWorker;
+			$element = $this->getElement();
+			$default = $w->parseMessageForPlaceHolder($element->default, $data, true, true);
+			/* calc in fabrik3.0/3.1 doesn't have eval, issues if F2.0 calc elements are migrated*/
+			/*if ($element->eval == '1')
+			{
+				if (FabrikHelperHTML::isDebug())
+				{
+					$res = eval($default);
+				}
+				else
+				{
+					$res = @eval($default);
+				}
+				FabrikWorker::logEval($res, 'Eval exception : ' . $element->name . '::getDefaultValue() : ' . $default . ' : %s');
+				$default = $res;
+			}
+			*/
+			$this->default = $default;
+		}
     /**
      * This really does get just the default value (as defined in the element's settings)
      *
@@ -97,6 +128,7 @@ class PlgFabrik_ElementCalc extends PlgFabrik_Element
             $this->setStoreDatabaseFormat($data, $repeatCounter);
             $default = $w->parseMessageForRepeats($params->get('calc_calculation'), $data, $this, $repeatCounter);
             $default = $w->parseMessageForPlaceHolder($default, $data, true, true);
+			$formModel = $this->getFormModel();
 
             //  $$$ hugh - standardizing on $data but need need $d here for backward compat
             $d = $data;

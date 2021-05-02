@@ -15,22 +15,24 @@ defined('_JEXEC') or die('Restricted access');
 $group = $this->group;
 ?>
 <table class="table table-striped repeatGroupTable">
-    <thead>
-    <tr>
-        <?php
-        // Add in the table heading
-        $firstGroup = $group->subgroups[0];
-        foreach ($firstGroup as $el) :
-            $style = $el->hidden ? 'style="display:none"' : '';
-            ?>
-            <th <?php
-            echo $style; ?> class="<?php
-            echo $el->containerClass ?>">
-                <?php
-                echo $el->label_raw ?>
-            </th>
-        <?php
-        endforeach;
+	<thead>
+		<tr>
+	<?php
+	// Add in the table heading
+    if ($group->canOrder) :
+    ?>
+        <th data-role="fabrik-group-sort-handle"></th>
+    <?php
+    endif;
+	$firstGroup = $group->subgroups[0];
+	foreach ($firstGroup as $el) :
+		$style = $el->hidden ? 'style="display:none"' : '';
+		?>
+		<th <?php echo $style; ?> class="<?php echo $el->containerClass?>">
+			<?php echo $el->label_raw?>
+		</th>
+		<?php
+	endforeach;
 
         // This column will contain the add/delete buttons
         if ($group->editable) : ?>

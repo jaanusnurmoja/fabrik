@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws\Multipart;
 
 use Aws\AwsClientInterface as Client;
@@ -52,7 +51,7 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
 
     /**
      * @param Client $client
-     * @param array $config
+     * @param array  $config
      */
     public function __construct(Client $client, array $config = [])
     {
@@ -91,26 +90,21 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
      */
     public function promise()
     {
-        if ($this->promise)
-        {
+        if ($this->promise) {
             return $this->promise;
         }
 
-        return $this->promise = Promise\coroutine(function ()
-        {
+        return $this->promise = Promise\coroutine(function () {
             // Initiate the upload.
-            if ($this->state->isCompleted())
-            {
+            if ($this->state->isCompleted()) {
                 throw new \LogicException('This multipart upload has already '
                     . 'been completed or aborted.'
                 );
             }
 
-            if (!$this->state->isInitiated())
-            {
+            if (!$this->state->isInitiated()) {
                 // Execute the prepare callback.
-                if (is_callable($this->config["prepare_data_source"]))
-                {
+                if (is_callable($this->config["prepare_data_source"])) {
                     $this->config["prepare_data_source"]();
                 }
 
@@ -136,23 +130,36 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
 
             // Execute the pool of commands concurrently, and process errors.
             yield $commands->promise();
-            if ($errors)
-            {
+            if ($errors) {
                 throw new $this->config['exception_class']($this->state, $errors);
             }
 
             // Complete the multipart upload.
             yield $this->execCommand('complete', $this->getCompleteParams());
             $this->state->setStatus(UploadState::COMPLETED);
-        })->otherwise(function (\Exception $e)
-        {
-            // Throw errors from the operations as a specific Multipart error.
-            if ($e instanceof AwsException)
-            {
-                $e = new $this->config['exception_class']($this->state, $e);
-            }
-            throw $e;
-        });
+        })->otherwise($this->buildFailureCatch());
+    }
+
+    private function transformException($e)
+    {
+        // Throw errors from the operations as a specific Multipart error.
+        if ($e instanceof AwsException) {
+            $e = new $this->config['exception_class']($this->state, $e);
+        }
+        throw $e;
+    }
+
+    private function buildFailureCatch()
+    {
+        if (interface_exists("Throwable")) {
+            return function (\Throwable $e) {
+                return $this->transformException($e);
+            };
+        } else {
+            return function (\Exception $e) {
+                return $this->transformException($e);
+            };
+        }
     }
 
     protected function getConfig()
@@ -176,9 +183,9 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
      * Examines the provided partSize value and the source to determine the
      * best possible part size.
      *
-     * @return int
      * @throws \InvalidArgumentException if the part size is invalid.
      *
+     * @return int
      */
     abstract protected function determinePartSize();
 
@@ -187,7 +194,7 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
      * uploaded and mark it as uploaded in the upload's state.
      *
      * @param CommandInterface $command
-     * @param ResultInterface $result
+     * @param ResultInterface  $result
      */
     abstract protected function handleResult(
         CommandInterface $command,
@@ -217,8 +224,7 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
     private function determineState()
     {
         // If the state was provided via config, then just use it.
-        if ($this->config['state'] instanceof UploadState)
-        {
+        if ($this->config['state'] instanceof UploadState) {
             return $this->config['state'];
         }
 
@@ -226,10 +232,8 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
         $required = $this->info['id'];
         $id = [$required['upload_id'] => null];
         unset($required['upload_id']);
-        foreach ($required as $key => $param)
-        {
-            if (!$this->config[$key])
-            {
+        foreach ($required as $key => $param) {
+            if (!$this->config[$key]) {
                 throw new IAE('You must provide a value for "' . $key . '" in '
                     . 'your config for the MultipartUploader for '
                     . $this->client->getApi()->getServiceFullName() . '.');
@@ -246,7 +250,7 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
      * Executes a MUP command with all of the parameters for the operation.
      *
      * @param string $operation Name of the operation.
-     * @param array $params Service-specific params for the operation.
+     * @param array  $params    Service-specific params for the operation.
      *
      * @return PromiseInterface
      */
@@ -259,8 +263,7 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
         );
 
         // Execute the before callback.
-        if (is_callable($this->config["before_{$operation}"]))
-        {
+        if (is_callable($this->config["before_{$operation}"])) {
             $this->config["before_{$operation}"]($command);
         }
 
@@ -283,21 +286,17 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
      */
     protected function getResultHandler(&$errors = [])
     {
-        return function (callable $handler) use (&$errors)
-        {
+        return function (callable $handler) use (&$errors) {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler, &$errors)
-            {
+            ) use ($handler, &$errors) {
                 return $handler($command, $request)->then(
-                    function (ResultInterface $result) use ($command)
-                    {
+                    function (ResultInterface $result) use ($command) {
                         $this->handleResult($command, $result);
                         return $result;
                     },
-                    function (AwsException $e) use (&$errors)
-                    {
+                    function (AwsException $e) use (&$errors) {
                         $errors[$e->getCommand()[$this->info['part_num']]] = $e;
                         return new Result();
                     }

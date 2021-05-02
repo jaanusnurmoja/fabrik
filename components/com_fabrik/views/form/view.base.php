@@ -458,7 +458,7 @@ class FabrikViewFormBase extends FabrikView
             //echo '<pre>';
             print json_encode($this->details);
             exit;
-            /// IF LÃ•PP
+            /// IF LÕPP
         }
 
 
@@ -520,15 +520,43 @@ class FabrikViewFormBase extends FabrikView
         $this->rowid = $model->getRowId();
         $this->access = $model->checkAccessFromListSettings();
 
-        if ($this->access == 0)
-        {
-            $this->app->enqueueMessage(FText::_('JERROR_ALERTNOAUTHOR'), 'error');
+		/** @var FabrikFEModelForm $model */
+		$model = $this->getModel();
+		$model->elementJsJLayouts();
+		$params                = $model->getParams();
+		$aLoadedElementPlugins = array();
+		$jsActions             = array();
+		$bKey                  = $model->jsKey();
+		$mediaFolder = FabrikHelperHTML::getMediaFolder();
+		$srcs                  = array_merge(
+			array(
+				'FloatingTips' => $mediaFolder . '/tipsBootStrapMock.js',
+				'FbForm' => $mediaFolder . '/form.js',
+				'Fabrik' => $mediaFolder . '/fabrik.js'
+			),
+			FabrikHelperHTML::framework());
+		$shim                  = array();
 
-            return false;
-        }
+		$groups = $model->getGroupsHiarachy();
 
-        return true;
-    }
+		$liveSiteReq[] = $mediaFolder . '/tipsBootStrapMock.js';
+		$tablesorter = false;
+
+		foreach ($groups as $groupModel)
+		{
+			$groupParams = $groupModel->getParams();
+			if ($groupParams->get('repeat_sortable', '0') === '2')
+			{
+				$tablesorter = true;
+
+				break;
+			}
+		}
+
+		if (!defined('_JOS_FABRIK_FORMJS_INCLUDED'))
+		{
+			define('_JOS_FABRIK_FORMJS_INCLUDED', 1);
+			FabrikHelperHTML::slimbox();
 
     /**
      * Prepare the form table for use in the templates
@@ -547,39 +575,48 @@ class FabrikViewFormBase extends FabrikView
         $form->formid = $model->isEditable() ? 'form_' . $model->getId() : 'details_' . $model->getId();
         $form->name = 'form_' . $model->getId();
 
-        if ((string)$this->rowid !== '')
-        {
-            $form->formid .= '_' . $this->rowid;
-        }
+			$deps                         = new stdClass;
+			$deps->deps                   = array('fab/fabrik', 'fab/element', 'fab/form-submit');
+			$shim['fab/elementlist'] = $deps;
 
-        $form->error = $form->error === '' ? FText::_('COM_FABRIK_FAILED_VALIDATION') : FText::_($form->error);
+			$srcs['Placeholder'] = 'media/com_fabrik/js/lib/form_placeholder/Form.Placeholder.js';
+			$srcs['FormSubmit'] = $mediaFolder . '/form-submit.js';
+			$srcs['Element'] = $mediaFolder . '/element.js';
 
-        if (!empty($model->formErrorMsg))
-        {
-            $form->error .= '<br />' . $model->formErrorMsg;
-        }
+			if ($tablesorter)
+			{
+				$dep->deps[] = 'lib/form_placeholder/jquery.tablesorter.combined';
+				//$dep->deps[] = 'lib/form_placeholder/jquery.tablesorter.widgets.min';
+				$srcs['TableSorter']        = 'media/com_fabrik/js/lib/tablesorter/jquery.tablesorter.combined.js';
+				//$srcs['TableSorterWidgets'] = 'media/com_fabrik/js/lib/tablesorter/jquery.tablesorter.widgets.min.js';
+				//$srcs['TableSorterNetwork'] = 'media/com_fabrik/js/lib/tablesorter/parsers/parser-network.min.js';
+				FabrikHelperHTML::stylesheetFromPath('media/com_fabrik/js/lib/tablesorter/theme.blue.min.css');
+			}
+
+			$shim['fabrik/form'] = $dep;
+		}
 
         $form->origerror = $form->error;
         $form->error = $model->hasErrors() ? $form->error : '';
         $form->attribs = ' class="' . $form->class . '" name="' . $form->name . '" id="' .
             $form->formid . '" enctype="' . $model->getFormEncType() . '"';
 
-        return $form;
-    }
+		foreach ($groups as $groupModel)
+		{
+			$groupParams = $groupModel->getParams();
 
-    /**
-     * Add the template folder paths
-     *
-     * @param $tmpl
-     */
-    private function setTmplFolders($tmpl)
-    {
-        // Force front end templates
-        $this->_basePath = COM_FABRIK_FRONTEND . '/views';
-        $model = $this->getModel();
-        $jTmplFolder = FabrikWorker::j3() ? 'tmpl' : 'tmpl25';
-        $folder = $model->isEditable() ? 'form' : 'details';
-        $this->addTemplatePath($this->_basePath . '/' . $folder . '/' . $jTmplFolder . '/' . $tmpl);
+			if ($groupParams->get('repeat_sortable', '0') === '2')
+			{
+				if (!array_key_exists('TableSorter', $srcs))
+				{
+					$srcs['TableSorter'] = 'media/com_fabrik/js/lib/tablesorter/jquery.tablesorter.min.js';
+					$srcs['TableSorteWidgetsr'] = 'media/com_fabrik/js/lib/tablesorter/jquery.tablesorter.widgets.min.js';
+					//$srcs['TableSorterNetwork'] = 'media/com_fabrik/js/lib/tablesorter/parsers/parser-network.min.js';
+					FabrikHelperHTML::stylesheetFromPath('media/com_fabrik/js/lib/tablesorter/theme.blue.min.css');
+				}
+			}
+
+			$elementModels = $groupModel->getPublishedElements();
 
         $root = $this->app->isAdmin() ? JPATH_ADMINISTRATOR : JPATH_SITE;
         $this->addTemplatePath($root . '/templates/' . $this->app->getTemplate() . '/html/com_fabrik/' . $folder . '/' . $tmpl);
@@ -1163,15 +1200,18 @@ class FabrikViewFormBase extends FabrikView
                     $joinParams = new Registry($joinParams);
                 }
 
-                $groupId = $groupModel->getGroup()->id;
-                $opts->group_pk_ids[$groupId] = FabrikString::safeColNameToArrayKey($joinParams->get('pk'));
-                $opts->join_group_ids[$groupModel->getGroup()->join_id] = (int)$groupModel->getGroup()->id;
-                $opts->group_join_ids[$groupId] = (int)$groupModel->getGroup()->join_id;
-                $opts->group_repeats[$groupId] = $groupModel->canRepeat();
-                $opts->group_copy_element_values[$groupId] = $groupModel->canCopyElementValues();
-                $opts->group_repeat_intro[$groupId] = $groupModel->getParams()->get('repeat_intro', '');
-            }
-        }
+				$groupId                                                = $groupModel->getGroup()->id;
+				$opts->group_pk_ids[$groupId]                           = FabrikString::safeColNameToArrayKey($joinParams->get('pk'));
+				$opts->join_group_ids[$groupModel->getGroup()->join_id] = (int) $groupModel->getGroup()->id;
+				$opts->group_join_ids[$groupId]                         = (int) $groupModel->getGroup()->join_id;
+				$opts->group_repeats[$groupId]                          = $groupModel->canRepeat();
+				$opts->group_copy_element_values[$groupId]              = $groupModel->canCopyElementValues();
+				$opts->group_repeat_intro[$groupId]                     = $groupModel->getParams()->get('repeat_intro', '');
+				$opts->group_repeat_sortable[$groupId]                  = $groupModel->getParams()->get('repeat_sortable', '') === '1';
+				$opts->group_repeat_tablesort[$groupId]                  = $groupModel->getParams()->get('repeat_sortable', '') === '2';
+				$opts->group_repeat_order_element[$groupId]             = $groupModel->getParams()->get('repeat_order_element', '');
+			}
+		}
 
         return $opts;
     }

@@ -6,7 +6,6 @@
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
-
 namespace Dompdf\Renderer;
 
 use Dompdf\Frame;
@@ -31,29 +30,29 @@ class Image extends Block
         $cb = $frame->get_containing_block();
         list($x, $y, $w, $h) = $frame->get_border_box();
 
+        if ($w === 0.0 || $h === 0.0) {
+            return;
+        }
+
         $this->_set_opacity($frame->get_opacity($style->opacity));
 
         list($tl, $tr, $br, $bl) = $style->get_computed_border_radius($w, $h);
 
         $has_border_radius = $tl + $tr + $br + $bl > 0;
 
-        if ($has_border_radius)
-        {
+        if ($has_border_radius) {
             $this->_canvas->clipping_roundrectangle($x, $y, (float)$w, (float)$h, $tl, $tr, $br, $bl);
         }
 
-        if (($bg = $style->background_color) !== "transparent")
-        {
+        if (($bg = $style->background_color) !== "transparent") {
             $this->_canvas->filled_rectangle($x, $y, (float)$w, (float)$h, $bg);
         }
 
-        if (($url = $style->background_image) && $url !== "none")
-        {
+        if (($url = $style->background_image) && $url !== "none") {
             $this->_background_image($url, $x, $y, $w, $h, $style);
         }
 
-        if ($has_border_radius)
-        {
+        if ($has_border_radius) {
             $this->_canvas->clipping_end();
         }
 
@@ -68,8 +67,7 @@ class Image extends Block
         $w = (float)$style->length_in_pt($style->width, $cb["w"]);
         $h = (float)$style->length_in_pt($style->height, $cb["h"]);
 
-        if ($has_border_radius)
-        {
+        if ($has_border_radius) {
             list($wt, $wr, $wb, $wl) = [
                 $style->border_top_width,
                 $style->border_right_width,
@@ -78,20 +76,16 @@ class Image extends Block
             ];
 
             // we have to get the "inner" radius
-            if ($tl > 0)
-            {
+            if ($tl > 0) {
                 $tl -= ($wt + $wl) / 2;
             }
-            if ($tr > 0)
-            {
+            if ($tr > 0) {
                 $tr -= ($wt + $wr) / 2;
             }
-            if ($br > 0)
-            {
+            if ($br > 0) {
                 $br -= ($wb + $wr) / 2;
             }
-            if ($bl > 0)
-            {
+            if ($bl > 0) {
                 $bl -= ($wb + $wl) / 2;
             }
 
@@ -101,11 +95,9 @@ class Image extends Block
         $src = $frame->get_image_url();
         $alt = null;
 
-        if (
-            Cache::is_broken($src) &&
+        if (Cache::is_broken($src) &&
             $alt = $frame->get_node()->getAttribute("alt")
-        )
-        {
+        ) {
             $font = $style->font_family;
             $size = $style->font_size;
             $spacing = $style->word_spacing;
@@ -118,41 +110,33 @@ class Image extends Block
                 $style->color,
                 $spacing
             );
-        }
-        else
-        {
+        } else {
             $this->_canvas->image($src, $x, $y, $w, $h, $style->image_resolution);
         }
 
-        if ($has_border_radius)
-        {
+        if ($has_border_radius) {
             $this->_canvas->clipping_end();
         }
 
-        if ($msg = $frame->get_image_msg())
-        {
+        if ($msg = $frame->get_image_msg()) {
             $parts = preg_split("/\s*\n\s*/", $msg);
             $height = 10;
             $_y = $alt ? $y + $h - count($parts) * $height : $y;
 
-            foreach ($parts as $i => $_part)
-            {
+            foreach ($parts as $i => $_part) {
                 $this->_canvas->text($x, $_y + $i * $height, $_part, "times", $height * 0.8, [0.5, 0.5, 0.5]);
             }
         }
 
-        if ($this->_dompdf->getOptions()->getDebugLayout() && $this->_dompdf->getOptions()->getDebugLayoutBlocks())
-        {
+        if ($this->_dompdf->getOptions()->getDebugLayout() && $this->_dompdf->getOptions()->getDebugLayoutBlocks()) {
             $this->_debug_layout($frame->get_border_box(), "blue");
-            if ($this->_dompdf->getOptions()->getDebugLayoutPaddingBox())
-            {
+            if ($this->_dompdf->getOptions()->getDebugLayoutPaddingBox()) {
                 $this->_debug_layout($frame->get_padding_box(), "blue", [0.5, 0.5]);
             }
         }
 
         $id = $frame->get_node()->getAttribute("id");
-        if (strlen($id) > 0)
-        {
+        if (strlen($id) > 0)  {
             $this->_canvas->add_named_dest($id);
         }
     }

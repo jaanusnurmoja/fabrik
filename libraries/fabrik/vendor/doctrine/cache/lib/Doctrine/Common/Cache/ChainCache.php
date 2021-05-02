@@ -15,6 +15,9 @@ class ChainCache extends CacheProvider
     /** @var CacheProvider[] */
     private $cacheProviders = [];
 
+    /** @var int */
+    private $defaultLifeTimeForDownstreamCacheProviders = 0;
+
     /**
      * @param CacheProvider[] $cacheProviders
      */
@@ -25,6 +28,11 @@ class ChainCache extends CacheProvider
             : array_values($cacheProviders);
     }
 
+    public function setDefaultLifeTimeForDownstreamCacheProviders(int $defaultLifeTimeForDownstreamCacheProviders) : void
+    {
+        $this->defaultLifeTimeForDownstreamCacheProviders = $defaultLifeTimeForDownstreamCacheProviders;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -32,8 +40,7 @@ class ChainCache extends CacheProvider
     {
         parent::setNamespace($namespace);
 
-        foreach ($this->cacheProviders as $cacheProvider)
-        {
+        foreach ($this->cacheProviders as $cacheProvider) {
             $cacheProvider->setNamespace($namespace);
         }
     }
@@ -43,16 +50,13 @@ class ChainCache extends CacheProvider
      */
     protected function doFetch($id)
     {
-        foreach ($this->cacheProviders as $key => $cacheProvider)
-        {
-            if ($cacheProvider->doContains($id))
-            {
+        foreach ($this->cacheProviders as $key => $cacheProvider) {
+            if ($cacheProvider->doContains($id)) {
                 $value = $cacheProvider->doFetch($id);
 
                 // We populate all the previous cache layers (that are assumed to be faster)
-                for ($subKey = $key - 1; $subKey >= 0; $subKey--)
-                {
-                    $this->cacheProviders[$subKey]->doSave($id, $value);
+                for ($subKey = $key - 1; $subKey >= 0; $subKey--) {
+                    $this->cacheProviders[$subKey]->doSave($id, $value, $this->defaultLifeTimeForDownstreamCacheProviders);
                 }
 
                 return $value;
@@ -69,19 +73,16 @@ class ChainCache extends CacheProvider
     {
         /** @var CacheProvider[] $traversedProviders */
         $traversedProviders = [];
-        $keysCount = count($keys);
-        $fetchedValues = [];
+        $keysCount          = count($keys);
+        $fetchedValues      = [];
 
-        foreach ($this->cacheProviders as $key => $cacheProvider)
-        {
+        foreach ($this->cacheProviders as $key => $cacheProvider) {
             $fetchedValues = $cacheProvider->doFetchMultiple($keys);
 
             // We populate all the previous cache layers (that are assumed to be faster)
-            if (count($fetchedValues) === $keysCount)
-            {
-                foreach ($traversedProviders as $previousCacheProvider)
-                {
-                    $previousCacheProvider->doSaveMultiple($fetchedValues);
+            if (count($fetchedValues) === $keysCount) {
+                foreach ($traversedProviders as $previousCacheProvider) {
+                    $previousCacheProvider->doSaveMultiple($fetchedValues, $this->defaultLifeTimeForDownstreamCacheProviders);
                 }
 
                 return $fetchedValues;
@@ -98,10 +99,8 @@ class ChainCache extends CacheProvider
      */
     protected function doContains($id)
     {
-        foreach ($this->cacheProviders as $cacheProvider)
-        {
-            if ($cacheProvider->doContains($id))
-            {
+        foreach ($this->cacheProviders as $cacheProvider) {
+            if ($cacheProvider->doContains($id)) {
                 return true;
             }
         }
@@ -116,8 +115,7 @@ class ChainCache extends CacheProvider
     {
         $stored = true;
 
-        foreach ($this->cacheProviders as $cacheProvider)
-        {
+        foreach ($this->cacheProviders as $cacheProvider) {
             $stored = $cacheProvider->doSave($id, $data, $lifeTime) && $stored;
         }
 
@@ -131,8 +129,7 @@ class ChainCache extends CacheProvider
     {
         $stored = true;
 
-        foreach ($this->cacheProviders as $cacheProvider)
-        {
+        foreach ($this->cacheProviders as $cacheProvider) {
             $stored = $cacheProvider->doSaveMultiple($keysAndValues, $lifetime) && $stored;
         }
 
@@ -146,8 +143,7 @@ class ChainCache extends CacheProvider
     {
         $deleted = true;
 
-        foreach ($this->cacheProviders as $cacheProvider)
-        {
+        foreach ($this->cacheProviders as $cacheProvider) {
             $deleted = $cacheProvider->doDelete($id) && $deleted;
         }
 
@@ -161,8 +157,7 @@ class ChainCache extends CacheProvider
     {
         $deleted = true;
 
-        foreach ($this->cacheProviders as $cacheProvider)
-        {
+        foreach ($this->cacheProviders as $cacheProvider) {
             $deleted = $cacheProvider->doDeleteMultiple($keys) && $deleted;
         }
 
@@ -176,8 +171,7 @@ class ChainCache extends CacheProvider
     {
         $flushed = true;
 
-        foreach ($this->cacheProviders as $cacheProvider)
-        {
+        foreach ($this->cacheProviders as $cacheProvider) {
             $flushed = $cacheProvider->doFlush() && $flushed;
         }
 
@@ -192,8 +186,7 @@ class ChainCache extends CacheProvider
         // We return all the stats from all adapters
         $stats = [];
 
-        foreach ($this->cacheProviders as $cacheProvider)
-        {
+        foreach ($this->cacheProviders as $cacheProvider) {
             $stats[] = $cacheProvider->doGetStats();
         }
 

@@ -37,7 +37,7 @@ class PumpStream implements StreamInterface
      *                         amount of data to return. The callable MUST
      *                         return a string when called, or false on error
      *                         or EOF.
-     * @param array $options Stream options:
+     * @param array $options   Stream options:
      *                         - metadata: Hash of metadata to use with stream.
      *                         - size: Size of the stream, if known.
      */
@@ -51,12 +51,9 @@ class PumpStream implements StreamInterface
 
     public function __toString()
     {
-        try
-        {
-            return copy_to_string($this);
-        }
-        catch (\Exception $e)
-        {
+        try {
+            return Utils::copyToString($this);
+        } catch (\Exception $e) {
             return '';
         }
     }
@@ -70,6 +67,8 @@ class PumpStream implements StreamInterface
     {
         $this->tellPos = false;
         $this->source = null;
+
+        return null;
     }
 
     public function getSize()
@@ -124,8 +123,7 @@ class PumpStream implements StreamInterface
         $this->tellPos += $readLen;
         $remaining = $length - $readLen;
 
-        if ($remaining)
-        {
+        if ($remaining) {
             $this->pump($remaining);
             $data .= $this->buffer->read($remaining);
             $this->tellPos += strlen($data) - $readLen;
@@ -137,8 +135,7 @@ class PumpStream implements StreamInterface
     public function getContents()
     {
         $result = '';
-        while (!$this->eof())
-        {
+        while (!$this->eof()) {
             $result .= $this->read(1000000);
         }
 
@@ -147,8 +144,7 @@ class PumpStream implements StreamInterface
 
     public function getMetadata($key = null)
     {
-        if (!$key)
-        {
+        if (!$key) {
             return $this->metadata;
         }
 
@@ -157,13 +153,10 @@ class PumpStream implements StreamInterface
 
     private function pump($length)
     {
-        if ($this->source)
-        {
-            do
-            {
+        if ($this->source) {
+            do {
                 $data = call_user_func($this->source, $length);
-                if ($data === false || $data === null)
-                {
+                if ($data === false || $data === null) {
                     $this->source = null;
                     return;
                 }

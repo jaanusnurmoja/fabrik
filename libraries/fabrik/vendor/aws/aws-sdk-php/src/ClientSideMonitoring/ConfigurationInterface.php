@@ -4,7 +4,7 @@ namespace Aws\ClientSideMonitoring;
 
 /**
  * Provides access to client-side monitoring configuration options:
- * 'client_id', 'enabled', 'port'
+ * 'client_id', 'enabled', 'host', 'port'
  */
 interface ConfigurationInterface
 {
@@ -21,6 +21,13 @@ interface ConfigurationInterface
      * @return string|null
      */
     public function getClientId();
+
+    /**
+     * Returns the configured host.
+     *
+     * @return string|null
+     */
+    public function getHost();
 
     /**
      * Returns the configured port.

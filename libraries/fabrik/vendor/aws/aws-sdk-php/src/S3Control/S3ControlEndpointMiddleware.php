@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws\S3Control;
 
 use Aws\CommandInterface;
@@ -16,9 +15,6 @@ use Psr\Http\Message\RequestInterface;
  */
 class S3ControlEndpointMiddleware
 {
-    const NO_PATTERN = 0;
-    const DUALSTACK = 1;
-
     /** @var bool */
     private $dualStackByDefault;
     /** @var string */
@@ -30,14 +26,13 @@ class S3ControlEndpointMiddleware
      * Create a middleware wrapper function
      *
      * @param string $region
-     * @param array $options
+     * @param array  $options
      *
      * @return callable
      */
     public static function wrap($region, array $options)
     {
-        return function (callable $handler) use ($region, $options)
-        {
+        return function (callable $handler) use ($region, $options) {
             return new self($handler, $region, $options);
         };
     }
@@ -46,23 +41,18 @@ class S3ControlEndpointMiddleware
         callable $nextHandler,
         $region,
         array $options
-    )
-    {
+    ) {
         $this->dualStackByDefault = isset($options['dual_stack'])
-            ? (bool)$options['dual_stack'] : false;
-        $this->region = (string)$region;
+            ? (bool) $options['dual_stack'] : false;
+        $this->region = (string) $region;
         $this->nextHandler = $nextHandler;
     }
 
     public function __invoke(CommandInterface $command, RequestInterface $request)
     {
-        if ($this->isDualStackRequest($command, $request))
-        {
+        if ($this->isDualStackRequest($command, $request)) {
             $request = $this->applyDualStackEndpoint($command, $request);
         }
-        $request = $this->applyHostStyleEndpoint($command, $request)
-            ->withoutHeader('x-amz-account-id');
-        unset($command['AccountId']);
 
         $nextHandler = $this->nextHandler;
         return $nextHandler($command, $request);
@@ -71,8 +61,7 @@ class S3ControlEndpointMiddleware
     private function isDualStackRequest(
         CommandInterface $command,
         RequestInterface $request
-    )
-    {
+    ) {
         return isset($command['@use_dual_stack_endpoint'])
             ? $command['@use_dual_stack_endpoint'] : $this->dualStackByDefault;
     }
@@ -86,43 +75,12 @@ class S3ControlEndpointMiddleware
     private function applyDualStackEndpoint(
         CommandInterface $command,
         RequestInterface $request
-    )
-    {
+    ) {
         $uri = $request->getUri();
         return $request->withUri(
             $uri->withHost($this->getDualStackHost(
                 $uri->getHost()
             ))
         );
-    }
-
-    private function getAccountIdStyleHost(CommandInterface $command, $host)
-    {
-        return "{$command['AccountId']}.{$host}";
-    }
-
-    private function getAccountIdlessPath($path, CommandInterface $command)
-    {
-        $pattern = '/^\\/' . preg_quote($command['AccountId'], '/') . '/';
-        return preg_replace($pattern, '', $path) ?: '/';
-    }
-
-    private function applyHostStyleEndpoint(
-        CommandInterface $command,
-        RequestInterface $request
-    )
-    {
-        $uri = $request->getUri();
-        $request = $request->withUri(
-            $uri->withHost($this->getAccountIdStyleHost(
-                $command,
-                $uri->getHost()
-            ))
-                ->withPath($this->getAccountIdlessPath(
-                    $uri->getPath(),
-                    $command
-                ))
-        );
-        return $request;
     }
 }

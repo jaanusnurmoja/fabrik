@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws\Signature;
 
 use Aws\Credentials\CredentialsInterface;
@@ -10,18 +9,22 @@ use Psr\Http\Message\RequestInterface;
  */
 class S3SignatureV4 extends SignatureV4
 {
+
     /**
-     * Always add a x-amz-content-sha-256 for data integrity.
+     * S3-specific signing logic
+     *
+     * @param RequestInterface $request
+     * @param CredentialsInterface $credentials
+     * @return \GuzzleHttp\Psr7\Request|RequestInterface
      */
     public function signRequest(
         RequestInterface $request,
         CredentialsInterface $credentials
-    )
-    {
-        if (!$request->hasHeader('x-amz-content-sha256'))
-        {
+    ) {
+        // Always add a x-amz-content-sha-256 for data integrity
+        if (!$request->hasHeader('x-amz-content-sha256')) {
             $request = $request->withHeader(
-                'X-Amz-Content-Sha256',
+                'x-amz-content-sha256',
                 $this->getPayload($request)
             );
         }
@@ -37,10 +40,8 @@ class S3SignatureV4 extends SignatureV4
         CredentialsInterface $credentials,
         $expires,
         array $options = []
-    )
-    {
-        if (!$request->hasHeader('x-amz-content-sha256'))
-        {
+    ) {
+        if (!$request->hasHeader('x-amz-content-sha256')) {
             $request = $request->withHeader(
                 'X-Amz-Content-Sha256',
                 $this->getPresignedPayload($request)
@@ -65,8 +66,7 @@ class S3SignatureV4 extends SignatureV4
     protected function createCanonicalizedPath($path)
     {
         // Only remove one slash in case of keys that have a preceding slash
-        if (substr($path, 0, 1) === '/')
-        {
+        if (substr($path, 0, 1) === '/') {
             $path = substr($path, 1);
         }
         return '/' . $path;

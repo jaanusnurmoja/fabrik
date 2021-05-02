@@ -71,15 +71,13 @@ class UploadedFile implements UploadedFileInterface
         $errorStatus,
         $clientFilename = null,
         $clientMediaType = null
-    )
-    {
+    ) {
         $this->setError($errorStatus);
         $this->setSize($size);
         $this->setClientFilename($clientFilename);
         $this->setClientMediaType($clientMediaType);
 
-        if ($this->isOk())
-        {
+        if ($this->isOk()) {
             $this->setStreamOrFile($streamOrFile);
         }
     }
@@ -88,24 +86,18 @@ class UploadedFile implements UploadedFileInterface
      * Depending on the value set file or stream variable
      *
      * @param mixed $streamOrFile
+     *
      * @throws InvalidArgumentException
      */
     private function setStreamOrFile($streamOrFile)
     {
-        if (is_string($streamOrFile))
-        {
+        if (is_string($streamOrFile)) {
             $this->file = $streamOrFile;
-        }
-        elseif (is_resource($streamOrFile))
-        {
+        } elseif (is_resource($streamOrFile)) {
             $this->stream = new Stream($streamOrFile);
-        }
-        elseif ($streamOrFile instanceof StreamInterface)
-        {
+        } elseif ($streamOrFile instanceof StreamInterface) {
             $this->stream = $streamOrFile;
-        }
-        else
-        {
+        } else {
             throw new InvalidArgumentException(
                 'Invalid stream or file provided for UploadedFile'
             );
@@ -114,19 +106,18 @@ class UploadedFile implements UploadedFileInterface
 
     /**
      * @param int $error
+     *
      * @throws InvalidArgumentException
      */
     private function setError($error)
     {
-        if (false === is_int($error))
-        {
+        if (false === is_int($error)) {
             throw new InvalidArgumentException(
                 'Upload file error status must be an integer'
             );
         }
 
-        if (false === in_array($error, UploadedFile::$errors))
-        {
+        if (false === in_array($error, UploadedFile::$errors)) {
             throw new InvalidArgumentException(
                 'Invalid error status for UploadedFile'
             );
@@ -137,12 +128,12 @@ class UploadedFile implements UploadedFileInterface
 
     /**
      * @param int $size
+     *
      * @throws InvalidArgumentException
      */
     private function setSize($size)
     {
-        if (false === is_int($size))
-        {
+        if (false === is_int($size)) {
             throw new InvalidArgumentException(
                 'Upload file size must be an integer'
             );
@@ -171,12 +162,12 @@ class UploadedFile implements UploadedFileInterface
 
     /**
      * @param string|null $clientFilename
+     *
      * @throws InvalidArgumentException
      */
     private function setClientFilename($clientFilename)
     {
-        if (false === $this->isStringOrNull($clientFilename))
-        {
+        if (false === $this->isStringOrNull($clientFilename)) {
             throw new InvalidArgumentException(
                 'Upload file client filename must be a string or null'
             );
@@ -187,12 +178,12 @@ class UploadedFile implements UploadedFileInterface
 
     /**
      * @param string|null $clientMediaType
+     *
      * @throws InvalidArgumentException
      */
     private function setClientMediaType($clientMediaType)
     {
-        if (false === $this->isStringOrNull($clientMediaType))
-        {
+        if (false === $this->isStringOrNull($clientMediaType)) {
             throw new InvalidArgumentException(
                 'Upload file client media type must be a string or null'
             );
@@ -224,27 +215,25 @@ class UploadedFile implements UploadedFileInterface
      */
     private function validateActive()
     {
-        if (false === $this->isOk())
-        {
+        if (false === $this->isOk()) {
             throw new RuntimeException('Cannot retrieve stream due to upload error');
         }
 
-        if ($this->isMoved())
-        {
+        if ($this->isMoved()) {
             throw new RuntimeException('Cannot retrieve stream after it has already been moved');
         }
     }
 
     /**
      * {@inheritdoc}
+     *
      * @throws RuntimeException if the upload was not successful.
      */
     public function getStream()
     {
         $this->validateActive();
 
-        if ($this->stream instanceof StreamInterface)
-        {
+        if ($this->stream instanceof StreamInterface) {
             return $this->stream;
         }
 
@@ -256,7 +245,9 @@ class UploadedFile implements UploadedFileInterface
      *
      * @see http://php.net/is_uploaded_file
      * @see http://php.net/move_uploaded_file
+     *
      * @param string $targetPath Path to which to move the uploaded file.
+     *
      * @throws RuntimeException if the upload was not successful.
      * @throws InvalidArgumentException if the $path specified is invalid.
      * @throws RuntimeException on any error during the move operation, or on
@@ -266,22 +257,18 @@ class UploadedFile implements UploadedFileInterface
     {
         $this->validateActive();
 
-        if (false === $this->isStringNotEmpty($targetPath))
-        {
+        if (false === $this->isStringNotEmpty($targetPath)) {
             throw new InvalidArgumentException(
                 'Invalid path provided for move operation; must be a non-empty string'
             );
         }
 
-        if ($this->file)
-        {
+        if ($this->file) {
             $this->moved = php_sapi_name() == 'cli'
                 ? rename($this->file, $targetPath)
                 : move_uploaded_file($this->file, $targetPath);
-        }
-        else
-        {
-            copy_to_stream(
+        } else {
+            Utils::copyToStream(
                 $this->getStream(),
                 new LazyOpenStream($targetPath, 'w')
             );
@@ -289,8 +276,7 @@ class UploadedFile implements UploadedFileInterface
             $this->moved = true;
         }
 
-        if (false === $this->moved)
-        {
+        if (false === $this->moved) {
             throw new RuntimeException(
                 sprintf('Uploaded file could not be moved to %s', $targetPath)
             );

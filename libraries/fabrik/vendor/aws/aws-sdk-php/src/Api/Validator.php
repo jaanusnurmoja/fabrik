@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws\Api;
 
 use Aws;
@@ -9,8 +8,8 @@ use Aws;
  */
 class Validator
 {
-    private $path        = [];
-    private $errors      = [];
+    private $path = [];
+    private $errors = [];
     private $constraints = [];
 
     private static $defaultConstraints = [
@@ -42,9 +41,9 @@ class Validator
     /**
      * Validates the given input against the schema.
      *
-     * @param string $name Operation name
-     * @param Shape $shape Shape to validate
-     * @param array $input Input to validate
+     * @param string $name  Operation name
+     * @param Shape  $shape Shape to validate
+     * @param array  $input Input to validate
      *
      * @throws \InvalidArgumentException if the input is invalid.
      */
@@ -52,11 +51,10 @@ class Validator
     {
         $this->dispatch($shape, $input);
 
-        if ($this->errors)
-        {
+        if ($this->errors) {
             $message = sprintf(
                 "Found %d error%s while validating the input provided for the "
-                . "%s operation:\n%s",
+                    . "%s operation:\n%s",
                 count($this->errors),
                 count($this->errors) > 1 ? 's' : '',
                 $name,
@@ -85,25 +83,20 @@ class Validator
         ];
 
         $type = $shape->getType();
-        if (isset($methods[$type]))
-        {
+        if (isset($methods[$type])) {
             $this->{$methods[$type]}($shape, $value);
         }
     }
 
     private function check_structure(StructureShape $shape, $value)
     {
-        if (!$this->checkAssociativeArray($value))
-        {
+        if (!$this->checkAssociativeArray($value)) {
             return;
         }
 
-        if ($this->constraints['required'] && $shape['required'])
-        {
-            foreach ($shape['required'] as $req)
-            {
-                if (!isset($value[$req]))
-                {
+        if ($this->constraints['required'] && $shape['required']) {
+            foreach ($shape['required'] as $req) {
+                if (!isset($value[$req])) {
                     $this->path[] = $req;
                     $this->addError('is missing and is a required parameter');
                     array_pop($this->path);
@@ -111,10 +104,8 @@ class Validator
             }
         }
 
-        foreach ($value as $name => $v)
-        {
-            if ($shape->hasMember($name))
-            {
+        foreach ($value as $name => $v) {
+            if ($shape->hasMember($name)) {
                 $this->path[] = $name;
                 $this->dispatch(
                     $shape->getMember($name),
@@ -127,8 +118,7 @@ class Validator
 
     private function check_list(ListShape $shape, $value)
     {
-        if (!is_array($value))
-        {
+        if (!is_array($value)) {
             $this->addError('must be an array. Found '
                 . Aws\describe_type($value));
             return;
@@ -137,8 +127,7 @@ class Validator
         $this->validateRange($shape, count($value), "list element count");
 
         $items = $shape->getMember();
-        foreach ($value as $index => $v)
-        {
+        foreach ($value as $index => $v) {
             $this->path[] = $index;
             $this->dispatch($items, $v);
             array_pop($this->path);
@@ -147,14 +136,12 @@ class Validator
 
     private function check_map(MapShape $shape, $value)
     {
-        if (!$this->checkAssociativeArray($value))
-        {
+        if (!$this->checkAssociativeArray($value)) {
             return;
         }
 
         $values = $shape->getValue();
-        foreach ($value as $key => $v)
-        {
+        foreach ($value as $key => $v) {
             $this->path[] = $key;
             $this->dispatch($values, $v);
             array_pop($this->path);
@@ -164,17 +151,15 @@ class Validator
     private function check_blob(Shape $shape, $value)
     {
         static $valid = [
-            'string'   => true,
-            'integer'  => true,
-            'double'   => true,
+            'string' => true,
+            'integer' => true,
+            'double' => true,
             'resource' => true
         ];
 
         $type = gettype($value);
-        if (!isset($valid[$type]))
-        {
-            if ($type != 'object' || !method_exists($value, '__toString'))
-            {
+        if (!isset($valid[$type])) {
+            if ($type != 'object' || !method_exists($value, '__toString')) {
                 $this->addError('must be an fopen resource, a '
                     . 'GuzzleHttp\Stream\StreamInterface object, or something '
                     . 'that can be cast to a string. Found '
@@ -185,8 +170,7 @@ class Validator
 
     private function check_numeric(Shape $shape, $value)
     {
-        if (!is_numeric($value))
-        {
+        if (!is_numeric($value)) {
             $this->addError('must be numeric. Found '
                 . Aws\describe_type($value));
             return;
@@ -197,8 +181,7 @@ class Validator
 
     private function check_boolean(Shape $shape, $value)
     {
-        if (!is_bool($value))
-        {
+        if (!is_bool($value)) {
             $this->addError('must be a boolean. Found '
                 . Aws\describe_type($value));
         }
@@ -206,18 +189,15 @@ class Validator
 
     private function check_string(Shape $shape, $value)
     {
-        if ($shape['jsonvalue'])
-        {
-            if (!self::canJsonEncode($value))
-            {
+        if ($shape['jsonvalue']) {
+            if (!self::canJsonEncode($value)) {
                 $this->addError('must be a value encodable with \'json_encode\'.'
                     . ' Found ' . Aws\describe_type($value));
             }
             return;
         }
 
-        if (!$this->checkCanString($value))
-        {
+        if (!$this->checkCanString($value)) {
             $this->addError('must be a string or an object that implements '
                 . '__toString(). Found ' . Aws\describe_type($value));
             return;
@@ -225,11 +205,9 @@ class Validator
 
         $this->validateRange($shape, strlen($value), "string length");
 
-        if ($this->constraints['pattern'])
-        {
+        if ($this->constraints['pattern']) {
             $pattern = $shape['pattern'];
-            if ($pattern && !preg_match("/$pattern/", $value))
-            {
+            if ($pattern && !preg_match("/$pattern/", $value)) {
                 $this->addError("Pattern /$pattern/ failed to match '$value'");
             }
         }
@@ -237,21 +215,17 @@ class Validator
 
     private function validateRange(Shape $shape, $length, $descriptor)
     {
-        if ($this->constraints['min'])
-        {
+        if ($this->constraints['min']) {
             $min = $shape['min'];
-            if ($min && $length < $min)
-            {
+            if ($min && $length < $min) {
                 $this->addError("expected $descriptor to be >= $min, but "
                     . "found $descriptor of $length");
             }
         }
 
-        if ($this->constraints['max'])
-        {
+        if ($this->constraints['max']) {
             $max = $shape['max'];
-            if ($max && $length > $max)
-            {
+            if ($max && $length > $max) {
                 $this->addError("expected $descriptor to be <= $max, but "
                     . "found $descriptor of $length");
             }
@@ -275,8 +249,20 @@ class Validator
 
     private function checkAssociativeArray($value)
     {
-        if (!is_array($value) || isset($value[0]))
-        {
+        $isAssociative = false;
+
+        if (is_array($value)) {
+            $expectedIndex = 0;
+            $key = key($value);
+
+            do {
+                $isAssociative = $key !== $expectedIndex++;
+                next($value);
+                $key = key($value);
+            } while (!$isAssociative && null !== $key);
+        }
+
+        if (!$isAssociative) {
             $this->addError('must be an associative array. Found '
                 . Aws\describe_type($value));
             return false;
@@ -288,10 +274,7 @@ class Validator
     private function addError($message)
     {
         $this->errors[] =
-            implode('', array_map(function ($s)
-            {
-                return "[{$s}]";
-            }, $this->path))
+            implode('', array_map(function ($s) { return "[{$s}]"; }, $this->path))
             . ' '
             . $message;
     }

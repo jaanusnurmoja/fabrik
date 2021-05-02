@@ -948,17 +948,16 @@ class FabrikFEModelGroup extends FabModel
                 }
             }
 
-            $group->editable = $this->editable;
-            $group->canRepeat = $params->get('repeat_group_button', '0');
-            $showGroup = $params->def('repeat_group_show_first', '1');
-            $pages = $formModel->getPages();
-            $startPage = isset($formModel->sessionModel->last_page) ? $formModel->sessionModel->last_page : 0;
+			$group->editable  = $this->editable;
+			$group->canRepeat = $params->get('repeat_group_button', '0');
+			$showGroup        = $params->def('repeat_group_show_first', '1');
+			$pages            = $formModel->getPages();
+			$startPage        = isset($formModel->sessionModel->last_page) ? $formModel->sessionModel->last_page : 0;
 
-            /**
-             * $$$ hugh - added array_key_exists for (I think!) corner case where group properties have been
-             * changed to remove (or change) paging, but user still has session state set.  So it was throwing
-             * a PHP 'undefined index' notice.
-             */
+			if ($showGroup == -1 || $showGroup == 0 || ($view == 'form' && $showGroup == -2) || ($view == 'details' && $showGroup == -3))
+			{
+				$groupTable->css .= ";display:none;";
+			}
 
             if (
                 array_key_exists($startPage, $pages) && is_array($pages[$startPage])
@@ -979,6 +978,7 @@ class FabrikFEModelGroup extends FabModel
                 $replace = $formModel->isNewRecord() ? FText::_('COM_FABRIK_ADD') : FText::_('COM_FABRIK_EDIT');
                 $label = str_replace("{Add/Edit}", $replace, $label);
             }
+			$group->canOrder         = $params->get('repeat_sortable', '') === '1';
 
             $groupTable->label = $label;
             $group->title = $w->parseMessageForPlaceHolder($groupTable->label, $formModel->data, false);

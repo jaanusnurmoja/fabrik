@@ -5,7 +5,6 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
-
 namespace Dompdf;
 
 use Dompdf\Renderer\AbstractRenderer;
@@ -59,33 +58,28 @@ class Renderer extends AbstractRenderer
 
         $this->_check_callbacks("begin_frame", $frame);
 
-        if ($_dompdf_debug)
-        {
+        if ($_dompdf_debug) {
             echo $frame;
             flush();
         }
 
         $style = $frame->get_style();
 
-        if (in_array($style->visibility, ["hidden", "collapse"]))
-        {
+        if (in_array($style->visibility, ["hidden", "collapse"])) {
             return;
         }
 
         $display = $style->display;
 
         // Starts the CSS transformation
-        if ($style->transform && is_array($style->transform))
-        {
+        if ($style->transform && is_array($style->transform)) {
             $this->_canvas->save();
             list($x, $y) = $frame->get_padding_box();
             $origin = $style->transform_origin;
 
-            foreach ($style->transform as $transform)
-            {
+            foreach ($style->transform as $transform) {
                 list($function, $values) = $transform;
-                if ($function === "matrix")
-                {
+                if ($function === "matrix") {
                     $function = "transform";
                 }
 
@@ -97,8 +91,7 @@ class Renderer extends AbstractRenderer
             }
         }
 
-        switch ($display)
-        {
+        switch ($display) {
 
             case "block":
             case "list-item":
@@ -109,12 +102,9 @@ class Renderer extends AbstractRenderer
                 break;
 
             case "inline":
-                if ($frame->is_text_node())
-                {
+                if ($frame->is_text_node()) {
                     $this->_render_frame("text", $frame);
-                }
-                else
-                {
+                } else {
                     $this->_render_frame("inline", $frame);
                 }
                 break;
@@ -140,21 +130,15 @@ class Renderer extends AbstractRenderer
             case "none":
                 $node = $frame->get_node();
 
-                if ($node->nodeName === "script")
-                {
-                    if (
-                        $node->getAttribute("type") === "text/php" ||
+                if ($node->nodeName === "script") {
+                    if ($node->getAttribute("type") === "text/php" ||
                         $node->getAttribute("language") === "php"
-                    )
-                    {
+                    ) {
                         // Evaluate embedded php scripts
                         $this->_render_frame("php", $frame);
-                    }
-                    elseif (
-                        $node->getAttribute("type") === "text/javascript" ||
+                    } elseif ($node->getAttribute("type") === "text/javascript" ||
                         $node->getAttribute("language") === "javascript"
-                    )
-                    {
+                    ) {
                         // Insert JavaScript
                         $this->_render_frame("javascript", $frame);
                     }
@@ -169,28 +153,23 @@ class Renderer extends AbstractRenderer
         }
 
         // Starts the overflow: hidden box
-        if ($style->overflow === "hidden")
-        {
+        if ($style->overflow === "hidden") {
             list($x, $y, $w, $h) = $frame->get_padding_box();
 
             // get border radii
             $style = $frame->get_style();
             list($tl, $tr, $br, $bl) = $style->get_computed_border_radius($w, $h);
 
-            if ($tl + $tr + $br + $bl > 0)
-            {
+            if ($tl + $tr + $br + $bl > 0) {
                 $this->_canvas->clipping_roundrectangle($x, $y, (float)$w, (float)$h, $tl, $tr, $br, $bl);
-            }
-            else
-            {
+            } else {
                 $this->_canvas->clipping_rectangle($x, $y, (float)$w, (float)$h);
             }
         }
 
         $stack = [];
 
-        foreach ($frame->get_children() as $child)
-        {
+        foreach ($frame->get_children() as $child) {
             // < 0 : nagative z-index
             // = 0 : no z-index, no stacking context
             // = 1 : stacking context without z-index
@@ -199,12 +178,9 @@ class Renderer extends AbstractRenderer
             $child_z_index = $child_style->z_index;
             $z_index = 0;
 
-            if ($child_z_index !== "auto")
-            {
+            if ($child_z_index !== "auto") {
                 $z_index = intval($child_z_index) + 1;
-            }
-            elseif ($child_style->float !== "none" || $child->is_positionned())
-            {
+            } elseif ($child_style->float !== "none" || $child->is_positionned()) {
                 $z_index = 1;
             }
 
@@ -213,22 +189,18 @@ class Renderer extends AbstractRenderer
 
         ksort($stack);
 
-        foreach ($stack as $by_index)
-        {
-            foreach ($by_index as $child)
-            {
+        foreach ($stack as $by_index) {
+            foreach ($by_index as $child) {
                 $this->render($child);
             }
         }
 
         // Ends the overflow: hidden box
-        if ($style->overflow === "hidden")
-        {
+        if ($style->overflow === "hidden") {
             $this->_canvas->clipping_end();
         }
 
-        if ($style->transform && is_array($style->transform))
-        {
+        if ($style->transform && is_array($style->transform)) {
             $this->_canvas->restore();
         }
 
@@ -241,32 +213,23 @@ class Renderer extends AbstractRenderer
      * gets triggered on a frame
      *
      * @param string $event the type of event
-     * @param Frame $frame the frame that event is triggered on
+     * @param Frame $frame  the frame that event is triggered on
      */
     protected function _check_callbacks($event, $frame)
     {
-        if (!isset($this->_callbacks))
-        {
+        if (!isset($this->_callbacks)) {
             $this->_callbacks = $this->_dompdf->getCallbacks();
         }
 
-        if (is_array($this->_callbacks) && isset($this->_callbacks[$event]))
-        {
-            $info = [
-                0 => $this->_canvas, "canvas" => $this->_canvas,
-                1 => $frame, "frame" => $frame
-            ];
+        if (is_array($this->_callbacks) && isset($this->_callbacks[$event])) {
+            $info = [0 => $this->_canvas, "canvas" => $this->_canvas,
+                1 => $frame, "frame" => $frame];
             $fs = $this->_callbacks[$event];
-            foreach ($fs as $f)
-            {
-                if (is_callable($f))
-                {
-                    if (is_array($f))
-                    {
+            foreach ($fs as $f) {
+                if (is_callable($f)) {
+                    if (is_array($f)) {
                         $f[0]->{$f[1]}($info);
-                    }
-                    else
-                    {
+                    } else {
                         $f($info);
                     }
                 }
@@ -285,11 +248,9 @@ class Renderer extends AbstractRenderer
     protected function _render_frame($type, $frame)
     {
 
-        if (!isset($this->_renderers[$type]))
-        {
+        if (!isset($this->_renderers[$type])) {
 
-            switch ($type)
-            {
+            switch ($type) {
                 case "block":
                     $this->_renderers[$type] = new Block($this->_dompdf);
                     break;

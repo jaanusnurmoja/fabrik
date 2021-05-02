@@ -7,7 +7,6 @@
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
-
 namespace Dompdf\Renderer;
 
 use Dompdf\Adapter\CPDF;
@@ -47,8 +46,7 @@ class Text extends AbstractRenderer
     function render(Frame $frame)
     {
         $text = $frame->get_text();
-        if (trim($text) === "")
-        {
+        if (trim($text) === "") {
             return;
         }
 
@@ -56,18 +54,15 @@ class Text extends AbstractRenderer
         list($x, $y) = $frame->get_position();
         $cb = $frame->get_containing_block();
 
-        if (($ml = $style->margin_left) === "auto" || $ml === "none")
-        {
+        if (($ml = $style->margin_left) === "auto" || $ml === "none") {
             $ml = 0;
         }
 
-        if (($pl = $style->padding_left) === "auto" || $pl === "none")
-        {
+        if (($pl = $style->padding_left) === "auto" || $pl === "none") {
             $pl = 0;
         }
 
-        if (($bl = $style->border_left_width) === "auto" || $bl === "none")
-        {
+        if (($bl = $style->border_left_width) === "auto" || $bl === "none") {
             $bl = 0;
         }
 
@@ -94,8 +89,7 @@ class Text extends AbstractRenderer
 
         // FIXME Instead of using the tallest frame to position,
         // the decoration, the text should be well placed
-        if (false && $line->tallest_frame)
-        {
+        if (false && $line->tallest_frame) {
             $base_frame = $line->tallest_frame;
             $style = $base_frame->get_style();
             $size = $style->font_size;
@@ -107,17 +101,14 @@ class Text extends AbstractRenderer
         $linethrough_offset = $size * self::LINETHROUGH_OFFSET;
         $underline_position = -0.08;
 
-        if ($this->_canvas instanceof CPDF)
-        {
+        if ($this->_canvas instanceof CPDF) {
             $cpdf_font = $this->_canvas->get_cpdf()->fonts[$style->font_family];
 
-            if (isset($cpdf_font["UnderlinePosition"]))
-            {
+            if (isset($cpdf_font["UnderlinePosition"])) {
                 $underline_position = $cpdf_font["UnderlinePosition"] / 1000;
             }
 
-            if (isset($cpdf_font["UnderlineThickness"]))
-            {
+            if (isset($cpdf_font["UnderlineThickness"])) {
                 $line_thickness = $size * ($cpdf_font["UnderlineThickness"] / 1000);
             }
         }
@@ -131,25 +122,21 @@ class Text extends AbstractRenderer
         // Draw all applicable text-decorations.  Start with the root and work our way down.
         $p = $frame;
         $stack = [];
-        while ($p = $p->get_parent())
-        {
+        while ($p = $p->get_parent()) {
             $stack[] = $p;
         }
 
-        while (isset($stack[0]))
-        {
+        while (isset($stack[0])) {
             $f = array_pop($stack);
 
-            if (($text_deco = $f->get_style()->text_decoration) === "none")
-            {
+            if (($text_deco = $f->get_style()->text_decoration) === "none") {
                 continue;
             }
 
             $deco_y = $y; //$line->y;
             $color = $f->get_style()->color;
 
-            switch ($text_deco)
-            {
+            switch ($text_deco) {
                 default:
                     continue 2;
 
@@ -172,11 +159,9 @@ class Text extends AbstractRenderer
             $this->_canvas->line($x1, $deco_y, $x2, $deco_y, $color, $line_thickness);
         }
 
-        if ($this->_dompdf->getOptions()->getDebugLayout() && $this->_dompdf->getOptions()->getDebugLayoutLines())
-        {
+        if ($this->_dompdf->getOptions()->getDebugLayout() && $this->_dompdf->getOptions()->getDebugLayoutLines()) {
             $text_width = $this->_dompdf->getFontMetrics()->getTextWidth($text, $font, $size);
-            $this->_debug_layout([$x, $y, $text_width + ($line->wc - 1) * $word_spacing, $frame_font_size], "orange",
-                [0.5, 0.5]);
+            $this->_debug_layout([$x, $y, $text_width + ($line->wc - 1) * $word_spacing, $frame_font_size], "orange", [0.5, 0.5]);
         }
     }
 }

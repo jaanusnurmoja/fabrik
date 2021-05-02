@@ -13,12 +13,12 @@ trait MessageTrait
     private $headers = [];
 
     /** @var array Map of lowercase header name => original name at registration */
-    private $headerNames = [];
+    private $headerNames  = [];
 
     /** @var string */
     private $protocol = '1.1';
 
-    /** @var StreamInterface */
+    /** @var StreamInterface|null */
     private $stream;
 
     public function getProtocolVersion()
@@ -28,8 +28,7 @@ trait MessageTrait
 
     public function withProtocolVersion($version)
     {
-        if ($this->protocol === $version)
-        {
+        if ($this->protocol === $version) {
             return $this;
         }
 
@@ -52,8 +51,7 @@ trait MessageTrait
     {
         $header = strtolower($header);
 
-        if (!isset($this->headerNames[$header]))
-        {
+        if (!isset($this->headerNames[$header])) {
             return [];
         }
 
@@ -69,17 +67,12 @@ trait MessageTrait
 
     public function withHeader($header, $value)
     {
-        if (!is_array($value))
-        {
-            $value = [$value];
-        }
-
-        $value = $this->trimHeaderValues($value);
+        $this->assertHeader($header);
+        $value = $this->normalizeHeaderValue($value);
         $normalized = strtolower($header);
 
         $new = clone $this;
-        if (isset($new->headerNames[$normalized]))
-        {
+        if (isset($new->headerNames[$normalized])) {
             unset($new->headers[$new->headerNames[$normalized]]);
         }
         $new->headerNames[$normalized] = $header;
@@ -90,22 +83,15 @@ trait MessageTrait
 
     public function withAddedHeader($header, $value)
     {
-        if (!is_array($value))
-        {
-            $value = [$value];
-        }
-
-        $value = $this->trimHeaderValues($value);
+        $this->assertHeader($header);
+        $value = $this->normalizeHeaderValue($value);
         $normalized = strtolower($header);
 
         $new = clone $this;
-        if (isset($new->headerNames[$normalized]))
-        {
+        if (isset($new->headerNames[$normalized])) {
             $header = $this->headerNames[$normalized];
             $new->headers[$header] = array_merge($this->headers[$header], $value);
-        }
-        else
-        {
+        } else {
             $new->headerNames[$normalized] = $header;
             $new->headers[$header] = $value;
         }
@@ -117,8 +103,7 @@ trait MessageTrait
     {
         $normalized = strtolower($header);
 
-        if (!isset($this->headerNames[$normalized]))
-        {
+        if (!isset($this->headerNames[$normalized])) {
             return $this;
         }
 
@@ -132,9 +117,8 @@ trait MessageTrait
 
     public function getBody()
     {
-        if (!$this->stream)
-        {
-            $this->stream = stream_for('');
+        if (!$this->stream) {
+            $this->stream = Utils::streamFor('');
         }
 
         return $this->stream;
@@ -142,8 +126,7 @@ trait MessageTrait
 
     public function withBody(StreamInterface $body)
     {
-        if ($body === $this->stream)
-        {
+        if ($body === $this->stream) {
             return $this;
         }
 
@@ -155,26 +138,36 @@ trait MessageTrait
     private function setHeaders(array $headers)
     {
         $this->headerNames = $this->headers = [];
-        foreach ($headers as $header => $value)
-        {
-            if (!is_array($value))
-            {
-                $value = [$value];
+        foreach ($headers as $header => $value) {
+            if (is_int($header)) {
+                // Numeric array keys are converted to int by PHP but having a header name '123' is not forbidden by the spec
+                // and also allowed in withHeader(). So we need to cast it to string again for the following assertion to pass.
+                $header = (string) $header;
             }
-
-            $value = $this->trimHeaderValues($value);
+            $this->assertHeader($header);
+            $value = $this->normalizeHeaderValue($value);
             $normalized = strtolower($header);
-            if (isset($this->headerNames[$normalized]))
-            {
+            if (isset($this->headerNames[$normalized])) {
                 $header = $this->headerNames[$normalized];
                 $this->headers[$header] = array_merge($this->headers[$header], $value);
-            }
-            else
-            {
+            } else {
                 $this->headerNames[$normalized] = $header;
                 $this->headers[$header] = $value;
             }
         }
+    }
+
+    private function normalizeHeaderValue($value)
+    {
+        if (!is_array($value)) {
+            return $this->trimHeaderValues([$value]);
+        }
+
+        if (count($value) === 0) {
+            throw new \InvalidArgumentException('Header value can not be an empty array.');
+        }
+
+        return $this->trimHeaderValues($value);
     }
 
     /**
@@ -193,9 +186,29 @@ trait MessageTrait
      */
     private function trimHeaderValues(array $values)
     {
-        return array_map(function ($value)
-        {
-            return trim($value, " \t");
-        }, $values);
+        return array_map(function ($value) {
+            if (!is_scalar($value) && null !== $value) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Header value must be scalar or null but %s provided.',
+                    is_object($value) ? get_class($value) : gettype($value)
+                ));
+            }
+
+            return trim((string) $value, " \t");
+        }, array_values($values));
+    }
+
+    private function assertHeader($header)
+    {
+        if (!is_string($header)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Header name must be a string but %s provided.',
+                is_object($header) ? get_class($header) : gettype($header)
+            ));
+        }
+
+        if ($header === '') {
+            throw new \InvalidArgumentException('Header name can not be empty.');
+        }
     }
 }

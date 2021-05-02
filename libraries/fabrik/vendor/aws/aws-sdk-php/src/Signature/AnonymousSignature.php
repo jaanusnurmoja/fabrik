@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws\Signature;
 
 use Aws\Credentials\CredentialsInterface;
@@ -13,17 +12,16 @@ class AnonymousSignature implements SignatureInterface
     public function signRequest(
         RequestInterface $request,
         CredentialsInterface $credentials
-    )
-    {
+    ) {
         return $request;
     }
 
     public function presign(
         RequestInterface $request,
         CredentialsInterface $credentials,
-        $expires
-    )
-    {
+        $expires,
+        array $options = []
+    ) {
         return $request;
     }
 }

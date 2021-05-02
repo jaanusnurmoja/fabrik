@@ -493,7 +493,6 @@ class Page extends AbstractFrameDecorator
                 }
             }
         }
-
     }
 
     /**

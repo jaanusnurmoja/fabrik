@@ -58,7 +58,7 @@ trait StreamDecoratorTrait
 
     public function getContents()
     {
-        return copy_to_string($this);
+        return Utils::copyToString($this);
     }
 
     /**
@@ -146,6 +146,7 @@ trait StreamDecoratorTrait
      * Implement in subclasses to dynamically create streams when requested.
      *
      * @return StreamInterface
+     *
      * @throws \BadMethodCallException
      */
     protected function createStream()

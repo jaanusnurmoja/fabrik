@@ -66,54 +66,50 @@ echo $form->intro;
         $tabs = [];
         $i = 0;
 
-        foreach ($this->groups as $group) :
-            $tabId = $this->form->id . '_' . (int)$this->rowid . '_' . $i;
-            // If this is multi-page then groups are consolidated until a group with a page break
-            // So we should only show a tab if: it is first tab, or if it is a page break
-            if (!$model->isMultiPage() || $i === 0 || $group->splitPage) :
-                $tab = new stdClass;
-                $tab->class = $i === 0 ? 'active' : '';
-                $tab->css = $group->css;
-                $tab->href = 'group-tab' . $tabId;
-                $tab->id = 'group' . $group->id . '_tab';
-                $tab->label = !empty($group->title) ? $group->title : $group->name;;
-                $tabs[] = $tab;
-                $i++;
-            endif;
-        endforeach;
-        ?>
-        <?php
-        echo FabrikHelperHTML::getLayout('fabrik-tabs')->render((object)['tabs' => $tabs]);
-        ?>
-        <div class="tab-content">
-            <?php
+	foreach ($this->groups as $group) :
+		$tabId = $this->form->id . '_' . (int)$this->rowid . '_' . $i;
+		// If this is multi-page then groups are consolidated until a group with a page break
+		// So we should only show a tab if: it is first tab, or if it is a page break
+		if (!$model->isMultiPage() || $i === 0 || $group->splitPage) :
+			$tab = new stdClass;
+			$tab->id = 'group' . $group->id . '_tab';
+			$tab->class = $i === 0 ? 'active' : '';
+			$tab->class .= ' ' . $tab->id . '_tab';
+			$tab->css = $group->css;
+			$tab->href = 'group-tab' . $tabId;
+			$tab->label = !empty($group->title) ? $group->title : $group->name;;
+			$tabs[] = $tab;
+			$i ++;
+		endif;
+	endforeach;
+	?>
+<?php
+echo FabrikHelperHTML::getLayout('fabrik-tabs')->render((object) array('tabs' => $tabs));
+?>
+<div class="tab-content">
+	<?php
 
             $i = 0;
             foreach ($this->groups as $group) :
             $this->group = $group;
             $tabId = $this->form->id . '_' . (int)$this->rowid . '_' . $i;
+	    $class = 'group' . $group->id . '_tab_content';
 
-            if ($i == 0 || !$model->isMultiPage() || $group->splitPage) :
-            if ($i != 0) :
-                echo '</div>';
-            endif;
-            ?>
-            <div role="tabpanel" class="tab-pane<?php
-            if ($i == 0) echo " active" ?>" id="group-tab<?php
-            echo $tabId; ?>">
-                <?php
-                $i++;
-                endif; ?>
-                <fieldset class="<?php
-                echo $group->class; ?>" id="group<?php
-                echo $group->id; ?>" style="<?php
-                echo $group->css; ?>">
-                    <?php
-                    if ($group->showLegend) :?>
-                        <legend class="legend"><?php
-                            echo $group->title; ?></legend>
-                    <?php
-                    endif;
+		if ($i == 0 || !$model->isMultiPage() || $group->splitPage) :
+			if ($i != 0) :
+				echo '</div>';
+			endif;
+			?>
+			<div role="tabpanel" class="<?php echo $class; ?> tab-pane<?php if ($i == 0) echo " active"?>" id="group-tab<?php echo $tabId;?>">
+			<?php
+			$i++;
+		endif; ?>
+			<fieldset class="<?php echo $group->class; ?>" id="group<?php echo $group->id;?>" style="<?php echo $group->css;?>">
+				<?php
+				if ($group->showLegend) :?>
+					<legend class="legend"><?php echo $group->title;?></legend>
+				<?php
+				endif;
 
                     if (!empty($group->intro)) : ?>
                         <div class="groupintro"><?php

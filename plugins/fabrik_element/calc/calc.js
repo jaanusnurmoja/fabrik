@@ -108,6 +108,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 }
             }.bind(this));
 
+            /*
             $H(formData).each(function (v, k) {
                 var el = this.form.formElements.get(k);
                 if (el && el.options.inRepeatGroup && el.options.joinid === this.options.joinid &&
@@ -116,6 +117,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     formData[el.options.fullName + '_raw'] = formData[k + '_raw'];
                 }
             }.bind(this));
+            */
 
             // For placeholders lets set repeat joined groups to their full element name
 

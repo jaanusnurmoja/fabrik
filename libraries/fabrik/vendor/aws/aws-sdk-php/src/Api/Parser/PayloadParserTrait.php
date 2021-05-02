@@ -38,7 +38,7 @@ trait PayloadParserTrait
      * @throws ParserException
      *
      */
-    private function parseXml($xml, $response)
+    protected function parseXml($xml, $response)
     {
         $priorSetting = libxml_use_internal_errors(true);
         try

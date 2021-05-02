@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws\S3;
 
 use GuzzleHttp\Promise\PromisorInterface;
@@ -14,12 +13,12 @@ class ObjectUploader implements PromisorInterface
 {
     const DEFAULT_MULTIPART_THRESHOLD = 16777216;
 
-    private        $client;
-    private        $bucket;
-    private        $key;
-    private        $body;
-    private        $acl;
-    private        $options;
+    private $client;
+    private $bucket;
+    private $key;
+    private $body;
+    private $acl;
+    private $options;
     private static $defaults = [
         'before_upload' => null,
         'concurrency'   => 3,
@@ -29,17 +28,18 @@ class ObjectUploader implements PromisorInterface
     ];
 
     /**
-     * @param S3ClientInterface $client The S3 Client used to execute
+     * @param S3ClientInterface $client         The S3 Client used to execute
      *                                          the upload command(s).
-     * @param string $bucket Bucket to upload the object.
-     * @param string $key Key of the object.
-     * @param mixed $body Object data to upload. Can be a
+     * @param string            $bucket         Bucket to upload the object, or
+     *                                          an S3 access point ARN.
+     * @param string            $key            Key of the object.
+     * @param mixed             $body           Object data to upload. Can be a
      *                                          StreamInterface, PHP stream
      *                                          resource, or a string of data to
      *                                          upload.
-     * @param string $acl ACL to apply to the copy
+     * @param string            $acl            ACL to apply to the copy
      *                                          (default: private).
-     * @param array $options Options used to configure the
+     * @param array             $options        Options used to configure the
      *                                          copy process. Options passed in
      *                                          through 'params' are added to
      *                                          the sub command(s).
@@ -51,8 +51,7 @@ class ObjectUploader implements PromisorInterface
         $body,
         $acl = 'private',
         array $options = []
-    )
-    {
+    ) {
         $this->client = $client;
         $this->bucket = $bucket;
         $this->key = $key;
@@ -65,8 +64,7 @@ class ObjectUploader implements PromisorInterface
     {
         /** @var int $mup_threshold */
         $mup_threshold = $this->options['mup_threshold'];
-        if ($this->requiresMultipart($this->body, $mup_threshold))
-        {
+        if ($this->requiresMultipart($this->body, $mup_threshold)) {
             // Perform a multipart upload.
             return (new MultipartUploader($this->client, $this->body, [
                     'bucket' => $this->bucket,
@@ -82,8 +80,7 @@ class ObjectUploader implements PromisorInterface
                 'Body'   => $this->body,
                 'ACL'    => $this->acl,
             ] + $this->options['params']);
-        if (is_callable($this->options['before_upload']))
-        {
+        if (is_callable($this->options['before_upload'])) {
             $this->options['before_upload']($command);
         }
         return $this->client->executeAsync($command);
@@ -99,16 +96,15 @@ class ObjectUploader implements PromisorInterface
      * Multipart Upload System. It also modifies the passed-in $body as needed
      * to support the upload.
      *
-     * @param StreamInterface $body Stream representing the body.
-     * @param integer $threshold Minimum bytes before using Multipart.
+     * @param StreamInterface $body      Stream representing the body.
+     * @param integer             $threshold Minimum bytes before using Multipart.
      *
      * @return bool
      */
     private function requiresMultipart(StreamInterface &$body, $threshold)
     {
         // If body size known, compare to threshold to determine if Multipart.
-        if ($body->getSize() !== null)
-        {
+        if ($body->getSize() !== null) {
             return $body->getSize() >= $threshold;
         }
 
@@ -121,21 +117,17 @@ class ObjectUploader implements PromisorInterface
         Psr7\copy_to_stream($body, $buffer, MultipartUploader::PART_MIN_SIZE);
 
         // If body < 5MB, use PutObject with the buffer.
-        if ($buffer->getSize() < MultipartUploader::PART_MIN_SIZE)
-        {
+        if ($buffer->getSize() < MultipartUploader::PART_MIN_SIZE) {
             $buffer->seek(0);
             $body = $buffer;
             return false;
         }
 
         // If body >= 5 MB, then use multipart. [YES]
-        if ($body->isSeekable())
-        {
+        if ($body->isSeekable() && $body->getMetadata('uri') !== 'php://input') {
             // If the body is seekable, just rewind the body.
             $body->seek(0);
-        }
-        else
-        {
+        } else {
             // If the body is non-seekable, stitch the rewind the buffer and
             // the partially read body together into one stream. This avoids
             // unnecessary disc usage and does not require seeking on the

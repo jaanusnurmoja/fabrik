@@ -34,6 +34,9 @@ class Command implements CommandInterface
         {
             $this->data['@http'] = [];
         }
+        if (!isset($this->data['@context'])) {
+            $this->data['@context'] = [];
+        }
     }
 
     public function __clone()

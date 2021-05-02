@@ -5,7 +5,6 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
-
 namespace Dompdf\FrameReflower;
 
 use Dompdf\FrameDecorator\Block as BlockFrameDecorator;
@@ -43,8 +42,7 @@ class TableCell extends Block
         $cells = $cellmap->get_spanned_cells($this->_frame);
 
         $w = 0;
-        foreach ($cells["columns"] as $i)
-        {
+        foreach ($cells["columns"] as $i) {
             $col = $cellmap->get_column($i);
             $w += $col["used-width"];
         }
@@ -52,31 +50,23 @@ class TableCell extends Block
         //FIXME?
         $h = $this->_frame->get_containing_block("h");
 
-        $left_space = (float)$style->length_in_pt([
-            $style->margin_left,
-            $style->padding_left,
-            $style->border_left_width
-        ],
+        $left_space = (float)$style->length_in_pt([$style->margin_left,
+                $style->padding_left,
+                $style->border_left_width],
             $w);
 
-        $right_space = (float)$style->length_in_pt([
-            $style->padding_right,
-            $style->margin_right,
-            $style->border_right_width
-        ],
+        $right_space = (float)$style->length_in_pt([$style->padding_right,
+                $style->margin_right,
+                $style->border_right_width],
             $w);
 
-        $top_space = (float)$style->length_in_pt([
-            $style->margin_top,
-            $style->padding_top,
-            $style->border_top_width
-        ],
+        $top_space = (float)$style->length_in_pt([$style->margin_top,
+                $style->padding_top,
+                $style->border_top_width],
             $h);
-        $bottom_space = (float)$style->length_in_pt([
-            $style->margin_bottom,
-            $style->padding_bottom,
-            $style->border_bottom_width
-        ],
+        $bottom_space = (float)$style->length_in_pt([$style->margin_bottom,
+                $style->padding_bottom,
+                $style->border_bottom_width],
             $h);
 
         $style->width = $cb_w = $w - $left_space - $right_space;
@@ -95,10 +85,8 @@ class TableCell extends Block
         $line_box->y = $line_y;
 
         // Set the containing blocks and reflow each child
-        foreach ($this->_frame->get_children() as $child)
-        {
-            if ($page->is_full())
-            {
+        foreach ($this->_frame->get_children() as $child) {
+            if ($page->is_full()) {
                 break;
             }
 
@@ -118,13 +106,11 @@ class TableCell extends Block
         // Let the cellmap know our height
         $cell_height = $height / count($cells["rows"]);
 
-        if ($style_height <= $height)
-        {
+        if ($style_height <= $height) {
             $cell_height += $top_space + $bottom_space;
         }
 
-        foreach ($cells["rows"] as $i)
-        {
+        foreach ($cells["rows"] as $i) {
             $cellmap->set_row_height($i, $cell_height);
         }
 

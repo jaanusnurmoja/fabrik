@@ -1,9 +1,10 @@
 <?php
-
 namespace Aws\Endpoint;
 
 use ArrayAccess;
 use Aws\HasDataTrait;
+use Aws\Sts\RegionalEndpoints\ConfigurationProvider;
+use Aws\S3\RegionalEndpoint\ConfigurationProvider as S3ConfigurationProvider;
 use InvalidArgumentException as Iae;
 
 /**
@@ -12,6 +13,25 @@ use InvalidArgumentException as Iae;
 final class Partition implements ArrayAccess, PartitionInterface
 {
     use HasDataTrait;
+
+    private $stsLegacyGlobalRegions = [
+        'ap-northeast-1',
+        'ap-south-1',
+        'ap-southeast-1',
+        'ap-southeast-2',
+        'aws-global',
+        'ca-central-1',
+        'eu-central-1',
+        'eu-north-1',
+        'eu-west-1',
+        'eu-west-2',
+        'eu-west-3',
+        'sa-east-1',
+        'us-east-1',
+        'us-east-2',
+        'us-west-1',
+        'us-west-2',
+    ];
 
     /**
      * The partition constructor accepts the following options:
@@ -39,10 +59,8 @@ final class Partition implements ArrayAccess, PartitionInterface
      */
     public function __construct(array $definition)
     {
-        foreach (['partition', 'regions', 'services', 'dnsSuffix'] as $key)
-        {
-            if (!isset($definition[$key]))
-            {
+        foreach (['partition', 'regions', 'services', 'dnsSuffix'] as $key) {
+            if (!isset($definition[$key])) {
                 throw new Iae("Partition missing required $key field");
             }
         }
@@ -55,19 +73,25 @@ final class Partition implements ArrayAccess, PartitionInterface
         return $this->data['partition'];
     }
 
+    /**
+     * @internal
+     * @return mixed
+     */
+    public function getDnsSuffix()
+    {
+        return $this->data['dnsSuffix'];
+    }
+
     public function isRegionMatch($region, $service)
     {
-        if (
-            isset($this->data['regions'][$region])
+        if (isset($this->data['regions'][$region])
             || isset($this->data['services'][$service]['endpoints'][$region])
-        )
-        {
+        ) {
             return true;
         }
 
-        if (isset($this->data['regionRegex']))
-        {
-            return (bool)preg_match(
+        if (isset($this->data['regionRegex'])) {
+            return (bool) preg_match(
                 "@{$this->data['regionRegex']}@",
                 $region
             );
@@ -79,15 +103,12 @@ final class Partition implements ArrayAccess, PartitionInterface
     public function getAvailableEndpoints(
         $service,
         $allowNonRegionalEndpoints = false
-    )
-    {
-        if ($this->isServicePartitionGlobal($service))
-        {
+    ) {
+        if ($this->isServicePartitionGlobal($service)) {
             return [$this->getPartitionEndpoint($service)];
         }
 
-        if (isset($this->data['services'][$service]['endpoints']))
-        {
+        if (isset($this->data['services'][$service]['endpoints'])) {
             $serviceRegions = array_keys(
                 $this->data['services'][$service]['endpoints']
             );
@@ -107,28 +128,28 @@ final class Partition implements ArrayAccess, PartitionInterface
         $service = isset($args['service']) ? $args['service'] : '';
         $region = isset($args['region']) ? $args['region'] : '';
         $scheme = isset($args['scheme']) ? $args['scheme'] : 'https';
-        $data = $this->getEndpointData($service, $region);
+        $options = isset($args['options']) ? $args['options'] : [];
+        $data = $this->getEndpointData($service, $region, $options);
 
         return [
-            'endpoint'         => "{$scheme}://" . $this->formatEndpoint(
+            'endpoint' => "{$scheme}://" . $this->formatEndpoint(
                     isset($data['hostname']) ? $data['hostname'] : '',
                     $service,
                     $region
                 ),
             'signatureVersion' => $this->getSignatureVersion($data),
-            'signingRegion'    => isset($data['credentialScope']['region'])
+            'signingRegion' => isset($data['credentialScope']['region'])
                 ? $data['credentialScope']['region']
                 : $region,
-            'signingName'      => isset($data['credentialScope']['service'])
+            'signingName' => isset($data['credentialScope']['service'])
                 ? $data['credentialScope']['service']
                 : $service,
         ];
     }
 
-    private function getEndpointData($service, $region)
+    private function getEndpointData($service, $region, $options)
     {
-
-        $resolved = $this->resolveRegion($service, $region);
+        $resolved = $this->resolveRegion($service, $region, $options);
         $data = isset($this->data['services'][$service]['endpoints'][$resolved])
             ? $this->data['services'][$service]['endpoints'][$resolved]
             : [];
@@ -160,10 +181,12 @@ final class Partition implements ArrayAccess, PartitionInterface
         return array_shift($possibilities);
     }
 
-    private function resolveRegion($service, $region)
+    private function resolveRegion($service, $region, $options)
     {
-        if ($this->isServicePartitionGlobal($service))
-        {
+        if ($this->isServicePartitionGlobal($service)
+            || $this->isStsLegacyEndpointUsed($service, $region, $options)
+            || $this->isS3LegacyEndpointUsed($service, $region, $options)
+        ) {
             return $this->getPartitionEndpoint($service);
         }
 
@@ -177,6 +200,46 @@ final class Partition implements ArrayAccess, PartitionInterface
             && isset($this->data['services'][$service]['partitionEndpoint']);
     }
 
+    /**
+     * STS legacy endpoints used for valid regions unless option is explicitly
+     * set to 'regional'
+     *
+     * @param string $service
+     * @param string $region
+     * @param array $options
+     * @return bool
+     */
+    private function isStsLegacyEndpointUsed($service, $region, $options)
+    {
+        return $service === 'sts'
+            && in_array($region, $this->stsLegacyGlobalRegions)
+            && (empty($options['sts_regional_endpoints'])
+                || ConfigurationProvider::unwrap(
+                    $options['sts_regional_endpoints']
+                )->getEndpointsType() !== 'regional'
+            );
+    }
+
+    /**
+     * S3 legacy us-east-1 endpoint used for valid regions unless option is explicitly
+     * set to 'regional'
+     *
+     * @param string $service
+     * @param string $region
+     * @param array $options
+     * @return bool
+     */
+    private function isS3LegacyEndpointUsed($service, $region, $options)
+    {
+        return $service === 's3'
+            && $region === 'us-east-1'
+            && (empty($options['s3_us_east_1_regional_endpoint'])
+                || S3ConfigurationProvider::unwrap(
+                    $options['s3_us_east_1_regional_endpoint']
+                )->getEndpointsType() !== 'regional'
+            );
+    }
+
     private function getPartitionEndpoint($service)
     {
         return $this->data['services'][$service]['partitionEndpoint'];
@@ -185,8 +248,8 @@ final class Partition implements ArrayAccess, PartitionInterface
     private function formatEndpoint($template, $service, $region)
     {
         return strtr($template, [
-            '{service}'   => $service,
-            '{region}'    => $region,
+            '{service}' => $service,
+            '{region}' => $region,
             '{dnsSuffix}' => $this->data['dnsSuffix'],
         ]);
     }

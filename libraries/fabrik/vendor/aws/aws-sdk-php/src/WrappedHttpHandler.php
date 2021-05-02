@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws;
 
 use Aws\Api\Parser\Exception\ParserException;
@@ -32,16 +31,16 @@ class WrappedHttpHandler
     private $collectStats;
 
     /**
-     * @param callable $httpHandler Function that accepts a request and array
+     * @param callable $httpHandler    Function that accepts a request and array
      *                                 of request options and returns a promise
      *                                 that fulfills with a response or rejects
      *                                 with an error array.
-     * @param callable $parser Function that accepts a response object
+     * @param callable $parser         Function that accepts a response object
      *                                 and returns an AWS result object.
-     * @param callable $errorParser Function that parses a response object
+     * @param callable $errorParser    Function that parses a response object
      *                                 into AWS error data.
-     * @param string $exceptionClass Exception class to throw.
-     * @param bool $collectStats Whether to collect HTTP transfer
+     * @param string   $exceptionClass Exception class to throw.
+     * @param bool     $collectStats   Whether to collect HTTP transfer
      *                                 information.
      */
     public function __construct(
@@ -50,8 +49,7 @@ class WrappedHttpHandler
         callable $errorParser,
         $exceptionClass = 'Aws\Exception\AwsException',
         $collectStats = false
-    )
-    {
+    ) {
         $this->httpHandler = $httpHandler;
         $this->parser = $parser;
         $this->errorParser = $errorParser;
@@ -71,22 +69,17 @@ class WrappedHttpHandler
     public function __invoke(
         CommandInterface $command,
         RequestInterface $request
-    )
-    {
+    ) {
         $fn = $this->httpHandler;
         $options = $command['@http'] ?: [];
         $stats = [];
-        if ($this->collectStats || !empty($options['collect_stats']))
-        {
+        if ($this->collectStats || !empty($options['collect_stats'])) {
             $options['http_stats_receiver'] = static function (
                 array $transferStats
-            ) use (&$stats)
-            {
+            ) use (&$stats) {
                 $stats = $transferStats;
             };
-        }
-        elseif (isset($options['http_stats_receiver']))
-        {
+        } elseif (isset($options['http_stats_receiver'])) {
             throw new \InvalidArgumentException('Providing a custom HTTP stats'
                 . ' receiver to Aws\WrappedHttpHandler is not supported.');
         }
@@ -95,14 +88,11 @@ class WrappedHttpHandler
             ->then(
                 function (
                     ResponseInterface $res
-                ) use ($command, $request, &$stats)
-                {
+                ) use ($command, $request, &$stats) {
                     return $this->parseResponse($command, $request, $res, $stats);
                 },
-                function ($err) use ($request, $command, &$stats)
-                {
-                    if (is_array($err))
-                    {
+                function ($err) use ($request, $command, &$stats) {
+                    if (is_array($err)) {
                         $err = $this->parseError(
                             $err,
                             $request,
@@ -116,10 +106,10 @@ class WrappedHttpHandler
     }
 
     /**
-     * @param CommandInterface $command
-     * @param RequestInterface $request
+     * @param CommandInterface  $command
+     * @param RequestInterface  $request
      * @param ResponseInterface $response
-     * @param array $stats
+     * @param array             $stats
      *
      * @return ResultInterface
      */
@@ -128,8 +118,7 @@ class WrappedHttpHandler
         RequestInterface $request,
         ResponseInterface $response,
         array $stats
-    )
-    {
+    ) {
         $parser = $this->parser;
         $status = $response->getStatusCode();
         $result = $status < 300
@@ -138,18 +127,16 @@ class WrappedHttpHandler
 
         $metadata = [
             'statusCode'    => $status,
-            'effectiveUri'  => (string)$request->getUri(),
+            'effectiveUri'  => (string) $request->getUri(),
             'headers'       => [],
             'transferStats' => [],
         ];
-        if (!empty($stats))
-        {
+        if (!empty($stats)) {
             $metadata['transferStats']['http'] = [$stats];
         }
 
         // Bring headers into the metadata array.
-        foreach ($response->getHeaders() as $name => $values)
-        {
+        foreach ($response->getHeaders() as $name => $values) {
             $metadata['headers'][strtolower($name)] = $values[0];
         }
 
@@ -161,10 +148,10 @@ class WrappedHttpHandler
     /**
      * Parses a rejection into an AWS error.
      *
-     * @param array $err Rejection error array.
+     * @param array            $err     Rejection error array.
      * @param RequestInterface $request Request that was sent.
      * @param CommandInterface $command Command being sent.
-     * @param array $stats Transfer statistics
+     * @param array            $stats   Transfer statistics
      *
      * @return \Exception
      */
@@ -173,29 +160,25 @@ class WrappedHttpHandler
         RequestInterface $request,
         CommandInterface $command,
         array $stats
-    )
-    {
-        if (!isset($err['exception']))
-        {
+    ) {
+        if (!isset($err['exception'])) {
             throw new \RuntimeException('The HTTP handler was rejected without an "exception" key value pair.');
         }
 
         $serviceError = "AWS HTTP error: " . $err['exception']->getMessage();
 
-        if (!isset($err['response']))
-        {
+        if (!isset($err['response'])) {
             $parts = ['response' => null];
-        }
-        else
-        {
-            try
-            {
-                $parts = call_user_func($this->errorParser, $err['response']);
+        } else {
+            try {
+                $parts = call_user_func(
+                    $this->errorParser,
+                    $err['response'],
+                    $command
+                );
                 $serviceError .= " {$parts['code']} ({$parts['type']}): "
                     . "{$parts['message']} - " . $err['response']->getBody();
-            }
-            catch (ParserException $e)
-            {
+            } catch (ParserException $e) {
                 $parts = [];
                 $serviceError .= ' Unable to parse error information from '
                     . "response - {$e->getMessage()}";

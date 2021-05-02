@@ -2,18 +2,32 @@
 
 namespace Aws\Api\ErrorParser;
 
+use Aws\Api\Parser\JsonParser;
+use Aws\Api\Service;
+use Aws\CommandInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
  * Parsers JSON-RPC errors.
  */
-class JsonRpcErrorParser
+class JsonRpcErrorParser extends AbstractErrorParser
 {
     use JsonParserTrait;
 
-    public function __invoke(ResponseInterface $response)
+    private $parser;
+
+    public function __construct(Service $api = null, JsonParser $parser = null)
     {
+        parent::__construct($api);
+        $this->parser = $parser ?: new JsonParser();
+    }
+
+    public function __invoke(
+        ResponseInterface $response,
+        CommandInterface $command = null
+    ) {
         $data = $this->genericHandler($response);
+
         // Make the casing consistent across services.
         if ($data['parsed'])
         {
@@ -28,6 +42,8 @@ class JsonRpcErrorParser
                 ? $data['parsed']['message']
                 : null;
         }
+
+        $this->populateShape($data, $response, $command);
 
         return $data;
     }

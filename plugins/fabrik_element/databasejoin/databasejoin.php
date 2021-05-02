@@ -2590,21 +2590,24 @@ class PlgFabrik_ElementDatabasejoin extends PlgFabrik_ElementList
                     $query->order($order);
                 }
 
-                return $query;
-            }
-        }
-        else
-        {
-            if (!empty($this->orderBy))
-            {
-                if (!$query)
-                {
-                    return $this->orderBy;
-                }
-                else
-                {
-                    $order = JString::str_ireplace('ORDER BY', '', $this->orderBy);
-                    $query->order($order);
+				return $query;
+			}
+		}
+		else
+		{
+			if (!empty($this->orderBy))
+			{
+				$w 	       = new FabrikWorker;
+				$this->orderBy = $w->replaceWithLanguageTags($this->orderBy);
+				
+				if (!$query)
+				{
+					return $this->orderBy;
+				}
+				else
+				{
+					$order = JString::str_ireplace('ORDER BY', '', $this->orderBy);
+					$query->order($order);
 
                     return $query;
                 }

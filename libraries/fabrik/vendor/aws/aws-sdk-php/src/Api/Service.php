@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws\Api;
 
 use Aws\Api\Serializer\QuerySerializer;
@@ -30,7 +29,7 @@ class Service extends AbstractModel
     private $waiters = null;
 
     /**
-     * @param array $definition
+     * @param array    $definition
      * @param callable $provider
      *
      * @internal param array $definition Service description
@@ -58,12 +57,9 @@ class Service extends AbstractModel
         $this->apiProvider = $provider;
         parent::__construct($definition, new ShapeMap($definition['shapes']));
 
-        if (isset($definition['metadata']['serviceIdentifier']))
-        {
+        if (isset($definition['metadata']['serviceIdentifier'])) {
             $this->serviceName = $this->getServiceName();
-        }
-        else
-        {
+        } else {
             $this->serviceName = $this->getEndpointPrefix();
         }
 
@@ -73,8 +69,8 @@ class Service extends AbstractModel
     /**
      * Creates a request serializer for the provided API object.
      *
-     * @param Service $api API that contains a protocol.
-     * @param string $endpoint Endpoint to send requests to.
+     * @param Service $api      API that contains a protocol.
+     * @param string  $endpoint Endpoint to send requests to.
      *
      * @return callable
      * @throws \UnexpectedValueException
@@ -90,13 +86,11 @@ class Service extends AbstractModel
 
         $proto = $api->getProtocol();
 
-        if (isset($mapping[$proto]))
-        {
+        if (isset($mapping[$proto])) {
             return new $mapping[$proto]($api, $endpoint);
         }
 
-        if ($proto == 'ec2')
-        {
+        if ($proto == 'ec2') {
             return new QuerySerializer($api, $endpoint, new Ec2ParamBuilder());
         }
 
@@ -108,12 +102,14 @@ class Service extends AbstractModel
     /**
      * Creates an error parser for the given protocol.
      *
+     * Redundant method signature to preserve backwards compatibility.
+     *
      * @param string $protocol Protocol to parse (e.g., query, json, etc.)
      *
      * @return callable
      * @throws \UnexpectedValueException
      */
-    public static function createErrorParser($protocol)
+    public static function createErrorParser($protocol, Service $api = null)
     {
         static $mapping = [
             'json'      => 'Aws\Api\ErrorParser\JsonRpcErrorParser',
@@ -123,9 +119,8 @@ class Service extends AbstractModel
             'ec2'       => 'Aws\Api\ErrorParser\XmlErrorParser'
         ];
 
-        if (isset($mapping[$protocol]))
-        {
-            return new $mapping[$protocol]();
+        if (isset($mapping[$protocol])) {
+            return new $mapping[$protocol]($api);
         }
 
         throw new \UnexpectedValueException("Unknown protocol: $protocol");
@@ -148,13 +143,11 @@ class Service extends AbstractModel
         ];
 
         $proto = $api->getProtocol();
-        if (isset($mapping[$proto]))
-        {
+        if (isset($mapping[$proto])) {
             return new $mapping[$proto]($api);
         }
 
-        if ($proto == 'ec2')
-        {
+        if ($proto == 'ec2') {
             return new QueryParser($api, null, false);
         }
 
@@ -278,10 +271,8 @@ class Service extends AbstractModel
      */
     public function getOperation($name)
     {
-        if (!isset($this->operations[$name]))
-        {
-            if (!isset($this->definition['operations'][$name]))
-            {
+        if (!isset($this->operations[$name])) {
+            if (!isset($this->definition['operations'][$name])) {
                 throw new \InvalidArgumentException("Unknown operation: $name");
             }
             $this->operations[$name] = new Operation(
@@ -301,9 +292,26 @@ class Service extends AbstractModel
     public function getOperations()
     {
         $result = [];
-        foreach ($this->definition['operations'] as $name => $definition)
-        {
+        foreach ($this->definition['operations'] as $name => $definition) {
             $result[$name] = $this->getOperation($name);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get all of the error shapes of the service
+     *
+     * @return array
+     */
+    public function getErrorShapes()
+    {
+        $result = [];
+        foreach ($this->definition['shapes'] as $name => $definition) {
+            if (!empty($definition['exception'])) {
+                $definition['name'] = $name;
+                $result[] = new StructureShape($definition, $this->getShapeMap());
+            }
         }
 
         return $result;
@@ -318,13 +326,11 @@ class Service extends AbstractModel
      */
     public function getMetadata($key = null)
     {
-        if (!$key)
-        {
+        if (!$key) {
             return $this['metadata'];
         }
 
-        if (isset($this->definition['metadata'][$key]))
-        {
+        if (isset($this->definition['metadata'][$key])) {
             return $this->definition['metadata'][$key];
         }
 
@@ -341,8 +347,7 @@ class Service extends AbstractModel
      */
     public function getPaginators()
     {
-        if (!isset($this->paginators))
-        {
+        if (!isset($this->paginators)) {
             $res = call_user_func(
                 $this->apiProvider,
                 'paginator',
@@ -388,8 +393,7 @@ class Service extends AbstractModel
             'more_results' => null,
         ];
 
-        if ($this->hasPaginator($name))
-        {
+        if ($this->hasPaginator($name)) {
             return $this->paginators[$name] + $defaults;
         }
 
@@ -406,8 +410,7 @@ class Service extends AbstractModel
      */
     public function getWaiters()
     {
-        if (!isset($this->waiters))
-        {
+        if (!isset($this->waiters)) {
             $res = call_user_func(
                 $this->apiProvider,
                 'waiter',
@@ -445,8 +448,7 @@ class Service extends AbstractModel
     public function getWaiterConfig($name)
     {
         // Error if the waiter is not defined
-        if ($this->hasWaiter($name))
-        {
+        if ($this->hasWaiter($name)) {
             return $this->waiters[$name];
         }
 

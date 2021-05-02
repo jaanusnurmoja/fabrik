@@ -5,7 +5,6 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
-
 namespace Dompdf\FrameDecorator;
 
 use Dompdf\Dompdf;
@@ -98,8 +97,7 @@ class Block extends AbstractFrameDecorator
      */
     function clear_line($i)
     {
-        if (isset($this->_line_boxes[$i]))
-        {
+        if (isset($this->_line_boxes[$i])) {
             unset($this->_line_boxes[$i]);
         }
     }
@@ -109,8 +107,7 @@ class Block extends AbstractFrameDecorator
      */
     function add_frame_to_line(Frame $frame)
     {
-        if (!$frame->is_in_flow())
-        {
+        if (!$frame->is_in_flow()) {
             return;
         }
 
@@ -135,12 +132,10 @@ class Block extends AbstractFrameDecorator
         else*/
 
         // Handle inline frames (which are effectively wrappers)
-        if ($frame instanceof Inline)
-        {
+        if ($frame instanceof Inline) {
             // Handle line breaks
-            if ($frame->get_node()->nodeName === "br")
-            {
-                $this->maximize_line_height($style->length_in_pt($style->line_height), $frame);
+            if ($frame->get_node()->nodeName === "br") {
+                $this->maximize_line_height($style->line_height, $frame);
                 $this->add_line(true);
             }
 
@@ -149,12 +144,10 @@ class Block extends AbstractFrameDecorator
 
         // Trim leading text if this is an empty line.  Kinda a hack to put it here,
         // but what can you do...
-        if (
-            $this->get_current_line_box()->w == 0 &&
+        if ($this->get_current_line_box()->w == 0 &&
             $frame->is_text_node() &&
             !$frame->is_pre()
-        )
-        {
+        ) {
             $frame->set_text(ltrim($frame->get_text()));
             $frame->recalculate_width();
         }
@@ -163,8 +156,7 @@ class Block extends AbstractFrameDecorator
 
         // FIXME: Why? Doesn't quite seem to be the correct thing to do,
         // but does appear to be necessary. Hack to handle wrapped white space?
-        if ($w == 0 && $frame->get_node()->nodeName !== "hr")
-        {
+        if ($w == 0 && $frame->get_node()->nodeName !== "hr" && !$frame->is_pre()) {
             return;
         }
 
@@ -186,8 +178,7 @@ class Block extends AbstractFrameDecorator
         // End debugging
 
         $line = $this->_line_boxes[$this->_cl];
-        if ($line->left + $line->w + $line->right + $w > $this->get_containing_block("w"))
-        {
+        if ($line->left + $line->w + $line->right + $w > $this->get_containing_block("w")) {
             $this->add_line();
         }
 
@@ -196,9 +187,12 @@ class Block extends AbstractFrameDecorator
         $current_line = $this->_line_boxes[$this->_cl];
         $current_line->add_frame($frame);
 
-        if ($frame->is_text_node())
-        {
-            $current_line->wc += count(preg_split("/\s+/", trim($frame->get_text())));
+        if ($frame->is_text_node()) {
+            // split the text into words (used to determine spacing between words on justified lines)
+            // The regex splits on everything that's a separator (^\S double negative), excluding nbsp (\xa0)
+            // This currently excludes the "narrow nbsp" character
+            $words = preg_split('/[^\S\xA0]+/u', trim($frame->get_text()));
+            $current_line->wc += count($words);
         }
 
         $this->increase_line_width($w);
@@ -215,24 +209,20 @@ class Block extends AbstractFrameDecorator
         $i = $this->_cl;
         $j = null;
 
-        while ($i >= 0)
-        {
-            if (($j = in_array($frame, $this->_line_boxes[$i]->get_frames(), true)) !== false)
-            {
+        while ($i >= 0) {
+            if (($j = in_array($frame, $this->_line_boxes[$i]->get_frames(), true)) !== false) {
                 break;
             }
 
             $i--;
         }
 
-        if ($j === false)
-        {
+        if ($j === false) {
             return;
         }
 
         // Remove $frame and all frames that follow
-        while ($j < count($this->_line_boxes[$i]->get_frames()))
-        {
+        while ($j < count($this->_line_boxes[$i]->get_frames())) {
             $frames = $this->_line_boxes[$i]->get_frames();
             $f = $frames[$j];
             $frames[$j] = null;
@@ -243,16 +233,14 @@ class Block extends AbstractFrameDecorator
 
         // Recalculate the height of the line
         $h = 0;
-        foreach ($this->_line_boxes[$i]->get_frames() as $f)
-        {
+        foreach ($this->_line_boxes[$i]->get_frames() as $f) {
             $h = max($h, $f->get_margin_height());
         }
 
         $this->_line_boxes[$i]->h = $h;
 
         // Remove all lines that follow
-        while ($this->_cl > $i)
-        {
+        while ($this->_cl > $i) {
             $this->_line_boxes[$this->_cl] = null;
             unset($this->_line_boxes[$this->_cl]);
             $this->_cl--;
@@ -273,8 +261,7 @@ class Block extends AbstractFrameDecorator
      */
     function maximize_line_height($val, Frame $frame)
     {
-        if ($val > $this->_line_boxes[$this->_cl]->h)
-        {
+        if ($val > $this->_line_boxes[$this->_cl]->h) {
             $this->_line_boxes[$this->_cl]->tallest_frame = $frame;
             $this->_line_boxes[$this->_cl]->h = $val;
         }
@@ -285,10 +272,6 @@ class Block extends AbstractFrameDecorator
      */
     function add_line($br = false)
     {
-
-//     if ( $this->_line_boxes[$this->_cl]["h"] == 0 ) //count($this->_line_boxes[$i]["frames"]) == 0 ||
-//       return;
-
         $this->_line_boxes[$this->_cl]->br = $br;
         $y = $this->_line_boxes[$this->_cl]->y + $this->_line_boxes[$this->_cl]->h;
 

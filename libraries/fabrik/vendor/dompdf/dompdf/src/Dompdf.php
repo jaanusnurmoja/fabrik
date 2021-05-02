@@ -6,7 +6,6 @@
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
-
 namespace Dompdf;
 
 use DOMDocument;
@@ -20,6 +19,7 @@ use HTML5_TreeBuilder;
 use Dompdf\Image\Cache;
 use Dompdf\Renderer\ListBullet;
 use Dompdf\Css\Stylesheet;
+use Dompdf\Helpers;
 
 /**
  * Dompdf - PHP5 HTML to PDF renderer
@@ -150,7 +150,7 @@ class Dompdf
     private $basePath = "";
 
     /**
-     * Protcol used to request file (file://, http://, etc)
+     * Protocol used to request file (file://, http://, etc)
      *
      * @var string
      */
@@ -200,29 +200,29 @@ class Dompdf
     private $defaultViewOptions = [];
 
     /**
-     * Tells wether the DOM document is in quirksmode (experimental)
+     * Tells whether the DOM document is in quirksmode (experimental)
      *
      * @var bool
      */
     private $quirksmode = false;
 
     /**
-     * Protocol whitelist
-     *
-     * Protocols and PHP wrappers allowed in URLs. Full support is not
-     * guarantee for the protocols/wrappers contained in this array.
-     *
-     * @var array
-     */
+    * Protocol whitelist
+    *
+    * Protocols and PHP wrappers allowed in URLs. Full support is not
+    * guaranteed for the protocols/wrappers contained in this array.
+    *
+    * @var array
+    */
     private $allowedProtocols = [null, "", "file://", "http://", "https://"];
 
     /**
-     * Local file extension whitelist
-     *
-     * File extensions supported by dompdf for local files.
-     *
-     * @var array
-     */
+    * Local file extension whitelist
+    *
+    * File extensions supported by dompdf for local files.
+    *
+    * @var array
+    */
     private $allowedLocalFileExtensions = ["htm", "html"];
 
     /**
@@ -276,26 +276,20 @@ class Dompdf
 
         if (version_compare(PHP_VERSION, '7.0.0') >= 0)
         {
-            ini_set('pcre.jit', 0);
+            @ini_set('pcre.jit', 0);
         }
 
-        if (isset($options) && $options instanceof Options)
-        {
+        if (isset($options) && $options instanceof Options) {
             $this->setOptions($options);
-        }
-        elseif (is_array($options))
-        {
+        } elseif (is_array($options)) {
             $this->setOptions(new Options($options));
-        }
-        else
-        {
+        } else {
             $this->setOptions(new Options());
         }
 
         $versionFile = realpath(__DIR__ . '/../VERSION');
-        if (file_exists($versionFile) && ($version = file_get_contents($versionFile)) !== false && $version !== '$Format:<%h>$')
-        {
-            $this->version = sprintf('dompdf %s', $version);
+        if (file_exists($versionFile) && ($version = file_get_contents($versionFile)) !== false && $version !== '$Format:<%h>$') {
+          $this->version = sprintf('dompdf %s', $version);
         }
 
         $this->localeStandard = sprintf('%.1f', 1.0) == '1.0';
@@ -316,8 +310,7 @@ class Dompdf
      */
     private function saveLocale()
     {
-        if ($this->localeStandard)
-        {
+        if ($this->localeStandard) {
             return;
         }
 
@@ -330,8 +323,7 @@ class Dompdf
      */
     private function restoreLocale()
     {
-        if ($this->localeStandard)
-        {
+        if ($this->localeStandard) {
             return;
         }
 
@@ -352,63 +344,58 @@ class Dompdf
      * Parse errors are stored in the global array _dompdf_warnings.
      *
      * @param string $file a filename or url to load
+     * @param string $encoding Encoding of $file
      *
      * @throws Exception
      */
-    public function loadHtmlFile($file)
+    public function loadHtmlFile($file, $encoding = null)
     {
         $this->saveLocale();
 
-        if (!$this->protocol && !$this->baseHost && !$this->basePath)
-        {
-            list($this->protocol, $this->baseHost, $this->basePath) = Helpers::explode_url($file);
+        if (!$this->protocol && !$this->baseHost && !$this->basePath) {
+            [$this->protocol, $this->baseHost, $this->basePath] = Helpers::explode_url($file);
         }
         $protocol = strtolower($this->protocol);
+        
+        $uri = Helpers::build_url($this->protocol, $this->baseHost, $this->basePath, $file);
 
-        if (!in_array($protocol, $this->allowedProtocols))
-        {
+        if ( !in_array($protocol, $this->allowedProtocols) ) {
             throw new Exception("Permission denied on $file. The communication protocol is not supported.");
         }
 
-        if (!$this->options->isRemoteEnabled() && ($protocol != "" && $protocol !== "file://"))
-        {
+        if (!$this->options->isRemoteEnabled() && ($protocol != "" && $protocol !== "file://")) {
             throw new Exception("Remote file requested, but remote file download is disabled.");
         }
 
-        if ($protocol == "" || $protocol === "file://")
-        {
-            $realfile = realpath($file);
+        if ($protocol == "" || $protocol === "file://") {
+            $realfile = realpath($uri);
 
             $chroot = realpath($this->options->getChroot());
-            if ($chroot && strpos($realfile, $chroot) !== 0)
-            {
+            if ($chroot && strpos($realfile, $chroot) !== 0) {
                 throw new Exception("Permission denied on $file. The file could not be found under the directory specified by Options::chroot.");
             }
 
             $ext = strtolower(pathinfo($realfile, PATHINFO_EXTENSION));
-            if (!in_array($ext, $this->allowedLocalFileExtensions))
-            {
+            if (!in_array($ext, $this->allowedLocalFileExtensions)) {
                 throw new Exception("Permission denied on $file. This file extension is forbidden");
             }
 
-            if (!$realfile)
-            {
+            if (!$realfile) {
                 throw new Exception("File '$file' not found.");
             }
 
-            $file = $realfile;
+            $uri = $realfile;
         }
 
-        list($contents, $http_response_header) = Helpers::getFileContent($file, $this->httpContext);
-        $encoding = 'UTF-8';
+        [$contents, $http_response_header] = Helpers::getFileContent($uri, $this->httpContext);
+        if (empty($contents)) {
+            throw new Exception("File '$file' not found.");
+        }
 
         // See http://the-stickman.com/web-development/php/getting-http-response-headers-when-using-file_get_contents/
-        if (isset($http_response_header))
-        {
-            foreach ($http_response_header as $_header)
-            {
-                if (preg_match("@Content-Type:\s*[\w/]+;\s*?charset=([^\s]+)@i", $_header, $matches))
-                {
+        if (isset($http_response_header)) {
+            foreach ($http_response_header as $_header) {
+                if (preg_match("@Content-Type:\s*[\w/]+;\s*?charset=([^\s]+)@i", $_header, $matches)) {
                     $encoding = strtoupper($matches[1]);
                     break;
                 }
@@ -425,33 +412,53 @@ class Dompdf
      * @param string $encoding
      * @deprecated
      */
-    public function load_html($str, $encoding = 'UTF-8')
+    public function load_html($str, $encoding = null)
     {
         $this->loadHtml($str, $encoding);
+    }
+
+    public function loadDOM($doc, $quirksmode = false) {
+        // Remove #text children nodes in nodes that shouldn't have
+        $tag_names = ["html", "head", "table", "tbody", "thead", "tfoot", "tr"];
+        foreach ($tag_names as $tag_name) {
+            $nodes = $doc->getElementsByTagName($tag_name);
+
+            foreach ($nodes as $node) {
+                self::removeTextNodes($node);
+            }
+        }
+
+        $this->dom = $doc;
+        $this->quirksmode = $quirksmode;
+        $this->tree = new FrameTree($this->dom);
     }
 
     /**
      * Loads an HTML string
      * Parse errors are stored in the global array _dompdf_warnings.
-     * @param string $str HTML text to load
-     * @param string $encoding Not used yet
-     * @todo use the $encoding variable
      *
+     * @param string $str HTML text to load
+     * @param string $encoding Encoding of $str
      */
-    public function loadHtml($str, $encoding = 'UTF-8')
+    public function loadHtml($str, $encoding = null)
     {
         $this->saveLocale();
 
-        // FIXME: Determine character encoding, switch to UTF8, update meta tag. Need better http/file stream encoding detection, currently relies on text or meta tag.
-        $known_encodings = mb_list_encodings();
-        mb_detect_order('auto');
-        if (($file_encoding = mb_detect_encoding($str, null, true)) === false)
-        {
-            $file_encoding = "auto";
+        // Determine character encoding when $encoding parameter not used
+        if ($encoding === null) {
+            mb_detect_order('auto');
+            if (($encoding = mb_detect_encoding($str, null, true)) === false) {
+
+                //"auto" is expanded to "ASCII,JIS,UTF-8,EUC-JP,SJIS"
+                $encoding = "auto";
+            }
         }
-        if (in_array(strtoupper($file_encoding), ['UTF-8', 'UTF8']) === false)
-        {
-            $str = mb_convert_encoding($str, 'UTF-8', $file_encoding);
+
+        if (in_array(strtoupper($encoding), array('UTF-8','UTF8')) === false) {
+            $str = mb_convert_encoding($str, 'UTF-8', $encoding);
+
+            //Update encoding after converting
+            $encoding = 'UTF-8';
         }
 
         $metatags = [
@@ -459,123 +466,76 @@ class Dompdf
             '@<meta\s+content="(?:[\w/]+)(?:;\s*?charset=([^\s"]+))"?\s+http-equiv="Content-Type"@i',
             '@<meta [^>]*charset\s*=\s*["\']?\s*([^"\' ]+)@i',
         ];
-        foreach ($metatags as $metatag)
-        {
-            if (preg_match($metatag, $str, $matches))
-            {
-                if (isset($matches[1]) && in_array($matches[1], $known_encodings))
-                {
+        foreach ($metatags as $metatag) {
+            if (preg_match($metatag, $str, $matches)) {
+                if (isset($matches[1]) && in_array($matches[1], mb_list_encodings())) {
                     $document_encoding = $matches[1];
                     break;
                 }
             }
         }
-        if (isset($document_encoding) && in_array(strtoupper($document_encoding), ['UTF-8', 'UTF8']) === false)
-        {
+        if (isset($document_encoding) && in_array(strtoupper($document_encoding), ['UTF-8','UTF8']) === false) {
             $str = preg_replace('/charset=([^\s"]+)/i', 'charset=UTF-8', $str);
-        }
-        elseif (isset($document_encoding) === false && strpos($str, '<head>') !== false)
-        {
-            $str = str_replace('<head>', '<head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">',
-                $str);
-        }
-        elseif (isset($document_encoding) === false)
-        {
+        } elseif (isset($document_encoding) === false && strpos($str, '<head>') !== false) {
+            $str = str_replace('<head>', '<head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">', $str);
+        } elseif (isset($document_encoding) === false) {
             $str = '<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">' . $str;
         }
-        //FIXME: since we're not using this just yet
-        $encoding = 'UTF-8';
 
         // remove BOM mark from UTF-8, it's treated as document text by DOMDocument
         // FIXME: roll this into the encoding detection using UTF-8/16/32 BOM (http://us2.php.net/manual/en/function.mb-detect-encoding.php#91051)?
-        if (substr($str, 0, 3) == chr(0xEF) . chr(0xBB) . chr(0xBF))
-        {
+        if (substr($str, 0, 3) == chr(0xEF) . chr(0xBB) . chr(0xBF)) {
             $str = substr($str, 3);
         }
 
         // Store parsing warnings as messages
-        set_error_handler(["\\Dompdf\\Helpers", "record_warnings"]);
+        set_error_handler([Helpers::class, 'record_warnings']);
 
-        // @todo Take the quirksmode into account
-        // http://hsivonen.iki.fi/doctype/
-        // https://developer.mozilla.org/en/mozilla's_quirks_mode
-        $quirksmode = false;
+        try {
+            // @todo Take the quirksmode into account
+            // http://hsivonen.iki.fi/doctype/
+            // https://developer.mozilla.org/en/mozilla's_quirks_mode
+            $quirksmode = false;
 
-        if ($this->options->isHtml5ParserEnabled() && class_exists("HTML5_Tokenizer"))
-        {
-            $tokenizer = new HTML5_Tokenizer($str);
-            $tokenizer->parse();
-            $doc = $tokenizer->save();
+            if ($this->options->isHtml5ParserEnabled() && class_exists(HTML5_Tokenizer::class)) {
+                $tokenizer = new HTML5_Tokenizer($str);
+                $tokenizer->parse();
+                $doc = $tokenizer->save();
 
-            // Remove #text children nodes in nodes that shouldn't have
-            $tag_names = ["html", "table", "tbody", "thead", "tfoot", "tr"];
-            foreach ($tag_names as $tag_name)
-            {
-                $nodes = $doc->getElementsByTagName($tag_name);
+                $quirksmode = ($tokenizer->getTree()->getQuirksMode() > HTML5_TreeBuilder::NO_QUIRKS);
+            } else {
+                // loadHTML assumes ISO-8859-1 unless otherwise specified on the HTML document header.
+                // http://devzone.zend.com/1538/php-dom-xml-extension-encoding-processing/ (see #4)
+                // http://stackoverflow.com/a/11310258/264628
+                $doc = new DOMDocument("1.0", $encoding);
+                $doc->preserveWhiteSpace = true;
+                $doc->loadHTML($str);
+                $doc->encoding = $encoding;
 
-                foreach ($nodes as $node)
-                {
-                    self::removeTextNodes($node);
-                }
-            }
-
-            $quirksmode = ($tokenizer->getTree()->getQuirksMode() > HTML5_TreeBuilder::NO_QUIRKS);
-        }
-        else
-        {
-            // loadHTML assumes ISO-8859-1 unless otherwise specified on the HTML document header.
-            // http://devzone.zend.com/1538/php-dom-xml-extension-encoding-processing/ (see #4)
-            // http://stackoverflow.com/a/11310258/264628
-            $doc = new DOMDocument("1.0", $encoding);
-            $doc->preserveWhiteSpace = true;
-            $doc->loadHTML($str);
-            $doc->encoding = $encoding;
-
-            // Remove #text children nodes in nodes that shouldn't have
-            $tag_names = ["html", "table", "tbody", "thead", "tfoot", "tr"];
-            foreach ($tag_names as $tag_name)
-            {
-                $nodes = $doc->getElementsByTagName($tag_name);
-
-                foreach ($nodes as $node)
-                {
-                    self::removeTextNodes($node);
-                }
-            }
-
-            // If some text is before the doctype, we are in quirksmode
-            if (preg_match("/^(.+)<!doctype/i", ltrim($str), $matches))
-            {
-                $quirksmode = true;
-            } // If no doctype is provided, we are in quirksmode
-            elseif (!preg_match("/^<!doctype/i", ltrim($str), $matches))
-            {
-                $quirksmode = true;
-            }
-            else
-            {
-                // HTML5 <!DOCTYPE html>
-                if (!$doc->doctype->publicId && !$doc->doctype->systemId)
-                {
-                    $quirksmode = false;
-                }
-
-                // not XHTML
-                if (!preg_match("/xhtml/i", $doc->doctype->publicId))
-                {
+                // If some text is before the doctype, we are in quirksmode
+                if (preg_match("/^(.+)<!doctype/i", ltrim($str), $matches)) {
                     $quirksmode = true;
+                } // If no doctype is provided, we are in quirksmode
+                elseif (!preg_match("/^<!doctype/i", ltrim($str), $matches)) {
+                    $quirksmode = true;
+                } else {
+                    // HTML5 <!DOCTYPE html>
+                    if (!$doc->doctype->publicId && !$doc->doctype->systemId) {
+                        $quirksmode = false;
+                    }
+
+                    // not XHTML
+                    if (!preg_match("/xhtml/i", $doc->doctype->publicId)) {
+                        $quirksmode = true;
+                    }
                 }
             }
+
+            $this->loadDOM($doc, $quirksmode);
+        } finally {
+            restore_error_handler();
+            $this->restoreLocale();
         }
-
-        $this->dom = $doc;
-        $this->quirksmode = $quirksmode;
-
-        $this->tree = new FrameTree($this->dom);
-
-        restore_error_handler();
-
-        $this->restoreLocale();
     }
 
     /**
@@ -593,17 +553,14 @@ class Dompdf
     public static function removeTextNodes(DOMNode $node)
     {
         $children = [];
-        for ($i = 0; $i < $node->childNodes->length; $i++)
-        {
+        for ($i = 0; $i < $node->childNodes->length; $i++) {
             $child = $node->childNodes->item($i);
-            if ($child->nodeName === "#text")
-            {
+            if ($child->nodeName === "#text") {
                 $children[] = $child;
             }
         }
 
-        foreach ($children as $child)
-        {
+        foreach ($children as $child) {
             $node->removeChild($child);
         }
     }
@@ -616,16 +573,15 @@ class Dompdf
     {
         $this->tree->build_tree();
 
-        $this->css->load_css_file(Stylesheet::getDefaultStylesheet(), Stylesheet::ORIG_UA);
+        $this->css->load_css_file($this->css->getDefaultStylesheet(), Stylesheet::ORIG_UA);
 
         $acceptedmedia = Stylesheet::$ACCEPTED_GENERIC_MEDIA_TYPES;
         $acceptedmedia[] = $this->options->getDefaultMediaType();
 
         // <base href="" />
         $base_nodes = $this->dom->getElementsByTagName("base");
-        if ($base_nodes->length && ($href = $base_nodes->item(0)->getAttribute("href")))
-        {
-            list($this->protocol, $this->baseHost, $this->basePath) = Helpers::explode_url($href);
+        if ($base_nodes->length && ($href = $base_nodes->item(0)->getAttribute("href"))) {
+            [$this->protocol, $this->baseHost, $this->basePath] = Helpers::explode_url($href);
         }
 
         // Set the base path of the Stylesheet to that of the file being processed
@@ -638,35 +594,26 @@ class Dompdf
         $stylesheets = $xpath->query("//*[name() = 'link' or name() = 'style']");
 
         /** @var \DOMElement $tag */
-        foreach ($stylesheets as $tag)
-        {
-            switch (strtolower($tag->nodeName))
-            {
+        foreach ($stylesheets as $tag) {
+            switch (strtolower($tag->nodeName)) {
                 // load <link rel="STYLESHEET" ... /> tags
                 case "link":
-                    if (
-                        mb_strtolower(stripos($tag->getAttribute("rel"),
-                                "stylesheet") !== false) || // may be "appendix stylesheet"
+                    if (mb_strtolower(stripos($tag->getAttribute("rel"), "stylesheet") !== false) || // may be "appendix stylesheet"
                         mb_strtolower($tag->getAttribute("type")) === "text/css"
-                    )
-                    {
+                    ) {
                         //Check if the css file is for an accepted media type
                         //media not given then always valid
                         $formedialist = preg_split("/[\s\n,]/", $tag->getAttribute("media"), -1, PREG_SPLIT_NO_EMPTY);
-                        if (count($formedialist) > 0)
-                        {
+                        if (count($formedialist) > 0) {
                             $accept = false;
-                            foreach ($formedialist as $type)
-                            {
-                                if (in_array(mb_strtolower(trim($type)), $acceptedmedia))
-                                {
+                            foreach ($formedialist as $type) {
+                                if (in_array(mb_strtolower(trim($type)), $acceptedmedia)) {
                                     $accept = true;
                                     break;
                                 }
                             }
 
-                            if (!$accept)
-                            {
+                            if (!$accept) {
                                 //found at least one mediatype, but none of the accepted ones
                                 //Skip this css file.
                                 break;
@@ -686,33 +633,37 @@ class Dompdf
                     // HTML 4.0 spec:
                     // http://www.w3.org/TR/REC-html40/present/styles.html#adef-media
                     // which states that the default media type is 'screen'
-                    if (
-                        $tag->hasAttributes() &&
+                    if ($tag->hasAttributes() &&
                         ($media = $tag->getAttribute("media")) &&
                         !in_array($media, $acceptedmedia)
-                    )
-                    {
+                    ) {
                         break;
                     }
 
                     $css = "";
-                    if ($tag->hasChildNodes())
-                    {
+                    if ($tag->hasChildNodes()) {
                         $child = $tag->firstChild;
-                        while ($child)
-                        {
+                        while ($child) {
                             $css .= $child->nodeValue; // Handle <style><!-- blah --></style>
                             $child = $child->nextSibling;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         $css = $tag->nodeValue;
                     }
+
+                    // Set the base path of the Stylesheet to that of the file being processed
+                    $this->css->set_protocol($this->protocol);
+                    $this->css->set_host($this->baseHost);
+                    $this->css->set_base_path($this->basePath);
 
                     $this->css->load_css($css, Stylesheet::ORIG_AUTHOR);
                     break;
             }
+
+            // Set the base path of the Stylesheet to that of the file being processed
+            $this->css->set_protocol($this->protocol);
+            $this->css->set_host($this->baseHost);
+            $this->css->set_base_path($this->basePath);
         }
     }
 
@@ -756,8 +707,7 @@ class Dompdf
         $options = preg_split("/\s*,\s*/", trim($value));
         $defaultView = array_shift($options);
 
-        if (!in_array($defaultView, $valid))
-        {
+        if (!in_array($defaultView, $valid)) {
             return false;
         }
 
@@ -774,16 +724,13 @@ class Dompdf
         $options = $this->options;
 
         $logOutputFile = $options->getLogOutputFile();
-        if ($logOutputFile)
-        {
-            if (!file_exists($logOutputFile) && is_writable(dirname($logOutputFile)))
-            {
+        if ($logOutputFile) {
+            if (!file_exists($logOutputFile) && is_writable(dirname($logOutputFile))) {
                 touch($logOutputFile);
             }
 
             $this->startTime = microtime(true);
-            if (is_writable($logOutputFile))
-            {
+            if (is_writable($logOutputFile)) {
                 ob_start();
             }
         }
@@ -797,16 +744,14 @@ class Dompdf
         $basePageStyle = $pageStyles["base"];
         unset($pageStyles["base"]);
 
-        foreach ($pageStyles as $pageStyle)
-        {
+        foreach ($pageStyles as $pageStyle) {
             $pageStyle->inherit($basePageStyle);
         }
 
         $defaultOptionPaperSize = $this->getPaperSize($options->getDefaultPaperSize());
         // If there is a CSS defined paper size compare to the paper size used to create the canvas to determine a
         // recreation need
-        if (is_array($basePageStyle->size))
-        {
+        if (is_array($basePageStyle->size)) {
             $basePageStyleSize = $basePageStyle->size;
             $this->setPaper([0, 0, $basePageStyleSize[0], $basePageStyleSize[1]]);
         }
@@ -816,75 +761,18 @@ class Dompdf
             $defaultOptionPaperSize[2] !== $paperSize[2] ||
             $defaultOptionPaperSize[3] !== $paperSize[3] ||
             $options->getDefaultPaperOrientation() !== $this->paperOrientation
-        )
-        {
+        ) {
             $this->setCanvas(CanvasFactory::get_instance($this, $this->paperSize, $this->paperOrientation));
             $this->fontMetrics->setCanvas($this->getCanvas());
         }
 
         $canvas = $this->getCanvas();
 
-        if ($options->isFontSubsettingEnabled() && $canvas instanceof CPDF)
-        {
-            foreach ($this->tree->get_frames() as $frame)
-            {
-                $style = $frame->get_style();
-                $node = $frame->get_node();
-
-                // Handle text nodes
-                if ($node->nodeName === "#text")
-                {
-                    $chars = mb_strtoupper($node->nodeValue) . mb_strtolower($node->nodeValue);
-                    $canvas->register_string_subset($style->font_family, $chars);
-                    continue;
-                }
-
-                // Handle generated content (list items)
-                if ($style->display === "list-item")
-                {
-                    $chars = ListBullet::get_counter_chars($style->list_style_type);
-                    $canvas->register_string_subset($style->font_family, $chars);
-                    $canvas->register_string_subset($style->font_family, '.');
-                    continue;
-                }
-
-                // Handle other generated content (pseudo elements)
-                // FIXME: This only captures the text of the stylesheet declaration,
-                //        not the actual generated content, and forces all possible counter
-                //        values. See notes in issue #750.
-                if ($frame->get_node()->nodeName == "dompdf_generated")
-                {
-                    // all possible counter values, just in case
-                    $chars = ListBullet::get_counter_chars('decimal');
-                    $canvas->register_string_subset($style->font_family, $chars);
-                    $chars = ListBullet::get_counter_chars('upper-alpha');
-                    $canvas->register_string_subset($style->font_family, $chars);
-                    $chars = ListBullet::get_counter_chars('lower-alpha');
-                    $canvas->register_string_subset($style->font_family, $chars);
-                    $chars = ListBullet::get_counter_chars('lower-greek');
-                    $canvas->register_string_subset($style->font_family, $chars);
-
-                    // the hex-decoded text of the content property, duplicated from AbstrctFrameReflower::_parse_string
-                    $decoded_string = preg_replace_callback("/\\\\([0-9a-fA-F]{0,6})/",
-                        function ($matches)
-                        {
-                            return \Dompdf\Helpers::unichr(hexdec($matches[1]));
-                        },
-                        $style->content);
-                    $chars = mb_strtoupper($style->content) . mb_strtolower($style->content) . mb_strtoupper($decoded_string) . mb_strtolower($decoded_string);
-                    $canvas->register_string_subset($style->font_family, $chars);
-                    continue;
-                }
-            }
-        }
-
         $root = null;
 
-        foreach ($this->tree->get_frames() as $frame)
-        {
+        foreach ($this->tree->get_frames() as $frame) {
             // Set up the root frame
-            if (is_null($root))
-            {
+            if (is_null($root)) {
                 $root = Factory::decorate_root($this->tree->get_root(), $this);
                 continue;
             }
@@ -895,31 +783,27 @@ class Dompdf
 
         // Add meta information
         $title = $this->dom->getElementsByTagName("title");
-        if ($title->length)
-        {
+        if ($title->length) {
             $canvas->add_info("Title", trim($title->item(0)->nodeValue));
         }
 
         $metas = $this->dom->getElementsByTagName("meta");
         $labels = [
-            "author"      => "Author",
-            "keywords"    => "Keywords",
+            "author" => "Author",
+            "keywords" => "Keywords",
             "description" => "Subject",
         ];
         /** @var \DOMElement $meta */
-        foreach ($metas as $meta)
-        {
+        foreach ($metas as $meta) {
             $name = mb_strtolower($meta->getAttribute("name"));
             $value = trim($meta->getAttribute("content"));
 
-            if (isset($labels[$name]))
-            {
+            if (isset($labels[$name])) {
                 $canvas->add_info($labels[$name], $value);
                 continue;
             }
 
-            if ($name === "dompdf.view" && $this->parseDefaultView($value))
-            {
+            if ($name === "dompdf.view" && $this->parseDefaultView($value)) {
                 $canvas->set_default_view($this->defaultView, $this->defaultViewOptions);
             }
         }
@@ -934,24 +818,20 @@ class Dompdf
         Cache::clear();
 
         global $_dompdf_warnings, $_dompdf_show_warnings;
-        if ($_dompdf_show_warnings && isset($_dompdf_warnings))
-        {
+        if ($_dompdf_show_warnings && isset($_dompdf_warnings)) {
             echo '<b>Dompdf Warnings</b><br><pre>';
-            foreach ($_dompdf_warnings as $msg)
-            {
+            foreach ($_dompdf_warnings as $msg) {
                 echo $msg . "\n";
             }
 
-            if ($canvas instanceof CPDF)
-            {
+            if ($canvas instanceof CPDF) {
                 echo $canvas->get_cpdf()->messages;
             }
             echo '</pre>';
             flush();
         }
 
-        if ($logOutputFile && is_writable($logOutputFile))
-        {
+        if ($logOutputFile && is_writable($logOutputFile)) {
             $this->write_log();
             ob_end_clean();
         }
@@ -965,8 +845,7 @@ class Dompdf
     public function add_info($label, $value)
     {
         $canvas = $this->getCanvas();
-        if (!is_null($canvas))
-        {
+        if (!is_null($canvas)) {
             $canvas->add_info($label, $value);
         }
     }
@@ -979,8 +858,7 @@ class Dompdf
     private function write_log()
     {
         $log_output_file = $this->getOptions()->getLogOutputFile();
-        if (!$log_output_file || !is_writable($log_output_file))
-        {
+        if (!$log_output_file || !is_writable($log_output_file)) {
             return;
         }
 
@@ -1023,8 +901,7 @@ class Dompdf
         $this->saveLocale();
 
         $canvas = $this->getCanvas();
-        if (!is_null($canvas))
-        {
+        if (!is_null($canvas)) {
             $canvas->stream($filename, $options);
         }
 
@@ -1048,8 +925,7 @@ class Dompdf
         $this->saveLocale();
 
         $canvas = $this->getCanvas();
-        if (is_null($canvas))
-        {
+        if (is_null($canvas)) {
             return null;
         }
 
@@ -1147,16 +1023,11 @@ class Dompdf
     public function getPaperSize($paperSize = null)
     {
         $size = $paperSize !== null ? $paperSize : $this->paperSize;
-        if (is_array($size))
-        {
+        if (is_array($size)) {
             return $size;
-        }
-        elseif (isset(Adapter\CPDF::$PAPER_SIZES[mb_strtolower($size)]))
-        {
+        } else if (isset(Adapter\CPDF::$PAPER_SIZES[mb_strtolower($size)])) {
             return Adapter\CPDF::$PAPER_SIZES[mb_strtolower($size)];
-        }
-        else
-        {
+        } else {
             return Adapter\CPDF::$PAPER_SIZES["letter"];
         }
     }
@@ -1483,8 +1354,7 @@ class Dompdf
     {
         $this->options = $options;
         $fontMetrics = $this->getFontMetrics();
-        if (isset($fontMetrics))
-        {
+        if (isset($fontMetrics)) {
             $fontMetrics->setOptions($options);
         }
         return $this;
@@ -1539,17 +1409,13 @@ class Dompdf
      */
     public function setCallbacks($callbacks)
     {
-        if (is_array($callbacks))
-        {
+        if (is_array($callbacks)) {
             $this->callbacks = [];
-            foreach ($callbacks as $c)
-            {
-                if (is_array($c) && isset($c['event']) && isset($c['f']))
-                {
+            foreach ($callbacks as $c) {
+                if (is_array($c) && isset($c['event']) && isset($c['f'])) {
                     $event = $c['event'];
                     $f = $c['f'];
-                    if (is_callable($f) && is_string($event))
-                    {
+                    if (is_callable($f) && is_string($event)) {
                         $this->callbacks[$event][] = $f;
                     }
                 }
@@ -1602,8 +1468,8 @@ class Dompdf
      *
      * @param string $prop
      *
-     * @return mixed
      * @throws Exception
+     * @return mixed
      */
     function __get($prop)
     {
@@ -1612,7 +1478,7 @@ class Dompdf
             case 'version' :
                 return $this->version;
             default:
-                throw new Exception('Invalid property: ' . $prop);
+                throw new Exception( 'Invalid property: ' . $prop );
         }
     }
 }

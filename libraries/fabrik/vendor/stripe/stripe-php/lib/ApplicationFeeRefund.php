@@ -5,27 +5,10 @@ namespace Stripe;
 /**
  * Class ApplicationFeeRefund
  *
- * @property string $id
- * @property string $object
- * @property int $amount
- * @property string $balance_transaction
- * @property int $created
- * @property string $currency
- * @property string $fee
- * @property StripeObject $metadata
- *
  * @package Stripe
  */
 class ApplicationFeeRefund extends ApiResource
 {
-
-    const OBJECT_NAME = "fee_refund";
-
-    use ApiOperations\Update
-    {
-        save as protected _save;
-    }
-
     /**
      * @return string The API URL for this Stripe refund.
      */
@@ -33,8 +16,7 @@ class ApplicationFeeRefund extends ApiResource
     {
         $id = $this['id'];
         $fee = $this['fee'];
-        if (!$id)
-        {
+        if (!$id) {
             throw new Error\InvalidRequest(
                 "Could not determine which URL to request: " .
                 "class instance has invalid ID: $id",

@@ -2,6 +2,7 @@
 
 namespace Aws\S3;
 
+use Aws\Arn\ArnParser;
 use Aws\Multipart\AbstractUploadManager;
 use Aws\ResultInterface;
 use GuzzleHttp\Psr7;
@@ -59,12 +60,17 @@ class MultipartCopy extends AbstractUploadManager
         S3ClientInterface $client,
         $source,
         array $config = []
-    )
-    {
-        $this->source = '/' . ltrim($source, '/');
-        parent::__construct($client, array_change_key_case($config) + [
-                'source_metadata' => null
-            ]);
+    ) {
+        if (ArnParser::isArn($source)) {
+            $this->source = '';
+        } else {
+            $this->source = "/";
+        }
+        $this->source .= ltrim($source, '/');
+        parent::__construct(
+            $client,
+            array_change_key_case($config) + ['source_metadata' => null]
+        );
     }
 
     /**
@@ -80,14 +86,14 @@ class MultipartCopy extends AbstractUploadManager
     protected function loadUploadWorkflowInfo()
     {
         return [
-            'command'  => [
+            'command' => [
                 'initiate' => 'CreateMultipartUpload',
-                'upload'   => 'UploadPartCopy',
+                'upload' => 'UploadPartCopy',
                 'complete' => 'CompleteMultipartUpload',
             ],
-            'id'       => [
-                'bucket'    => 'Bucket',
-                'key'       => 'Key',
+            'id' => [
+                'bucket' => 'Bucket',
+                'key' => 'Key',
                 'upload_id' => 'UploadId',
             ],
             'part_num' => 'PartNumber',
@@ -98,15 +104,12 @@ class MultipartCopy extends AbstractUploadManager
     {
         $parts = ceil($this->getSourceSize() / $this->determinePartSize());
 
-        for ($partNumber = 1; $partNumber <= $parts; $partNumber++)
-        {
+        for ($partNumber = 1; $partNumber <= $parts; $partNumber++) {
             // If we haven't already uploaded this part, yield a new part.
-            if (!$this->state->hasPartBeenUploaded($partNumber))
-            {
+            if (!$this->state->hasPartBeenUploaded($partNumber)) {
                 $command = $this->client->getCommand(
                     $this->info['command']['upload'],
-                    $this->createPart($partNumber, $parts)
-                    + $this->getState()->getId()
+                    $this->createPart($partNumber, $parts) + $this->getState()->getId()
                 );
                 $command->getHandlerList()->appendSign($resultHandler, 'mup');
                 yield $command;
@@ -121,12 +124,18 @@ class MultipartCopy extends AbstractUploadManager
         // Apply custom params to UploadPartCopy data
         $config = $this->getConfig();
         $params = isset($config['params']) ? $config['params'] : [];
-        foreach ($params as $k => $v)
-        {
+        foreach ($params as $k => $v) {
             $data[$k] = $v;
         }
 
-        $data['CopySource'] = $this->source;
+        list($bucket, $key) = explode('/', ltrim($this->source, '/'), 2);
+        $data['CopySource'] = '/' . $bucket . '/' . implode(
+            '/',
+            array_map(
+                'urlencode',
+                explode('/', rawurldecode($key))
+            )
+        );
         $data['PartNumber'] = $partNumber;
 
         $defaultPartSize = $this->determinePartSize();
@@ -157,8 +166,7 @@ class MultipartCopy extends AbstractUploadManager
 
     private function getSourceMetadata()
     {
-        if (empty($this->sourceMetadata))
-        {
+        if (empty($this->sourceMetadata)) {
             $this->sourceMetadata = $this->fetchSourceMetadata();
         }
 
@@ -167,23 +175,20 @@ class MultipartCopy extends AbstractUploadManager
 
     private function fetchSourceMetadata()
     {
-        if ($this->config['source_metadata'] instanceof ResultInterface)
-        {
+        if ($this->config['source_metadata'] instanceof ResultInterface) {
             return $this->config['source_metadata'];
         }
 
         list($bucket, $key) = explode('/', ltrim($this->source, '/'), 2);
         $headParams = [
             'Bucket' => $bucket,
-            'Key'    => $key,
+            'Key' => $key,
         ];
-        if (strpos($key, '?'))
-        {
+        if (strpos($key, '?')) {
             list($key, $query) = explode('?', $key, 2);
             $headParams['Key'] = $key;
             $query = Psr7\parse_query($query, false);
-            if (isset($query['versionId']))
-            {
+            if (isset($query['versionId'])) {
                 $headParams['VersionId'] = $query['versionId'];
             }
         }

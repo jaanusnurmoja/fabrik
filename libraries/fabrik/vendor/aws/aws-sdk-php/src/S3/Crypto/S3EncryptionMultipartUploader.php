@@ -1,5 +1,4 @@
 <?php
-
 namespace Aws\S3\Crypto;
 
 use Aws\Crypto\AbstractCryptoClient;
@@ -12,10 +11,20 @@ use GuzzleHttp\Promise;
 
 /**
  * Encapsulates the execution of a multipart upload of an encrypted object to S3.
+ *
+ * Legacy implementation using older encryption workflow. Use
+ * S3EncryptionMultipartUploaderV2 if possible.
+ *
+ * @deprecated
  */
 class S3EncryptionMultipartUploader extends MultipartUploader
 {
-    use EncryptionTrait, CipherBuilderTrait, CryptoParamsTrait;
+    use CipherBuilderTrait;
+    use CryptoParamsTrait;
+    use EncryptionTrait;
+    use UserAgentTrait;
+
+    const CRYPTO_VERSION = '1n';
 
     /**
      * Returns if the passed cipher name is supported for encryption by the SDK.
@@ -43,7 +52,8 @@ class S3EncryptionMultipartUploader extends MultipartUploader
      * - @CipherOptions: (array) Cipher options for encrypting data. A Cipher
      *   is required. Accepts the following options:
      *       - Cipher: (string) cbc|gcm
-     *            See also: AbstractCryptoClient::$supportedCiphers
+     *            See also: AbstractCryptoClient::$supportedCiphers. Note that
+     *            cbc is deprecated and gcm should be used when possible.
      *       - KeySize: (int) 128|192|256
      *            See also: MaterialsProvider::$supportedKeySizes
      *       - Aad: (string) Additional authentication data. This option is
@@ -89,23 +99,21 @@ class S3EncryptionMultipartUploader extends MultipartUploader
      *   options are ignored.
      *
      * @param S3ClientInterface $client Client used for the upload.
-     * @param mixed $source Source of the data to upload.
-     * @param array $config Configuration used to perform the upload.
+     * @param mixed             $source Source of the data to upload.
+     * @param array             $config Configuration used to perform the upload.
      */
     public function __construct(
         S3ClientInterface $client,
         $source,
         array $config = []
-    )
-    {
+    ) {
+        $this->appendUserAgent($client, 'S3CryptoV' . self::CRYPTO_VERSION);
         $this->client = $client;
         $config['params'] = [];
-        if (!empty($config['bucket']))
-        {
+        if (!empty($config['bucket'])) {
             $config['params']['Bucket'] = $config['bucket'];
         }
-        if (!empty($config['key']))
-        {
+        if (!empty($config['key'])) {
             $config['params']['Key'] = $config['key'];
         }
 
@@ -118,8 +126,7 @@ class S3EncryptionMultipartUploader extends MultipartUploader
             $config,
             $this->instructionFileSuffix
         );
-        if ($this->strategy === null)
-        {
+        if ($this->strategy === null) {
             $this->strategy = self::getDefaultStrategy();
         }
         unset($config['@MetadataStrategy']);
@@ -136,8 +143,7 @@ class S3EncryptionMultipartUploader extends MultipartUploader
 
     private function getEncryptingDataPreparer()
     {
-        return function ()
-        {
+        return function() {
             // Defer encryption work until promise is executed
             $envelope = new MetadataEnvelope();
 
@@ -147,8 +153,7 @@ class S3EncryptionMultipartUploader extends MultipartUploader
                 $this->provider,
                 $envelope
             ))->then(
-                function ($bodyStream) use ($envelope)
-                {
+                function ($bodyStream) use ($envelope) {
                     $params = $this->strategy->save(
                         $envelope,
                         $this->config['params']

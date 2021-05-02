@@ -14,10 +14,10 @@ class FulfilledPromise implements PromiseInterface
 
     public function __construct($value)
     {
-        if (method_exists($value, 'then'))
-        {
+        if (is_object($value) && method_exists($value, 'then')) {
             throw new \InvalidArgumentException(
-                'You cannot create a FulfilledPromise with a promise.');
+                'You cannot create a FulfilledPromise with a promise.'
+            );
         }
 
         $this->value = $value;
@@ -26,31 +26,22 @@ class FulfilledPromise implements PromiseInterface
     public function then(
         callable $onFulfilled = null,
         callable $onRejected = null
-    )
-    {
+    ) {
         // Return itself if there is no onFulfilled function.
-        if (!$onFulfilled)
-        {
+        if (!$onFulfilled) {
             return $this;
         }
 
-        $queue = queue();
+        $queue = Utils::queue();
         $p = new Promise([$queue, 'run']);
         $value = $this->value;
-        $queue->add(static function () use ($p, $value, $onFulfilled)
-        {
-            if ($p->getState() === self::PENDING)
-            {
-                try
-                {
+        $queue->add(static function () use ($p, $value, $onFulfilled) {
+            if (Is::pending($p)) {
+                try {
                     $p->resolve($onFulfilled($value));
-                }
-                catch (\Throwable $e)
-                {
+                } catch (\Throwable $e) {
                     $p->reject($e);
-                }
-                catch (\Exception $e)
-                {
+                } catch (\Exception $e) {
                     $p->reject($e);
                 }
             }
@@ -76,8 +67,7 @@ class FulfilledPromise implements PromiseInterface
 
     public function resolve($value)
     {
-        if ($value !== $this->value)
-        {
+        if ($value !== $this->value) {
             throw new \LogicException("Cannot resolve a fulfilled promise");
         }
     }
