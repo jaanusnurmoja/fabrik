@@ -10,14 +10,14 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
     var AdvancedSearch = new Class({
 
         options: {
-            ajax            : false,
-            controller      : 'list',
-            parentView      : '',
+            ajax: false,
+            controller: 'list',
+            parentView: '',
             defaultStatement: '=',
-            conditionList   : '',
-            elementList     : '',
-            elementMap      : {},
-            statementList   : ''
+            conditionList: '',
+            elementList: '',
+            elementMap: {},
+            statementList: ''
         },
 
         /**
@@ -72,9 +72,9 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                  */
                 var list = self.getList();
                 jQuery(document.createElement('input')).attr({
-                    'name' : 'resetfilters',
+                    'name': 'resetfilters',
                     'value': 1,
-                    'type' : 'hidden'
+                    'type': 'hidden'
                 }).appendTo(self.form);
 
                 if (!self.options.ajax) {
@@ -142,15 +142,15 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
             }
             elData = this.options.elementMap[v];
             jQuery.ajax({
-                'url' : url,
+                'url': url,
                 'data': {
-                    'element'   : v,
-                    'id'        : this.options.listid,
-                    'elid'      : elData.id,
-                    'plugin'    : elData.plugin,
-                    'counter'   : this.options.counter,
-                    'listref'   : this.options.listref,
-                    'context'   : this.options.controller,
+                    'element': v,
+                    'id': this.options.listid,
+                    'elid': elData.id,
+                    'plugin': elData.plugin,
+                    'counter': this.options.counter,
+                    'listref': this.options.listref,
+                    'context': this.options.controller,
                     'parentView': this.options.parentView
                 }
             }).done(function (r) {
@@ -174,13 +174,13 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
             firstTd.empty().html(this.options.elementList);
             firstTd.append([
                 jQuery(document.createElement('input')).attr({
-                    'type' : 'hidden',
-                    'name' : 'fabrik___filter[list_' + this.options.listref + '][search_type][]',
+                    'type': 'hidden',
+                    'name': 'fabrik___filter[list_' + this.options.listref + '][search_type][]',
                     'value': 'advanced'
                 }),
                 jQuery(document.createElement('input')).attr({
-                    'type' : 'hidden',
-                    'name' : 'fabrik___filter[list_' + this.options.listref + '][grouped_to_previous][]',
+                    'type': 'hidden',
+                    'name': 'fabrik___filter[list_' + this.options.listref + '][grouped_to_previous][]',
                     'value': '0'
                 })
             ]);
@@ -198,7 +198,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                 this.options.counter--;
 
                 tr.animate({
-                        'height' : 0,
+                        'height': 0,
                         'opacity': 0
                     }, 800,
                     function () {
@@ -226,8 +226,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                     jQuery(this).find('.inputbox').each(function () {
                         if (this.id.test(/condition$/)) {
                             this.value = self.options.defaultStatement;
-                        }
-                        else {
+                        } else {
                             this.selectedIndex = 0;
                         }
                     });

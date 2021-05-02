@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto;
 
 use Aws\Kms\KmsClient;
@@ -20,14 +21,16 @@ class KmsMaterialsProvider extends MaterialsProvider
     public function __construct(
         KmsClient $kmsClient,
         $kmsKeyId = null
-    ) {
+    )
+    {
         $this->kmsClient = $kmsClient;
         $this->kmsKeyId = $kmsKeyId;
     }
 
     public function fromDecryptionEnvelope(MetadataEnvelope $envelope)
     {
-        if (empty($envelope[MetadataEnvelope::MATERIALS_DESCRIPTION_HEADER])) {
+        if (empty($envelope[MetadataEnvelope::MATERIALS_DESCRIPTION_HEADER]))
+        {
             throw new \RuntimeException('Not able to detect kms_cmk_id from an'
                 . ' empty materials description.');
         }
@@ -36,7 +39,8 @@ class KmsMaterialsProvider extends MaterialsProvider
             $envelope[MetadataEnvelope::MATERIALS_DESCRIPTION_HEADER],
             true
         );
-        if (empty($materialsDescription['kms_cmk_id'])) {
+        if (empty($materialsDescription['kms_cmk_id']))
+        {
             throw new \RuntimeException('Not able to detect kms_cmk_id from kms'
                 . ' materials description.');
         }
@@ -78,8 +82,8 @@ class KmsMaterialsProvider extends MaterialsProvider
     public function encryptCek($unencryptedCek, $materialDescription)
     {
         $encryptedDataKey = $this->kmsClient->encrypt([
-            'Plaintext' => $unencryptedCek,
-            'KeyId' => $this->kmsKeyId,
+            'Plaintext'         => $unencryptedCek,
+            'KeyId'             => $this->kmsKeyId,
             'EncryptionContext' => $materialDescription
         ]);
         return base64_encode($encryptedDataKey['CiphertextBlob']);
@@ -99,7 +103,7 @@ class KmsMaterialsProvider extends MaterialsProvider
     public function decryptCek($encryptedCek, $materialDescription)
     {
         $result = $this->kmsClient->decrypt([
-            'CiphertextBlob' => $encryptedCek,
+            'CiphertextBlob'    => $encryptedCek,
             'EncryptionContext' => $materialDescription
         ]);
 

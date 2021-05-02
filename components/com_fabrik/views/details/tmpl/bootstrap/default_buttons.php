@@ -13,13 +13,13 @@
 defined('_JEXEC') or die('Restricted access');
 
 if ($this->showEmail):
-	echo $this->emailLink;
+    echo $this->emailLink;
 endif;
 
 if ($this->showPDF):
-	echo $this->pdfLink;
+    echo $this->pdfLink;
 endif;
 
 if ($this->showPrint):
-	echo $this->printLink;
+    echo $this->printLink;
 endif;

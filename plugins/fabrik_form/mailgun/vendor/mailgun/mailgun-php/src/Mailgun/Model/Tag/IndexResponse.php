@@ -43,7 +43,8 @@ final class IndexResponse implements ApiResponse, PagingProvider
     public static function create(array $data)
     {
         $items = [];
-        foreach ($data['items'] as $item) {
+        foreach ($data['items'] as $item)
+        {
             $items[] = Tag::create($item);
         }
 

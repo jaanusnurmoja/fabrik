@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser\Dom;
 
 use Countable;

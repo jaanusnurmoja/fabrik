@@ -16,26 +16,26 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
          */
         options: {
             'dateTimeFormat': '',
-            'locale'        : 'en-GB',
-            'allowedDates'  : [],
+            'locale': 'en-GB',
+            'allowedDates': [],
             'allowedClasses': [],
-            'hour24'        : true,
-            'showSeconds'   : false,
+            'hour24': true,
+            'showSeconds': false,
             'timePickerLabel': 'Timepicker',
-            'calendarSetup' : {
-                'eventName'   : 'click',
-                'ifFormat'    : '%Y/%m/%d',
-                'daFormat'    : '%Y/%m/%d',
-                'singleClick' : true,
-                'align'       : 'Tl',
-                'range'       : [1900, 2999],
-                'showsTime'   : false,
-                'timeFormat'  : '24',
-                'electric'    : true,
-                'step'        : 2,
-                'cache'       : false,
-                'showOthers'  : false,
-                'advanced'    : false
+            'calendarSetup': {
+                'eventName': 'click',
+                'ifFormat': '%Y/%m/%d',
+                'daFormat': '%Y/%m/%d',
+                'singleClick': true,
+                'align': 'Tl',
+                'range': [1900, 2999],
+                'showsTime': false,
+                'timeFormat': '24',
+                'electric': true,
+                'step': 2,
+                'cache': false,
+                'showOthers': false,
+                'advanced': false
             }
         },
 
@@ -65,14 +65,13 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 if (parts.length > 1) {
                     this.options.allowedClasses[i] = parts[1];
                     this.options.allowedDates[i] = parts[0];
-                }
-                else {
+                } else {
                     this.options.allowedClasses[i] = false;
                 }
                 this.options.allowedDates[i] = new Date(this.options.allowedDates[i]);
                 // apply the TZ offset, otherwise if (say) GMT -6, 2017-02-15 will become 2017-01-14 18:00:00
-	            this.options.allowedDates[i].setTime(
-		            this.options.allowedDates[i].getTime() + this.options.allowedDates[i].getTimezoneOffset()*60*1000
+                this.options.allowedDates[i].setTime(
+                    this.options.allowedDates[i].getTime() + this.options.allowedDates[i].getTimezoneOffset() * 60 * 1000
                 );
             }
         },
@@ -94,8 +93,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                             // hoses up anything but standard 'db' format.  So we HAVE to use parseDate() here.
                             if (this.options.advanced) {
                                 d = Date.parseExact(date_str, Date.normalizeFormat(this.options.calendarSetup.ifFormat));
-                            }
-                            else {
+                            } else {
                                 d = Date.parseDate(date_str, this.options.calendarSetup.ifFormat);
                             }
                             this.setTimeFromField(d);
@@ -104,8 +102,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                             // need to fire this to cook off anything observing this element
                             Fabrik.fireEvent('fabrik.date.select', this);
                             this.element.fireEvent('change', new Event.Mock(this.element, 'change'));
-                        }
-                        else {
+                        } else {
                             this.options.value = '';
                         }
                     }.bind(this));
@@ -135,7 +132,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     this.afterAjaxValidation();
                 }.bind(this));
 
-                Fabrik.addEvent('fabrik.form.page.change.end', function(form, dir) {
+                Fabrik.addEvent('fabrik.form.page.change.end', function (form, dir) {
                     // Fired when multipage form changes page
                     this.afterAjaxValidation();
                 }.bind(this));
@@ -162,19 +159,19 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             if (el) {
                 el.addEvent('change', function (event) {
                     var data = {
-                        'option'    : 'com_fabrik',
-                        'format'    : 'raw',
-                        'task'      : 'plugin.pluginAjax',
-                        'plugin'    : 'date',
-                        'method'    : 'ajax_getAllowedDates',
+                        'option': 'com_fabrik',
+                        'format': 'raw',
+                        'task': 'plugin.pluginAjax',
+                        'plugin': 'date',
+                        'method': 'ajax_getAllowedDates',
                         'element_id': this.options.id,
-                        'v'         : el.get('value'),
-                        'formid'    : this.form.id
+                        'v': el.get('value'),
+                        'formid': this.form.id
                     };
                     new Request.JSON({
-                        url      : '',
-                        method   : 'post',
-                        'data'   : data,
+                        url: '',
+                        method: 'post',
+                        'data': data,
                         onSuccess: function (json) {
                             this.options.allowedDates = json;
                             this.convertAllowedDates();
@@ -212,8 +209,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 }
                 if (!matched) {
                     return true;
-                }
-                else {
+                } else {
                     if (this.options.allowedClasses[i] !== false) {
                         return this.options.allowedClasses[i];
                     }
@@ -433,10 +429,10 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 this.options.calendarSetup.button = this.element.id + '_cal_img';
                 //this.addEventToCalOpts();
                 this.cal.showAtElement(f, this.cal.params.align);
-                if (typeof(this.cal.wrapper) !== 'undefined') {
+                if (typeof (this.cal.wrapper) !== 'undefined') {
                     this.cal.wrapper.getParent().position({
                         'relativeTo': this.cal.params.inputField,
-                        'position'  : 'topLeft'
+                        'position': 'topLeft'
                     });
                 }
             }
@@ -516,9 +512,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 if (meridian) {
                     if (ampm === 'pm' && h < 12) {
                         h += 12;
-                    }
-                    else if (ampm === 'am' && h === 12)
-                    {
+                    } else if (ampm === 'am' && h === 12) {
                         h = 0;
                     }
                 }
@@ -528,9 +522,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 var s = 0;
                 if (t[2] && this.hasSeconds()) {
                     s = t[2] ? t[2].toInt() : 0;
-                }
-                else
-                {
+                } else {
                     format = '%H:%M';
                 }
 
@@ -539,8 +531,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 d.setSeconds(s);
 
                 timeStr = d.format(format);
-            }
-            else {
+            } else {
                 timeStr = '00:00';
             }
 
@@ -572,9 +563,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 if (meridian) {
                     if (ampm === 'pm' && h < 12) {
                         h += 12;
-                    }
-                    else if (ampm === 'am' && h === 12)
-                    {
+                    } else if (ampm === 'am' && h === 12) {
                         h = 0;
                     }
                 }
@@ -590,8 +579,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 } else {
                     d.setSeconds(0);
                 }
-            }
-            else {
+            } else {
                 if (this.options.dateTimeFormat === '') {
                     d.setHours(0);
                     d.setMinutes(0);
@@ -623,8 +611,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                                         'donetext': Joomla.JText._('JLIB_HTML_BEHAVIOR_CLOSE'),
                                         'afterDone': jQuery.proxy(this.hideTime, this),
                                     });
-                                }
-                                else {
+                                } else {
                                     this.timePicker = jQuery('#' + this.element.id + ' .timeField').wickedpicker({
                                         'now': this.getTimeFromField(),
                                         'timeSeparator': ':',
@@ -652,8 +639,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                         typeOf(js) === 'function' ? js.delay(0, this, this) : eval(js);
                     }
                 }.bind(this));
-            }
-            else {
+            } else {
                 this.element.getElements('input').each(function (i) {
                     i.addEvent(action, function (e) {
                         if (typeOf(e) === 'event') {
@@ -705,16 +691,14 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     }
 
                     return;
-                }
-                else {
+                } else {
                     /*
                      * Even though always standard format, need to use 'advanced' handling to work round a bug in
                      * the JoomlaFarsi implementation of the calendar JS which applies TZ offsets in parseDate()
                      */
                     if (this.options.advanced) {
                         date = Date.parseExact(val, Date.normalizeFormat('%Y-%m-%d %H:%M:%S'));
-                    }
-                    else {
+                    } else {
                         /*
                          * need to use parseDate() with a format string instead of just parse(), otherwise if advanced
                          * formats is enabled, parse() will overridden and use the "culture" specific parsing, and if

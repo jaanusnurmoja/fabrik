@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Credentials\CredentialsInterface;
@@ -28,12 +29,12 @@ class PostObjectV4
      * The options array accepts the following keys:
      * @link http://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
      *
-     * @param S3ClientInterface $client     Client used with the POST object
-     * @param string            $bucket     Bucket to use
-     * @param array             $formInputs Associative array of form input
+     * @param S3ClientInterface $client Client used with the POST object
+     * @param string $bucket Bucket to use
+     * @param array $formInputs Associative array of form input
      *                                      fields.
-     * @param array             $options    Policy condition options
-     * @param mixed             $expiration Upload expiration time value. By
+     * @param array $options Policy condition options
+     * @param mixed $expiration Upload expiration time value. By
      *                                      default: 1 hour valid period.
      */
     public function __construct(
@@ -42,7 +43,8 @@ class PostObjectV4
         array $formInputs,
         array $options = [],
         $expiration = '+1 hours'
-    ) {
+    )
+    {
         $this->client = $client;
         $this->bucket = $bucket;
 
@@ -53,9 +55,10 @@ class PostObjectV4
             'enctype' => 'multipart/form-data'
         ];
 
-        $credentials   = $this->client->getCredentials()->wait();
+        $credentials = $this->client->getCredentials()->wait();
 
-        if ($securityToken = $credentials->getSecurityToken()) {
+        if ($securityToken = $credentials->getSecurityToken())
+        {
             array_push($options, ['x-amz-security-token' => $securityToken]);
             $formInputs['X-Amz-Security-Token'] = $securityToken;
         }
@@ -111,7 +114,7 @@ class PostObjectV4
      * Set a form attribute.
      *
      * @param string $attribute Form attribute to set.
-     * @param string $value     Value to set.
+     * @param string $value Value to set.
      */
     public function setFormAttribute($attribute, $value)
     {
@@ -143,26 +146,32 @@ class PostObjectV4
     {
         $uri = new Uri($this->client->getEndpoint());
 
-        if ($this->client->getConfig('use_path_style_endpoint') === true
+        if (
+            $this->client->getConfig('use_path_style_endpoint') === true
             || ($uri->getScheme() === 'https'
-            && strpos($this->bucket, '.') !== false)
-        ) {
+                && strpos($this->bucket, '.') !== false)
+        )
+        {
             // Use path-style URLs
             $uri = $uri->withPath("/{$this->bucket}");
-        } else {
+        }
+        else
+        {
             // Use virtual-style URLs if haven't been set up already
-            if (strpos($uri->getHost(), $this->bucket . '.') !== 0) {
+            if (strpos($uri->getHost(), $this->bucket . '.') !== 0)
+            {
                 $uri = $uri->withHost($this->bucket . '.' . $uri->getHost());
             }
         }
 
-        return (string) $uri;
+        return (string)$uri;
     }
 
     protected function getPolicyAndSignature(
         CredentialsInterface $credentials,
         array $policy
-    ){
+    )
+    {
         $ldt = gmdate(SignatureV4::ISO8601_BASIC);
         $sdt = substr($ldt, 0, 8);
         $policy['conditions'][] = ['X-Amz-Date' => $ldt];
@@ -184,8 +193,8 @@ class PostObjectV4
 
         return [
             'X-Amz-Credential' => $creds,
-            'X-Amz-Algorithm' => "AWS4-HMAC-SHA256",
-            'X-Amz-Date' => $ldt,
+            'X-Amz-Algorithm'  => "AWS4-HMAC-SHA256",
+            'X-Amz-Date'       => $ldt,
             'Policy'           => $jsonPolicy64,
             'X-Amz-Signature'  => bin2hex(
                 hash_hmac('sha256', $jsonPolicy64, $key, true)

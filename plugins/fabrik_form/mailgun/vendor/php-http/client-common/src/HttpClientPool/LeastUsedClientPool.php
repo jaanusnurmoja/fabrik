@@ -20,20 +20,25 @@ final class LeastUsedClientPool extends HttpClientPool
      */
     protected function chooseHttpClient()
     {
-        $clientPool = array_filter($this->clientPool, function (HttpClientPoolItem $clientPoolItem) {
+        $clientPool = array_filter($this->clientPool, function (HttpClientPoolItem $clientPoolItem)
+        {
             return !$clientPoolItem->isDisabled();
         });
 
-        if (0 === count($clientPool)) {
+        if (0 === count($clientPool))
+        {
             throw new HttpClientNotFoundException('Cannot choose a http client as there is no one present in the pool');
         }
 
-        usort($clientPool, function (HttpClientPoolItem $clientA, HttpClientPoolItem $clientB) {
-            if ($clientA->getSendingRequestCount() === $clientB->getSendingRequestCount()) {
+        usort($clientPool, function (HttpClientPoolItem $clientA, HttpClientPoolItem $clientB)
+        {
+            if ($clientA->getSendingRequestCount() === $clientB->getSendingRequestCount())
+            {
                 return 0;
             }
 
-            if ($clientA->getSendingRequestCount() < $clientB->getSendingRequestCount()) {
+            if ($clientA->getSendingRequestCount() < $clientB->getSendingRequestCount())
+            {
                 return -1;
             }
 

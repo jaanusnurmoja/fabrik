@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -42,12 +43,14 @@ class ShapeMap
     {
         $shape = $shapeRef['shape'];
 
-        if (!isset($this->definitions[$shape])) {
+        if (!isset($this->definitions[$shape]))
+        {
             throw new \InvalidArgumentException('Shape not found: ' . $shape);
         }
 
         $isSimple = count($shapeRef) == 1;
-        if ($isSimple && isset($this->simple[$shape])) {
+        if ($isSimple && isset($this->simple[$shape]))
+        {
             return $this->simple[$shape];
         }
 
@@ -57,7 +60,8 @@ class ShapeMap
 
         $result = Shape::create($definition, $this);
 
-        if ($isSimple) {
+        if ($isSimple)
+        {
             $this->simple[$shape] = $result;
         }
 

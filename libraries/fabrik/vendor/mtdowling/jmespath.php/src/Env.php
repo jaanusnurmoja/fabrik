@@ -1,4 +1,5 @@
 <?php
+
 namespace JmesPath;
 
 /**
@@ -18,14 +19,15 @@ final class Env
      * Returns data from the input array that matches a JMESPath expression.
      *
      * @param string $expression JMESPath expression to evaluate
-     * @param mixed  $data       JSON-like data to search
+     * @param mixed $data JSON-like data to search
      *
      * @return mixed|null Returns the matching data or null
      */
     public static function search($expression, $data)
     {
         static $runtime;
-        if (!$runtime) {
+        if (!$runtime)
+        {
             $runtime = Env::createRuntime();
         }
         return $runtime($expression, $data);
@@ -39,10 +41,14 @@ final class Env
      */
     public static function createRuntime()
     {
-        switch ($compileDir = getenv(self::COMPILE_DIR)) {
-            case false: return new AstRuntime();
-            case 'on': return new CompilerRuntime();
-            default: return new CompilerRuntime($compileDir);
+        switch ($compileDir = getenv(self::COMPILE_DIR))
+        {
+            case false:
+                return new AstRuntime();
+            case 'on':
+                return new CompilerRuntime();
+            default:
+                return new CompilerRuntime($compileDir);
         }
     }
 
@@ -56,7 +62,8 @@ final class Env
     {
         $total = 0;
         $compileDir = getenv(self::COMPILE_DIR) ?: sys_get_temp_dir();
-        foreach (glob("{$compileDir}/jmespath_*.php") as $file) {
+        foreach (glob("{$compileDir}/jmespath_*.php") as $file)
+        {
             $total++;
             unlink($file);
         }

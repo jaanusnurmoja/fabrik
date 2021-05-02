@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Credentials;
 
 use Aws;
@@ -87,7 +88,8 @@ class CredentialProvider
     {
         $promise = Promise\promise_for($creds);
 
-        return function () use ($promise) {
+        return function () use ($promise)
+        {
             return $promise;
         };
     }
@@ -102,15 +104,18 @@ class CredentialProvider
     public static function chain()
     {
         $links = func_get_args();
-        if (empty($links)) {
+        if (empty($links))
+        {
             throw new \InvalidArgumentException('No providers in chain');
         }
 
-        return function () use ($links) {
+        return function () use ($links)
+        {
             /** @var callable $parent */
             $parent = array_shift($links);
             $promise = $parent();
-            while ($next = array_shift($links)) {
+            while ($next = array_shift($links))
+            {
                 $promise = $promise->otherwise($next);
             }
             return $promise;
@@ -128,32 +133,38 @@ class CredentialProvider
      */
     public static function memoize(callable $provider)
     {
-        return function () use ($provider) {
+        return function () use ($provider)
+        {
             static $result;
             static $isConstant;
 
             // Constant credentials will be returned constantly.
-            if ($isConstant) {
+            if ($isConstant)
+            {
                 return $result;
             }
 
             // Create the initial promise that will be used as the cached value
             // until it expires.
-            if (null === $result) {
+            if (null === $result)
+            {
                 $result = $provider();
             }
 
             // Return credentials that could expire and refresh when needed.
             return $result
-                ->then(function (CredentialsInterface $creds) use ($provider, &$isConstant, &$result) {
+                ->then(function (CredentialsInterface $creds) use ($provider, &$isConstant, &$result)
+                {
                     // Determine if these are constant credentials.
-                    if (!$creds->getExpiration()) {
+                    if (!$creds->getExpiration())
+                    {
                         $isConstant = true;
                         return $creds;
                     }
 
                     // Refresh expired credentials.
-                    if (!$creds->isExpired()) {
+                    if (!$creds->isExpired())
+                    {
                         return $creds;
                     }
                     // Refresh the result and forward the promise.
@@ -179,12 +190,15 @@ class CredentialProvider
         callable $provider,
         CacheInterface $cache,
         $cacheKey = null
-    ) {
+    )
+    {
         $cacheKey = $cacheKey ?: 'aws_cached_credentials';
 
-        return function () use ($provider, $cache, $cacheKey) {
+        return function () use ($provider, $cache, $cacheKey)
+        {
             $found = $cache->get($cacheKey);
-            if ($found instanceof CredentialsInterface && !$found->isExpired()) {
+            if ($found instanceof CredentialsInterface && !$found->isExpired())
+            {
                 return Promise\promise_for($found);
             }
 
@@ -192,7 +206,8 @@ class CredentialProvider
                 ->then(function (CredentialsInterface $creds) use (
                     $cache,
                     $cacheKey
-                ) {
+                )
+                {
                     $cache->set(
                         $cacheKey,
                         $creds,
@@ -213,13 +228,15 @@ class CredentialProvider
      */
     public static function env()
     {
-        return function () {
+        return function ()
+        {
             // Use credentials from environment variables, if available
             $key = getenv(self::ENV_KEY);
             $secret = getenv(self::ENV_SECRET);
-            if ($key && $secret) {
+            if ($key && $secret)
+            {
                 return Promise\promise_for(
-                    new Credentials($key, $secret, getenv(self::ENV_SESSION) ?: NULL)
+                    new Credentials($key, $secret, getenv(self::ENV_SESSION) ?: null)
                 );
             }
 
@@ -264,7 +281,7 @@ class CredentialProvider
      * @return callable
      * @see Aws\Credentials\AssumeRoleCredentialProvider for $config details.
      */
-    public static function assumeRole(array $config=[])
+    public static function assumeRole(array $config = [])
     {
         return new AssumeRoleCredentialProvider($config);
     }
@@ -273,7 +290,7 @@ class CredentialProvider
      * Credentials provider that creates credentials using an ini file stored
      * in the current user's home directory.
      *
-     * @param string|null $profile  Profile to use. If not specified will use
+     * @param string|null $profile Profile to use. If not specified will use
      *                              the "default" profile in "~/.aws/credentials".
      * @param string|null $filename If provided, uses a custom filename rather
      *                              than looking in the home directory.
@@ -285,29 +302,36 @@ class CredentialProvider
         $filename = $filename ?: (self::getHomeDir() . '/.aws/credentials');
         $profile = $profile ?: (getenv(self::ENV_PROFILE) ?: 'default');
 
-        return function () use ($profile, $filename) {
-            if (!is_readable($filename)) {
+        return function () use ($profile, $filename)
+        {
+            if (!is_readable($filename))
+            {
                 return self::reject("Cannot read credentials from $filename");
             }
             $data = parse_ini_file($filename, true, INI_SCANNER_RAW);
-            if ($data === false) {
+            if ($data === false)
+            {
                 return self::reject("Invalid credentials file: $filename");
             }
-            if (!isset($data[$profile])) {
+            if (!isset($data[$profile]))
+            {
                 return self::reject("'$profile' not found in credentials file");
             }
-            if (!isset($data[$profile]['aws_access_key_id'])
+            if (
+                !isset($data[$profile]['aws_access_key_id'])
                 || !isset($data[$profile]['aws_secret_access_key'])
-            ) {
+            )
+            {
                 return self::reject("No credentials present in INI profile "
                     . "'$profile' ($filename)");
             }
 
-            if (empty($data[$profile]['aws_session_token'])) {
+            if (empty($data[$profile]['aws_session_token']))
+            {
                 $data[$profile]['aws_session_token']
                     = isset($data[$profile]['aws_security_token'])
-                        ? $data[$profile]['aws_security_token']
-                        : null;
+                    ? $data[$profile]['aws_security_token']
+                    : null;
             }
 
             return Promise\promise_for(
@@ -350,15 +374,19 @@ class CredentialProvider
      */
     private static function remoteCredentialProviders(array $config = [])
     {
-        if (!empty(getenv(EcsCredentialProvider::ENV_URI))) {
+        if (!empty(getenv(EcsCredentialProvider::ENV_URI)))
+        {
             $providers['ecs'] = self::ecsCredentials($config);
         }
         $providers['instance'] = self::instanceProfile($config);
 
-        if (isset($config['credentials'])
+        if (
+            isset($config['credentials'])
             && $config['credentials'] instanceof CacheInterface
-        ) {
-            foreach ($providers as $key => $provider) {
+        )
+        {
+            foreach ($providers as $key => $provider)
+            {
                 $providers[$key] = self::cache(
                     $provider,
                     $config['credentials'],
@@ -378,7 +406,8 @@ class CredentialProvider
     private static function getHomeDir()
     {
         // On Linux/Unix-like systems, use the HOME environment variable
-        if ($homeDir = getenv('HOME')) {
+        if ($homeDir = getenv('HOME'))
+        {
             return $homeDir;
         }
 

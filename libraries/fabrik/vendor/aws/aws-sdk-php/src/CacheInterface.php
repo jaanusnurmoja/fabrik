@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 /**
@@ -18,9 +19,9 @@ interface CacheInterface
     /**
      * Set a cache key value.
      *
-     * @param string $key   Key to set
-     * @param mixed  $value Value to set.
-     * @param int    $ttl   Number of seconds the item is allowed to live. Set
+     * @param string $key Key to set
+     * @param mixed $value Value to set.
+     * @param int $ttl Number of seconds the item is allowed to live. Set
      *                      to 0 to allow an unlimited lifetime.
      */
     public function set($key, $value, $ttl = 0);

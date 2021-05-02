@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Athena;
 
 use Aws\AwsClient;
@@ -28,4 +29,6 @@ use Aws\AwsClient;
  * @method \Aws\Result stopQueryExecution(array $args = [])
  * @method \GuzzleHttp\Promise\Promise stopQueryExecutionAsync(array $args = [])
  */
-class AthenaClient extends AwsClient {}
+class AthenaClient extends AwsClient
+{
+}

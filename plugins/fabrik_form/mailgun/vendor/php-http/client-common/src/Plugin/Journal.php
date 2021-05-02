@@ -16,7 +16,7 @@ interface Journal
     /**
      * Record a successful call.
      *
-     * @param RequestInterface  $request  Request use to make the call
+     * @param RequestInterface $request Request use to make the call
      * @param ResponseInterface $response Response returned by the call
      */
     public function addSuccess(RequestInterface $request, ResponseInterface $response);
@@ -24,8 +24,8 @@ interface Journal
     /**
      * Record a failed call.
      *
-     * @param RequestInterface $request   Request use to make the call
-     * @param Exception        $exception Exception returned by the call
+     * @param RequestInterface $request Request use to make the call
+     * @param Exception $exception Exception returned by the call
      */
     public function addFailure(RequestInterface $request, Exception $exception);
 }

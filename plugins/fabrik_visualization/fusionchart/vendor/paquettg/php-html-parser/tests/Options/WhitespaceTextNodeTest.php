@@ -2,7 +2,8 @@
 
 use PHPHtmlParser\Dom;
 
-class WhitespaceTextNodeTest extends PHPUnit_Framework_TestCase {
+class WhitespaceTextNodeTest extends PHPUnit_Framework_TestCase
+{
 
     public function testConfigGlobalNoWhitespaceTextNode()
     {

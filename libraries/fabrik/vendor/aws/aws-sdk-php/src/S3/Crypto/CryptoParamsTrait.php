@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3\Crypto;
 
 use Aws\Crypto\MaterialsProvider;
@@ -9,7 +10,8 @@ trait CryptoParamsTrait
 {
     protected function getMaterialsProvider(array $args)
     {
-        if ($args['@MaterialsProvider'] instanceof MaterialsProvider) {
+        if ($args['@MaterialsProvider'] instanceof MaterialsProvider)
+        {
             return $args['@MaterialsProvider'];
         }
 
@@ -27,8 +29,10 @@ trait CryptoParamsTrait
     protected function determineGetObjectStrategy(
         $result,
         $instructionFileSuffix
-    ) {
-        if (isset($result['Metadata'][MetadataEnvelope::CONTENT_KEY_V2_HEADER])) {
+    )
+    {
+        if (isset($result['Metadata'][MetadataEnvelope::CONTENT_KEY_V2_HEADER]))
+        {
             return new HeadersMetadataStrategy();
         }
 
@@ -40,13 +44,17 @@ trait CryptoParamsTrait
 
     protected function getMetadataStrategy(array $args, $instructionFileSuffix)
     {
-        if (!empty($args['@MetadataStrategy'])) {
-            if ($args['@MetadataStrategy'] instanceof MetadataStrategyInterface) {
+        if (!empty($args['@MetadataStrategy']))
+        {
+            if ($args['@MetadataStrategy'] instanceof MetadataStrategyInterface)
+            {
                 return $args['@MetadataStrategy'];
             }
 
-            if (is_string($args['@MetadataStrategy'])) {
-                switch ($args['@MetadataStrategy']) {
+            if (is_string($args['@MetadataStrategy']))
+            {
+                switch ($args['@MetadataStrategy'])
+                {
                     case HeadersMetadataStrategy::class:
                         return new HeadersMetadataStrategy();
                     case InstructionFileMetadataStrategy::class:
@@ -59,11 +67,15 @@ trait CryptoParamsTrait
                             . ' specified string in "MetadataStrategy" to a'
                             . ' predefined strategy.');
                 }
-            } else {
+            }
+            else
+            {
                 throw new \InvalidArgumentException('The metadata strategy that'
                     . ' was passed to "MetadataStrategy" was unrecognized.');
             }
-        } elseif ($instructionFileSuffix) {
+        }
+        elseif ($instructionFileSuffix)
+        {
             return new InstructionFileMetadataStrategy(
                 $this->client,
                 $instructionFileSuffix

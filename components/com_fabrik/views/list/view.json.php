@@ -20,25 +20,25 @@ require_once JPATH_SITE . '/components/com_fabrik/views/list/view.base.php';
  */
 class FabrikViewlist extends FabrikViewListBase
 {
-	/**
-	 * Display a json object representing the table data.
-	 * Not used for updating fabrik list, use raw view for that, here in case you want to export the data to another application
-	 *
-	 * @param   string  $tpl  Template
-	 *
-	 * @return  void
-	 */
-	public function display($tpl = null)
-	{
-		$model = $this->getModel();
-		$model->setId($this->app->input->getInt('listid'));
+    /**
+     * Display a json object representing the table data.
+     * Not used for updating fabrik list, use raw view for that, here in case you want to export the data to another application
+     *
+     * @param string $tpl Template
+     *
+     * @return  void
+     */
+    public function display($tpl = null)
+    {
+        $model = $this->getModel();
+        $model->setId($this->app->input->getInt('listid'));
 
-		if (!parent::access($model))
-		{
-			exit;
-		}
+        if (!parent::access($model))
+        {
+            exit;
+        }
 
-		$data = $model->getData();
-		echo json_encode($data);
-	}
+        $data = $model->getData();
+        echo json_encode($data);
+    }
 }

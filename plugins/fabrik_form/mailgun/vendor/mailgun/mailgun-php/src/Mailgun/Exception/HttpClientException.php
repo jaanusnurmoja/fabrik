@@ -33,21 +33,25 @@ final class HttpClientException extends \RuntimeException implements Exception
     private $responseCode;
 
     /**
-     * @param string                 $message
-     * @param int                    $code
+     * @param string $message
+     * @param int $code
      * @param ResponseInterface|null $response
      */
     public function __construct($message, $code, ResponseInterface $response = null)
     {
         parent::__construct($message, $code);
 
-        if ($response) {
+        if ($response)
+        {
             $this->response = $response;
             $this->responseCode = $response->getStatusCode();
             $body = $response->getBody()->__toString();
-            if (0 !== strpos($response->getHeaderLine('Content-Type'), 'application/json')) {
+            if (0 !== strpos($response->getHeaderLine('Content-Type'), 'application/json'))
+            {
                 $this->responseBody['message'] = $body;
-            } else {
+            }
+            else
+            {
                 $this->responseBody = json_decode($body, true);
             }
         }
@@ -70,7 +74,8 @@ final class HttpClientException extends \RuntimeException implements Exception
 
     public static function notFound(ResponseInterface $response = null)
     {
-        return new self('The endpoint you have tried to access does not exist. Check if the domain matches the domain you have configure on Mailgun.', 404, $response);
+        return new self('The endpoint you have tried to access does not exist. Check if the domain matches the domain you have configure on Mailgun.',
+            404, $response);
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 namespace Clickatell;
 
 use PHPUnit_Framework_TestCase;

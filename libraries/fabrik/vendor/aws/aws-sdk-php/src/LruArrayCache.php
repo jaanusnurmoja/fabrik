@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 /**
@@ -17,7 +18,7 @@ class LruArrayCache implements CacheInterface, \Countable
     private $maxItems;
 
     /** @var array */
-    private $items = array();
+    private $items = [];
 
     /**
      * @param int $maxItems Maximum number of allowed cache items.
@@ -29,14 +30,16 @@ class LruArrayCache implements CacheInterface, \Countable
 
     public function get($key)
     {
-        if (!isset($this->items[$key])) {
+        if (!isset($this->items[$key]))
+        {
             return null;
         }
 
         $entry = $this->items[$key];
 
         // Ensure the item is not expired.
-        if (!$entry[1] || time() < $entry[1]) {
+        if (!$entry[1] || time() < $entry[1])
+        {
             // LRU: remove the item and push it to the end of the array.
             unset($this->items[$key]);
             $this->items[$key] = $entry;
@@ -57,10 +60,12 @@ class LruArrayCache implements CacheInterface, \Countable
         $diff = count($this->items) - $this->maxItems;
 
         // Clear out least recently used items.
-        if ($diff > 0) {
+        if ($diff > 0)
+        {
             // Reset to the beginning of the array and begin unsetting.
             reset($this->items);
-            for ($i = 0; $i < $diff; $i++) {
+            for ($i = 0; $i < $diff; $i++)
+            {
                 unset($this->items[key($this->items)]);
                 next($this->items);
             }

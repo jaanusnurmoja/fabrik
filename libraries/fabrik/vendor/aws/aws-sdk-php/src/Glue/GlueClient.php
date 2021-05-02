@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Glue;
 
 use Aws\AwsClient;
@@ -180,4 +181,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateUserDefinedFunction(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateUserDefinedFunctionAsync(array $args = [])
  */
-class GlueClient extends AwsClient {}
+class GlueClient extends AwsClient
+{
+}

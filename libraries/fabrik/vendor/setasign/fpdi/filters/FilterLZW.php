@@ -13,27 +13,28 @@
  */
 class FilterLZW
 {
-    protected $_sTable = array();
-    protected $_data = null;
+    protected $_sTable     = [];
+    protected $_data       = null;
     protected $_dataLength = 0;
     protected $_tIdx;
-    protected $_bitsToGet = 9;
+    protected $_bitsToGet  = 9;
     protected $_bytePointer;
     protected $_bitPointer;
-    protected $_nextData = 0;
-    protected $_nextBits = 0;
-    protected $_andTable = array(511, 1023, 2047, 4095);
+    protected $_nextData   = 0;
+    protected $_nextBits   = 0;
+    protected $_andTable   = [511, 1023, 2047, 4095];
 
     /**
      * Decodes LZW compressed data.
      *
      * @param string $data The compressed data.
-     * @throws Exception
      * @return string
+     * @throws Exception
      */
     public function decode($data)
     {
-        if ($data[0] == 0x00 && $data[1] == 0x01) {
+        if ($data[0] == 0x00 && $data[1] == 0x01)
+        {
             throw new Exception('LZW flavour not supported.');
         }
 
@@ -53,31 +54,40 @@ class FilterLZW
 
         $unCompData = '';
 
-        while (($code = $this->_getNextCode()) != 257) {
-            if ($code == 256) {
+        while (($code = $this->_getNextCode()) != 257)
+        {
+            if ($code == 256)
+            {
                 $this->_initsTable();
                 $code = $this->_getNextCode();
 
-                if ($code == 257) {
+                if ($code == 257)
+                {
                     break;
                 }
 
-                if (!isset($this->_sTable[$code])) {
+                if (!isset($this->_sTable[$code]))
+                {
                     throw new Exception('Error while decompression LZW compressed data.');
                 }
 
                 $unCompData .= $this->_sTable[$code];
                 $oldCode = $code;
 
-            } else {
+            }
+            else
+            {
 
-                if ($code < $this->_tIdx) {
+                if ($code < $this->_tIdx)
+                {
                     $string = $this->_sTable[$code];
                     $unCompData .= $string;
 
                     $this->_addStringToTable($this->_sTable[$oldCode], $string[0]);
                     $oldCode = $code;
-                } else {
+                }
+                else
+                {
                     $string = $this->_sTable[$oldCode];
                     $string = $string . $string[0];
                     $unCompData .= $string;
@@ -97,7 +107,7 @@ class FilterLZW
      */
     protected function _initsTable()
     {
-        $this->_sTable = array();
+        $this->_sTable = [];
 
         for ($i = 0; $i < 256; $i++)
             $this->_sTable[$i] = chr($i);
@@ -116,11 +126,16 @@ class FilterLZW
         // Add this new String to the table
         $this->_sTable[$this->_tIdx++] = $string;
 
-        if ($this->_tIdx == 511) {
+        if ($this->_tIdx == 511)
+        {
             $this->_bitsToGet = 10;
-        } else if ($this->_tIdx == 1023) {
+        }
+        elseif ($this->_tIdx == 1023)
+        {
             $this->_bitsToGet = 11;
-        } else if ($this->_tIdx == 2047) {
+        }
+        elseif ($this->_tIdx == 2047)
+        {
             $this->_bitsToGet = 12;
         }
     }
@@ -132,19 +147,21 @@ class FilterLZW
      */
     protected function _getNextCode()
     {
-        if ($this->_bytePointer == $this->_dataLength) {
+        if ($this->_bytePointer == $this->_dataLength)
+        {
             return 257;
         }
 
         $this->_nextData = ($this->_nextData << 8) | (ord($this->_data[$this->_bytePointer++]) & 0xff);
         $this->_nextBits += 8;
 
-        if ($this->_nextBits < $this->_bitsToGet) {
+        if ($this->_nextBits < $this->_bitsToGet)
+        {
             $this->_nextData = ($this->_nextData << 8) | (ord($this->_data[$this->_bytePointer++]) & 0xff);
             $this->_nextBits += 8;
         }
 
-        $code = ($this->_nextData >> ($this->_nextBits - $this->_bitsToGet)) & $this->_andTable[$this->_bitsToGet-9];
+        $code = ($this->_nextData >> ($this->_nextBits - $this->_bitsToGet)) & $this->_andTable[$this->_bitsToGet - 9];
         $this->_nextBits -= $this->_bitsToGet;
 
         return $code;

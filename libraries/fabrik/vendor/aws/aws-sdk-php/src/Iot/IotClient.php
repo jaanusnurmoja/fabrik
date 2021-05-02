@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Iot;
 
 use Aws\AwsClient;
@@ -339,4 +340,6 @@ use Aws\AwsClient;
  * @method \Aws\Result validateSecurityProfileBehaviors(array $args = [])
  * @method \GuzzleHttp\Promise\Promise validateSecurityProfileBehaviorsAsync(array $args = [])
  */
-class IotClient extends AwsClient {}
+class IotClient extends AwsClient
+{
+}

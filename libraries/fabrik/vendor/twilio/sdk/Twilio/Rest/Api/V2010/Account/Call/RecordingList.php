@@ -15,47 +15,53 @@ use Twilio\Serialize;
 use Twilio\Values;
 use Twilio\Version;
 
-class RecordingList extends ListResource {
+class RecordingList extends ListResource
+{
     /**
      * Construct the RecordingList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $accountSid The unique sid that identifies this account
      * @param string $callSid The unique id for the call leg that corresponds to
      *                        the recording.
-     * @return \Twilio\Rest\Api\V2010\Account\Call\RecordingList 
+     * @return \Twilio\Rest\Api\V2010\Account\Call\RecordingList
      */
-    public function __construct(Version $version, $accountSid, $callSid) {
+    public function __construct(Version $version, $accountSid, $callSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('accountSid' => $accountSid, 'callSid' => $callSid, );
+        $this->solution = ['accountSid' => $accountSid, 'callSid' => $callSid,];
 
         $this->uri = '/Accounts/' . rawurlencode($accountSid) . '/Calls/' . rawurlencode($callSid) . '/Recordings.json';
     }
 
     /**
      * Create a new RecordingInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return RecordingInstance Newly created RecordingInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function create($options = array()) {
+    public function create($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array(
-            'RecordingStatusCallbackEvent' => Serialize::map($options['recordingStatusCallbackEvent'], function($e) { return $e; }),
-            'RecordingStatusCallback' => $options['recordingStatusCallback'],
+        $data = Values::of([
+            'RecordingStatusCallbackEvent'  => Serialize::map($options['recordingStatusCallbackEvent'], function ($e)
+            {
+                return $e;
+            }),
+            'RecordingStatusCallback'       => $options['recordingStatusCallback'],
             'RecordingStatusCallbackMethod' => $options['recordingStatusCallbackMethod'],
-            'Trim' => $options['trim'],
-            'RecordingChannels' => $options['recordingChannels'],
-        ));
+            'Trim'                          => $options['trim'],
+            'RecordingChannels'             => $options['recordingChannels'],
+        ]);
 
         $payload = $this->version->create(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -74,7 +80,7 @@ class RecordingList extends ListResource {
      * is reached.
      * The results are returned as a generator, so this operation is memory
      * efficient.
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param int $limit Upper limit for the number of records to return. stream()
      *                   guarantees to never return more than limit.  Default is no
@@ -86,7 +92,8 @@ class RecordingList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return \Twilio\Stream stream of results
      */
-    public function stream($options = array(), $limit = null, $pageSize = null) {
+    public function stream($options = [], $limit = null, $pageSize = null)
+    {
         $limits = $this->version->readLimits($limit, $pageSize);
 
         $page = $this->page($options, $limits['pageSize']);
@@ -98,7 +105,7 @@ class RecordingList extends ListResource {
      * Reads RecordingInstance records from the API as a list.
      * Unlike stream(), this operation is eager and will load `limit` records into
      * memory before returning.
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param int $limit Upper limit for the number of records to return. read()
      *                   guarantees to never return more than limit.  Default is no
@@ -110,30 +117,32 @@ class RecordingList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return RecordingInstance[] Array of results
      */
-    public function read($options = array(), $limit = null, $pageSize = null) {
+    public function read($options = [], $limit = null, $pageSize = null)
+    {
         return iterator_to_array($this->stream($options, $limit, $pageSize), false);
     }
 
     /**
      * Retrieve a single page of RecordingInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param mixed $pageSize Number of records to return, defaults to 50
      * @param string $pageToken PageToken provided by the API
      * @param mixed $pageNumber Page Number, this value is simply for client state
      * @return \Twilio\Page Page of RecordingInstance
      */
-    public function page($options = array(), $pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE) {
+    public function page($options = [], $pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE)
+    {
         $options = new Values($options);
-        $params = Values::of(array(
+        $params = Values::of([
             'DateCreated<' => Serialize::iso8601Date($options['dateCreatedBefore']),
-            'DateCreated' => Serialize::iso8601Date($options['dateCreated']),
+            'DateCreated'  => Serialize::iso8601Date($options['dateCreated']),
             'DateCreated>' => Serialize::iso8601Date($options['dateCreatedAfter']),
-            'PageToken' => $pageToken,
-            'Page' => $pageNumber,
-            'PageSize' => $pageSize,
-        ));
+            'PageToken'    => $pageToken,
+            'Page'         => $pageNumber,
+            'PageSize'     => $pageSize,
+        ]);
 
         $response = $this->version->page(
             'GET',
@@ -147,11 +156,12 @@ class RecordingList extends ListResource {
     /**
      * Retrieve a specific page of RecordingInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param string $targetUrl API-generated URL for the requested results page
      * @return \Twilio\Page Page of RecordingInstance
      */
-    public function getPage($targetUrl) {
+    public function getPage($targetUrl)
+    {
         $response = $this->version->getDomain()->getClient()->request(
             'GET',
             $targetUrl
@@ -162,11 +172,12 @@ class RecordingList extends ListResource {
 
     /**
      * Constructs a RecordingContext
-     * 
+     *
      * @param string $sid Fetch by unique recording Sid
-     * @return \Twilio\Rest\Api\V2010\Account\Call\RecordingContext 
+     * @return \Twilio\Rest\Api\V2010\Account\Call\RecordingContext
      */
-    public function getContext($sid) {
+    public function getContext($sid)
+    {
         return new RecordingContext(
             $this->version,
             $this->solution['accountSid'],
@@ -177,10 +188,11 @@ class RecordingList extends ListResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Api.V2010.RecordingList]';
     }
 }

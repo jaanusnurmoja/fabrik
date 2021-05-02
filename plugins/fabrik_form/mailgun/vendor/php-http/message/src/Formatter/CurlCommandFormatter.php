@@ -18,25 +18,33 @@ class CurlCommandFormatter implements Formatter
      */
     public function formatRequest(RequestInterface $request)
     {
-        $command = sprintf('curl %s', escapeshellarg((string) $request->getUri()->withFragment('')));
-        if ($request->getProtocolVersion() === '1.0') {
+        $command = sprintf('curl %s', escapeshellarg((string)$request->getUri()->withFragment('')));
+        if ($request->getProtocolVersion() === '1.0')
+        {
             $command .= ' --http1.0';
-        } elseif ($request->getProtocolVersion() === '2.0') {
+        }
+        elseif ($request->getProtocolVersion() === '2.0')
+        {
             $command .= ' --http2';
         }
 
         $method = strtoupper($request->getMethod());
-        if ('HEAD' === $method) {
+        if ('HEAD' === $method)
+        {
             $command .= ' --head';
-        } elseif ('GET' !== $method) {
-            $command .= ' --request '.$method;
+        }
+        elseif ('GET' !== $method)
+        {
+            $command .= ' --request ' . $method;
         }
 
         $command .= $this->getHeadersAsCommandOptions($request);
 
         $body = $request->getBody();
-        if ($body->getSize() > 0) {
-            if (!$body->isSeekable()) {
+        if ($body->getSize() > 0)
+        {
+            if (!$body->isSeekable())
+            {
                 return 'Cant format Request as cUrl command if body stream is not seekable.';
             }
             $command .= sprintf(' --data %s', escapeshellarg($body->__toString()));
@@ -62,17 +70,20 @@ class CurlCommandFormatter implements Formatter
     private function getHeadersAsCommandOptions(RequestInterface $request)
     {
         $command = '';
-        foreach ($request->getHeaders() as $name => $values) {
-            if ('host' === strtolower($name) && $values[0] === $request->getUri()->getHost()) {
+        foreach ($request->getHeaders() as $name => $values)
+        {
+            if ('host' === strtolower($name) && $values[0] === $request->getUri()->getHost())
+            {
                 continue;
             }
 
-            if ('user-agent' === strtolower($name)) {
+            if ('user-agent' === strtolower($name))
+            {
                 $command .= sprintf(' -A %s', escapeshellarg($values[0]));
                 continue;
             }
 
-            $command .= sprintf(' -H %s', escapeshellarg($name.': '.$request->getHeaderLine($name)));
+            $command .= sprintf(' -H %s', escapeshellarg($name . ': ' . $request->getHeaderLine($name)));
         }
 
         return $command;

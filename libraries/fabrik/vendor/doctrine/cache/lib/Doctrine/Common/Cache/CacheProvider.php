@@ -37,7 +37,7 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
      */
     public function setNamespace($namespace)
     {
-        $this->namespace        = (string) $namespace;
+        $this->namespace = (string)$namespace;
         $this->namespaceVersion = null;
     }
 
@@ -64,19 +64,22 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
      */
     public function fetchMultiple(array $keys)
     {
-        if (empty($keys)) {
+        if (empty($keys))
+        {
             return [];
         }
 
         // note: the array_combine() is in place to keep an association between our $keys and the $namespacedKeys
         $namespacedKeys = array_combine($keys, array_map([$this, 'getNamespacedId'], $keys));
-        $items          = $this->doFetchMultiple($namespacedKeys);
-        $foundItems     = [];
+        $items = $this->doFetchMultiple($namespacedKeys);
+        $foundItems = [];
 
         // no internal array function supports this sort of mapping: needs to be iterative
         // this filters and combines keys in one pass
-        foreach ($namespacedKeys as $requestedKey => $namespacedKey) {
-            if (! isset($items[$namespacedKey]) && ! array_key_exists($namespacedKey, $items)) {
+        foreach ($namespacedKeys as $requestedKey => $namespacedKey)
+        {
+            if (!isset($items[$namespacedKey]) && !array_key_exists($namespacedKey, $items))
+            {
                 continue;
             }
 
@@ -92,7 +95,8 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
     public function saveMultiple(array $keysAndValues, $lifetime = 0)
     {
         $namespacedKeysAndValues = [];
-        foreach ($keysAndValues as $key => $value) {
+        foreach ($keysAndValues as $key => $value)
+        {
             $namespacedKeysAndValues[$this->getNamespacedId($key)] = $value;
         }
 
@@ -153,9 +157,10 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
     public function deleteAll()
     {
         $namespaceCacheKey = $this->getNamespaceCacheKey();
-        $namespaceVersion  = $this->getNamespaceVersion() + 1;
+        $namespaceVersion = $this->getNamespaceVersion() + 1;
 
-        if ($this->doSave($namespaceCacheKey, $namespaceVersion)) {
+        if ($this->doSave($namespaceCacheKey, $namespaceVersion))
+        {
             $this->namespaceVersion = $namespaceVersion;
 
             return true;
@@ -171,7 +176,7 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
      *
      * @return string The namespaced id.
      */
-    private function getNamespacedId(string $id) : string
+    private function getNamespacedId(string $id): string
     {
         $namespaceVersion = $this->getNamespaceVersion();
 
@@ -181,7 +186,7 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
     /**
      * Returns the namespace cache key.
      */
-    private function getNamespaceCacheKey() : string
+    private function getNamespaceCacheKey(): string
     {
         return sprintf(self::DOCTRINE_NAMESPACE_CACHEKEY, $this->namespace);
     }
@@ -189,14 +194,15 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
     /**
      * Returns the namespace version.
      */
-    private function getNamespaceVersion() : int
+    private function getNamespaceVersion(): int
     {
-        if ($this->namespaceVersion !== null) {
+        if ($this->namespaceVersion !== null)
+        {
             return $this->namespaceVersion;
         }
 
-        $namespaceCacheKey      = $this->getNamespaceCacheKey();
-        $this->namespaceVersion = (int) $this->doFetch($namespaceCacheKey) ?: 1;
+        $namespaceCacheKey = $this->getNamespaceCacheKey();
+        $this->namespaceVersion = (int)$this->doFetch($namespaceCacheKey) ?: 1;
 
         return $this->namespaceVersion;
     }
@@ -212,9 +218,11 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
     {
         $returnValues = [];
 
-        foreach ($keys as $key) {
+        foreach ($keys as $key)
+        {
             $item = $this->doFetch($key);
-            if ($item === false && ! $this->doContains($key)) {
+            if ($item === false && !$this->doContains($key))
+            {
                 continue;
             }
 
@@ -246,7 +254,7 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
      * Default implementation of doSaveMultiple. Each driver that supports multi-put should override it.
      *
      * @param array $keysAndValues Array of keys and values to save in cache
-     * @param int   $lifetime      The lifetime. If != 0, sets a specific lifetime for these
+     * @param int $lifetime The lifetime. If != 0, sets a specific lifetime for these
      *                             cache entries (0 => infinite lifeTime).
      *
      * @return bool TRUE if the operation was successful, FALSE if it wasn't.
@@ -255,8 +263,10 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
     {
         $success = true;
 
-        foreach ($keysAndValues as $key => $value) {
-            if ($this->doSave($key, $value, $lifetime)) {
+        foreach ($keysAndValues as $key => $value)
+        {
+            if ($this->doSave($key, $value, $lifetime))
+            {
                 continue;
             }
 
@@ -269,9 +279,9 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
     /**
      * Puts data into the cache.
      *
-     * @param string $id       The cache id.
-     * @param string $data     The cache entry/data.
-     * @param int    $lifeTime The lifetime. If != 0, sets a specific lifetime for this
+     * @param string $id The cache id.
+     * @param string $data The cache entry/data.
+     * @param int $lifeTime The lifetime. If != 0, sets a specific lifetime for this
      *                           cache entry (0 => infinite lifeTime).
      *
      * @return bool TRUE if the entry was successfully stored in the cache, FALSE otherwise.
@@ -289,8 +299,10 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
     {
         $success = true;
 
-        foreach ($keys as $key) {
-            if ($this->doDelete($key)) {
+        foreach ($keys as $key)
+        {
+            if ($this->doDelete($key))
+            {
                 continue;
             }
 

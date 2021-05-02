@@ -16,11 +16,11 @@ interface RequestFactory
     /**
      * Creates a new PSR-7 request.
      *
-     * @param string                               $method
-     * @param string|UriInterface                  $uri
-     * @param array                                $headers
+     * @param string $method
+     * @param string|UriInterface $uri
+     * @param array $headers
      * @param resource|string|StreamInterface|null $body
-     * @param string                               $protocolVersion
+     * @param string $protocolVersion
      *
      * @return RequestInterface
      */

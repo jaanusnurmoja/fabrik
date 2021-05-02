@@ -18,26 +18,24 @@ $query->clear();
 $query->select('id, (electronisch_dance -50) * relevantie_live_dance AS dance, (electronisch_underground -50) * relevantie_live_dance AS underground, (live_pop - 50) * relevantie_live_dance AS pop, (live_rock -50)* relevantie_live_dance AS rock, (urban - 50) * relevantie_live_dance AS urban, (overig -50) * relevantie_live_dance AS overig')->from('fab_userinfo');//->group('doelgroep_student');
 $query->order('id ASC');
 $db->setQuery($query);
-$data = array();
+$data = [];
 $rows = $db->loadObjectList('id');
 
 
+$this->data = [];
 
-
-$this->data = array();
-
- $keys = array('dance', 'underground', 'pop', 'rock', 'urban', 'overig');
+$keys = ['dance', 'underground', 'pop', 'rock', 'urban', 'overig'];
 foreach ($keys as $key)
 {
-	$o = new stdClass;
-	$o->key = $key;
-	$o->values = array();
+    $o = new stdClass;
+    $o->key = $key;
+    $o->values = [];
 
-	foreach ($rows as $id => $row)
-	{
-		$o->values[] = array($id, ($row->$key / 100));
-	}
-	$this->data[] = $o;
+    foreach ($rows as $id => $row)
+    {
+        $o->values[] = [$id, ($row->$key / 100)];
+    }
+    $this->data[] = $o;
 }
 //echo "<pre>";print_r($this->data);echo "</pre>";
 

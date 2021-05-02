@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Psr\Http\Message\RequestInterface;
@@ -18,21 +19,26 @@ use GuzzleHttp\Promise\FulfilledPromise;
  */
 function constantly($value)
 {
-    return function () use ($value) { return $value; };
+    return function () use ($value)
+    {
+        return $value;
+    };
 }
 
 /**
  * Filters values that do not satisfy the predicate function $pred.
  *
- * @param mixed    $iterable Iterable sequence of data.
+ * @param mixed $iterable Iterable sequence of data.
  * @param callable $pred Function that accepts a value and returns true/false
  *
  * @return \Generator
  */
 function filter($iterable, callable $pred)
 {
-    foreach ($iterable as $value) {
-        if ($pred($value)) {
+    foreach ($iterable as $value)
+    {
+        if ($pred($value))
+        {
             yield $value;
         }
     }
@@ -41,14 +47,15 @@ function filter($iterable, callable $pred)
 /**
  * Applies a map function $f to each value in a collection.
  *
- * @param mixed    $iterable Iterable sequence of data.
- * @param callable $f        Map function to apply.
+ * @param mixed $iterable Iterable sequence of data.
+ * @param callable $f Map function to apply.
  *
  * @return \Generator
  */
 function map($iterable, callable $f)
 {
-    foreach ($iterable as $value) {
+    foreach ($iterable as $value)
+    {
         yield $f($value);
     }
 }
@@ -58,15 +65,17 @@ function map($iterable, callable $f)
  * value in the sequence and yields the application of the map function to each
  * value.
  *
- * @param mixed    $iterable Iterable sequence of data.
- * @param callable $f        Map function to apply.
+ * @param mixed $iterable Iterable sequence of data.
+ * @param callable $f Map function to apply.
  *
  * @return \Generator
  */
 function flatmap($iterable, callable $f)
 {
-    foreach (map($iterable, $f) as $outer) {
-        foreach ($outer as $inner) {
+    foreach (map($iterable, $f) as $outer)
+    {
+        foreach ($outer as $inner)
+        {
             yield $inner;
         }
     }
@@ -75,7 +84,7 @@ function flatmap($iterable, callable $f)
 /**
  * Partitions the input sequence into partitions of the specified size.
  *
- * @param mixed    $iterable Iterable sequence of data.
+ * @param mixed $iterable Iterable sequence of data.
  * @param int $size Size to make each partition (except possibly the last chunk)
  *
  * @return \Generator
@@ -83,15 +92,18 @@ function flatmap($iterable, callable $f)
 function partition($iterable, $size)
 {
     $buffer = [];
-    foreach ($iterable as $value) {
+    foreach ($iterable as $value)
+    {
         $buffer[] = $value;
-        if (count($buffer) === $size) {
+        if (count($buffer) === $size)
+        {
             yield $buffer;
             $buffer = [];
         }
     }
 
-    if ($buffer) {
+    if ($buffer)
+    {
         yield $buffer;
     }
 }
@@ -112,11 +124,14 @@ function partition($iterable, $size)
 function or_chain()
 {
     $fns = func_get_args();
-    return function () use ($fns) {
+    return function () use ($fns)
+    {
         $args = func_get_args();
-        foreach ($fns as $fn) {
+        foreach ($fns as $fn)
+        {
             $result = $args ? call_user_func_array($fn, $args) : $fn();
-            if ($result) {
+            if ($result)
+            {
                 return $result;
             }
         }
@@ -142,11 +157,13 @@ function or_chain()
 function load_compiled_json($path)
 {
     $compiledFilepath = "{$path}.php";
-    if (is_readable($compiledFilepath)) {
+    if (is_readable($compiledFilepath))
+    {
         return include($compiledFilepath);
     }
 
-    if (!file_exists($path)) {
+    if (!file_exists($path))
+    {
         throw new \InvalidArgumentException(
             sprintf("File not found: %s", $path)
         );
@@ -170,7 +187,7 @@ function clear_compiled_json()
 /**
  * Iterates over the files in a directory and works with custom wrappers.
  *
- * @param string   $path Path to open (e.g., "s3://foo/bar").
+ * @param string $path Path to open (e.g., "s3://foo/bar").
  * @param resource $context Stream wrapper context.
  *
  * @return \Generator Yields relative filename strings.
@@ -178,10 +195,12 @@ function clear_compiled_json()
 function dir_iterator($path, $context = null)
 {
     $dh = $context ? opendir($path, $context) : opendir($path);
-    if (!$dh) {
+    if (!$dh)
+    {
         throw new \InvalidArgumentException('File not found: ' . $path);
     }
-    while (($file = readdir($dh)) !== false) {
+    while (($file = readdir($dh)) !== false)
+    {
         yield $file;
     }
     closedir($dh);
@@ -194,7 +213,7 @@ function dir_iterator($path, $context = null)
  * will read the first file from a stream wrapper, then rewind, then read
  * it again).
  *
- * @param string   $path    Path to traverse (e.g., s3://bucket/key, /tmp)
+ * @param string $path Path to traverse (e.g., s3://bucket/key, /tmp)
  * @param resource $context Stream context options.
  *
  * @return \Generator Yields absolute filenames.
@@ -205,20 +224,25 @@ function recursive_dir_iterator($path, $context = null)
     $pathLen = strlen($path) + 1;
     $iterator = dir_iterator($path, $context);
     $queue = [];
-    do {
-        while ($iterator->valid()) {
+    do
+    {
+        while ($iterator->valid())
+        {
             $file = $iterator->current();
             $iterator->next();
-            if (isset($invalid[basename($file)])) {
+            if (isset($invalid[basename($file)]))
+            {
                 continue;
             }
             $fullPath = "{$path}/{$file}";
             yield $fullPath;
-            if (is_dir($fullPath)) {
+            if (is_dir($fullPath))
+            {
                 $queue[] = $iterator;
                 $iterator = map(
                     dir_iterator($fullPath, $context),
-                    function ($file) use ($fullPath, $pathLen) {
+                    function ($file) use ($fullPath, $pathLen)
+                    {
                         return substr("{$fullPath}/{$file}", $pathLen);
                     }
                 );
@@ -243,7 +267,8 @@ function recursive_dir_iterator($path, $context = null)
  */
 function describe_type($input)
 {
-    switch (gettype($input)) {
+    switch (gettype($input))
+    {
         case 'object':
             return 'object(' . get_class($input) . ')';
         case 'array':
@@ -263,12 +288,14 @@ function describe_type($input)
  */
 function default_http_handler()
 {
-    $version = (string) ClientInterface::VERSION;
-    if ($version[0] === '5') {
+    $version = (string)ClientInterface::VERSION;
+    if ($version[0] === '5')
+    {
         return new \Aws\Handler\GuzzleV5\GuzzleHandler();
     }
 
-    if ($version[0] === '6') {
+    if ($version[0] === '6')
+    {
         return new \Aws\Handler\GuzzleV6\GuzzleHandler();
     }
 
@@ -282,12 +309,14 @@ function default_http_handler()
  */
 function default_user_agent()
 {
-    $version = (string) ClientInterface::VERSION;
-    if ($version[0] === '5') {
+    $version = (string)ClientInterface::VERSION;
+    if ($version[0] === '5')
+    {
         return \GuzzleHttp\Client::getDefaultUserAgent();
     }
 
-    if ($version[0] === '6') {
+    if ($version[0] === '6')
+    {
         return \GuzzleHttp\default_user_agent();
     }
 
@@ -311,14 +340,16 @@ function serialize(CommandInterface $command)
 
     // Return a mock result.
     $handlerList->setHandler(
-        function (CommandInterface $_, RequestInterface $r) use (&$request) {
+        function (CommandInterface $_, RequestInterface $r) use (&$request)
+        {
             $request = $r;
             return new FulfilledPromise(new Result([]));
         }
     );
 
     call_user_func($handlerList->resolve(), $command)->wait();
-    if (!$request instanceof RequestInterface) {
+    if (!$request instanceof RequestInterface)
+    {
         throw new \RuntimeException(
             'Calling handler did not serialize request'
         );
@@ -344,28 +375,34 @@ function manifest($service = null)
     // Load the manifest and create aliases for lowercased namespaces
     static $manifest = [];
     static $aliases = [];
-    if (empty($manifest)) {
+    if (empty($manifest))
+    {
         $manifest = load_compiled_json(__DIR__ . '/data/manifest.json');
-        foreach ($manifest as $endpoint => $info) {
+        foreach ($manifest as $endpoint => $info)
+        {
             $alias = strtolower($info['namespace']);
-            if ($alias !== $endpoint) {
+            if ($alias !== $endpoint)
+            {
                 $aliases[$alias] = $endpoint;
             }
         }
     }
 
     // If no service specified, then return the whole manifest.
-    if ($service === null) {
+    if ($service === null)
+    {
         return $manifest;
     }
 
     // Look up the service's info in the manifest data.
     $service = strtolower($service);
-    if (isset($manifest[$service])) {
+    if (isset($manifest[$service]))
+    {
         return $manifest[$service] + ['endpoint' => $service];
     }
 
-    if (isset($aliases[$service])) {
+    if (isset($aliases[$service]))
+    {
         return manifest($aliases[$service]);
     }
 

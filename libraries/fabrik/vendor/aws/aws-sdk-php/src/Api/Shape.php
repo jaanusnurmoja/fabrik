@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -9,7 +10,7 @@ class Shape extends AbstractModel
     /**
      * Get a concrete shape for the given definition.
      *
-     * @param array    $definition
+     * @param array $definition
      * @param ShapeMap $shapeMap
      *
      * @return mixed
@@ -33,11 +34,13 @@ class Shape extends AbstractModel
             'boolean'   => 'Aws\Api\Shape'
         ];
 
-        if (isset($definition['shape'])) {
+        if (isset($definition['shape']))
+        {
             return $shapeMap->resolve($definition);
         }
 
-        if (!isset($map[$definition['type']])) {
+        if (!isset($map[$definition['type']]))
+        {
             throw new \RuntimeException('Invalid type: '
                 . print_r($definition, true));
         }

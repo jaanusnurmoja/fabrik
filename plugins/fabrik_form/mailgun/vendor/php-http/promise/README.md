@@ -11,7 +11,6 @@
 
 **Note:** This will eventually be removed/deprecated and replaced with the upcoming Promise PSR.
 
-
 ## Install
 
 Via Composer
@@ -20,11 +19,9 @@ Via Composer
 $ composer require php-http/promise
 ```
 
-
 ## Documentation
 
 Please see the [official documentation](http://docs.php-http.org).
-
 
 ## Testing
 
@@ -32,17 +29,14 @@ Please see the [official documentation](http://docs.php-http.org).
 $ composer test
 ```
 
-
 ## Contributing
 
 Please see our [contributing guide](http://docs.php-http.org/en/latest/development/contributing.html).
-
 
 ## Security
 
 If you discover any security related issues, please contact us at [security@httplug.io](mailto:security@httplug.io)
 or [security@php-http.org](mailto:security@php-http.org).
-
 
 ## License
 

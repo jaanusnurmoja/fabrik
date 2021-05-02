@@ -21,7 +21,8 @@ abstract class ApiResource extends StripeObject
     public static function getSavedNestedResources()
     {
         static $savedNestedResources = null;
-        if ($savedNestedResources === null) {
+        if ($savedNestedResources === null)
+        {
             $savedNestedResources = new Util\Set();
         }
         return $savedNestedResources;
@@ -40,8 +41,11 @@ abstract class ApiResource extends StripeObject
     {
         parent::__set($k, $v);
         $v = $this->$k;
-        if ((static::getSavedNestedResources()->includes($k)) &&
-            ($v instanceof ApiResource)) {
+        if (
+            (static::getSavedNestedResources()->includes($k)) &&
+            ($v instanceof ApiResource)
+        )
+        {
             $v->saveWithParent = true;
         }
         return $v;
@@ -90,10 +94,11 @@ abstract class ApiResource extends StripeObject
      */
     public static function resourceUrl($id)
     {
-        if ($id === null) {
+        if ($id === null)
+        {
             $class = get_called_class();
             $message = "Could not determine which URL to request: "
-               . "$class instance has invalid ID: $id";
+                . "$class instance has invalid ID: $id";
             throw new Error\InvalidRequest($message, null);
         }
         $id = Util\Util::utf8($id);

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Endpoint;
 
 use JmesPath\Env;
@@ -12,7 +13,8 @@ class PartitionEndpointProvider
 
     public function __construct(array $partitions, $defaultPartition = 'aws')
     {
-        $this->partitions = array_map(function (array $definition) {
+        $this->partitions = array_map(function (array $definition)
+        {
             return new Partition($definition);
         }, array_values($partitions));
         $this->defaultPartition = $defaultPartition;
@@ -39,8 +41,10 @@ class PartitionEndpointProvider
      */
     public function getPartition($region, $service)
     {
-        foreach ($this->partitions as $partition) {
-            if ($partition->isRegionMatch($region, $service)) {
+        foreach ($this->partitions as $partition)
+        {
+            if ($partition->isRegionMatch($region, $service))
+            {
                 return $partition;
             }
         }
@@ -58,8 +62,10 @@ class PartitionEndpointProvider
      */
     public function getPartitionByName($name)
     {
-        foreach ($this->partitions as $partition) {
-            if ($name === $partition->getName()) {
+        foreach ($this->partitions as $partition)
+        {
+            if ($name === $partition->getName())
+            {
                 return $partition;
             }
         }
@@ -90,12 +96,17 @@ class PartitionEndpointProvider
     {
         $prefixGroups = $prefixData['prefix-groups'];
 
-        foreach ($data["partitions"] as $index => $partition) {
-            foreach ($prefixGroups as $current => $old) {
+        foreach ($data["partitions"] as $index => $partition)
+        {
+            foreach ($prefixGroups as $current => $old)
+            {
                 $serviceData = Env::search("services.{$current}", $partition);
-                if (!empty($serviceData)) {
-                    foreach ($old as $prefix) {
-                        if (empty(Env::search("services.{$prefix}", $partition))) {
+                if (!empty($serviceData))
+                {
+                    foreach ($old as $prefix)
+                    {
+                        if (empty(Env::search("services.{$prefix}", $partition)))
+                        {
                             $data["partitions"][$index]["services"][$prefix] = $serviceData;
                         }
                     }

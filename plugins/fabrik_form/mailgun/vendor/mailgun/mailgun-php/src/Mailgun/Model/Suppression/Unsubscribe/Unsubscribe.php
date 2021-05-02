@@ -47,10 +47,12 @@ class Unsubscribe
     {
         $unsubscribe = new self($data['address']);
 
-        if (isset($data['tags'])) {
+        if (isset($data['tags']))
+        {
             $unsubscribe->setTags($data['tags']);
         }
-        if (isset($data['created_at'])) {
+        if (isset($data['created_at']))
+        {
             $unsubscribe->setCreatedAt(new \DateTime($data['created_at']));
         }
 

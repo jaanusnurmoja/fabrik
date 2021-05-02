@@ -38,18 +38,22 @@ final class CookieJar implements \Countable, \IteratorAggregate
      */
     public function addCookie(Cookie $cookie)
     {
-        if (!$this->hasCookie($cookie)) {
+        if (!$this->hasCookie($cookie))
+        {
             $cookies = $this->getMatchingCookies($cookie);
 
-            foreach ($cookies as $matchingCookie) {
-                if ($cookie->getValue() !== $matchingCookie->getValue() || $cookie->getMaxAge() > $matchingCookie->getMaxAge()) {
+            foreach ($cookies as $matchingCookie)
+            {
+                if ($cookie->getValue() !== $matchingCookie->getValue() || $cookie->getMaxAge() > $matchingCookie->getMaxAge())
+                {
                     $this->removeCookie($matchingCookie);
 
                     continue;
                 }
             }
 
-            if ($cookie->hasValue()) {
+            if ($cookie->hasValue())
+            {
                 $this->cookies->attach($cookie);
             }
         }
@@ -72,7 +76,8 @@ final class CookieJar implements \Countable, \IteratorAggregate
      */
     public function getCookies()
     {
-        $match = function ($matchCookie) {
+        $match = function ($matchCookie)
+        {
             return true;
         };
 
@@ -88,7 +93,8 @@ final class CookieJar implements \Countable, \IteratorAggregate
      */
     public function getMatchingCookies(Cookie $cookie)
     {
-        $match = function ($matchCookie) use ($cookie) {
+        $match = function ($matchCookie) use ($cookie)
+        {
             return $matchCookie->match($cookie);
         };
 
@@ -106,8 +112,10 @@ final class CookieJar implements \Countable, \IteratorAggregate
     {
         $cookies = [];
 
-        foreach ($this->cookies as $cookie) {
-            if ($match($cookie)) {
+        foreach ($this->cookies as $cookie)
+        {
+            if ($match($cookie))
+            {
                 $cookies[] = $cookie;
             }
         }
@@ -143,7 +151,8 @@ final class CookieJar implements \Countable, \IteratorAggregate
      */
     public function addCookies(array $cookies)
     {
-        foreach ($cookies as $cookie) {
+        foreach ($cookies as $cookie)
+        {
             $this->addCookie($cookie);
         }
     }
@@ -155,7 +164,8 @@ final class CookieJar implements \Countable, \IteratorAggregate
      */
     public function removeCookies(array $cookies)
     {
-        foreach ($cookies as $cookie) {
+        foreach ($cookies as $cookie)
+        {
             $this->removeCookie($cookie);
         }
     }
@@ -171,18 +181,22 @@ final class CookieJar implements \Countable, \IteratorAggregate
      */
     public function removeMatchingCookies($name = null, $domain = null, $path = null)
     {
-        $match = function ($cookie) use ($name, $domain, $path) {
+        $match = function ($cookie) use ($name, $domain, $path)
+        {
             $match = true;
 
-            if (isset($name)) {
+            if (isset($name))
+            {
                 $match = $match && ($cookie->getName() === $name);
             }
 
-            if (isset($domain)) {
+            if (isset($domain))
+            {
                 $match = $match && $cookie->matchDomain($domain);
             }
 
-            if (isset($path)) {
+            if (isset($path))
+            {
                 $match = $match && $cookie->matchPath($path);
             }
 

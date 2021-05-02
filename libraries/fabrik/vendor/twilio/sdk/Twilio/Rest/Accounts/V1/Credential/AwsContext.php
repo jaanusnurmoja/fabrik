@@ -14,31 +14,34 @@ use Twilio\Options;
 use Twilio\Values;
 use Twilio\Version;
 
-class AwsContext extends InstanceContext {
+class AwsContext extends InstanceContext
+{
     /**
      * Initialize the AwsContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $sid The sid
-     * @return \Twilio\Rest\Accounts\V1\Credential\AwsContext 
+     * @return \Twilio\Rest\Accounts\V1\Credential\AwsContext
      */
-    public function __construct(Version $version, $sid) {
+    public function __construct(Version $version, $sid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('sid' => $sid, );
+        $this->solution = ['sid' => $sid,];
 
         $this->uri = '/Credentials/AWS/' . rawurlencode($sid) . '';
     }
 
     /**
      * Fetch a AwsInstance
-     * 
+     *
      * @return AwsInstance Fetched AwsInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -51,20 +54,21 @@ class AwsContext extends InstanceContext {
 
     /**
      * Update the AwsInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return AwsInstance Updated AwsInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array('FriendlyName' => $options['friendlyName'], ));
+        $data = Values::of(['FriendlyName' => $options['friendlyName'],]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -73,22 +77,25 @@ class AwsContext extends InstanceContext {
 
     /**
      * Deletes the AwsInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->version->delete('delete', $this->uri);
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Accounts.V1.AwsContext ' . implode(' ', $context) . ']';

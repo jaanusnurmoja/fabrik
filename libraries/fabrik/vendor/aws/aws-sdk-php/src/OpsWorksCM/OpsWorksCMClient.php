@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\OpsWorksCM;
 
 use Aws\AwsClient;
@@ -38,4 +39,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateServerEngineAttributes(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateServerEngineAttributesAsync(array $args = [])
  */
-class OpsWorksCMClient extends AwsClient {}
+class OpsWorksCMClient extends AwsClient
+{
+}

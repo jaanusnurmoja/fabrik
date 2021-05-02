@@ -9,10 +9,10 @@ $rows = $db->loadObjectList('label');
 $total = 0;
 foreach ($rows as $row)
 {
-	$total += $row->value;
+    $total += $row->value;
 }
 
-$data = array();
+$data = [];
 
 $o = new stdClass();
 $o->label = 'Yes';
@@ -21,7 +21,7 @@ $data[] = $o;
 
 $o = new stdClass();
 $o->label = 'No';
-$o->value = (string) ($total - $rows[1]->value);
+$o->value = (string)($total - $rows[1]->value);
 $data[] = $o;
 
 
@@ -29,4 +29,4 @@ $this->data = new stdClass;
 $this->data->key = 'todo2';
 $this->data->values = $data;
 
-$this->data = array($this->data);
+$this->data = [$this->data];

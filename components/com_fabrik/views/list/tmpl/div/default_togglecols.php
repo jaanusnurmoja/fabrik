@@ -10,35 +10,42 @@
  */
 ?>
 <li class="dropdown togglecols">
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-		<?php echo FabrikHelperHTML::icon('icon-eye-open', FText::_('COM_FABRIK_TOGGLE')); ?>
-		<b class="caret"></b>
-	</a>
-	<ul class="dropdown-menu">
-	<?php
-	$groups = array();
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <?php
+        echo FabrikHelperHTML::icon('icon-eye-open', FText::_('COM_FABRIK_TOGGLE')); ?>
+        <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+        <?php
+        $groups = [];
 
-	foreach ($this->toggleCols as $group) :
-		?>
-		<li>
-			<a data-toggle-group="<?php echo $group['name']?>" data-toggle-state="open">
-				<?php echo FabrikHelperHTML::icon('icon-eye-open'); ?>
-				<strong><?php echo $group['name'];?></strong>
-			</a>
-		</li>
-		<?php
-		foreach ($group['elements'] as $element => $label) :
-		?>
-		<li>
-			<a data-toggle-col="<?php echo $element?>" data-toggle-parent-group="<?php echo $group['name']?>" data-toggle-state="open">
-				<?php echo FabrikHelperHTML::icon('icon-eye-open', $label); ?>
-			</a>
-		</li>
-		<?php
-		endforeach;
+        foreach ($this->toggleCols as $group) :
+            ?>
+            <li>
+                <a data-toggle-group="<?php
+                echo $group['name'] ?>" data-toggle-state="open">
+                    <?php
+                    echo FabrikHelperHTML::icon('icon-eye-open'); ?>
+                    <strong><?php
+                        echo $group['name']; ?></strong>
+                </a>
+            </li>
+            <?php
+            foreach ($group['elements'] as $element => $label) :
+                ?>
+                <li>
+                    <a data-toggle-col="<?php
+                    echo $element ?>" data-toggle-parent-group="<?php
+                    echo $group['name'] ?>" data-toggle-state="open">
+                        <?php
+                        echo FabrikHelperHTML::icon('icon-eye-open', $label); ?>
+                    </a>
+                </li>
+            <?php
+            endforeach;
 
-	endforeach;
+        endforeach;
 
-	?>
-	</ul>
+        ?>
+    </ul>
 </li>

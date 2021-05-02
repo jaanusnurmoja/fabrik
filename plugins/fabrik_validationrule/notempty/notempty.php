@@ -23,32 +23,32 @@ require_once COM_FABRIK_FRONTEND . '/models/validation_rule.php';
  */
 class PlgFabrik_ValidationruleNotempty extends PlgFabrik_Validationrule
 {
-	/**
-	 * Plugin name
-	 *
-	 * @var string
-	 */
-	protected $pluginName = 'notempty';
+    /**
+     * Plugin name
+     *
+     * @var string
+     */
+    protected $pluginName = 'notempty';
 
-	/**
-	 * Validate the elements data against the rule
-	 *
-	 * @param   string  $data           To check
-	 * @param   int     $repeatCounter  Repeat group counter
-	 *
-	 * @return  bool  true if validation passes, false if fails
-	 */
-	public function validate($data, $repeatCounter)
-	{
-		if (method_exists($this->elementModel, 'dataConsideredEmptyForValidation'))
-		{
-			$ok = $this->elementModel->dataConsideredEmptyForValidation($data, $repeatCounter);
-		}
-		else
-		{
-			$ok = $this->elementModel->dataConsideredEmpty($data, $repeatCounter);
-		}
+    /**
+     * Validate the elements data against the rule
+     *
+     * @param string $data To check
+     * @param int $repeatCounter Repeat group counter
+     *
+     * @return  bool  true if validation passes, false if fails
+     */
+    public function validate($data, $repeatCounter)
+    {
+        if (method_exists($this->elementModel, 'dataConsideredEmptyForValidation'))
+        {
+            $ok = $this->elementModel->dataConsideredEmptyForValidation($data, $repeatCounter);
+        }
+        else
+        {
+            $ok = $this->elementModel->dataConsideredEmpty($data, $repeatCounter);
+        }
 
-		return !$ok;
-	}
+        return !$ok;
+    }
 }

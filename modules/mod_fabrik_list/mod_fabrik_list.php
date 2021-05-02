@@ -15,7 +15,7 @@ use Fabrik\Helpers\ArrayHelper;
 
 if (!defined('COM_FABRIK_FRONTEND'))
 {
-	JError::raiseError(400, JText::_('COM_FABRIK_SYSTEM_PLUGIN_NOT_ACTIVE'));
+    JError::raiseError(400, JText::_('COM_FABRIK_SYSTEM_PLUGIN_NOT_ACTIVE'));
 }
 
 jimport('joomla.filesystem.file');
@@ -42,7 +42,7 @@ $input = $app->input;
 // Clear out other filters (e.g. content/module previously rendered which used the same list but different filter)
 if ($params->get('clearfilters'))
 {
-	$input->set('clearfilters', 1);
+    $input->set('clearfilters', 1);
 }
 
 $document = JFactory::getDocument();
@@ -57,29 +57,29 @@ FabrikHelperHTML::framework();
 $origLayout = $input->get('layout');
 $origItemId = $input->get('itemId');
 
-$listId = (int) $params->get('list_id', 1);
-$useajax = (int) $params->get('useajax', 0);
-$random	= (int) $params->get('radomizerecords', 0);
-$limit = (int) $params->get('limit', 0);
+$listId = (int)$params->get('list_id', 1);
+$useajax = (int)$params->get('useajax', 0);
+$random = (int)$params->get('radomizerecords', 0);
+$limit = (int)$params->get('limit', 0);
 $origResetfilters = $input->get('resetfilters');
-$resetFilters = (int) $params->get('resetfilters', 0);
+$resetFilters = (int)$params->get('resetfilters', 0);
 $input->set('resetfilters', $resetFilters);
 $showTitle = $params->get('show-title', '');
-$layout	= $params->get('fabriklayout', '');
+$layout = $params->get('fabriklayout', '');
 $input->set('layout', $layout);
 
 $moduleclass_sfx = $params->get('moduleclass_sfx', '');
-$listId	= intval($params->get('list_id', 0));
+$listId = intval($params->get('list_id', 0));
 $listels = json_decode($params->get('list_elements'));
 
 if ($listId === 0)
 {
-	JError::raiseError(500, 'no list specified');
+    JError::raiseError(500, 'no list specified');
 }
 
 if (isset($listels->show_in_list))
 {
-	$input->set('fabrik_show_in_list', $listels->show_in_list);
+    $input->set('fabrik_show_in_list', $listels->show_in_list);
 }
 
 $viewName = 'list';
@@ -99,23 +99,23 @@ $listParams = $model->getParams();
 
 if ($limit !== 0)
 {
-	$app->setUserState('com_fabrik.list' . $model->getRenderContext() . '.limitlength', $limit);
-	$input->set('limit' . $listId, $limit);
+    $app->setUserState('com_fabrik.list' . $model->getRenderContext() . '.limitlength', $limit);
+    $input->set('limit' . $listId, $limit);
 }
 
 if ($useajax !== '')
 {
-	$model->set('ajax', $useajax);
+    $model->set('ajax', $useajax);
 }
 
 if ($params->get('ajax_links') !== '')
 {
-	$listParams->set('list_ajax_links', $params->get('ajax_links'));
+    $listParams->set('list_ajax_links', $params->get('ajax_links'));
 }
 
 if ($params->get('show_nav', '') !== '')
 {
-	$listParams->set('show-table-nav', $params->get('show_nav'));
+    $listParams->set('show-table-nav', $params->get('show_nav'));
 }
 
 $listParams->set('show_into', $params->get('show_into', 1));
@@ -125,30 +125,30 @@ $app->input->set('showfilters', $params->get('show_filters', 1));
 
 if ($showTitle !== '')
 {
-	$listParams->set('show-title', $showTitle);
+    $listParams->set('show-title', $showTitle);
 }
 
 $ordering = JArrayHelper::fromObject(json_decode($params->get('ordering')));
-$orderBy = (array) $ordering['order_by'];
-$orderDir = (array) $ordering['order_dir'];
+$orderBy = (array)$ordering['order_by'];
+$orderDir = (array)$ordering['order_dir'];
 
 if (!empty($orderBy))
 {
-	// added setting ordering in the session so PDF rendering will pick it up
-	foreach ($orderBy as $k => $v)
-	{
-		$context = 'com_fabrik.list' . $model->getRenderContext() . '.order.' . $v;
-		JFactory::getSession()->set($context, $orderDir[$k]);
-	}
+    // added setting ordering in the session so PDF rendering will pick it up
+    foreach ($orderBy as $k => $v)
+    {
+        $context = 'com_fabrik.list' . $model->getRenderContext() . '.order.' . $v;
+        JFactory::getSession()->set($context, $orderDir[$k]);
+    }
 
-	$model->getTable()->order_by = json_encode($orderBy);
-	$model->getTable()->order_dir = json_encode($orderDir);
+    $model->getTable()->order_by = json_encode($orderBy);
+    $model->getTable()->order_dir = json_encode($orderDir);
 }
 
 // Set up prefilters - will overwrite ones defined in the list!
 
 $prefilters = JArrayHelper::fromObject(json_decode($params->get('prefilters')));
-$conditions = (array) $prefilters['filter-conditions'];
+$conditions = (array)$prefilters['filter-conditions'];
 
 if (!empty($conditions))
 {
@@ -166,13 +166,13 @@ if (!empty($conditions))
     else
     {
         // merge module filters into list's
-        $listFields = (array) $listParams->get('filter-fields');
-        $listConditions = (array) $listParams->get('filter-conditions');
-        $listValue = (array) $listParams->get('filter-value');
-        $listAccess = (array) $listParams->get('filter-access');
-        $listEval = (array) $listParams->get('filter-eval');
-        $listJoins = (array) $listParams->get('filter-join');
-        $listGrouped = (array) $listParams->get('filter-grouped');
+        $listFields = (array)$listParams->get('filter-fields');
+        $listConditions = (array)$listParams->get('filter-conditions');
+        $listValue = (array)$listParams->get('filter-value');
+        $listAccess = (array)$listParams->get('filter-access');
+        $listEval = (array)$listParams->get('filter-eval');
+        $listJoins = (array)$listParams->get('filter-join');
+        $listGrouped = (array)$listParams->get('filter-grouped');
         $listJoins[0] = 'AND';
 
         $listParams->set('filter-join', array_merge($listJoins, $prefilters['filter-join']));
@@ -181,7 +181,8 @@ if (!empty($conditions))
         $listParams->set('filter-value', array_merge($listValue, $prefilters['filter-value']));
         $listParams->set('filter-access', array_merge($listAccess, $prefilters['filter-access']));
         $listParams->set('filter-eval', array_merge($listEval, $prefilters['filter-eval']));
-        $listParams->set('filter-grouped', array_merge($listGrouped, FArrayHelper::array_fill(0, count($prefilters['filter-join']), '0')));
+        $listParams->set('filter-grouped',
+            array_merge($listGrouped, FArrayHelper::array_fill(0, count($prefilters['filter-join']), '0')));
     }
 
 }
@@ -190,7 +191,7 @@ $model->randomRecords = $random;
 
 if (!JError::isError($model))
 {
-	$view->setModel($model, true);
+    $view->setModel($model, true);
 }
 
 $view->isMambot = true;

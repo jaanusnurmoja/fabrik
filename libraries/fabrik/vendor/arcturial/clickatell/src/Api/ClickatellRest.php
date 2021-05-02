@@ -46,12 +46,12 @@ class ClickatellRest extends Clickatell
      */
     private function getHeaders()
     {
-        return array(
+        return [
             "Authorization: Bearer " . $this->token,
             "Content-Type: application/json",
             "X-Version: 1",
             "Accept: application/json"
-        );
+        ];
     }
 
     /**
@@ -67,41 +67,46 @@ class ClickatellRest extends Clickatell
     /**
      * {@inheritdoc}
      */
-    public function sendMessage($to, $message, $extra = array())
+    public function sendMessage($to, $message, $extra = [])
     {
-        $extra['to'] = (array) $to;
+        $extra['to'] = (array)$to;
         $extra['text'] = $message;
         $args = $this->getSendDefaults($extra);
 
         // The "to" field only accepts strings as numbers. We will take all the
         // values and map them into strings.
-        $args['to'] = array_map(function ($value) {
-            return (string) $value;
+        $args['to'] = array_map(function ($value)
+        {
+            return (string)$value;
         }, $args['to']);
 
-        try {
+        try
+        {
             $response = $this->get('rest/message', $args, self::HTTP_POST);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
 
-            $response = array(
-                'error' => $e->getMessage(),
+            $response = [
+                'error'     => $e->getMessage(),
                 'errorCode' => $e->getCode()
-            );
+            ];
         }
 
-        $return = array();
+        $return = [];
 
         // According to the documentation, we can pretty much assume that
         // a response from "rest/message" will contain a "message" key with an
         // array of messages in it.
-        foreach ($response['message'] as $entry) {
+        foreach ($response['message'] as $entry)
+        {
 
-            $return[] = (object) array(
-                'id'            => (isset($entry['apiMessageId'])) ? $entry['apiMessageId'] : false,
-                'destination'   => (isset($entry['to'])) ? $entry['to'] : $args['to'],
-                'error'         => (isset($entry['error'])) ? $entry['error']['description'] : false,
-                'errorCode'     => (isset($entry['code'])) ? $entry['error']['code'] : false
-            );
+            $return[] = (object)[
+                'id'          => (isset($entry['apiMessageId'])) ? $entry['apiMessageId'] : false,
+                'destination' => (isset($entry['to'])) ? $entry['to'] : $args['to'],
+                'error'       => (isset($entry['error'])) ? $entry['error']['description'] : false,
+                'errorCode'   => (isset($entry['code'])) ? $entry['error']['code'] : false
+            ];
         }
 
         return $return;
@@ -112,11 +117,11 @@ class ClickatellRest extends Clickatell
      */
     public function getBalance()
     {
-        $response = $this->get('rest/account/balance', array());
+        $response = $this->get('rest/account/balance', []);
 
-        return (object) array(
-            'balance' => (float) $response['balance']
-        );
+        return (object)[
+            'balance' => (float)$response['balance']
+        ];
     }
 
     /**
@@ -132,13 +137,13 @@ class ClickatellRest extends Clickatell
      */
     public function routeCoverage($msisdn)
     {
-        $response = $this->get('rest/coverage/' . $msisdn, array());
+        $response = $this->get('rest/coverage/' . $msisdn, []);
 
-        return (object) array(
-            'routable'      => $response['routable'],
-            'destination'   => $response['destination'],
-            'charge'        => (float) $response['minimumCharge']
-        );
+        return (object)[
+            'routable'    => $response['routable'],
+            'destination' => $response['destination'],
+            'charge'      => (float)$response['minimumCharge']
+        ];
     }
 
     /**
@@ -146,14 +151,14 @@ class ClickatellRest extends Clickatell
      */
     public function getMessageCharge($apiMsgId)
     {
-        $response = $this->get('rest/message/' . $apiMsgId, array());
+        $response = $this->get('rest/message/' . $apiMsgId, []);
 
-        return (object) array(
-            'id'            => $response['apiMessageId'],
-            'status'        => $response['messageStatus'],
-            'description'   => Diagnostic::getStatus($response['messageStatus']),
-            'charge'        => (float) $response['charge']
-        );
+        return (object)[
+            'id'          => $response['apiMessageId'],
+            'status'      => $response['messageStatus'],
+            'description' => Diagnostic::getStatus($response['messageStatus']),
+            'charge'      => (float)$response['charge']
+        ];
     }
 
     /**
@@ -161,12 +166,12 @@ class ClickatellRest extends Clickatell
      */
     public function stopMessage($apiMsgId)
     {
-        $response = $this->get('rest/message/' . $apiMsgId, array(), self::HTTP_DELETE);
+        $response = $this->get('rest/message/' . $apiMsgId, [], self::HTTP_DELETE);
 
-        return (object) array(
-            'id'            => $response['apiMessageId'],
-            'status'        => $response['messageStatus'],
-            'description'   => Diagnostic::getStatus($response['messageStatus']),
-        );
+        return (object)[
+            'id'          => $response['apiMessageId'],
+            'status'      => $response['messageStatus'],
+            'description' => Diagnostic::getStatus($response['messageStatus']),
+        ];
     }
 }

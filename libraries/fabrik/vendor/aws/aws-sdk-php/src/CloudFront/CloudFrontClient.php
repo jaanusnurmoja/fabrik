@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudFront;
 
 use Aws\AwsClient;
@@ -127,8 +128,10 @@ class CloudFrontClient extends AwsClient
      */
     public function getSignedUrl(array $options)
     {
-        foreach (['url', 'key_pair_id', 'private_key'] as $required) {
-            if (!isset($options[$required])) {
+        foreach (['url', 'key_pair_id', 'private_key'] as $required)
+        {
+            if (!isset($options[$required]))
+            {
                 throw new \InvalidArgumentException("$required is required");
             }
         }
@@ -170,8 +173,10 @@ class CloudFrontClient extends AwsClient
      */
     public function getSignedCookie(array $options)
     {
-        foreach (['key_pair_id', 'private_key'] as $required) {
-            if (!isset($options[$required])) {
+        foreach (['key_pair_id', 'private_key'] as $required)
+        {
+            if (!isset($options[$required]))
+            {
                 throw new \InvalidArgumentException("$required is required");
             }
         }

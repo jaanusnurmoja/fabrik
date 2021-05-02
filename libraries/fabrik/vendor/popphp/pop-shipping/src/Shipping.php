@@ -11,6 +11,7 @@
 /**
  * @namespace
  */
+
 namespace Pop\Shipping;
 
 /**
@@ -37,7 +38,7 @@ class Shipping
      *
      * Instantiate the shipping object
      *
-     * @param  Adapter\AbstractAdapter $adapter
+     * @param Adapter\AbstractAdapter $adapter
      * @return Shipping
      */
     public function __construct(Adapter\AbstractAdapter $adapter)
@@ -58,7 +59,7 @@ class Shipping
     /**
      * Set ship to
      *
-     * @param  array $shipTo
+     * @param array $shipTo
      * @return self
      */
     public function shipTo(array $shipTo)
@@ -70,7 +71,7 @@ class Shipping
     /**
      * Set ship from
      *
-     * @param  array $shipFrom
+     * @param array $shipFrom
      * @return self
      */
     public function shipFrom(array $shipFrom)
@@ -82,8 +83,8 @@ class Shipping
     /**
      * Set dimensions
      *
-     * @param  array  $dimensions
-     * @param  string $unit
+     * @param array $dimensions
+     * @param string $unit
      * @return self
      */
     public function setDimensions(array $dimensions, $unit = null)
@@ -95,8 +96,8 @@ class Shipping
     /**
      * Set dimensions
      *
-     * @param  string $weight
-     * @param  string $unit
+     * @param string $weight
+     * @param string $unit
      * @return self
      */
     public function setWeight($weight, $unit = null)
@@ -108,7 +109,7 @@ class Shipping
     /**
      * Send transaction
      *
-     * @param  boolean $verifyPeer
+     * @param boolean $verifyPeer
      * @return void
      */
     public function send($verifyPeer = true)

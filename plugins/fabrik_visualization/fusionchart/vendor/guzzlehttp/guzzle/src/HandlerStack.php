@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp;
 
 use Psr\Http\Message\RequestInterface;
@@ -58,7 +59,7 @@ class HandlerStack
      * Invokes the handler stack as a composed handler
      *
      * @param RequestInterface $request
-     * @param array            $options
+     * @param array $options
      */
     public function __invoke(RequestInterface $request, array $options)
     {
@@ -76,12 +77,14 @@ class HandlerStack
     {
         $depth = 0;
         $stack = [];
-        if ($this->handler) {
+        if ($this->handler)
+        {
             $stack[] = "0) Handler: " . $this->debugCallable($this->handler);
         }
 
         $result = '';
-        foreach (array_reverse($this->stack) as $tuple) {
+        foreach (array_reverse($this->stack) as $tuple)
+        {
             $depth++;
             $str = "{$depth}) Name: '{$tuple[1]}', ";
             $str .= "Function: " . $this->debugCallable($tuple[0]);
@@ -89,7 +92,8 @@ class HandlerStack
             $stack[] = $str;
         }
 
-        foreach (array_keys($stack) as $k) {
+        foreach (array_keys($stack) as $k)
+        {
             $result .= "< {$stack[$k]}\n";
         }
 
@@ -115,14 +119,14 @@ class HandlerStack
      */
     public function hasHandler()
     {
-        return (bool) $this->handler;
+        return (bool)$this->handler;
     }
 
     /**
      * Unshift a middleware to the bottom of the stack.
      *
      * @param callable $middleware Middleware function
-     * @param string   $name       Name to register for this middleware.
+     * @param string $name Name to register for this middleware.
      */
     public function unshift(callable $middleware, $name = null)
     {
@@ -134,7 +138,7 @@ class HandlerStack
      * Push a middleware to the top of the stack.
      *
      * @param callable $middleware Middleware function
-     * @param string   $name       Name to register for this middleware.
+     * @param string $name Name to register for this middleware.
      */
     public function push(callable $middleware, $name = '')
     {
@@ -145,9 +149,9 @@ class HandlerStack
     /**
      * Add a middleware before another middleware by name.
      *
-     * @param string   $findName   Middleware to find
+     * @param string $findName Middleware to find
      * @param callable $middleware Middleware function
-     * @param string   $withName   Name to register for this middleware.
+     * @param string $withName Name to register for this middleware.
      */
     public function before($findName, callable $middleware, $withName = '')
     {
@@ -157,9 +161,9 @@ class HandlerStack
     /**
      * Add a middleware after another middleware by name.
      *
-     * @param string   $findName   Middleware to find
+     * @param string $findName Middleware to find
      * @param callable $middleware Middleware function
-     * @param string   $withName   Name to register for this middleware.
+     * @param string $withName Name to register for this middleware.
      */
     public function after($findName, callable $middleware, $withName = '')
     {
@@ -177,7 +181,8 @@ class HandlerStack
         $idx = is_callable($remove) ? 0 : 1;
         $this->stack = array_values(array_filter(
             $this->stack,
-            function ($tuple) use ($idx, $remove) {
+            function ($tuple) use ($idx, $remove)
+            {
                 return $tuple[$idx] !== $remove;
             }
         ));
@@ -190,12 +195,15 @@ class HandlerStack
      */
     public function resolve()
     {
-        if (!$this->cached) {
-            if (!($prev = $this->handler)) {
+        if (!$this->cached)
+        {
+            if (!($prev = $this->handler))
+            {
                 throw new \LogicException('No handler has been specified');
             }
 
-            foreach (array_reverse($this->stack) as $fn) {
+            foreach (array_reverse($this->stack) as $fn)
+            {
                 $prev = $fn[0]($prev);
             }
 
@@ -211,8 +219,10 @@ class HandlerStack
      */
     private function findByName($name)
     {
-        foreach ($this->stack as $k => $v) {
-            if ($v[1] === $name) {
+        foreach ($this->stack as $k => $v)
+        {
+            if ($v[1] === $name)
+            {
                 return $k;
             }
         }
@@ -234,16 +244,24 @@ class HandlerStack
         $idx = $this->findByName($findName);
         $tuple = [$middleware, $withName];
 
-        if ($before) {
-            if ($idx === 0) {
+        if ($before)
+        {
+            if ($idx === 0)
+            {
                 array_unshift($this->stack, $tuple);
-            } else {
+            }
+            else
+            {
                 $replacement = [$tuple, $this->stack[$idx]];
                 array_splice($this->stack, $idx, 1, $replacement);
             }
-        } elseif ($idx === count($this->stack) - 1) {
+        }
+        elseif ($idx === count($this->stack) - 1)
+        {
             $this->stack[] = $tuple;
-        } else {
+        }
+        else
+        {
             $replacement = [$this->stack[$idx], $tuple];
             array_splice($this->stack, $idx, 1, $replacement);
         }
@@ -258,11 +276,13 @@ class HandlerStack
      */
     private function debugCallable($fn)
     {
-        if (is_string($fn)) {
+        if (is_string($fn))
+        {
             return "callable({$fn})";
         }
 
-        if (is_array($fn)) {
+        if (is_array($fn))
+        {
             return is_string($fn[0])
                 ? "callable({$fn[0]}::{$fn[1]})"
                 : "callable(['" . get_class($fn[0]) . "', '{$fn[1]}'])";

@@ -11,85 +11,94 @@ namespace Twilio\TwiML\Voice;
 
 use Twilio\TwiML\TwiML;
 
-class Prompt extends TwiML {
+class Prompt extends TwiML
+{
     /**
      * Prompt constructor.
-     * 
+     *
      * @param array $attributes Optional attributes
      */
-    public function __construct($attributes = array()) {
+    public function __construct($attributes = [])
+    {
         parent::__construct('Prompt', null, $attributes);
     }
 
     /**
      * Add Say child.
-     * 
+     *
      * @param string $message Message to say
      * @param array $attributes Optional attributes
      * @return TwiML Child element.
      */
-    public function say($message, $attributes = array()) {
+    public function say($message, $attributes = [])
+    {
         return $this->nest(new Say($message, $attributes));
     }
 
     /**
      * Add Play child.
-     * 
+     *
      * @param url $url Media URL
      * @param array $attributes Optional attributes
      * @return TwiML Child element.
      */
-    public function play($url = null, $attributes = array()) {
+    public function play($url = null, $attributes = [])
+    {
         return $this->nest(new Play($url, $attributes));
     }
 
     /**
      * Add Pause child.
-     * 
+     *
      * @param array $attributes Optional attributes
      * @return TwiML Child element.
      */
-    public function pause($attributes = array()) {
+    public function pause($attributes = [])
+    {
         return $this->nest(new Pause($attributes));
     }
 
     /**
      * Add For_ attribute.
-     * 
+     *
      * @param prompt:Enum:For $for_ Name of the credit card data element
      * @return $this
      */
-    public function setFor_($for_) {
+    public function setFor_($for_)
+    {
         return $this->setAttribute('for_', $for_);
     }
 
     /**
      * Add ErrorType attribute.
-     * 
+     *
      * @param prompt:Enum:ErrorType $errorType Type of error
      * @return $this
      */
-    public function setErrorType($errorType) {
+    public function setErrorType($errorType)
+    {
         return $this->setAttribute('errorType', $errorType);
     }
 
     /**
      * Add CardType attribute.
-     * 
+     *
      * @param prompt:Enum:CardType $cardType Type of the credit card
      * @return $this
      */
-    public function setCardType($cardType) {
+    public function setCardType($cardType)
+    {
         return $this->setAttribute('cardType', $cardType);
     }
 
     /**
      * Add Attempt attribute.
-     * 
+     *
      * @param integer $attempt Current attempt count
      * @return $this
      */
-    public function setAttempt($attempt) {
+    public function setAttempt($attempt)
+    {
         return $this->setAttribute('attempt', $attempt);
     }
 }

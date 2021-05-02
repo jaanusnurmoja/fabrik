@@ -7,11 +7,11 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbCaptcha = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             if (options.method === 'invisible') {
                 var self = this;
-                window.fabrikCaptureLoaded = function() {
+                window.fabrikCaptureLoaded = function () {
                     self.widgetId = grecaptcha.render(self.options.element, {
                         'sitekey': self.options.siteKey,
                         'size': 'invisible',
@@ -24,8 +24,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             this.parent(element, options);
         },
 
-        captureCompleted: function (response)
-        {
+        captureCompleted: function (response) {
             window.fabrikCaptchaSubmitCallBack(true);
             delete window.fabrikCaptchaSubmitCallBack;
         },
@@ -38,19 +37,16 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
          * @return  void
          */
         onsubmit: function (cb) {
-            if (typeof cb === 'undefined')
-            {
+            if (typeof cb === 'undefined') {
                 return;
             }
 
-            if (this.options.method === 'invisible')
-            {
+            if (this.options.method === 'invisible') {
                 if (!grecaptcha.getResponse()) {
                     window.fabrikCaptchaSubmitCallBack = cb;
                     var response = grecaptcha.execute(this.widgetId);
                 }
-            }
-            else {
+            } else {
                 this.parent(cb);
             }
         }

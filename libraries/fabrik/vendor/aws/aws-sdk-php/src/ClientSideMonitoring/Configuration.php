@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\ClientSideMonitoring;
 
 class Configuration implements ConfigurationInterface
@@ -17,7 +18,8 @@ class Configuration implements ConfigurationInterface
     public function __construct($enabled, $port, $clientId = '')
     {
         $this->port = filter_var($port, FILTER_VALIDATE_INT);
-        if ($this->port === false) {
+        if ($this->port === false)
+        {
             throw new \InvalidArgumentException(
                 "CSM 'port' value must be an integer!");
         }
@@ -58,8 +60,8 @@ class Configuration implements ConfigurationInterface
     {
         return [
             'client_id' => $this->getClientId(),
-            'enabled' => $this->isEnabled(),
-            'port' => $this->getPort()
+            'enabled'   => $this->isEnabled(),
+            'port'      => $this->getPort()
         ];
     }
 }

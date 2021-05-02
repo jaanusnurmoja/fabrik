@@ -10,10 +10,10 @@
          stopOnFailure="false"
          syntaxCheck="false"
          bootstrap="src/autoload.php"
-  >
-  <testsuites>
-    <testsuite name="SVG lib test suite">
-      <directory>./tests/Svg/</directory>
-    </testsuite>
-  </testsuites>
+>
+    <testsuites>
+        <testsuite name="SVG lib test suite">
+            <directory>./tests/Svg/</directory>
+        </testsuite>
+    </testsuites>
 </phpunit>

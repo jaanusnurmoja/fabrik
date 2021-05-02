@@ -22,25 +22,25 @@ require_once JPATH_SITE . '/components/com_fabrik/views/list/view.base.php';
  */
 class FabrikViewList extends FabrikViewListBase
 {
-	/**
-	 * Display the template
-	 *
-	 * @param   sting  $tpl  template
-	 *
-	 * @return void
-	 */
-	public function display($tpl = null)
-	{
-		$model = $this->getModel();
-		$input = $this->app->input;
-		$usersConfig = JComponentHelper::getParams('com_fabrik');
-		$model->setId($input->getInt('listid', $usersConfig->get('listid')));
-		$model->render();
-		$table = $model->getTable();
-		$this->doc->title = $table->label;
-		$this->doc->description = $table->introduction;
-		$this->doc->copyright = '';
-		$this->doc->listid = $table->id;
-		$this->doc->items = $model->getData();
-	}
+    /**
+     * Display the template
+     *
+     * @param sting $tpl template
+     *
+     * @return void
+     */
+    public function display($tpl = null)
+    {
+        $model = $this->getModel();
+        $input = $this->app->input;
+        $usersConfig = JComponentHelper::getParams('com_fabrik');
+        $model->setId($input->getInt('listid', $usersConfig->get('listid')));
+        $model->render();
+        $table = $model->getTable();
+        $this->doc->title = $table->label;
+        $this->doc->description = $table->introduction;
+        $this->doc->copyright = '';
+        $this->doc->listid = $table->id;
+        $this->doc->items = $model->getData();
+    }
 }

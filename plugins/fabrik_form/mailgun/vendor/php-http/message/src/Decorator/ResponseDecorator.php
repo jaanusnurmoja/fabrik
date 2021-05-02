@@ -9,7 +9,8 @@ use Psr\Http\Message\ResponseInterface;
  */
 trait ResponseDecorator
 {
-    use MessageDecorator {
+    use MessageDecorator
+    {
         getMessage as getResponse;
     }
 

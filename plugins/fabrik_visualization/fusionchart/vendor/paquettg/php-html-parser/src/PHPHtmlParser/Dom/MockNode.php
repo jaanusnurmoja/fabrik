@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser\Dom;
 
 /**
@@ -39,7 +40,7 @@ class MockNode extends InnerNode
     {
         $this->innerHtml = null;
         $this->outerHtml = null;
-        $this->text      = null;
+        $this->text = null;
     }
 
     /**

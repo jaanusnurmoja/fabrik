@@ -55,16 +55,21 @@ class BatchClient implements HttpClient
     {
         $batchResult = new BatchResult();
 
-        foreach ($requests as $request) {
-            try {
+        foreach ($requests as $request)
+        {
+            try
+            {
                 $response = $this->sendRequest($request);
                 $batchResult = $batchResult->addResponse($request, $response);
-            } catch (Exception $e) {
+            }
+            catch (Exception $e)
+            {
                 $batchResult = $batchResult->addException($request, $e);
             }
         }
 
-        if ($batchResult->hasExceptions()) {
+        if ($batchResult->hasExceptions())
+        {
             throw new BatchException($batchResult);
         }
 

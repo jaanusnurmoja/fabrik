@@ -5,6 +5,7 @@
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
+
 namespace Dompdf;
 
 use Dompdf\FrameDecorator\Block;
@@ -29,7 +30,7 @@ class LineBox
     /**
      * @var Frame[]
      */
-    protected $_frames = array();
+    protected $_frames = [];
 
     /**
      * @var integer
@@ -69,7 +70,7 @@ class LineBox
     /**
      * @var bool[]
      */
-    public $floating_blocks = array();
+    public $floating_blocks = [];
 
     /**
      * @var bool
@@ -85,7 +86,7 @@ class LineBox
     public function __construct(Block $frame, $y = 0)
     {
         $this->_block_frame = $frame;
-        $this->_frames = array();
+        $this->_frames = [];
         $this->y = $y;
 
         $this->get_float_offsets();
@@ -102,36 +103,42 @@ class LineBox
     {
         $floating_frames = $root->get_floating_frames();
 
-        if (count($floating_frames) == 0) {
+        if (count($floating_frames) == 0)
+        {
             return $floating_frames;
         }
 
         // Find nearest floating element
         $p = $this->_block_frame;
-        while ($p->get_style()->float === "none") {
+        while ($p->get_style()->float === "none")
+        {
             $parent = $p->get_parent();
 
-            if (!$parent) {
+            if (!$parent)
+            {
                 break;
             }
 
             $p = $parent;
         }
 
-        if ($p == $root) {
+        if ($p == $root)
+        {
             return $floating_frames;
         }
 
         $parent = $p;
 
-        $childs = array();
+        $childs = [];
 
-        foreach ($floating_frames as $_floating) {
+        foreach ($floating_frames as $_floating)
+        {
             $p = $_floating->get_parent();
 
-            while (($p = $p->get_parent()) && $p !== $parent);
+            while (($p = $p->get_parent()) && $p !== $parent) ;
 
-            if ($p) {
+            if ($p)
+            {
                 $childs[] = $p;
             }
         }
@@ -148,7 +155,8 @@ class LineBox
 
         $reflower = $this->_block_frame->get_reflower();
 
-        if (!$reflower) {
+        if (!$reflower)
+        {
             return;
         }
 
@@ -157,7 +165,8 @@ class LineBox
         $block = $this->_block_frame;
         $root = $block->get_root();
 
-        if (!$root) {
+        if (!$root)
+        {
             return;
         }
 
@@ -168,60 +177,78 @@ class LineBox
         $outside_left_floating_width = 0;
         $outside_right_floating_width = 0;
 
-        foreach ($floating_frames as $child_key => $floating_frame) {
+        foreach ($floating_frames as $child_key => $floating_frame)
+        {
             $floating_frame_parent = $floating_frame->get_parent();
             $id = $floating_frame->get_id();
 
-            if (isset($this->floating_blocks[$id])) {
+            if (isset($this->floating_blocks[$id]))
+            {
                 continue;
             }
 
             $float = $floating_frame->get_style()->float;
             $floating_width = $floating_frame->get_margin_width();
 
-            if (!$cb_w) {
+            if (!$cb_w)
+            {
                 $cb_w = $floating_frame->get_containing_block("w");
             }
 
             $line_w = $this->get_width();
 
-            if (!$floating_frame->_float_next_line && ($cb_w <= $line_w + $floating_width) && ($cb_w > $line_w)) {
+            if (!$floating_frame->_float_next_line && ($cb_w <= $line_w + $floating_width) && ($cb_w > $line_w))
+            {
                 $floating_frame->_float_next_line = true;
                 continue;
             }
 
             // If the child is still shifted by the floating element
-            if ($anti_infinite_loop-- > 0 &&
+            if (
+                $anti_infinite_loop-- > 0 &&
                 $floating_frame->get_position("y") + $floating_frame->get_margin_height() >= $this->y &&
                 $block->get_position("x") + $block->get_margin_width() >= $floating_frame->get_position("x")
-            ) {
-                if ($float === "left") {
-                    if ($floating_frame_parent === $this->_block_frame) {
+            )
+            {
+                if ($float === "left")
+                {
+                    if ($floating_frame_parent === $this->_block_frame)
+                    {
                         $inside_left_floating_width += $floating_width;
-                    } else {
+                    }
+                    else
+                    {
                         $outside_left_floating_width += $floating_width;
                     }
-                } elseif ($float === "right") {
-                    if ($floating_frame_parent === $this->_block_frame) {
+                }
+                elseif ($float === "right")
+                {
+                    if ($floating_frame_parent === $this->_block_frame)
+                    {
                         $inside_right_floating_width += $floating_width;
-                    } else {
+                    }
+                    else
+                    {
                         $outside_right_floating_width += $floating_width;
                     }
                 }
 
                 $this->floating_blocks[$id] = true;
             } // else, the floating element won't shift anymore
-            else {
+            else
+            {
                 $root->remove_floating_frame($child_key);
             }
         }
 
         $this->left += $inside_left_floating_width;
-        if ($outside_left_floating_width > 0 && $outside_left_floating_width > ((float)$style->length_in_pt($style->margin_left) + (float)$style->length_in_pt($style->padding_left))) {
+        if ($outside_left_floating_width > 0 && $outside_left_floating_width > ((float)$style->length_in_pt($style->margin_left) + (float)$style->length_in_pt($style->padding_left)))
+        {
             $this->left += $outside_left_floating_width - (float)$style->length_in_pt($style->margin_left) - (float)$style->length_in_pt($style->padding_left);
         }
         $this->right += $inside_right_floating_width;
-        if ($outside_right_floating_width > 0 && $outside_right_floating_width > ((float)$style->length_in_pt($style->margin_left) + (float)$style->length_in_pt($style->padding_right))) {
+        if ($outside_right_floating_width > 0 && $outside_right_floating_width > ((float)$style->length_in_pt($style->margin_left) + (float)$style->length_in_pt($style->padding_right)))
+        {
             $this->right += $outside_right_floating_width - (float)$style->length_in_pt($style->margin_right) - (float)$style->length_in_pt($style->padding_right);
         }
     }
@@ -267,7 +294,8 @@ class LineBox
     {
         $width = 0;
 
-        foreach ($this->get_frames() as $frame) {
+        foreach ($this->get_frames() as $frame)
+        {
             $width += $frame->calculate_auto_width();
         }
 
@@ -279,9 +307,10 @@ class LineBox
      */
     public function __toString()
     {
-        $props = array("wc", "y", "w", "h", "left", "right", "br");
+        $props = ["wc", "y", "w", "h", "left", "right", "br"];
         $s = "";
-        foreach ($props as $prop) {
+        foreach ($props as $prop)
+        {
             $s .= "$prop: " . $this->$prop . "\n";
         }
         $s .= count($this->_frames) . " frames\n";

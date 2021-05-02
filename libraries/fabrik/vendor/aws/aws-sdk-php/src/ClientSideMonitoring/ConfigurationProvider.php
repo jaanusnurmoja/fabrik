@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\ClientSideMonitoring;
 
 use Aws\CacheInterface;
@@ -67,12 +68,15 @@ class ConfigurationProvider
         callable $provider,
         CacheInterface $cache,
         $cacheKey = null
-    ) {
+    )
+    {
         $cacheKey = $cacheKey ?: self::CACHE_KEY;
 
-        return function () use ($provider, $cache, $cacheKey) {
+        return function () use ($provider, $cache, $cacheKey)
+        {
             $found = $cache->get($cacheKey);
-            if ($found instanceof ConfigurationInterface) {
+            if ($found instanceof ConfigurationInterface)
+            {
                 return Promise\promise_for($found);
             }
 
@@ -80,7 +84,8 @@ class ConfigurationProvider
                 ->then(function (ConfigurationInterface $config) use (
                     $cache,
                     $cacheKey
-                ) {
+                )
+                {
                     $cache->set(
                         $cacheKey,
                         $config
@@ -101,15 +106,18 @@ class ConfigurationProvider
     public static function chain()
     {
         $links = func_get_args();
-        if (empty($links)) {
+        if (empty($links))
+        {
             throw new \InvalidArgumentException('No providers in chain');
         }
 
-        return function () use ($links) {
+        return function () use ($links)
+        {
             /** @var callable $parent */
             $parent = array_shift($links);
             $promise = $parent();
-            while ($next = array_shift($links)) {
+            while ($next = array_shift($links))
+            {
                 $promise = $promise->otherwise($next);
             }
             return $promise;
@@ -142,7 +150,8 @@ class ConfigurationProvider
             call_user_func_array('self::chain', $configProviders)
         );
 
-        if (isset($config['csm']) && $config['csm'] instanceof CacheInterface) {
+        if (isset($config['csm']) && $config['csm'] instanceof CacheInterface)
+        {
             return self::cache($memo, $config['csm'], self::CACHE_KEY);
         }
 
@@ -156,21 +165,23 @@ class ConfigurationProvider
      */
     public static function env()
     {
-        return function () {
+        return function ()
+        {
             // Use credentials from environment variables, if available
             $enabled = getenv(self::ENV_ENABLED);
-            if ($enabled !== false) {
+            if ($enabled !== false)
+            {
                 return Promise\promise_for(
                     new Configuration(
                         $enabled,
                         getenv(self::ENV_PORT) ?: self::DEFAULT_PORT,
                         getenv(self:: ENV_CLIENT_ID) ?: self::DEFAULT_CLIENT_ID
-                     )
+                    )
                 );
             }
 
             return self::reject('Could not find environment variable CSM config'
-                . ' in ' . self::ENV_ENABLED. '/' . self::ENV_PORT . '/'
+                . ' in ' . self::ENV_ENABLED . '/' . self::ENV_PORT . '/'
                 . self::ENV_CLIENT_ID);
         };
     }
@@ -182,7 +193,8 @@ class ConfigurationProvider
      */
     public static function fallback()
     {
-        return function() {
+        return function ()
+        {
             return Promise\promise_for(
                 new Configuration(
                     self::DEFAULT_ENABLED,
@@ -201,7 +213,8 @@ class ConfigurationProvider
     private static function getHomeDir()
     {
         // On Linux/Unix-like systems, use the HOME environment variable
-        if ($homeDir = getenv('HOME')) {
+        if ($homeDir = getenv('HOME'))
+        {
             return $homeDir;
         }
 
@@ -216,7 +229,7 @@ class ConfigurationProvider
      * CSM config provider that creates CSM config using an ini file stored
      * in the current user's home directory.
      *
-     * @param string|null $profile  Profile to use. If not specified will use
+     * @param string|null $profile Profile to use. If not specified will use
      *                              the "aws_csm" profile in "~/.aws/config".
      * @param string|null $filename If provided, uses a custom filename rather
      *                              than looking in the home directory.
@@ -228,29 +241,36 @@ class ConfigurationProvider
         $filename = $filename ?: (self::getHomeDir() . '/.aws/config');
         $profile = $profile ?: (getenv(self::ENV_PROFILE) ?: 'aws_csm');
 
-        return function () use ($profile, $filename) {
-            if (!is_readable($filename)) {
+        return function () use ($profile, $filename)
+        {
+            if (!is_readable($filename))
+            {
                 return self::reject("Cannot read CSM config from $filename");
             }
             $data = parse_ini_file($filename, true);
-            if ($data === false) {
+            if ($data === false)
+            {
                 return self::reject("Invalid config file: $filename");
             }
-            if (!isset($data[$profile])) {
+            if (!isset($data[$profile]))
+            {
                 return self::reject("'$profile' not found in config file");
             }
-            if (!isset($data[$profile]['csm_enabled'])) {
+            if (!isset($data[$profile]['csm_enabled']))
+            {
                 return self::reject("Required CSM config values not present in 
                     INI profile '{$profile}' ({$filename})");
             }
 
             // port is optional
-            if (empty($data[$profile]['csm_port'])) {
+            if (empty($data[$profile]['csm_port']))
+            {
                 $data[$profile]['csm_port'] = self::DEFAULT_PORT;
             }
 
             // client_id is optional
-            if (empty($data[$profile]['csm_client_id'])) {
+            if (empty($data[$profile]['csm_client_id']))
+            {
                 $data[$profile]['csm_client_id'] = self::DEFAULT_CLIENT_ID;
             }
 
@@ -275,24 +295,28 @@ class ConfigurationProvider
      */
     public static function memoize(callable $provider)
     {
-        return function () use ($provider) {
+        return function () use ($provider)
+        {
             static $result;
             static $isConstant;
 
             // Constant config will be returned constantly.
-            if ($isConstant) {
+            if ($isConstant)
+            {
                 return $result;
             }
 
             // Create the initial promise that will be used as the cached value
             // until it expires.
-            if (null === $result) {
+            if (null === $result)
+            {
                 $result = $provider();
             }
 
             // Return config and set flag that provider is already set
             return $result
-                ->then(function (ConfigurationInterface $config) use (&$isConstant) {
+                ->then(function (ConfigurationInterface $config) use (&$isConstant)
+                {
                     $isConstant = true;
                     return $config;
                 });
@@ -301,7 +325,7 @@ class ConfigurationProvider
 
     /**
      * Reject promise with standardized exception.
-     * 
+     *
      * @param $msg
      * @return Promise\RejectedPromise
      */
@@ -314,21 +338,26 @@ class ConfigurationProvider
      * Unwraps a configuration object in whatever valid form it is in,
      * always returning a ConfigurationInterface object.
      *
-     * @param  mixed $config
+     * @param mixed $config
      * @return ConfigurationInterface
      * @throws \InvalidArgumentException
      */
     public static function unwrap($config)
     {
-        if (is_callable($config)) {
+        if (is_callable($config))
+        {
             $config = $config();
         }
-        if ($config instanceof PromiseInterface) {
+        if ($config instanceof PromiseInterface)
+        {
             $config = $config->wait();
         }
-        if ($config instanceof ConfigurationInterface) {
+        if ($config instanceof ConfigurationInterface)
+        {
             return $config;
-        } elseif (is_array($config) && isset($config['enabled'])) {
+        }
+        elseif (is_array($config) && isset($config['enabled']))
+        {
             $client_id = isset($config['client_id']) ? $config['client_id']
                 : self::DEFAULT_CLIENT_ID;
             $port = isset($config['port']) ? $config['port']

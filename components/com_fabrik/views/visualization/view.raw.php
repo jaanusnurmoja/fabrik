@@ -20,14 +20,14 @@ jimport('joomla.application.component.view');
  */
 class FabrikViewVisualization extends FabrikView
 {
-	/**
-	 * Display
-	 *
-	 * @param   string  $tmpl  Template
-	 *
-	 * @return  void
-	 */
-	public function display($tmpl = 'default')
-	{
-	}
+    /**
+     * Display
+     *
+     * @param string $tmpl Template
+     *
+     * @return  void
+     */
+    public function display($tmpl = 'default')
+    {
+    }
 }

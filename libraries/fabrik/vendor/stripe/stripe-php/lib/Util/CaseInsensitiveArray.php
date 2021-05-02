@@ -16,9 +16,9 @@ use ArrayAccess;
  */
 class CaseInsensitiveArray implements ArrayAccess
 {
-    private $container = array();
+    private $container = [];
 
-    public function __construct($initial_array = array())
+    public function __construct($initial_array = [])
     {
         $this->container = array_map("strtolower", $initial_array);
     }
@@ -26,9 +26,12 @@ class CaseInsensitiveArray implements ArrayAccess
     public function offsetSet($offset, $value)
     {
         $offset = static::maybeLowercase($offset);
-        if (is_null($offset)) {
+        if (is_null($offset))
+        {
             $this->container[] = $value;
-        } else {
+        }
+        else
+        {
             $this->container[$offset] = $value;
         }
     }
@@ -53,9 +56,12 @@ class CaseInsensitiveArray implements ArrayAccess
 
     private static function maybeLowercase($v)
     {
-        if (is_string($v)) {
+        if (is_string($v))
+        {
             return strtolower($v);
-        } else {
+        }
+        else
+        {
             return $v;
         }
     }

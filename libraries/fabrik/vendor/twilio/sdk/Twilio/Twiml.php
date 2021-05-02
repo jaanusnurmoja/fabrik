@@ -8,7 +8,8 @@ use Twilio\Exceptions\TwimlException;
  * Twiml response generator.
  * @deprecated Use the generated types in the Twilio\TwiML namespace instead
  */
-class Twiml {
+class Twiml
+{
 
     protected $element;
 
@@ -23,8 +24,10 @@ class Twiml {
      *   - attributes to add to the element
      *   - if null, initialize an empty element named 'Response'
      */
-    public function __construct($arg = null) {
-        switch (true) {
+    public function __construct($arg = null)
+    {
+        switch (true)
+        {
             case $arg instanceof \SimpleXMLElement:
                 $this->element = $arg;
                 break;
@@ -33,7 +36,8 @@ class Twiml {
                 break;
             case is_array($arg):
                 $this->element = new \SimpleXMLElement('<Response/>');
-                foreach ($arg as $name => $value) {
+                foreach ($arg as $name => $value)
+                {
                     $this->element->addAttribute($name, $value);
                 }
                 break;
@@ -78,10 +82,12 @@ class Twiml {
      * :return: A SimpleXmlElement
      * :rtype: SimpleXmlElement
      */
-    public function __call($verb, array $args) {
-        list($noun, $attrs) = $args + array('', array());
-        if (is_array($noun)) {
-            list($attrs, $noun) = array($noun, '');
+    public function __call($verb, array $args)
+    {
+        list($noun, $attrs) = $args + ['', []];
+        if (is_array($noun))
+        {
+            list($attrs, $noun) = [$noun, ''];
         }
         /* addChild does not escape XML, while addAttribute does. This means if
          * you pass unescaped ampersands ("&") to addChild, you will generate
@@ -105,11 +111,13 @@ class Twiml {
         $normalized = htmlspecialchars($decoded, ENT_COMPAT, 'UTF-8', false);
         $hasNoun = is_scalar($noun) && strlen($noun);
         $child = $hasNoun
-               ? $this->element->addChild(ucfirst($verb), $normalized)
-               : $this->element->addChild(ucfirst($verb));
+            ? $this->element->addChild(ucfirst($verb), $normalized)
+            : $this->element->addChild(ucfirst($verb));
 
-        if (is_array($attrs)) {
-            foreach ($attrs as $name => $value) {
+        if (is_array($attrs))
+        {
+            foreach ($attrs as $name => $value)
+            {
                 /* Note that addAttribute escapes raw ampersands by default, so we
                  * haven't touched its implementation. So this is the matrix for
                  * addAttribute:
@@ -117,7 +125,8 @@ class Twiml {
                  * & turns into &amp;
                  * &amp; turns into &amp;amp;
                  */
-                if (is_bool($value)) {
+                if (is_bool($value))
+                {
                     $value = ($value === true) ? 'true' : 'false';
                 }
                 $child->addAttribute($name, $value);
@@ -132,7 +141,8 @@ class Twiml {
      * :return: The response as an XML string
      * :rtype: string
      */
-    public function __toString() {
+    public function __toString()
+    {
         $xml = $this->element->asXML();
         return (string)str_replace(
             '<?xml version="1.0"?>',

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Multipart\AbstractUploadManager;
@@ -50,19 +51,20 @@ class MultipartCopy extends AbstractUploadManager
      *   result of executing a HeadObject command on the copy source.
      *
      * @param S3ClientInterface $client Client used for the upload.
-     * @param string            $source Location of the data to be copied
+     * @param string $source Location of the data to be copied
      *                                  (in the form /<bucket>/<key>).
-     * @param array             $config Configuration used to perform the upload.
+     * @param array $config Configuration used to perform the upload.
      */
     public function __construct(
         S3ClientInterface $client,
         $source,
         array $config = []
-    ) {
+    )
+    {
         $this->source = '/' . ltrim($source, '/');
         parent::__construct($client, array_change_key_case($config) + [
-            'source_metadata' => null
-        ]);
+                'source_metadata' => null
+            ]);
     }
 
     /**
@@ -78,12 +80,12 @@ class MultipartCopy extends AbstractUploadManager
     protected function loadUploadWorkflowInfo()
     {
         return [
-            'command' => [
+            'command'  => [
                 'initiate' => 'CreateMultipartUpload',
                 'upload'   => 'UploadPartCopy',
                 'complete' => 'CompleteMultipartUpload',
             ],
-            'id' => [
+            'id'       => [
                 'bucket'    => 'Bucket',
                 'key'       => 'Key',
                 'upload_id' => 'UploadId',
@@ -96,13 +98,15 @@ class MultipartCopy extends AbstractUploadManager
     {
         $parts = ceil($this->getSourceSize() / $this->determinePartSize());
 
-        for ($partNumber = 1; $partNumber <= $parts; $partNumber++) {
+        for ($partNumber = 1; $partNumber <= $parts; $partNumber++)
+        {
             // If we haven't already uploaded this part, yield a new part.
-            if (!$this->state->hasPartBeenUploaded($partNumber)) {
+            if (!$this->state->hasPartBeenUploaded($partNumber))
+            {
                 $command = $this->client->getCommand(
                     $this->info['command']['upload'],
                     $this->createPart($partNumber, $parts)
-                        + $this->getState()->getId()
+                    + $this->getState()->getId()
                 );
                 $command->getHandlerList()->appendSign($resultHandler, 'mup');
                 yield $command;
@@ -117,7 +121,8 @@ class MultipartCopy extends AbstractUploadManager
         // Apply custom params to UploadPartCopy data
         $config = $this->getConfig();
         $params = isset($config['params']) ? $config['params'] : [];
-        foreach ($params as $k => $v) {
+        foreach ($params as $k => $v)
+        {
             $data[$k] = $v;
         }
 
@@ -152,7 +157,8 @@ class MultipartCopy extends AbstractUploadManager
 
     private function getSourceMetadata()
     {
-        if (empty($this->sourceMetadata)) {
+        if (empty($this->sourceMetadata))
+        {
             $this->sourceMetadata = $this->fetchSourceMetadata();
         }
 
@@ -161,20 +167,23 @@ class MultipartCopy extends AbstractUploadManager
 
     private function fetchSourceMetadata()
     {
-        if ($this->config['source_metadata'] instanceof ResultInterface) {
+        if ($this->config['source_metadata'] instanceof ResultInterface)
+        {
             return $this->config['source_metadata'];
         }
 
         list($bucket, $key) = explode('/', ltrim($this->source, '/'), 2);
         $headParams = [
             'Bucket' => $bucket,
-            'Key' => $key,
+            'Key'    => $key,
         ];
-        if (strpos($key, '?')) {
+        if (strpos($key, '?'))
+        {
             list($key, $query) = explode('?', $key, 2);
             $headParams['Key'] = $key;
             $query = Psr7\parse_query($query, false);
-            if (isset($query['versionId'])) {
+            if (isset($query['versionId']))
+            {
                 $headParams['VersionId'] = $query['versionId'];
             }
         }

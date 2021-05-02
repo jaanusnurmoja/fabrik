@@ -6,7 +6,7 @@
  */
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbCount = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('fabrikcount');
             this.parent(element, options);

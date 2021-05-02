@@ -27,7 +27,7 @@ use PHPUnit\Framework\TestCase;
 
 class BsdTest extends TestCase
 {
-    
+
     public function testGetBSDs()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -35,10 +35,10 @@ class BsdTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/bsds')
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/bsds')
+            );
         $bitlink = new Bsd($mock);
         $bitlink->getBSDs();
-    } 
+    }
 
 }

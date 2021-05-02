@@ -11,39 +11,32 @@ Latest release: [1.2.0](https://packagist.org/packages/webmozart/assert#1.2.0)
 
 PHP >= 5.3.9
 
-This library contains efficient assertions to test the input and output of
-your methods. With these assertions, you can greatly reduce the amount of coding
-needed to write a safe implementation.
+This library contains efficient assertions to test the input and output of your methods. With these assertions, you can
+greatly reduce the amount of coding needed to write a safe implementation.
 
-All assertions in the [`Assert`] class throw an `\InvalidArgumentException` if 
-they fail.
+All assertions in the [`Assert`] class throw an `\InvalidArgumentException` if they fail.
 
 FAQ
 ---
 
 **What's the difference to [beberlei/assert]?**
 
-This library is heavily inspired by Benjamin Eberlei's wonderful [assert package],
-but fixes a usability issue with error messages that can't be fixed there without
-breaking backwards compatibility.
+This library is heavily inspired by Benjamin Eberlei's wonderful [assert package], but fixes a usability issue with
+error messages that can't be fixed there without breaking backwards compatibility.
 
-This package features usable error messages by default. However, you can also 
-easily write custom error messages:
+This package features usable error messages by default. However, you can also easily write custom error messages:
 
 ```
 Assert::string($path, 'The path is expected to be a string. Got: %s');
 ```
 
-In [beberlei/assert], the ordering of the `%s` placeholders is different for 
-every assertion. This package, on the contrary, provides consistent placeholder 
-ordering for all assertions:
+In [beberlei/assert], the ordering of the `%s` placeholders is different for every assertion. This package, on the
+contrary, provides consistent placeholder ordering for all assertions:
 
 * `%s`: The tested value as string, e.g. `"/foo/bar"`.
-* `%2$s`, `%3$s`, ...: Additional assertion-specific values, e.g. the
-  minimum/maximum length, allowed values, etc.
-  
-Check the source code of the assertions to find out details about the additional
-available placeholders.
+* `%2$s`, `%3$s`, ...: Additional assertion-specific values, e.g. the minimum/maximum length, allowed values, etc.
+
+Check the source code of the assertions to find out details about the additional available placeholders.
 
 Installation
 ------------
@@ -135,8 +128,7 @@ Method                                          | Description
 
 ### String Assertions
 
-You should check that a value is a string with `Assert::string()` before making
-any of the following assertions.
+You should check that a value is a string with `Assert::string()` before making any of the following assertions.
 
 Method                                              | Description
 --------------------------------------------------- | -----------------------------------------------------------------
@@ -199,8 +191,7 @@ Method                                      | Description
 
 ### Collection Assertions
 
-All of the above assertions can be prefixed with `all*()` to test the contents
-of an array or a `\Traversable`:
+All of the above assertions can be prefixed with `all*()` to test the contents of an array or a `\Traversable`:
 
 ```php
 Assert::allIsInstanceOf($employees, 'Acme\Employee');
@@ -208,8 +199,7 @@ Assert::allIsInstanceOf($employees, 'Acme\Employee');
 
 ### Nullable Assertions
 
-All of the above assertions can be prefixed with `nullOr*()` to run the
-assertion only if it the value is not `null`:
+All of the above assertions can be prefixed with `nullOr*()` to run the assertion only if it the value is not `null`:
 
 ```php
 Assert::nullOrString($middleName, 'The middle name must be a string or null. Got: %s');
@@ -241,12 +231,21 @@ License
 All contents of this package are licensed under the [MIT license].
 
 [beberlei/assert]: https://github.com/beberlei/assert
+
 [assert package]: https://github.com/beberlei/assert
+
 [Composer]: https://getcomposer.org
+
 [Bernhard Schussek]: http://webmozarts.com
+
 [The Community Contributors]: https://github.com/webmozart/assert/graphs/contributors
+
 [issue tracker]: https://github.com/webmozart/assert/issues
+
 [Git repository]: https://github.com/webmozart/assert
+
 [@webmozart]: https://twitter.com/webmozart
+
 [MIT license]: LICENSE
+
 [`Assert`]: src/Assert.php

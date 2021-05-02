@@ -34,7 +34,7 @@ class Callback
     public static function parseCallback($callable)
     {
         $required = array_flip(
-            array(
+            [
                 'apiMsgId',
                 'cliMsgId',
                 'to',
@@ -42,7 +42,7 @@ class Callback
                 'from',
                 'status',
                 'charge'
-            )
+            ]
         );
 
         $values = array_intersect_key($_GET, $required);
@@ -50,8 +50,9 @@ class Callback
 
         // If there are no difference, then it means the callback
         // passed all the required values.
-        if (empty($diff)) {
-            return call_user_func_array($callable, array($values));
+        if (empty($diff))
+        {
+            return call_user_func_array($callable, [$values]);
         }
 
         return false;

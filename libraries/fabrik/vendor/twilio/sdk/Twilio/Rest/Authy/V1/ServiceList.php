@@ -16,36 +16,39 @@ use Twilio\Version;
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
  */
-class ServiceList extends ListResource {
+class ServiceList extends ListResource
+{
     /**
      * Construct the ServiceList
-     * 
+     *
      * @param Version $version Version that contains the resource
-     * @return \Twilio\Rest\Authy\V1\ServiceList 
+     * @return \Twilio\Rest\Authy\V1\ServiceList
      */
-    public function __construct(Version $version) {
+    public function __construct(Version $version)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array();
+        $this->solution = [];
 
         $this->uri = '/Services';
     }
 
     /**
      * Create a new ServiceInstance
-     * 
+     *
      * @param string $friendlyName A human readable description of this resource.
      * @return ServiceInstance Newly created ServiceInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function create($friendlyName) {
-        $data = Values::of(array('FriendlyName' => $friendlyName, ));
+    public function create($friendlyName)
+    {
+        $data = Values::of(['FriendlyName' => $friendlyName,]);
 
         $payload = $this->version->create(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -59,7 +62,7 @@ class ServiceList extends ListResource {
      * is reached.
      * The results are returned as a generator, so this operation is memory
      * efficient.
-     * 
+     *
      * @param int $limit Upper limit for the number of records to return. stream()
      *                   guarantees to never return more than limit.  Default is no
      *                   limit
@@ -70,7 +73,8 @@ class ServiceList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return \Twilio\Stream stream of results
      */
-    public function stream($limit = null, $pageSize = null) {
+    public function stream($limit = null, $pageSize = null)
+    {
         $limits = $this->version->readLimits($limit, $pageSize);
 
         $page = $this->page($limits['pageSize']);
@@ -82,7 +86,7 @@ class ServiceList extends ListResource {
      * Reads ServiceInstance records from the API as a list.
      * Unlike stream(), this operation is eager and will load `limit` records into
      * memory before returning.
-     * 
+     *
      * @param int $limit Upper limit for the number of records to return. read()
      *                   guarantees to never return more than limit.  Default is no
      *                   limit
@@ -93,25 +97,27 @@ class ServiceList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return ServiceInstance[] Array of results
      */
-    public function read($limit = null, $pageSize = null) {
+    public function read($limit = null, $pageSize = null)
+    {
         return iterator_to_array($this->stream($limit, $pageSize), false);
     }
 
     /**
      * Retrieve a single page of ServiceInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param mixed $pageSize Number of records to return, defaults to 50
      * @param string $pageToken PageToken provided by the API
      * @param mixed $pageNumber Page Number, this value is simply for client state
      * @return \Twilio\Page Page of ServiceInstance
      */
-    public function page($pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE) {
-        $params = Values::of(array(
+    public function page($pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE)
+    {
+        $params = Values::of([
             'PageToken' => $pageToken,
-            'Page' => $pageNumber,
-            'PageSize' => $pageSize,
-        ));
+            'Page'      => $pageNumber,
+            'PageSize'  => $pageSize,
+        ]);
 
         $response = $this->version->page(
             'GET',
@@ -125,11 +131,12 @@ class ServiceList extends ListResource {
     /**
      * Retrieve a specific page of ServiceInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param string $targetUrl API-generated URL for the requested results page
      * @return \Twilio\Page Page of ServiceInstance
      */
-    public function getPage($targetUrl) {
+    public function getPage($targetUrl)
+    {
         $response = $this->version->getDomain()->getClient()->request(
             'GET',
             $targetUrl
@@ -140,20 +147,22 @@ class ServiceList extends ListResource {
 
     /**
      * Constructs a ServiceContext
-     * 
+     *
      * @param string $sid A string that uniquely identifies this Service.
-     * @return \Twilio\Rest\Authy\V1\ServiceContext 
+     * @return \Twilio\Rest\Authy\V1\ServiceContext
      */
-    public function getContext($sid) {
+    public function getContext($sid)
+    {
         return new ServiceContext($this->version, $sid);
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Authy.V1.ServiceList]';
     }
 }

@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbPicklist = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('fabrikpicklist');
             this.parent(element, options);
@@ -29,9 +29,9 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     dropcolour = from.getStyle('background-color'),
                     that = this;
                 this.sortable = new Sortables([from, to], {
-                    clone     : true,
-                    revert    : true,
-                    opacity   : 0.7,
+                    clone: true,
+                    revert: true,
+                    opacity: 0.7,
                     hovercolor: '#ffddff',
                     onComplete: function (element) {
                         this.setData();
@@ -39,7 +39,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                         that.fadeOut(from, dropcolour);
                         that.fadeOut(to, dropcolour);
                     }.bind(this),
-                    onSort    : function (element, clone) {
+                    onSort: function (element, clone) {
                         this.showNotices(element, clone);
 
                     }.bind(this),
@@ -67,7 +67,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
 
         fadeOut: function (droppable, colour) {
             var hoverFx = new Fx.Tween(droppable, {
-                wait    : false,
+                wait: false,
                 duration: 600
             });
             hoverFx.start('background-color', colour);
@@ -135,7 +135,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
 
                         var li = new Element('li', {
                             'class': 'picklist',
-                            'id'   : this.element.id + '_value_' + val
+                            'id': this.element.id + '_value_' + val
                         }).set('text', label);
 
                         to.adopt(li);

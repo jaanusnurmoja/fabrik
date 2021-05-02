@@ -33,14 +33,12 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
     Fabrik.bootstrapVersion = function (pluginName) {
         // try the function provided first, punt to 'tooltip' if it doesn't exist (some plugins override 'modal')
         var i, pluginNames = [pluginName || 'modal', 'tooltip'], len = pluginNames.length;
-        for (i=0; i<len; ++i) {
+        for (i = 0; i < len; ++i) {
             var pluginFn = jQuery.fn[pluginNames[i]];
             if (pluginFn) {
                 if (pluginFn.VERSION) {
                     return pluginFn.VERSION.match(/(\d+)\./)[0].toInt();
-                }
-                else if (pluginFn.Constructor && pluginFn.Constructor.VERSION)
-                {
+                } else if (pluginFn.Constructor && pluginFn.Constructor.VERSION) {
                     return pluginFn.Constructor.VERSION.match(/(\d+)\./)[0].toInt();
                 }
             }
@@ -152,7 +150,7 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
         url = a.get('href');
         url += url.contains('?') ? '&tmpl=component&ajax=1' : '?tmpl=component&ajax=1';
         url += '&format=partial';
-        
+
         // Only one edit window open at the same time.
         $H(Fabrik.Windows).each(function (win, key) {
             win.close();
@@ -163,8 +161,8 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
         }
 
         var winOpts = {
-            'id'        : 'view.' + url,
-            'title'     : title,
+            'id': 'view.' + url,
+            'title': title,
             'loadMethod': 'xhr',
             'contentURL': url
         };
@@ -239,7 +237,7 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
 
         var prefix = document.location.protocol === 'https:' ? 'https:' : 'http:';
         var src = prefix + '//maps.googleapis.com/maps/api/js?libraries=places,visualization&callback=Fabrik.mapCb';
-        
+
         if (k !== false) {
             src += '&key=' + k;
         }
@@ -408,8 +406,7 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
             }
             list.setActive(row);
             rowId = row.prop('id').split('_').pop();
-        }
-        else {
+        } else {
             rowId = jQuery(target).data('rowid');
         }
 
@@ -440,12 +437,12 @@ define(['jquery', 'fab/loader', 'fab/requestqueue'], function (jQuery, Loader, R
         });
 
         winOpts = {
-            modalId   : 'ajax_links',
-            id        : listRef + '.' + rowId,
-            title     : title,
+            modalId: 'ajax_links',
+            id: listRef + '.' + rowId,
+            title: title,
             loadMethod: loadMethod,
             contentURL: url,
-            onClose   : function () {
+            onClose: function () {
                 var k = view + '_' + list.options.formid + '_' + rowId;
                 try {
                     Fabrik.blocks[k].destroyElements();

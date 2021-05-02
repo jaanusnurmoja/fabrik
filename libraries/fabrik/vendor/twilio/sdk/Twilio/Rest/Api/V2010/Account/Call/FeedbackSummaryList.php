@@ -15,48 +15,51 @@ use Twilio\Serialize;
 use Twilio\Values;
 use Twilio\Version;
 
-class FeedbackSummaryList extends ListResource {
+class FeedbackSummaryList extends ListResource
+{
     /**
      * Construct the FeedbackSummaryList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $accountSid The unique id of the Account responsible for
      *                           creating this Call
-     * @return \Twilio\Rest\Api\V2010\Account\Call\FeedbackSummaryList 
+     * @return \Twilio\Rest\Api\V2010\Account\Call\FeedbackSummaryList
      */
-    public function __construct(Version $version, $accountSid) {
+    public function __construct(Version $version, $accountSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('accountSid' => $accountSid, );
+        $this->solution = ['accountSid' => $accountSid,];
 
         $this->uri = '/Accounts/' . rawurlencode($accountSid) . '/Calls/FeedbackSummary.json';
     }
 
     /**
      * Create a new FeedbackSummaryInstance
-     * 
+     *
      * @param \DateTime $startDate Only include feedback given on or after this date
      * @param \DateTime $endDate Only include feedback given on or before this date
      * @param array|Options $options Optional Arguments
      * @return FeedbackSummaryInstance Newly created FeedbackSummaryInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function create($startDate, $endDate, $options = array()) {
+    public function create($startDate, $endDate, $options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array(
-            'StartDate' => Serialize::iso8601Date($startDate),
-            'EndDate' => Serialize::iso8601Date($endDate),
-            'IncludeSubaccounts' => Serialize::booleanToString($options['includeSubaccounts']),
-            'StatusCallback' => $options['statusCallback'],
+        $data = Values::of([
+            'StartDate'            => Serialize::iso8601Date($startDate),
+            'EndDate'              => Serialize::iso8601Date($endDate),
+            'IncludeSubaccounts'   => Serialize::booleanToString($options['includeSubaccounts']),
+            'StatusCallback'       => $options['statusCallback'],
             'StatusCallbackMethod' => $options['statusCallbackMethod'],
-        ));
+        ]);
 
         $payload = $this->version->create(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -65,21 +68,23 @@ class FeedbackSummaryList extends ListResource {
 
     /**
      * Constructs a FeedbackSummaryContext
-     * 
+     *
      * @param string $sid A string that uniquely identifies this feedback summary
      *                    resource
-     * @return \Twilio\Rest\Api\V2010\Account\Call\FeedbackSummaryContext 
+     * @return \Twilio\Rest\Api\V2010\Account\Call\FeedbackSummaryContext
      */
-    public function getContext($sid) {
+    public function getContext($sid)
+    {
         return new FeedbackSummaryContext($this->version, $this->solution['accountSid'], $sid);
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Api.V2010.FeedbackSummaryList]';
     }
 }

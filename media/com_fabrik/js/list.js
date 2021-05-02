@@ -16,48 +16,48 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
             actionManager: null,
 
             options: {
-                'admin'              : false,
-                'filterMethod'       : 'onchange',
-                'ajax'               : false,
-                'ajax_links'         : false,
-                'links'              : {'edit': '', 'detail': '', 'add': ''},
-                'form'               : 'listform_' + this.id,
-                'hightLight'         : '#ccffff',
-                'primaryKey'         : '',
-                'headings'           : [],
-                'labels'             : {},
-                'Itemid'             : 0,
-                'formid'             : 0,
-                'canEdit'            : true,
-                'canView'            : true,
-                'page'               : 'index.php',
-                'actionMethod'       : 'floating', // deprecated in 3.1
-                'formels'            : [], // elements that only appear in the form
-                'data'               : [], // [{col:val, col:val},...] (depreciated)
-                'itemTemplate'       : '',
-                'floatPos'           : 'left', // deprecated in 3.1
-                'csvChoose'          : false,
-                advancedFilters      : null,
-                'csvOpts'            : {
-                    excel       : false,
-                    incfilters  : false,
+                'admin': false,
+                'filterMethod': 'onchange',
+                'ajax': false,
+                'ajax_links': false,
+                'links': {'edit': '', 'detail': '', 'add': ''},
+                'form': 'listform_' + this.id,
+                'hightLight': '#ccffff',
+                'primaryKey': '',
+                'headings': [],
+                'labels': {},
+                'Itemid': 0,
+                'formid': 0,
+                'canEdit': true,
+                'canView': true,
+                'page': 'index.php',
+                'actionMethod': 'floating', // deprecated in 3.1
+                'formels': [], // elements that only appear in the form
+                'data': [], // [{col:val, col:val},...] (depreciated)
+                'itemTemplate': '',
+                'floatPos': 'left', // deprecated in 3.1
+                'csvChoose': false,
+                advancedFilters: null,
+                'csvOpts': {
+                    excel: false,
+                    incfilters: false,
                     inctabledata: false,
-                    incraw      : false,
-                    inccalcs    : false
+                    incraw: false,
+                    inccalcs: false
 
                 },
-                'popup_width'        : 300,
-                'popup_height'       : 300,
-                'popup_offset_x'     : null,
-                'popup_offset_y'     : null,
-                'groupByOpts'        : {},
-                isGrouped            : false,
-                'listRef'            : '', // e.g. '1_com_fabrik_1'
+                'popup_width': 300,
+                'popup_height': 300,
+                'popup_offset_x': null,
+                'popup_offset_y': null,
+                'groupByOpts': {},
+                isGrouped: false,
+                'listRef': '', // e.g. '1_com_fabrik_1'
                 'fabrik_show_in_list': [],
-                'singleOrdering'     : false,
-                'tmpl'               : '',
-                'groupedBy'          : '',
-                'toggleCols'         : false
+                'singleOrdering': false,
+                'tmpl': '',
+                'groupedBy': '',
+                'toggleCols': false
             },
 
             initialize: function (id, options) {
@@ -113,7 +113,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     this._updateRows(history.state);
                 }
 
-	            this.mediaScan();
+                this.mediaScan();
 
                 Fabrik.fireEvent('fabrik.list.loaded', [this]);
             },
@@ -151,10 +151,10 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     rowId = this.id.split('_').pop();
                     json = {
                         errors: {},
-                        data  : {
+                        data: {
                             rowid: rowId
                         },
-                        rowid : rowId,
+                        rowid: rowId,
                         listid: self.id
                     };
                     Fabrik.fireEvent('fabrik.list.row.selected', json);
@@ -197,17 +197,17 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
             watchButtons: function () {
                 var self = this;
                 this.exportWindowOpts = {
-                    modalId    : 'exportcsv',
-                    type       : 'modal',
-                    id         : 'exportcsv',
-                    title      : 'Export CSV',
-                    loadMethod : 'html',
+                    modalId: 'exportcsv',
+                    type: 'modal',
+                    id: 'exportcsv',
+                    title: 'Export CSV',
+                    loadMethod: 'html',
                     minimizable: false,
-                    width      : 360,
-                    height     : 240,
-                    content    : '',
+                    width: 360,
+                    height: 240,
+                    content: '',
                     modal: true,
-                    bootstrap  : true,
+                    bootstrap: true,
                     visible: true,
                     onContentLoaded: function () {
                         var win = this;
@@ -217,8 +217,8 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
 
                     }
                 };
-                this.exportWindowOpts.width = parseInt(this.options.csvOpts.popupwidth,10)>0 ? this.options.csvOpts.popupwidth : 360;
-                this.exportWindowOpts.optswidth = parseInt(this.options.csvOpts.optswidth,10)>0 ? this.options.csvOpts.optswidth : 240;
+                this.exportWindowOpts.width = parseInt(this.options.csvOpts.popupwidth, 10) > 0 ? this.options.csvOpts.popupwidth : 360;
+                this.exportWindowOpts.optswidth = parseInt(this.options.csvOpts.optswidth, 10) > 0 ? this.options.csvOpts.optswidth : 240;
                 if (this.options.view === 'csv') {
 
                     // For csv links e.g. index.php?option=com_fabrik&view=csv&listid=10
@@ -304,8 +304,8 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
              * This will allow for more easilly adding custom css styling to
              * hide options that you don't want the user to be able to change.
              */
-            makeSafeForCSS: function(name) {
-                return name.replace(/[^a-z0-9]/g, function(s) {
+            makeSafeForCSS: function (name) {
+                return name.replace(/[^a-z0-9]/g, function (s) {
                     var c = s.charCodeAt(0);
                     if (c == 32) return '-';
                     if (c >= 65 && c <= 90) return s.toLowerCase();
@@ -323,12 +323,12 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
              * @private
              */
             _csvYesNo: function (name, yesValue, yesLabel, noLabel, title) {
-                var label = jQuery('<label />').css({'display':'inline-block','margin-left':'15px'});
+                var label = jQuery('<label />').css({'display': 'inline-block', 'margin-left': '15px'});
 
                 var yes = label.clone().append(
                     [jQuery('<input />').attr({
-                        'type' : 'radio',
-                        'name' : name,
+                        'type': 'radio',
+                        'name': name,
                         'value': '1',
                         checked: yesValue
                     }),
@@ -337,8 +337,8 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
 
                     no = label.clone().append(
                         [jQuery('<input />').attr({
-                            'type' : 'radio',
-                            'name' : name,
+                            'type': 'radio',
+                            'name': name,
                             'value': '0',
                             checked: !yesValue
                         }),
@@ -351,7 +351,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     }).text(title);
 
                 var thisClass = 'opt__' + this.makeSafeForCSS(title);
-                return jQuery('<div class="' + thisClass + '">').css({'border-bottom':'1px solid #dddddd'}).append([titleLabel, yes, no]);
+                return jQuery('<div class="' + thisClass + '">').css({'border-bottom': '1px solid #dddddd'}).append([titleLabel, yes, no]);
             },
 
             /**
@@ -360,7 +360,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
              * @private
              */
             _csvExportForm: function () {
-                var thisClass,thisText;
+                var thisClass, thisText;
                 var yes = Joomla.JText._('JYES'),
                     no = Joomla.JText._('JNO'),
                     self = this,
@@ -368,7 +368,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                         this.id + '&format=csv&Itemid=' + this.options.Itemid,
                     label = jQuery('<label />').css('clear', 'left');
 
-                var c = jQuery('<form />').css('margin-bottom','0px').attr({
+                var c = jQuery('<form />').css('margin-bottom', '0px').attr({
                     'action': url,
                     'method': 'post'
                 }).append([
@@ -396,7 +396,10 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                         if (newg !== g) {
                             g = newg;
                             thisClass = 'opt__' + self.makeSafeForCSS(g);
-                            jQuery('<div />').prop('class',thisClass).css({'clear':'left','font-weight':'600'}).text(g).appendTo(c);
+                            jQuery('<div />').prop('class', thisClass).css({
+                                'clear': 'left',
+                                'font-weight': '600'
+                            }).text(g).appendTo(c);
                         }
 
                         labelText = labelText.replace(/<\/?[^>]+(>|jQuery)/g, '');
@@ -411,7 +414,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                 if (this.options.formels.length > 0) {
                     thisText = Joomla.JText._('COM_FABRIK_FORM_FIELDS');
                     thisClass = 'opt__' + self.makeSafeForCSS(thisText);
-                    jQuery('<div />').prop('class',thisClass)
+                    jQuery('<div />').prop('class', thisClass)
                         .text(thisText).appendTo(c);
                     this.options.formels.each(function (el) {
                         self._csvYesNo('fields[' + el.name + ']', false,
@@ -420,28 +423,28 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                 }
 
                 jQuery('<input />').attr({
-                    'type' : 'hidden',
-                    'name' : 'view',
+                    'type': 'hidden',
+                    'name': 'view',
                     'value': 'table'
                 }).appendTo(c);
                 jQuery('<input />').attr({
-                    'type' : 'hidden',
-                    'name' : 'option',
+                    'type': 'hidden',
+                    'name': 'option',
                     'value': 'com_fabrik'
                 }).appendTo(c);
                 jQuery('<input />').attr({
-                    'type' : 'hidden',
-                    'name' : 'listid',
+                    'type': 'hidden',
+                    'name': 'listid',
                     'value': self.id
                 }).appendTo(c);
                 jQuery('<input />').attr({
-                    'type' : 'hidden',
-                    'name' : 'format',
+                    'type': 'hidden',
+                    'name': 'format',
                     'value': 'csv'
                 }).appendTo(c);
                 jQuery('<input />').attr({
-                    'type' : 'hidden',
-                    'name' : 'c',
+                    'type': 'hidden',
+                    'name': 'c',
                     'value': 'table'
                 }).appendTo(c);
 
@@ -509,10 +512,10 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
 
                 // Append the custom_qs to the URL to enable querystring filtering of the list data
                 var myAjax = new Request.JSON({
-                    url       : url,
-                    method    : 'post',
-                    data      : opts,
-                    onError   : function (text, error) {
+                    url: url,
+                    method: 'post',
+                    data: opts,
+                    onError: function (text, error) {
                         fconsole(text, error);
                     },
                     onComplete: function (res) {
@@ -534,8 +537,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                                         '&format=csv' +
                                         '&listid=' + self.id +
                                         '&start=' + res.count;
-                                }
-                                else {
+                                } else {
                                     /*
                                     finalurl = Fabrik.liveSite + '/index.php' +
                                         '?option=com_fabrik' +
@@ -633,11 +635,9 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                                 '][' + key + '][' + advancedPointer + ']';
                             if (key === 'value') {
                                 opts[aName] = self.options.advancedFilters.origvalue[aa];
-                            }
-                            else if (key === 'condition') {
+                            } else if (key === 'condition') {
                                 opts[aName] = self.options.advancedFilters.orig_condition[aa];
-                            }
-                            else {
+                            } else {
                                 opts[aName] = values[aa];
                             }
                         }
@@ -745,7 +745,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     h.attr('class', newOrderClass);
                     if (Fabrik.bootstrapped) {
                         icon = h.find('*[data-isicon]');
-                    } else  {
+                    } else {
                         i = h.find('img');
                         icon = h.firstElementChild;
                     }
@@ -971,11 +971,9 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     if (this.form['limitstart' + this.id]) {
                         form.find('#limitstart' + this.id).val(0);
                     }
-                }
-                else if (task === 'list.view') {
+                } else if (task === 'list.view') {
                     Fabrik['filter_listform_' + this.options.listRef].onSubmit();
-                }
-                else {
+                } else {
                     if (task !== '') {
                         this.form.task.value = task;
                     }
@@ -991,9 +989,9 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     var data = this.form.toQueryString();
 
                     //if (task === 'list.doPlugin') {
-                        data += '&setListRefFromRequest=1';
-                        data += '&listref=' + this.options.listRef;
-                        data += '&Itemid=' + this.options.Itemid;
+                    data += '&setListRefFromRequest=1';
+                    data += '&listref=' + this.options.listRef;
+                    data += '&Itemid=' + this.options.Itemid;
                     //}
 
                     if (task === 'list.filter' && this.advancedSearch !== false) {
@@ -1012,8 +1010,8 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     data += '&tmpl=' + this.options.tmpl;
                     if (!this.request) {
                         this.request = new Request({
-                            'url'     : this.form.get('action'),
-                            'data'    : data,
+                            'url': this.form.get('action'),
+                            'data': data,
                             onComplete: function (json) {
                                 json = JSON.parse(json);
                                 self._updateRows(json);
@@ -1165,12 +1163,12 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                 var self = this,
                     url = '',
                     data = {
-                        'option'  : 'com_fabrik',
-                        'view'    : 'list',
-                        'task'    : 'list.view',
-                        'format'  : 'raw',
-                        'listid'  : this.id,
-                        'listref' : this.options.listRef
+                        'option': 'com_fabrik',
+                        'view': 'list',
+                        'task': 'list.view',
+                        'format': 'raw',
+                        'listid': this.id,
+                        'listref': this.options.listRef
                     };
                 data['limit' + this.id] = this.options.limitLength;
 
@@ -1178,25 +1176,24 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                     Object.append(data, extraData);
                 }
 
-                if (this.options.groupedBy !== '')
-                {
+                if (this.options.groupedBy !== '') {
                     data['group_by'] = this.options.groupedBy;
                 }
 
                 new Request({
-                    'url'        : url,
-                    'data'       : data,
+                    'url': url,
+                    'data': data,
                     'evalScripts': false,
-                    onSuccess    : function (json) {
+                    onSuccess: function (json) {
                         json = json.stripScripts();
                         json = JSON.parse(json);
                         self._updateRows(json);
                         // Fabrik.fireEvent('fabrik.list.update', [this, json]);
                     },
-                    onError      : function (text, error) {
+                    onError: function (text, error) {
                         fconsole(text, error);
                     },
-                    onFailure    : function (xhr) {
+                    onFailure: function (xhr) {
                         fconsole(xhr);
                     }
                 }).send();
@@ -1330,8 +1327,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                         if (tmpl === 'div') {
                             cells = items[i];
                             fullRow = rowTemplate.clone().append(cells);
-                        }
-                        else {
+                        } else {
                             fullRow = items[i];
                         }
                         tbody.append(fullRow);
@@ -1399,32 +1395,30 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                                     jQuery(thisCell).data('rowid', rowid);
                                 }
                             });
-                        }
-                        catch (err) {
+                        } catch (err) {
                             // val wasn't an A tag, so just treat it as an href
                             cell.prop('href', val);
                         }
                     }
                 });
-                if (typeof(this.options.itemTemplate) === 'string') {
+                if (typeof (this.options.itemTemplate) === 'string') {
                     c = template.find('.fabrik_row').addBack(template);
                     c.prop('id', row.id);
                     if (tmpl !== 'div') {
-	                    c.removeClass();
-	                    var newClass = row['class'].split(/\s+/);
-	                    for (j = 0; j < newClass.length; j++) {
-		                    c.addClass(newClass[j]);
-	                    }
-                    }
-                    else {
-	                    c.removeClass('oddRow0');
-	                    c.removeClass('oddRow1');
-	                    var newClass = row['class'].split(/\s+/);
-	                    for (j = 0; j < newClass.length; j++) {
-		                    if (!c.hasClass(newClass[j])) {
-			                    c.addClass(newClass[j]);
-		                    }
-	                    }
+                        c.removeClass();
+                        var newClass = row['class'].split(/\s+/);
+                        for (j = 0; j < newClass.length; j++) {
+                            c.addClass(newClass[j]);
+                        }
+                    } else {
+                        c.removeClass('oddRow0');
+                        c.removeClass('oddRow1');
+                        var newClass = row['class'].split(/\s+/);
+                        for (j = 0; j < newClass.length; j++) {
+                            if (!c.hasClass(newClass[j])) {
+                                c.addClass(newClass[j]);
+                            }
+                        }
                     }
                     r = template.clone();
                 } else {
@@ -1437,13 +1431,13 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
              * Once a row is added - we need to rescan lightboxes etc to re-attach
              */
             mediaScan: function () {
-                if (typeof(Slimbox) !== 'undefined') {
+                if (typeof (Slimbox) !== 'undefined') {
                     Slimbox.scanPage();
                 }
-                if (typeof(Lightbox) !== 'undefined') {
+                if (typeof (Lightbox) !== 'undefined') {
                     Lightbox.init();
                 }
-                if (typeof(Mediabox) !== 'undefined') {
+                if (typeof (Mediabox) !== 'undefined') {
                     Mediabox.scanPage();
                 }
             },
@@ -1543,7 +1537,7 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                         addRecord.off();
                         href = addRecord.prop('href');
                         loadMethod = (this.options.links.add === '' ||
-                        href.contains(Fabrik.liveSite)) ? 'xhr' : 'iframe';
+                            href.contains(Fabrik.liveSite)) ? 'xhr' : 'iframe';
                         var url = href;
                         url += url.contains('?') ? '&' : '?';
                         url += 'tmpl=component&ajax=1';
@@ -1552,12 +1546,12 @@ define(['jquery', 'fab/fabrik', 'fab/list-toggle', 'fab/list-grouped-toggler', '
                             e.preventDefault();
 
                             var winOpts = {
-                                'id'        : 'add.' + self.id,
-                                'title'     : self.options.popup_add_label,
+                                'id': 'add.' + self.id,
+                                'title': self.options.popup_add_label,
                                 'loadMethod': loadMethod,
                                 'contentURL': url,
-                                'width'     : self.options.popup_width,
-                                'height'    : self.options.popup_height
+                                'width': self.options.popup_width,
+                                'height': self.options.popup_height
                             };
                             if (self.options.popup_offset_x !== null) {
                                 winOpts.offset_x = self.options.popup_offset_x;

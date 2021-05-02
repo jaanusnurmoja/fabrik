@@ -1,4 +1,5 @@
 <?php
+
 namespace JmesPath\Tests;
 
 use JmesPath\Env;
@@ -8,14 +9,14 @@ class EnvTest extends \PHPUnit_Framework_TestCase
 {
     public function testSearchesInput()
     {
-        $data = array('foo' => 123);
+        $data = ['foo' => 123];
         $this->assertEquals(123, Env::search('foo', $data));
         $this->assertEquals(123, Env::search('foo', $data));
     }
 
     public function testSearchesWithFunction()
     {
-        $data = array('foo' => 123);
+        $data = ['foo' => 123];
         $this->assertEquals(123, \JmesPath\search('foo', $data));
     }
 

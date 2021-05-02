@@ -38,26 +38,26 @@ class Source extends ApiResource
      * Possible string representations of source flows.
      * @link https://stripe.com/docs/api#source_object-flow
      */
-    const FLOW_REDIRECT          = 'redirect';
-    const FLOW_RECEIVER          = 'receiver';
+    const FLOW_REDIRECT = 'redirect';
+    const FLOW_RECEIVER = 'receiver';
     const FLOW_CODE_VERIFICATION = 'code_verification';
-    const FLOW_NONE              = 'none';
+    const FLOW_NONE = 'none';
 
     /**
      * Possible string representations of source statuses.
      * @link https://stripe.com/docs/api#source_object-status
      */
-    const STATUS_CANCELED   = 'canceled';
+    const STATUS_CANCELED = 'canceled';
     const STATUS_CHARGEABLE = 'chargeable';
-    const STATUS_CONSUMED   = 'consumed';
-    const STATUS_FAILED     = 'failed';
-    const STATUS_PENDING    = 'pending';
+    const STATUS_CONSUMED = 'consumed';
+    const STATUS_FAILED = 'failed';
+    const STATUS_PENDING = 'pending';
 
     /**
      * Possible string representations of source usage.
      * @link https://stripe.com/docs/api#source_object-usage
      */
-    const USAGE_REUSABLE   = 'reusable';
+    const USAGE_REUSABLE = 'reusable';
     const USAGE_SINGLE_USE = 'single_use';
 
     /**
@@ -71,14 +71,16 @@ class Source extends ApiResource
         self::_validateParams($params);
 
         $id = $this['id'];
-        if (!$id) {
+        if (!$id)
+        {
             $class = get_class($this);
             $msg = "Could not determine which URL to request: $class instance "
-             . "has invalid ID: $id";
+                . "has invalid ID: $id";
             throw new Error\InvalidRequest($msg, null);
         }
 
-        if ($this['customer']) {
+        if ($this['customer'])
+        {
             $base = Customer::classUrl();
             $parentExtn = urlencode(Util\Util::utf8($this['customer']));
             $extn = urlencode(Util\Util::utf8($id));
@@ -87,9 +89,11 @@ class Source extends ApiResource
             list($response, $opts) = $this->_request('delete', $url, $params, $options);
             $this->refreshFrom($response, $opts);
             return $this;
-        } else {
+        }
+        else
+        {
             $message = "This source object does not appear to be currently attached "
-               . "to a customer object.";
+                . "to a customer object.";
             throw new Error\Api($message);
         }
     }

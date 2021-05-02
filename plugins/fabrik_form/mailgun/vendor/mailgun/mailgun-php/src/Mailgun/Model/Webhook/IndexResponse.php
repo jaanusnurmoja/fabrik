@@ -67,25 +67,32 @@ class IndexResponse implements ApiResponse
     {
         $self = new self();
         $data = isset($data['webhooks']) ? $data['webhooks'] : $data;
-        if (isset($data['bounce'])) {
+        if (isset($data['bounce']))
+        {
             $self->setBounce($data['bounce']);
         }
-        if (isset($data['deliver'])) {
+        if (isset($data['deliver']))
+        {
             $self->setDeliver($data['deliver']);
         }
-        if (isset($data['drop'])) {
+        if (isset($data['drop']))
+        {
             $self->setDrop($data['drop']);
         }
-        if (isset($data['spam'])) {
+        if (isset($data['spam']))
+        {
             $self->setSpam($data['spam']);
         }
-        if (isset($data['unsubscribe'])) {
+        if (isset($data['unsubscribe']))
+        {
             $self->setUnsubscribe($data['unsubscribe']);
         }
-        if (isset($data['click'])) {
+        if (isset($data['click']))
+        {
             $self->setClick($data['click']);
         }
-        if (isset($data['open'])) {
+        if (isset($data['open']))
+        {
             $self->setOpen($data['open']);
         }
 
@@ -97,7 +104,8 @@ class IndexResponse implements ApiResponse
      */
     public function getBounceUrl()
     {
-        if (isset($this->bounce['url'])) {
+        if (isset($this->bounce['url']))
+        {
             return $this->bounce['url'];
         }
     }
@@ -115,7 +123,8 @@ class IndexResponse implements ApiResponse
      */
     public function getDeliverUrl()
     {
-        if (isset($this->deliver['url'])) {
+        if (isset($this->deliver['url']))
+        {
             return $this->deliver['url'];
         }
     }
@@ -133,7 +142,8 @@ class IndexResponse implements ApiResponse
      */
     public function getDropUrl()
     {
-        if (isset($this->drop['url'])) {
+        if (isset($this->drop['url']))
+        {
             return $this->drop['url'];
         }
     }
@@ -151,7 +161,8 @@ class IndexResponse implements ApiResponse
      */
     public function getSpamUrl()
     {
-        if (isset($this->spam['url'])) {
+        if (isset($this->spam['url']))
+        {
             return $this->spam['url'];
         }
     }
@@ -169,7 +180,8 @@ class IndexResponse implements ApiResponse
      */
     public function getUnsubscribeUrl()
     {
-        if (isset($this->unsubscribe['url'])) {
+        if (isset($this->unsubscribe['url']))
+        {
             return $this->unsubscribe['url'];
         }
     }
@@ -187,7 +199,8 @@ class IndexResponse implements ApiResponse
      */
     public function getClickUrl()
     {
-        if (isset($this->click['url'])) {
+        if (isset($this->click['url']))
+        {
             return $this->click['url'];
         }
     }
@@ -205,7 +218,8 @@ class IndexResponse implements ApiResponse
      */
     public function getOpenUrl()
     {
-        if (isset($this->open['url'])) {
+        if (isset($this->open['url']))
+        {
             return $this->open['url'];
         }
     }

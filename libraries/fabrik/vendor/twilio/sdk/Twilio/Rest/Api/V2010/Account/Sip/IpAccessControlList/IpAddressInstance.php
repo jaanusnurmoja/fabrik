@@ -27,10 +27,11 @@ use Twilio\Version;
  * @property \DateTime dateUpdated
  * @property string uri
  */
-class IpAddressInstance extends InstanceResource {
+class IpAddressInstance extends InstanceResource
+{
     /**
      * Initialize the IpAddressInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $accountSid The unique id of the Account that is responsible
@@ -39,40 +40,43 @@ class IpAddressInstance extends InstanceResource {
      *                                       IpAccessControlList resource that
      *                                       includes this resource.
      * @param string $sid A string that identifies the IpAddress resource to fetch
-     * @return \Twilio\Rest\Api\V2010\Account\Sip\IpAccessControlList\IpAddressInstance 
+     * @return \Twilio\Rest\Api\V2010\Account\Sip\IpAccessControlList\IpAddressInstance
      */
-    public function __construct(Version $version, array $payload, $accountSid, $ipAccessControlListSid, $sid = null) {
+    public function __construct(Version $version, array $payload, $accountSid, $ipAccessControlListSid, $sid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'sid' => Values::array_get($payload, 'sid'),
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'friendlyName' => Values::array_get($payload, 'friendly_name'),
-            'ipAddress' => Values::array_get($payload, 'ip_address'),
-            'cidrPrefixLength' => Values::array_get($payload, 'cidr_prefix_length'),
+        $this->properties = [
+            'sid'                    => Values::array_get($payload, 'sid'),
+            'accountSid'             => Values::array_get($payload, 'account_sid'),
+            'friendlyName'           => Values::array_get($payload, 'friendly_name'),
+            'ipAddress'              => Values::array_get($payload, 'ip_address'),
+            'cidrPrefixLength'       => Values::array_get($payload, 'cidr_prefix_length'),
             'ipAccessControlListSid' => Values::array_get($payload, 'ip_access_control_list_sid'),
-            'dateCreated' => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
-            'dateUpdated' => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
-            'uri' => Values::array_get($payload, 'uri'),
-        );
+            'dateCreated'            => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
+            'dateUpdated'            => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
+            'uri'                    => Values::array_get($payload, 'uri'),
+        ];
 
-        $this->solution = array(
-            'accountSid' => $accountSid,
+        $this->solution = [
+            'accountSid'             => $accountSid,
             'ipAccessControlListSid' => $ipAccessControlListSid,
-            'sid' => $sid ?: $this->properties['sid'],
-        );
+            'sid'                    => $sid ?: $this->properties['sid'],
+        ];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Api\V2010\Account\Sip\IpAccessControlList\IpAddressContext Context for this
      *                                                                                 IpAddressInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new IpAddressContext(
                 $this->version,
                 $this->solution['accountSid'],
@@ -86,48 +90,54 @@ class IpAddressInstance extends InstanceResource {
 
     /**
      * Fetch a IpAddressInstance
-     * 
+     *
      * @return IpAddressInstance Fetched IpAddressInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Update the IpAddressInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return IpAddressInstance Updated IpAddressInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         return $this->proxy()->update($options);
     }
 
     /**
      * Deletes the IpAddressInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->proxy()->delete();
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -137,12 +147,14 @@ class IpAddressInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Api.V2010.IpAddressInstance ' . implode(' ', $context) . ']';

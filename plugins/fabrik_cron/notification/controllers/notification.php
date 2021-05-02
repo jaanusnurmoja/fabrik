@@ -22,45 +22,46 @@ jimport('joomla.application.component.controller');
  */
 class FabrikControllerCroncronnotification extends JControllerLegacy
 {
-	/**
-	 * Display the view
-	 *
-	 * @param   boolean  $cachable   If true, the view output will be cached - NOTE not actually used to control caching!!!
-	 * @param   array    $urlparams  An array of safe url parameters and their variable types, for valid values see {@link JFilterInput::clean()}.
-	 *
-	 * @return  JController  A JController object to support chaining.
-	 */
-	public function display($cachable = false, $urlparams = false)
-	{
-		$document = JFactory::getDocument();
-		$viewName = 'cronnotification';
-		$viewType = $document->getType();
+    /**
+     * Display the view
+     *
+     * @param boolean $cachable If true, the view output will be cached - NOTE not actually used to control caching!!!
+     * @param array $urlparams An array of safe url parameters and their variable types, for valid values see {@link JFilterInput::clean()}.
+     *
+     * @return  JController  A JController object to support chaining.
+     */
+    public function display($cachable = false, $urlparams = false)
+    {
+        $document = JFactory::getDocument();
+        $viewName = 'cronnotification';
+        $viewType = $document->getType();
 
-		// Set the default view name from the Request
-		$view = $this->getView($viewName, $viewType);
+        // Set the default view name from the Request
+        $view = $this->getView($viewName, $viewType);
 
-		// Push a model into the view
-		if ($model = $this->getModel($viewName))
-		{
-			$view->setModel($model, true);
-		}
+        // Push a model into the view
+        if ($model = $this->getModel($viewName))
+        {
+            $view->setModel($model, true);
+        }
 
-		// Display the view
-		$view->error = $this->getError();
-		$view->display();
+        // Display the view
+        $view->error = $this->getError();
+        $view->display();
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Delete a notification
-	 *
-	 * @return  void
-	 */
-	public function delete()
-	{
-		$model = $this->getModel('cronnotification');
-		$model->delete();
-		$this->setRedirect('index.php?option=com_fabrikn&task=cron.cronnotification', FText::_('NOTIFICATIONS_REMOVED'));
-	}
+    /**
+     * Delete a notification
+     *
+     * @return  void
+     */
+    public function delete()
+    {
+        $model = $this->getModel('cronnotification');
+        $model->delete();
+        $this->setRedirect('index.php?option=com_fabrikn&task=cron.cronnotification',
+            FText::_('NOTIFICATIONS_REMOVED'));
+    }
 }

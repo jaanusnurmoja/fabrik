@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Psr7;
 
 use Psr\Http\Message\StreamInterface;
@@ -12,7 +13,7 @@ trait MessageTrait
     private $headers = [];
 
     /** @var array Map of lowercase header name => original name at registration */
-    private $headerNames  = [];
+    private $headerNames = [];
 
     /** @var string */
     private $protocol = '1.1';
@@ -27,7 +28,8 @@ trait MessageTrait
 
     public function withProtocolVersion($version)
     {
-        if ($this->protocol === $version) {
+        if ($this->protocol === $version)
+        {
             return $this;
         }
 
@@ -50,7 +52,8 @@ trait MessageTrait
     {
         $header = strtolower($header);
 
-        if (!isset($this->headerNames[$header])) {
+        if (!isset($this->headerNames[$header]))
+        {
             return [];
         }
 
@@ -66,7 +69,8 @@ trait MessageTrait
 
     public function withHeader($header, $value)
     {
-        if (!is_array($value)) {
+        if (!is_array($value))
+        {
             $value = [$value];
         }
 
@@ -74,7 +78,8 @@ trait MessageTrait
         $normalized = strtolower($header);
 
         $new = clone $this;
-        if (isset($new->headerNames[$normalized])) {
+        if (isset($new->headerNames[$normalized]))
+        {
             unset($new->headers[$new->headerNames[$normalized]]);
         }
         $new->headerNames[$normalized] = $header;
@@ -85,7 +90,8 @@ trait MessageTrait
 
     public function withAddedHeader($header, $value)
     {
-        if (!is_array($value)) {
+        if (!is_array($value))
+        {
             $value = [$value];
         }
 
@@ -93,10 +99,13 @@ trait MessageTrait
         $normalized = strtolower($header);
 
         $new = clone $this;
-        if (isset($new->headerNames[$normalized])) {
+        if (isset($new->headerNames[$normalized]))
+        {
             $header = $this->headerNames[$normalized];
             $new->headers[$header] = array_merge($this->headers[$header], $value);
-        } else {
+        }
+        else
+        {
             $new->headerNames[$normalized] = $header;
             $new->headers[$header] = $value;
         }
@@ -108,7 +117,8 @@ trait MessageTrait
     {
         $normalized = strtolower($header);
 
-        if (!isset($this->headerNames[$normalized])) {
+        if (!isset($this->headerNames[$normalized]))
+        {
             return $this;
         }
 
@@ -122,7 +132,8 @@ trait MessageTrait
 
     public function getBody()
     {
-        if (!$this->stream) {
+        if (!$this->stream)
+        {
             $this->stream = stream_for('');
         }
 
@@ -131,7 +142,8 @@ trait MessageTrait
 
     public function withBody(StreamInterface $body)
     {
-        if ($body === $this->stream) {
+        if ($body === $this->stream)
+        {
             return $this;
         }
 
@@ -143,17 +155,22 @@ trait MessageTrait
     private function setHeaders(array $headers)
     {
         $this->headerNames = $this->headers = [];
-        foreach ($headers as $header => $value) {
-            if (!is_array($value)) {
+        foreach ($headers as $header => $value)
+        {
+            if (!is_array($value))
+            {
                 $value = [$value];
             }
 
             $value = $this->trimHeaderValues($value);
             $normalized = strtolower($header);
-            if (isset($this->headerNames[$normalized])) {
+            if (isset($this->headerNames[$normalized]))
+            {
                 $header = $this->headerNames[$normalized];
                 $this->headers[$header] = array_merge($this->headers[$header], $value);
-            } else {
+            }
+            else
+            {
                 $this->headerNames[$normalized] = $header;
                 $this->headers[$header] = $value;
             }
@@ -176,7 +193,8 @@ trait MessageTrait
      */
     private function trimHeaderValues(array $values)
     {
-        return array_map(function ($value) {
+        return array_map(function ($value)
+        {
             return trim($value, " \t");
         }, $values);
     }

@@ -8,7 +8,8 @@ is_dir($dir) or die('Dir not found: ' . $dir);
 \JmesPath\Env::search('foo', []);
 
 $total = 0;
-foreach (glob($dir . '/*.json') as $file) {
+foreach (glob($dir . '/*.json') as $file)
+{
     $total += runSuite($file);
 }
 echo "\nTotal time: {$total}\n";
@@ -18,8 +19,10 @@ function runSuite($file)
     $contents = file_get_contents($file);
     $json = json_decode($contents, true);
     $total = 0;
-    foreach ($json as $suite) {
-        foreach ($suite['cases'] as $case) {
+    foreach ($json as $suite)
+    {
+        foreach ($suite['cases'] as $case)
+        {
             $total += runCase(
                 $suite['given'],
                 $case['expression'],
@@ -35,17 +38,21 @@ function runCase($given, $expression, $name)
     $best = 99999;
     $runtime = \JmesPath\Env::createRuntime();
 
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 100; $i++)
+    {
         $t = microtime(true);
         $runtime($expression, $given);
         $tryTime = (microtime(true) - $t) * 1000;
-        if ($tryTime < $best) {
+        if ($tryTime < $best)
+        {
             $best = $tryTime;
         }
-        if (!getenv('CACHE')) {
+        if (!getenv('CACHE'))
+        {
             $runtime = \JmesPath\Env::createRuntime();
             // Delete compiled scripts if not caching.
-            if ($runtime instanceof \JmesPath\CompilerRuntime) {
+            if ($runtime instanceof \JmesPath\CompilerRuntime)
+            {
                 array_map('unlink', glob(sys_get_temp_dir() . '/jmespath_*.php'));
             }
         }

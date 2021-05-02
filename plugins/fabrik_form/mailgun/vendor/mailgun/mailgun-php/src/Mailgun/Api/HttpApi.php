@@ -42,22 +42,23 @@ abstract class HttpApi
     protected $requestBuilder;
 
     /**
-     * @param HttpClient     $httpClient
+     * @param HttpClient $httpClient
      * @param RequestBuilder $requestBuilder
-     * @param Hydrator       $hydrator
+     * @param Hydrator $hydrator
      */
     public function __construct(HttpClient $httpClient, RequestBuilder $requestBuilder, Hydrator $hydrator)
     {
         $this->httpClient = $httpClient;
         $this->requestBuilder = $requestBuilder;
-        if (!$hydrator instanceof NoopHydrator) {
+        if (!$hydrator instanceof NoopHydrator)
+        {
             $this->hydrator = $hydrator;
         }
     }
 
     /**
      * @param ResponseInterface $response
-     * @param string            $class
+     * @param string $class
      *
      * @return mixed|ResponseInterface
      *
@@ -65,11 +66,13 @@ abstract class HttpApi
      */
     protected function hydrateResponse(ResponseInterface $response, $class)
     {
-        if (!$this->hydrator) {
+        if (!$this->hydrator)
+        {
             return $response;
         }
 
-        if (200 !== $response->getStatusCode() && 201 !== $response->getStatusCode()) {
+        if (200 !== $response->getStatusCode() && 201 !== $response->getStatusCode())
+        {
             $this->handleErrors($response);
         }
 
@@ -86,7 +89,8 @@ abstract class HttpApi
     protected function handleErrors(ResponseInterface $response)
     {
         $statusCode = $response->getStatusCode();
-        switch ($statusCode) {
+        switch ($statusCode)
+        {
             case 400:
                 throw HttpClientException::badRequest($response);
             case 401:
@@ -105,23 +109,27 @@ abstract class HttpApi
     /**
      * Send a GET request with query parameters.
      *
-     * @param string $path           Request path
-     * @param array  $parameters     GET parameters
-     * @param array  $requestHeaders Request Headers
+     * @param string $path Request path
+     * @param array $parameters GET parameters
+     * @param array $requestHeaders Request Headers
      *
      * @return ResponseInterface
      */
     protected function httpGet($path, array $parameters = [], array $requestHeaders = [])
     {
-        if (count($parameters) > 0) {
-            $path .= '?'.http_build_query($parameters);
+        if (count($parameters) > 0)
+        {
+            $path .= '?' . http_build_query($parameters);
         }
 
-        try {
+        try
+        {
             $response = $this->httpClient->sendRequest(
                 $this->requestBuilder->create('GET', $path, $requestHeaders)
             );
-        } catch (HttplugException\NetworkException $e) {
+        }
+        catch (HttplugException\NetworkException $e)
+        {
             throw HttpServerException::networkError($e);
         }
 
@@ -131,9 +139,9 @@ abstract class HttpApi
     /**
      * Send a POST request with parameters.
      *
-     * @param string $path           Request path
-     * @param array  $parameters     POST parameters
-     * @param array  $requestHeaders Request headers
+     * @param string $path Request path
+     * @param array $parameters POST parameters
+     * @param array $requestHeaders Request headers
      *
      * @return ResponseInterface
      */
@@ -145,19 +153,22 @@ abstract class HttpApi
     /**
      * Send a POST request with raw data.
      *
-     * @param string       $path           Request path
-     * @param array|string $body           Request body
-     * @param array        $requestHeaders Request headers
+     * @param string $path Request path
+     * @param array|string $body Request body
+     * @param array $requestHeaders Request headers
      *
      * @return ResponseInterface
      */
     protected function httpPostRaw($path, $body, array $requestHeaders = [])
     {
-        try {
+        try
+        {
             $response = $this->httpClient->sendRequest(
                 $this->requestBuilder->create('POST', $path, $requestHeaders, $body)
             );
-        } catch (HttplugException\NetworkException $e) {
+        }
+        catch (HttplugException\NetworkException $e)
+        {
             throw HttpServerException::networkError($e);
         }
 
@@ -167,19 +178,22 @@ abstract class HttpApi
     /**
      * Send a PUT request.
      *
-     * @param string $path           Request path
-     * @param array  $parameters     PUT parameters
-     * @param array  $requestHeaders Request headers
+     * @param string $path Request path
+     * @param array $parameters PUT parameters
+     * @param array $requestHeaders Request headers
      *
      * @return ResponseInterface
      */
     protected function httpPut($path, array $parameters = [], array $requestHeaders = [])
     {
-        try {
+        try
+        {
             $response = $this->httpClient->sendRequest(
                 $this->requestBuilder->create('PUT', $path, $requestHeaders, $this->createRequestBody($parameters))
             );
-        } catch (HttplugException\NetworkException $e) {
+        }
+        catch (HttplugException\NetworkException $e)
+        {
             throw HttpServerException::networkError($e);
         }
 
@@ -189,19 +203,22 @@ abstract class HttpApi
     /**
      * Send a DELETE request.
      *
-     * @param string $path           Request path
-     * @param array  $parameters     DELETE parameters
-     * @param array  $requestHeaders Request headers
+     * @param string $path Request path
+     * @param array $parameters DELETE parameters
+     * @param array $requestHeaders Request headers
      *
      * @return ResponseInterface
      */
     protected function httpDelete($path, array $parameters = [], array $requestHeaders = [])
     {
-        try {
+        try
+        {
             $response = $this->httpClient->sendRequest(
                 $this->requestBuilder->create('DELETE', $path, $requestHeaders, $this->createRequestBody($parameters))
             );
-        } catch (HttplugException\NetworkException $e) {
+        }
+        catch (HttplugException\NetworkException $e)
+        {
             throw HttpServerException::networkError($e);
         }
 
@@ -218,13 +235,16 @@ abstract class HttpApi
     protected function createRequestBody(array $parameters)
     {
         $resources = [];
-        foreach ($parameters as $key => $values) {
-            if (!is_array($values)) {
+        foreach ($parameters as $key => $values)
+        {
+            if (!is_array($values))
+            {
                 $values = [$values];
             }
-            foreach ($values as $value) {
+            foreach ($values as $value)
+            {
                 $resources[] = [
-                    'name' => $key,
+                    'name'    => $key,
                     'content' => $value,
                 ];
             }

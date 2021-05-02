@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbSequence = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('FbSequence');
             this.parent(element, options);

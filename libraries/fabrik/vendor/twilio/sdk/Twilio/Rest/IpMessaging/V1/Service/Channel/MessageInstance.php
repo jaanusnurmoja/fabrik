@@ -31,55 +31,59 @@ use Twilio\Version;
  * @property integer index
  * @property string url
  */
-class MessageInstance extends InstanceResource {
+class MessageInstance extends InstanceResource
+{
     /**
      * Initialize the MessageInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $serviceSid The unique id of the Service this message belongs
      *                           to.
      * @param string $channelSid The channel_sid
      * @param string $sid The sid
-     * @return \Twilio\Rest\IpMessaging\V1\Service\Channel\MessageInstance 
+     * @return \Twilio\Rest\IpMessaging\V1\Service\Channel\MessageInstance
      */
-    public function __construct(Version $version, array $payload, $serviceSid, $channelSid, $sid = null) {
+    public function __construct(Version $version, array $payload, $serviceSid, $channelSid, $sid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'sid' => Values::array_get($payload, 'sid'),
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'attributes' => Values::array_get($payload, 'attributes'),
-            'serviceSid' => Values::array_get($payload, 'service_sid'),
-            'to' => Values::array_get($payload, 'to'),
-            'channelSid' => Values::array_get($payload, 'channel_sid'),
+        $this->properties = [
+            'sid'         => Values::array_get($payload, 'sid'),
+            'accountSid'  => Values::array_get($payload, 'account_sid'),
+            'attributes'  => Values::array_get($payload, 'attributes'),
+            'serviceSid'  => Values::array_get($payload, 'service_sid'),
+            'to'          => Values::array_get($payload, 'to'),
+            'channelSid'  => Values::array_get($payload, 'channel_sid'),
             'dateCreated' => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
             'dateUpdated' => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
-            'wasEdited' => Values::array_get($payload, 'was_edited'),
-            'from' => Values::array_get($payload, 'from'),
-            'body' => Values::array_get($payload, 'body'),
-            'index' => Values::array_get($payload, 'index'),
-            'url' => Values::array_get($payload, 'url'),
-        );
+            'wasEdited'   => Values::array_get($payload, 'was_edited'),
+            'from'        => Values::array_get($payload, 'from'),
+            'body'        => Values::array_get($payload, 'body'),
+            'index'       => Values::array_get($payload, 'index'),
+            'url'         => Values::array_get($payload, 'url'),
+        ];
 
-        $this->solution = array(
+        $this->solution = [
             'serviceSid' => $serviceSid,
             'channelSid' => $channelSid,
-            'sid' => $sid ?: $this->properties['sid'],
-        );
+            'sid'        => $sid ?: $this->properties['sid'],
+        ];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\IpMessaging\V1\Service\Channel\MessageContext Context
      *                                                                    for this
      *                                                                    MessageInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new MessageContext(
                 $this->version,
                 $this->solution['serviceSid'],
@@ -93,48 +97,54 @@ class MessageInstance extends InstanceResource {
 
     /**
      * Fetch a MessageInstance
-     * 
+     *
      * @return MessageInstance Fetched MessageInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Deletes the MessageInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->proxy()->delete();
     }
 
     /**
      * Update the MessageInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return MessageInstance Updated MessageInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         return $this->proxy()->update($options);
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -144,12 +154,14 @@ class MessageInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.IpMessaging.V1.MessageInstance ' . implode(' ', $context) . ']';

@@ -45,15 +45,15 @@ define(['jquery', 'fab/fabrik', 'fusionchart'], function (jQuery, Fabrik, fc) {
             Fabrik.loader.start(self.options.chartContainer);
 
             jQuery.ajax({
-                url     : '',
-                method  : 'post',
+                url: '',
+                method: 'post',
                 dataType: 'json',
-                data  : {
-                    'option'         : 'com_fabrik',
-                    'format'         : 'raw',
-                    'task'           : 'ajax_getFusionchart',
-                    'view'           : 'visualization',
-                    'controller'     : 'visualization.fusionchart',
+                data: {
+                    'option': 'com_fabrik',
+                    'format': 'raw',
+                    'task': 'ajax_getFusionchart',
+                    'view': 'visualization',
+                    'controller': 'visualization.fusionchart',
                     'visualizationid': self.options.id
                 }
 

@@ -20,55 +20,54 @@ defined('_JEXEC') or die('Restricted access');
  * @subpackage  Fabrik.helpers
  * @since       3.0.6
  */
-
 class Lizt
 {
-	/**
-	 * Get a list of elements which match a set of criteria
-	 *
-	 * @param   object  $listModel  list model to search
-	 * @param   array   $filter     array of element properties to match on
-	 *
-	 * @throws \Exception
-	 *
-	 * @return  array
-	 */
+    /**
+     * Get a list of elements which match a set of criteria
+     *
+     * @param object $listModel list model to search
+     * @param array $filter array of element properties to match on
+     *
+     * @return  array
+     * @throws \Exception
+     *
+     */
 
-	public static function getElements($listModel, $filter = array())
-	{
-		$found = array();
-		$groups = $listModel->getFormGroupElementData();
+    public static function getElements($listModel, $filter = [])
+    {
+        $found = [];
+        $groups = $listModel->getFormGroupElementData();
 
-		foreach ($groups as $groupModel)
-		{
-			$elementModels = $groupModel->getMyElements();
+        foreach ($groups as $groupModel)
+        {
+            $elementModels = $groupModel->getMyElements();
 
-			foreach ($elementModels as $elementModel)
-			{
-				$item = $elementModel->getElement();
-				$ok = true;
+            foreach ($elementModels as $elementModel)
+            {
+                $item = $elementModel->getElement();
+                $ok = true;
 
-				foreach ($filter as $key => $val)
-				{
-					if ($item->$key != $val)
-					{
-						$ok = false;
-					}
-				}
+                foreach ($filter as $key => $val)
+                {
+                    if ($item->$key != $val)
+                    {
+                        $ok = false;
+                    }
+                }
 
-				if ($ok)
-				{
-					$found[] = $elementModel;
-				}
-			}
-		}
+                if ($ok)
+                {
+                    $found[] = $elementModel;
+                }
+            }
+        }
 
-		if (empty($found))
-		{
-			$filterNames = implode(', ', $filter);
-			throw new \Exception(Text::sprintf('COM_FABRIK_ERR_NO_ELEMENTS_MATCHED_FILTER', $filterNames));
-		}
+        if (empty($found))
+        {
+            $filterNames = implode(', ', $filter);
+            throw new \Exception(Text::sprintf('COM_FABRIK_ERR_NO_ELEMENTS_MATCHED_FILTER', $filterNames));
+        }
 
-		return $found;
-	}
+        return $found;
+    }
 }

@@ -11,6 +11,7 @@
 /**
  * @namespace
  */
+
 namespace Pop\Shipping\Adapter;
 
 /**
@@ -23,7 +24,6 @@ namespace Pop\Shipping\Adapter;
  * @license    http://www.popphp.org/license     New BSD License
  * @version    2.1.0
  */
-
 abstract class AbstractAdapter implements AdapterInterface
 {
 
@@ -54,7 +54,7 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * Send transaction
      *
-     * @param  boolean $verifyPeer
+     * @param boolean $verifyPeer
      * @return void
      */
     abstract public function send($verifyPeer = true);
@@ -116,18 +116,21 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * Parse the curl response
      *
-     * @param  resource $curl
+     * @param resource $curl
      * @return string
      */
     protected function parseResponse($curl)
     {
         $response = curl_exec($curl);
 
-        if (curl_getinfo($curl, CURLOPT_HEADER)) {
+        if (curl_getinfo($curl, CURLOPT_HEADER))
+        {
             $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-            $body       = substr($response, $headerSize);
-        } else {
-            $body       = $response;
+            $body = substr($response, $headerSize);
+        }
+        else
+        {
+            $body = $response;
         }
 
         return $body;

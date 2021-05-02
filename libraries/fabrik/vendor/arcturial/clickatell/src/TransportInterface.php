@@ -33,13 +33,13 @@ interface TransportInterface
      *      error   => string|false
      *      code    => string|false
      *
-     * @param array   $to       The recipient list
-     * @param string  $message  Message
-     * @param array   $extra    Extra parameters (based on Clickatell documents)
+     * @param array $to The recipient list
+     * @param string $message Message
+     * @param array $extra Extra parameters (based on Clickatell documents)
      *
      * @return array
      */
-    public function sendMessage($to, $message, $extra = array());
+    public function sendMessage($to, $message, $extra = []);
 
     /**
      * API call for "getBalance".
@@ -47,9 +47,9 @@ interface TransportInterface
      * Response format:
      *      balance => int
      *
+     * @return int
      * @throws Exception
      *
-     * @return int
      */
     public function getBalance();
 
@@ -58,9 +58,9 @@ interface TransportInterface
      *
      * @param string $apiMsgId ApiMsgId to query
      *
+     * @return mixed
      * @throws Exception
      *
-     * @return mixed
      */
     public function stopMessage($apiMsgId);
 
@@ -69,9 +69,9 @@ interface TransportInterface
      *
      * @param string $apiMsgId ApiMsgId to query
      *
+     * @return mixed
      * @throws Exception
      *
-     * @return mixed
      */
     public function queryMessage($apiMsgId);
 
@@ -80,9 +80,9 @@ interface TransportInterface
      *
      * @param int $msisdn Number to check for coverage
      *
+     * @return mixed
      * @throws Exception
      *
-     * @return mixed
      */
     public function routeCoverage($msisdn);
 
@@ -91,9 +91,9 @@ interface TransportInterface
      *
      * @param string $apiMsgId ApiMsgId to query
      *
+     * @return mixed
      * @throws Exception
      *
-     * @return mixed
      */
     public function getMessageCharge($apiMsgId);
 }

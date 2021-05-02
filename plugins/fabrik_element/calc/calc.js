@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbCalc = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('calc');
             this.parent(element, options);
@@ -37,17 +37,17 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 }.bind(this));
             }
 
-            Fabrik.addEvent('fabrik.form.group.duplicate.end', function(form, event, groupId) {
+            Fabrik.addEvent('fabrik.form.group.duplicate.end', function (form, event, groupId) {
                 if (jQuery.inArray(groupId, this.observeGroupIds) !== -1) {
                     this.calc();
                 }
             }.bind(this));
 
-	        Fabrik.addEvent('fabrik.form.group.delete.end', function(form, event, groupId) {
-		        if (jQuery.inArray(groupId, this.observeGroupIds) !== -1) {
-			        this.calc();
-		        }
-	        }.bind(this));
+            Fabrik.addEvent('fabrik.form.group.delete.end', function (form, event, groupId) {
+                if (jQuery.inArray(groupId, this.observeGroupIds) !== -1) {
+                    this.calc();
+                }
+            }.bind(this));
 
             this.parent();
         },
@@ -61,8 +61,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 this.form.formElements[o].addNewEventAux(this.form.formElements[o].getChangeEvent(), function (e) {
                     this.calc(e);
                 }.bind(this));
-            }
-            else {
+            } else {
                 // $$$ hugh - check to see if an observed element is actually part of a repeat group,
                 // and if so, modify the placeholder name they used to match this instance of it
                 // @TODO - add and test code for non-joined repeats!
@@ -76,8 +75,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                                 this.calc(e);
                             }.bind(this));
                     }
-                }
-                else {
+                } else {
                     this.form.repeatGroupMarkers.each(function (v, k) {
                         o2 = '';
                         for (v2 = 0; v2 < v; v2++) {
@@ -122,21 +120,21 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             // For placeholders lets set repeat joined groups to their full element name
 
             var data = {
-	            'option'       : 'com_fabrik',
-	            'format'       : 'raw',
-	            'task'         : 'plugin.pluginAjax',
-	            'plugin'       : 'calc',
-	            'method'       : 'ajax_calc',
-	            'element_id'   : this.options.id,
-	            'formid'       : this.form.id,
-	            'repeatCounter': this.options.repeatCounter
+                'option': 'com_fabrik',
+                'format': 'raw',
+                'task': 'plugin.pluginAjax',
+                'plugin': 'calc',
+                'method': 'ajax_calc',
+                'element_id': this.options.id,
+                'formid': this.form.id,
+                'repeatCounter': this.options.repeatCounter
             };
             data = Object.append(formData, data);
             Fabrik.loader.start(this.element.getParent(), Joomla.JText._('COM_FABRIK_LOADING'));
             new Request.HTML({
-                'url'     : '',
-                method    : 'post',
-                'data'    : data,
+                'url': '',
+                method: 'post',
+                'data': data,
                 onSuccess: function (tree, elements, r, scripts) {
                     Fabrik.loader.stop(this.element.getParent());
                     this.update(r);

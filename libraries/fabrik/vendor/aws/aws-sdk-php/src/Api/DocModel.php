@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -18,7 +19,8 @@ class DocModel
      */
     public function __construct(array $docs)
     {
-        if (!extension_loaded('tidy')) {
+        if (!extension_loaded('tidy'))
+        {
             throw new \RuntimeException('The "tidy" PHP extension is required.');
         }
 
@@ -76,27 +78,32 @@ class DocModel
     /**
      * Retrieves documentation about a shape, specific to the context.
      *
-     * @param string $shapeName  Name of the shape.
+     * @param string $shapeName Name of the shape.
      * @param string $parentName Name of the parent/context shape.
-     * @param string $ref        Name used by the context to reference the shape.
+     * @param string $ref Name used by the context to reference the shape.
      *
      * @return null|string
      */
     public function getShapeDocs($shapeName, $parentName, $ref)
     {
-        if (!isset($this->docs['shapes'][$shapeName])) {
+        if (!isset($this->docs['shapes'][$shapeName]))
+        {
             return '';
         }
 
         $result = '';
         $d = $this->docs['shapes'][$shapeName];
-        if (isset($d['refs']["{$parentName}\$${ref}"])) {
+        if (isset($d['refs']["{$parentName}\$${ref}"]))
+        {
             $result = $d['refs']["{$parentName}\$${ref}"];
-        } elseif (isset($d['base'])) {
+        }
+        elseif (isset($d['base']))
+        {
             $result = $d['base'];
         }
 
-        if (isset($d['append'])) {
+        if (isset($d['append']))
+        {
             $result .= $d['append'];
         }
 
@@ -105,24 +112,25 @@ class DocModel
 
     private function clean($content)
     {
-        if (!$content) {
+        if (!$content)
+        {
             return '';
         }
 
         $tidy = new \Tidy();
         $tidy->parseString($content, [
-            'indent' => true,
-            'doctype' => 'omit',
-            'output-html' => true,
-            'show-body-only' => true,
-            'drop-empty-paras' => true,
-            'drop-font-tags' => true,
+            'indent'                      => true,
+            'doctype'                     => 'omit',
+            'output-html'                 => true,
+            'show-body-only'              => true,
+            'drop-empty-paras'            => true,
+            'drop-font-tags'              => true,
             'drop-proprietary-attributes' => true,
-            'hide-comments' => true,
-            'logical-emphasis' => true
+            'hide-comments'               => true,
+            'logical-emphasis'            => true
         ]);
         $tidy->cleanRepair();
 
-        return (string) $content;
+        return (string)$content;
     }
 }

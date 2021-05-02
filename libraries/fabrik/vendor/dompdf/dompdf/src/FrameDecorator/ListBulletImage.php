@@ -6,6 +6,7 @@
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
+
 namespace Dompdf\FrameDecorator;
 
 use Dompdf\Dompdf;
@@ -44,7 +45,7 @@ class ListBulletImage extends AbstractFrameDecorator
     /**
      * Class constructor
      *
-     * @param Frame $frame   the bullet frame to decorate
+     * @param Frame $frame the bullet frame to decorate
      * @param Dompdf $dompdf the document's dompdf object
      */
     function __construct(Frame $frame, Dompdf $dompdf)
@@ -88,7 +89,7 @@ class ListBulletImage extends AbstractFrameDecorator
         //This controls the distance between bullet image and text
         //return $this->_width;
         return $this->_frame->get_style()->get_font_size() * ListBullet::BULLET_SIZE +
-        2 * ListBullet::BULLET_PADDING;
+            2 * ListBullet::BULLET_PADDING;
     }
 
     /**
@@ -118,7 +119,8 @@ class ListBulletImage extends AbstractFrameDecorator
 
         // Small hack to prevent indenting of list text
         // Image Might not exist, then position like on list_bullet_frame_decorator fallback to none.
-        if ($this->_frame->get_style()->list_style_position === "outside" || $this->_width == 0) {
+        if ($this->_frame->get_style()->list_style_position === "outside" || $this->_width == 0)
+        {
             return 0;
         }
         //This aligns the "inside" image position with the text.

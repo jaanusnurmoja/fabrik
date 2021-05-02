@@ -2,7 +2,7 @@
 /**
  * @package php-svg-lib
  * @link    http://github.com/PhenX/php-svg-lib
- * @author  Fabien Ménager <fabien.menager@gmail.com>
+ * @author  Fabien Mï¿½nager <fabien.menager@gmail.com>
  * @license GNU LGPLv3+ http://www.gnu.org/copyleft/lesser.html
  */
 
@@ -20,30 +20,38 @@ class LinearGradient extends AbstractTag
     protected $y2;
 
     /** @var Gradient\Stop[] */
-    protected $stops = array();
+    protected $stops = [];
 
     public function start($attributes)
     {
         parent::start($attributes);
 
-        if (isset($attributes['x1'])) {
+        if (isset($attributes['x1']))
+        {
             $this->x1 = $attributes['x1'];
         }
-        if (isset($attributes['y1'])) {
+        if (isset($attributes['y1']))
+        {
             $this->y1 = $attributes['y1'];
         }
-        if (isset($attributes['x2'])) {
+        if (isset($attributes['x2']))
+        {
             $this->x2 = $attributes['x2'];
         }
-        if (isset($attributes['y2'])) {
+        if (isset($attributes['y2']))
+        {
             $this->y2 = $attributes['y2'];
         }
     }
 
-    public function getStops() {
-        if (empty($this->stops)) {
-            foreach ($this->children as $_child) {
-                if ($_child->tagName != "stop") {
+    public function getStops()
+    {
+        if (empty($this->stops))
+        {
+            foreach ($this->children as $_child)
+            {
+                if ($_child->tagName != "stop")
+                {
                     continue;
                 }
 
@@ -51,26 +59,32 @@ class LinearGradient extends AbstractTag
                 $_attributes = $_child->attributes;
 
                 // Style
-                if (isset($_attributes["style"])) {
+                if (isset($_attributes["style"]))
+                {
                     $_style = Style::parseCssStyle($_attributes["style"]);
 
-                    if (isset($_style["stop-color"])) {
+                    if (isset($_style["stop-color"]))
+                    {
                         $_stop->color = Style::parseColor($_style["stop-color"]);
                     }
 
-                    if (isset($_style["stop-opacity"])) {
+                    if (isset($_style["stop-opacity"]))
+                    {
                         $_stop->opacity = max(0, min(1.0, $_style["stop-opacity"]));
                     }
                 }
 
                 // Attributes
-                if (isset($_attributes["offset"])) {
+                if (isset($_attributes["offset"]))
+                {
                     $_stop->offset = $_attributes["offset"];
                 }
-                if (isset($_attributes["stop-color"])) {
+                if (isset($_attributes["stop-color"]))
+                {
                     $_stop->color = Style::parseColor($_attributes["stop-color"]);
                 }
-                if (isset($_attributes["stop-opacity"])) {
+                if (isset($_attributes["stop-opacity"]))
+                {
                     $_stop->opacity = max(0, min(1.0, $_attributes["stop-opacity"]));
                 }
 

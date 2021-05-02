@@ -14,13 +14,12 @@ figure.image {
 figcaption {
     width: 100%;
     display: inline-block;
-    margin:auto;
+    margin: auto;
 }
 
-.slick-slide
-{
-    width:auto;
-    height:auto;
+.slick-slide {
+    width: auto;
+    height: auto;
 }
 
 /* You may want to override this in custom.css as default colors don't work well with light theme */

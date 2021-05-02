@@ -9,9 +9,9 @@ define(['jquery'], function (jQuery) {
 
     var FbListPlugin = new Class({
         Implements: [Events, Options],
-        options   : {
+        options: {
             requireChecked: true,
-            canAJAX       : true
+            canAJAX: true
         },
 
         initialize: function (options) {

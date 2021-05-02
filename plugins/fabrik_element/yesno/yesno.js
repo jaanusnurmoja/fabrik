@@ -7,7 +7,7 @@
 
 define(['jquery', 'element/radiobutton/radiobutton'], function (jQuery, FbRadio) {
     window.FbYesno = new Class({
-        Extends   : FbRadio,
+        Extends: FbRadio,
         initialize: function (element, options) {
             this.setPlugin('fabrikyesno');
             this.parent(element, options);

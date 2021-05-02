@@ -26,9 +26,9 @@ class DecodingEventStreamIterator implements Iterator
     const BYTES_TRAILING = 4;
 
     private static $preludeFormat = [
-        self::LENGTH_TOTAL => 'decodeUint32',
+        self::LENGTH_TOTAL   => 'decodeUint32',
         self::LENGTH_HEADERS => 'decodeUint32',
-        self::CRC_PRELUDE => 'decodeUint32',
+        self::CRC_PRELUDE    => 'decodeUint32',
     ];
 
     private static $lengthFormatMap = [
@@ -82,7 +82,8 @@ class DecodingEventStreamIterator implements Iterator
         $headers = [];
         $bytesRead = 0;
 
-        while ($bytesRead < $headerBytes) {
+        while ($bytesRead < $headerBytes)
+        {
             list($key, $numBytes) = $this->decodeString(1);
             $bytesRead += $numBytes;
 
@@ -93,7 +94,8 @@ class DecodingEventStreamIterator implements Iterator
             list($value, $numBytes) = $this->{$f}();
             $bytesRead += $numBytes;
 
-            if (isset($headers[$key])) {
+            if (isset($headers[$key]))
+            {
                 throw new ParserException('Duplicate key in event headers.');
             }
             $headers[$key] = $value;
@@ -108,8 +110,10 @@ class DecodingEventStreamIterator implements Iterator
         $bytesRead = 0;
 
         $calculatedCrc = null;
-        foreach (self::$preludeFormat as $key => $decodeFunction) {
-            if ($key === self::CRC_PRELUDE) {
+        foreach (self::$preludeFormat as $key => $decodeFunction)
+        {
+            if ($key === self::CRC_PRELUDE)
+            {
                 $hashCopy = hash_copy($this->hashContext);
                 $calculatedCrc = hash_final($this->hashContext, true);
                 $this->hashContext = $hashCopy;
@@ -120,7 +124,8 @@ class DecodingEventStreamIterator implements Iterator
             $prelude[$key] = $value;
         }
 
-        if (unpack('N', $calculatedCrc)[1] !== $prelude[self::CRC_PRELUDE]) {
+        if (unpack('N', $calculatedCrc)[1] !== $prelude[self::CRC_PRELUDE])
+        {
             throw new ParserException('Prelude checksum mismatch.');
         }
 
@@ -131,24 +136,27 @@ class DecodingEventStreamIterator implements Iterator
     {
         $event = [];
 
-        if ($this->stream->tell() < $this->stream->getSize()) {
+        if ($this->stream->tell() < $this->stream->getSize())
+        {
             $this->hashContext = hash_init('crc32b');
 
             $bytesLeft = $this->stream->getSize() - $this->stream->tell();
             list($prelude, $numBytes) = $this->parsePrelude();
-            if ($prelude[self::LENGTH_TOTAL] > $bytesLeft) {
+            if ($prelude[self::LENGTH_TOTAL] > $bytesLeft)
+            {
                 throw new ParserException('Message length too long.');
             }
             $bytesLeft -= $numBytes;
 
-            if ($prelude[self::LENGTH_HEADERS] > $bytesLeft) {
+            if ($prelude[self::LENGTH_HEADERS] > $bytesLeft)
+            {
                 throw new ParserException('Headers length too long.');
             }
 
             list(
                 $event[self::HEADERS],
                 $numBytes
-            ) = $this->parseHeaders($prelude[self::LENGTH_HEADERS]);
+                ) = $this->parseHeaders($prelude[self::LENGTH_HEADERS]);
 
             $event[self::PAYLOAD] = Psr7\stream_for(
                 $this->readAndHashBytes(
@@ -159,7 +167,8 @@ class DecodingEventStreamIterator implements Iterator
 
             $calculatedCrc = hash_final($this->hashContext, true);
             $messageCrc = $this->stream->read(4);
-            if ($calculatedCrc !== $messageCrc) {
+            if ($calculatedCrc !== $messageCrc)
+            {
                 throw new ParserException('Message checksum mismatch.');
             }
         }
@@ -188,7 +197,8 @@ class DecodingEventStreamIterator implements Iterator
     public function next()
     {
         $this->currentPosition = $this->stream->tell();
-        if ($this->valid()) {
+        if ($this->valid())
+        {
             $this->key++;
             $this->currentEvent = $this->parseEvent();
         }
@@ -232,7 +242,8 @@ class DecodingEventStreamIterator implements Iterator
     private function uintToInt($val, $size)
     {
         $signedCap = pow(2, $size - 1);
-        if ($val > $signedCap) {
+        if ($val > $signedCap)
+        {
             $val -= (2 * $signedCap);
         }
         return $val;
@@ -284,16 +295,18 @@ class DecodingEventStreamIterator implements Iterator
 
     private function unpackInt64($bytes)
     {
-        if (version_compare(PHP_VERSION, '5.6.3', '<')) {
+        if (version_compare(PHP_VERSION, '5.6.3', '<'))
+        {
             $d = unpack('N2', $bytes);
             return [1 => $d[1] << 32 | $d[2]];
         }
         return unpack('J', $bytes);
     }
 
-    private function decodeBytes($lengthBytes=2)
+    private function decodeBytes($lengthBytes = 2)
     {
-        if (!isset(self::$lengthFormatMap[$lengthBytes])) {
+        if (!isset(self::$lengthFormatMap[$lengthBytes]))
+        {
             throw new ParserException('Undefined variable length format.');
         }
         $f = self::$lengthFormatMap[$lengthBytes];
@@ -301,9 +314,10 @@ class DecodingEventStreamIterator implements Iterator
         return [$this->readAndHashBytes($len), $len + $bytes];
     }
 
-    private function decodeString($lengthBytes=2)
+    private function decodeString($lengthBytes = 2)
     {
-        if (!isset(self::$lengthFormatMap[$lengthBytes])) {
+        if (!isset(self::$lengthFormatMap[$lengthBytes]))
+        {
             throw new ParserException('Undefined variable length format.');
         }
         $f = self::$lengthFormatMap[$lengthBytes];

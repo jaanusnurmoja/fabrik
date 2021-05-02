@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp;
 
 use GuzzleHttp\Promise\PromisorInterface;
@@ -22,10 +23,10 @@ class Pool implements PromisorInterface
     private $each;
 
     /**
-     * @param ClientInterface $client   Client used to send the requests.
+     * @param ClientInterface $client Client used to send the requests.
      * @param array|\Iterator $requests Requests or functions that return
      *                                  requests to send concurrently.
-     * @param array           $config   Associative array of options
+     * @param array $config Associative array of options
      *     - concurrency: (int) Maximum number of requests to send concurrently
      *     - options: Array of request options to apply to each request.
      *     - fulfilled: (callable) Function to invoke when a request completes.
@@ -35,29 +36,43 @@ class Pool implements PromisorInterface
         ClientInterface $client,
         $requests,
         array $config = []
-    ) {
+    )
+    {
         // Backwards compatibility.
-        if (isset($config['pool_size'])) {
+        if (isset($config['pool_size']))
+        {
             $config['concurrency'] = $config['pool_size'];
-        } elseif (!isset($config['concurrency'])) {
+        }
+        elseif (!isset($config['concurrency']))
+        {
             $config['concurrency'] = 25;
         }
 
-        if (isset($config['options'])) {
+        if (isset($config['options']))
+        {
             $opts = $config['options'];
             unset($config['options']);
-        } else {
+        }
+        else
+        {
             $opts = [];
         }
 
         $iterable = \GuzzleHttp\Promise\iter_for($requests);
-        $requests = function () use ($iterable, $client, $opts) {
-            foreach ($iterable as $key => $rfn) {
-                if ($rfn instanceof RequestInterface) {
+        $requests = function () use ($iterable, $client, $opts)
+        {
+            foreach ($iterable as $key => $rfn)
+            {
+                if ($rfn instanceof RequestInterface)
+                {
                     yield $key => $client->sendAsync($rfn, $opts);
-                } elseif (is_callable($rfn)) {
+                }
+                elseif (is_callable($rfn))
+                {
                     yield $key => $rfn($opts);
-                } else {
+                }
+                else
+                {
                     throw new \InvalidArgumentException('Each value yielded by '
                         . 'the iterator must be a Psr7\Http\Message\RequestInterface '
                         . 'or a callable that returns a promise that fulfills '
@@ -82,9 +97,9 @@ class Pool implements PromisorInterface
      * as such, is NOT recommended when sending a large number or an
      * indeterminate number of requests concurrently.
      *
-     * @param ClientInterface $client   Client used to send the requests
+     * @param ClientInterface $client Client used to send the requests
      * @param array|\Iterator $requests Requests to send concurrently.
-     * @param array           $options  Passes through the options available in
+     * @param array $options Passes through the options available in
      *                                  {@see GuzzleHttp\Pool::__construct}
      *
      * @return array Returns an array containing the response or an exception
@@ -95,7 +110,8 @@ class Pool implements PromisorInterface
         ClientInterface $client,
         $requests,
         array $options = []
-    ) {
+    )
+    {
         $res = [];
         self::cmpCallback($options, 'fulfilled', $res);
         self::cmpCallback($options, 'rejected', $res);
@@ -108,13 +124,18 @@ class Pool implements PromisorInterface
 
     private static function cmpCallback(array &$options, $name, array &$results)
     {
-        if (!isset($options[$name])) {
-            $options[$name] = function ($v, $k) use (&$results) {
+        if (!isset($options[$name]))
+        {
+            $options[$name] = function ($v, $k) use (&$results)
+            {
                 $results[$k] = $v;
             };
-        } else {
+        }
+        else
+        {
             $currentFn = $options[$name];
-            $options[$name] = function ($v, $k) use (&$results, $currentFn) {
+            $options[$name] = function ($v, $k) use (&$results, $currentFn)
+            {
                 $currentFn($v, $k);
                 $results[$k] = $v;
             };

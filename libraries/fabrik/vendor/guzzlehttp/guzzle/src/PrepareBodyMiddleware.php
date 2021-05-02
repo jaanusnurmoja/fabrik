@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp;
 
 use GuzzleHttp\Promise\PromiseInterface;
@@ -11,7 +12,7 @@ use Psr\Http\Message\RequestInterface;
  */
 class PrepareBodyMiddleware
 {
-    /** @var callable  */
+    /** @var callable */
     private $nextHandler;
 
     /**
@@ -24,7 +25,7 @@ class PrepareBodyMiddleware
 
     /**
      * @param RequestInterface $request
-     * @param array            $options
+     * @param array $options
      *
      * @return PromiseInterface
      */
@@ -33,29 +34,38 @@ class PrepareBodyMiddleware
         $fn = $this->nextHandler;
 
         // Don't do anything if the request has no body.
-        if ($request->getBody()->getSize() === 0) {
+        if ($request->getBody()->getSize() === 0)
+        {
             return $fn($request, $options);
         }
 
         $modify = [];
 
         // Add a default content-type if possible.
-        if (!$request->hasHeader('Content-Type')) {
-            if ($uri = $request->getBody()->getMetadata('uri')) {
-                if ($type = Psr7\mimetype_from_filename($uri)) {
+        if (!$request->hasHeader('Content-Type'))
+        {
+            if ($uri = $request->getBody()->getMetadata('uri'))
+            {
+                if ($type = Psr7\mimetype_from_filename($uri))
+                {
                     $modify['set_headers']['Content-Type'] = $type;
                 }
             }
         }
 
         // Add a default content-length or transfer-encoding header.
-        if (!$request->hasHeader('Content-Length')
+        if (
+            !$request->hasHeader('Content-Length')
             && !$request->hasHeader('Transfer-Encoding')
-        ) {
+        )
+        {
             $size = $request->getBody()->getSize();
-            if ($size !== null) {
+            if ($size !== null)
+            {
                 $modify['set_headers']['Content-Length'] = $size;
-            } else {
+            }
+            else
+            {
                 $modify['set_headers']['Transfer-Encoding'] = 'chunked';
             }
         }
@@ -70,27 +80,32 @@ class PrepareBodyMiddleware
         RequestInterface $request,
         array $options,
         array &$modify
-    ) {
+    )
+    {
         // Determine if the Expect header should be used
-        if ($request->hasHeader('Expect')) {
+        if ($request->hasHeader('Expect'))
+        {
             return;
         }
 
         $expect = isset($options['expect']) ? $options['expect'] : null;
 
         // Return if disabled or if you're not using HTTP/1.1 or HTTP/2.0
-        if ($expect === false || $request->getProtocolVersion() < 1.1) {
+        if ($expect === false || $request->getProtocolVersion() < 1.1)
+        {
             return;
         }
 
         // The expect header is unconditionally enabled
-        if ($expect === true) {
+        if ($expect === true)
+        {
             $modify['set_headers']['Expect'] = '100-Continue';
             return;
         }
 
         // By default, send the expect header when the payload is > 1mb
-        if ($expect === null) {
+        if ($expect === null)
+        {
             $expect = 1048576;
         }
 
@@ -99,7 +114,8 @@ class PrepareBodyMiddleware
         $body = $request->getBody();
         $size = $body->getSize();
 
-        if ($size === null || $size >= (int) $expect || !$body->isSeekable()) {
+        if ($size === null || $size >= (int)$expect || !$body->isSeekable())
+        {
             $modify['set_headers']['Expect'] = '100-Continue';
         }
     }

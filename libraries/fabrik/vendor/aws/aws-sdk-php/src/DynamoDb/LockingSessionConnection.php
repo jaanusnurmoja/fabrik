@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DynamoDb;
 
 use Aws\DynamoDb\Exception\DynamoDbException;
@@ -11,10 +12,10 @@ class LockingSessionConnection extends StandardSessionConnection
     public function __construct(DynamoDbClient $client, array $config = [])
     {
         parent::__construct($client, $config + [
-            'max_lock_wait_time'       => 10,
-            'min_lock_retry_microtime' => 10000,
-            'max_lock_retry_microtime' => 50000,
-        ]);
+                'max_lock_wait_time'       => 10,
+                'min_lock_retry_microtime' => 10000,
+                'max_lock_retry_microtime' => 50000,
+            ]);
     }
 
     /**
@@ -34,26 +35,36 @@ class LockingSessionConnection extends StandardSessionConnection
         ];
 
         // Acquire the lock and fetch the item data.
-        $timeout  = time() + $this->config['max_lock_wait_time'];
-        while (true) {
-            try {
+        $timeout = time() + $this->config['max_lock_wait_time'];
+        while (true)
+        {
+            try
+            {
                 $item = [];
                 $result = $this->client->updateItem($params);
-                if (isset($result['Attributes'])) {
-                    foreach ($result['Attributes'] as $key => $value) {
+                if (isset($result['Attributes']))
+                {
+                    foreach ($result['Attributes'] as $key => $value)
+                    {
                         $item[$key] = current($value);
                     }
                 }
                 return $item;
-            } catch (DynamoDbException $e) {
-                if ($e->getAwsErrorCode() === 'ConditionalCheckFailedException'
+            }
+            catch (DynamoDbException $e)
+            {
+                if (
+                    $e->getAwsErrorCode() === 'ConditionalCheckFailedException'
                     && time() < $timeout
-                ) {
+                )
+                {
                     usleep(rand(
                         $this->config['min_lock_retry_microtime'],
                         $this->config['max_lock_retry_microtime']
                     ));
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }

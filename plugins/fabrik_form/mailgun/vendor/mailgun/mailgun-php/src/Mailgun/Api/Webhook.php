@@ -30,10 +30,10 @@ class Webhook extends HttpApi
     private $apiKey;
 
     /**
-     * @param HttpClient     $httpClient
+     * @param HttpClient $httpClient
      * @param RequestBuilder $requestBuilder
-     * @param Hydrator       $hydrator
-     * @param string         $apiKey
+     * @param Hydrator $hydrator
+     * @param string $apiKey
      */
     public function __construct(HttpClient $httpClient, RequestBuilder $requestBuilder, Hydrator $hydrator, $apiKey)
     {
@@ -47,7 +47,7 @@ class Webhook extends HttpApi
      * If this function returns FALSE, you must not process the request.
      * You should reject the request with status code 403 Forbidden.
      *
-     * @param int    $timestamp
+     * @param int $timestamp
      * @param string $token
      * @param string $signature
      *
@@ -55,16 +55,20 @@ class Webhook extends HttpApi
      */
     public function verifyWebhookSignature($timestamp, $token, $signature)
     {
-        if (empty($timestamp) || empty($token) || empty($signature)) {
+        if (empty($timestamp) || empty($token) || empty($signature))
+        {
             return false;
         }
 
-        $hmac = hash_hmac('sha256', $timestamp.$token, $this->apiKey);
+        $hmac = hash_hmac('sha256', $timestamp . $token, $this->apiKey);
 
-        if (function_exists('hash_equals')) {
+        if (function_exists('hash_equals'))
+        {
             // hash_equals is constant time, but will not be introduced until PHP 5.6
             return hash_equals($hmac, $signature);
-        } else {
+        }
+        else
+        {
             return $hmac === $signature;
         }
     }
@@ -111,7 +115,7 @@ class Webhook extends HttpApi
         Assert::notEmpty($url);
 
         $params = [
-            'id' => $id,
+            'id'  => $id,
             'url' => $url,
         ];
 

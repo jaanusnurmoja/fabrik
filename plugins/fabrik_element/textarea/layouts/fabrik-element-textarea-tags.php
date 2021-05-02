@@ -6,6 +6,11 @@ defined('JPATH_BASE') or die;
 $d = $displayData;
 
 ?>
-<?php foreach ($d->tags as $tag) : ?>
-	<a href="<?php echo $tag->url;?>" class="fabrikTag"><?php echo $tag->icon;?> <?php echo $tag->label;?></a>
-<?php endforeach; ?>
+<?php
+foreach ($d->tags as $tag) : ?>
+    <a href="<?php
+    echo $tag->url; ?>" class="fabrikTag"><?php
+        echo $tag->icon; ?><?php
+        echo $tag->label; ?></a>
+<?php
+endforeach; ?>

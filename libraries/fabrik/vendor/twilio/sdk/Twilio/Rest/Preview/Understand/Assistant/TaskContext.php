@@ -22,7 +22,7 @@ use Twilio\Version;
 
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- * 
+ *
  * @property \Twilio\Rest\Preview\Understand\Assistant\Task\FieldList fields
  * @property \Twilio\Rest\Preview\Understand\Assistant\Task\SampleList samples
  * @property \Twilio\Rest\Preview\Understand\Assistant\Task\TaskActionsList taskActions
@@ -32,38 +32,41 @@ use Twilio\Version;
  * @method \Twilio\Rest\Preview\Understand\Assistant\Task\TaskActionsContext taskActions()
  * @method \Twilio\Rest\Preview\Understand\Assistant\Task\TaskStatisticsContext statistics()
  */
-class TaskContext extends InstanceContext {
-    protected $_fields = null;
-    protected $_samples = null;
+class TaskContext extends InstanceContext
+{
+    protected $_fields      = null;
+    protected $_samples     = null;
     protected $_taskActions = null;
-    protected $_statistics = null;
+    protected $_statistics  = null;
 
     /**
      * Initialize the TaskContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $assistantSid The unique ID of the Assistant.
      * @param string $sid A 34 character string that uniquely identifies this
      *                    resource.
-     * @return \Twilio\Rest\Preview\Understand\Assistant\TaskContext 
+     * @return \Twilio\Rest\Preview\Understand\Assistant\TaskContext
      */
-    public function __construct(Version $version, $assistantSid, $sid) {
+    public function __construct(Version $version, $assistantSid, $sid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('assistantSid' => $assistantSid, 'sid' => $sid, );
+        $this->solution = ['assistantSid' => $assistantSid, 'sid' => $sid,];
 
         $this->uri = '/Assistants/' . rawurlencode($assistantSid) . '/Tasks/' . rawurlencode($sid) . '';
     }
 
     /**
      * Fetch a TaskInstance
-     * 
+     *
      * @return TaskInstance Fetched TaskInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -81,25 +84,26 @@ class TaskContext extends InstanceContext {
 
     /**
      * Update the TaskInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return TaskInstance Updated TaskInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array(
+        $data = Values::of([
             'FriendlyName' => $options['friendlyName'],
-            'UniqueName' => $options['uniqueName'],
-            'Actions' => Serialize::jsonObject($options['actions']),
-            'ActionsUrl' => $options['actionsUrl'],
-        ));
+            'UniqueName'   => $options['uniqueName'],
+            'Actions'      => Serialize::jsonObject($options['actions']),
+            'ActionsUrl'   => $options['actionsUrl'],
+        ]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -113,21 +117,24 @@ class TaskContext extends InstanceContext {
 
     /**
      * Deletes the TaskInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->version->delete('delete', $this->uri);
     }
 
     /**
      * Access the fields
-     * 
-     * @return \Twilio\Rest\Preview\Understand\Assistant\Task\FieldList 
+     *
+     * @return \Twilio\Rest\Preview\Understand\Assistant\Task\FieldList
      */
-    protected function getFields() {
-        if (!$this->_fields) {
+    protected function getFields()
+    {
+        if (!$this->_fields)
+        {
             $this->_fields = new FieldList(
                 $this->version,
                 $this->solution['assistantSid'],
@@ -140,11 +147,13 @@ class TaskContext extends InstanceContext {
 
     /**
      * Access the samples
-     * 
-     * @return \Twilio\Rest\Preview\Understand\Assistant\Task\SampleList 
+     *
+     * @return \Twilio\Rest\Preview\Understand\Assistant\Task\SampleList
      */
-    protected function getSamples() {
-        if (!$this->_samples) {
+    protected function getSamples()
+    {
+        if (!$this->_samples)
+        {
             $this->_samples = new SampleList(
                 $this->version,
                 $this->solution['assistantSid'],
@@ -157,11 +166,13 @@ class TaskContext extends InstanceContext {
 
     /**
      * Access the taskActions
-     * 
-     * @return \Twilio\Rest\Preview\Understand\Assistant\Task\TaskActionsList 
+     *
+     * @return \Twilio\Rest\Preview\Understand\Assistant\Task\TaskActionsList
      */
-    protected function getTaskActions() {
-        if (!$this->_taskActions) {
+    protected function getTaskActions()
+    {
+        if (!$this->_taskActions)
+        {
             $this->_taskActions = new TaskActionsList(
                 $this->version,
                 $this->solution['assistantSid'],
@@ -174,11 +185,13 @@ class TaskContext extends InstanceContext {
 
     /**
      * Access the statistics
-     * 
-     * @return \Twilio\Rest\Preview\Understand\Assistant\Task\TaskStatisticsList 
+     *
+     * @return \Twilio\Rest\Preview\Understand\Assistant\Task\TaskStatisticsList
      */
-    protected function getStatistics() {
-        if (!$this->_statistics) {
+    protected function getStatistics()
+    {
+        if (!$this->_statistics)
+        {
             $this->_statistics = new TaskStatisticsList(
                 $this->version,
                 $this->solution['assistantSid'],
@@ -191,13 +204,15 @@ class TaskContext extends InstanceContext {
 
     /**
      * Magic getter to lazy load subresources
-     * 
+     *
      * @param string $name Subresource to return
      * @return \Twilio\ListResource The requested subresource
      * @throws \Twilio\Exceptions\TwilioException For unknown subresources
      */
-    public function __get($name) {
-        if (property_exists($this, '_' . $name)) {
+    public function __get($name)
+    {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -207,16 +222,18 @@ class TaskContext extends InstanceContext {
 
     /**
      * Magic caller to get resource contexts
-     * 
+     *
      * @param string $name Resource to return
      * @param array $arguments Context parameters
      * @return \Twilio\InstanceContext The requested resource context
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         $property = $this->$name;
-        if (method_exists($property, 'getContext')) {
-            return call_user_func_array(array($property, 'getContext'), $arguments);
+        if (method_exists($property, 'getContext'))
+        {
+            return call_user_func_array([$property, 'getContext'], $arguments);
         }
 
         throw new TwilioException('Resource does not have a context');
@@ -224,12 +241,14 @@ class TaskContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Preview.Understand.TaskContext ' . implode(' ', $context) . ']';

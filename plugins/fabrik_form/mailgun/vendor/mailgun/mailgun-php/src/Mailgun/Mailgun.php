@@ -62,10 +62,10 @@ class Mailgun
     private $responseHistory = null;
 
     /**
-     * @param string|null         $apiKey
-     * @param HttpClient|null     $httpClient
-     * @param string              $apiEndpoint
-     * @param Hydrator|null       $hydrator
+     * @param string|null $apiKey
+     * @param HttpClient|null $httpClient
+     * @param string $apiEndpoint
+     * @param Hydrator|null $hydrator
      * @param RequestBuilder|null $requestBuilder
      *
      * @internal Use Mailgun::configure or Mailgun::create instead.
@@ -76,7 +76,8 @@ class Mailgun
         $apiEndpoint = 'api.mailgun.net', /* Deprecated, will be removed in 3.0 */
         Hydrator $hydrator = null,
         RequestBuilder $requestBuilder = null
-    ) {
+    )
+    {
         $this->apiKey = $apiKey;
         $this->restClient = new RestClient($apiKey, $apiEndpoint, $httpClient);
 
@@ -87,8 +88,8 @@ class Mailgun
 
     /**
      * @param HttpClientConfigurator $configurator
-     * @param Hydrator|null          $hydrator
-     * @param RequestBuilder|null    $requestBuilder
+     * @param Hydrator|null $hydrator
+     * @param RequestBuilder|null $requestBuilder
      *
      * @return Mailgun
      */
@@ -96,7 +97,8 @@ class Mailgun
         HttpClientConfigurator $configurator,
         Hydrator $hydrator = null,
         RequestBuilder $requestBuilder = null
-    ) {
+    )
+    {
         $httpClient = $configurator->createConfiguredClient();
 
         return new self($configurator->getApiKey(), $httpClient, 'api.mailgun.net', $hydrator, $requestBuilder);
@@ -120,20 +122,23 @@ class Mailgun
      *  position of the function call.
      *
      * @param string $workingDomain
-     * @param array  $postData
-     * @param array  $postFiles
-     *
-     * @throws Exceptions\MissingRequiredMIMEParameters
+     * @param array $postData
+     * @param array $postFiles
      *
      * @return \stdClass
+     *
+     * @throws Exceptions\MissingRequiredMIMEParameters
      *
      * @deprecated Use Mailgun->messages()->send() instead. Will be removed in 3.0
      */
     public function sendMessage($workingDomain, $postData, $postFiles = [])
     {
-        if (is_array($postFiles)) {
+        if (is_array($postFiles))
+        {
             return $this->post("$workingDomain/messages", $postData, $postFiles);
-        } elseif (is_string($postFiles)) {
+        }
+        elseif (is_string($postFiles))
+        {
             $tempFile = tempnam(sys_get_temp_dir(), 'MG_TMP_MIME');
             $fileHandle = fopen($tempFile, 'w');
             fwrite($fileHandle, $postFiles);
@@ -143,7 +148,9 @@ class Mailgun
             unlink($tempFile);
 
             return $result;
-        } else {
+        }
+        else
+        {
             throw new Exceptions\MissingRequiredMIMEParameters(ExceptionMessages::EXCEPTION_MISSING_REQUIRED_MIME_PARAMETERS);
         }
     }
@@ -166,18 +173,23 @@ class Mailgun
      */
     public function verifyWebhookSignature($postData = null)
     {
-        if (null === $postData) {
+        if (null === $postData)
+        {
             $postData = $_POST;
         }
-        if (!isset($postData['timestamp']) || !isset($postData['token']) || !isset($postData['signature'])) {
+        if (!isset($postData['timestamp']) || !isset($postData['token']) || !isset($postData['signature']))
+        {
             return false;
         }
         $hmac = hash_hmac('sha256', "{$postData['timestamp']}{$postData['token']}", $this->apiKey);
         $sig = $postData['signature'];
-        if (function_exists('hash_equals')) {
+        if (function_exists('hash_equals'))
+        {
             // hash_equals is constant time, but will not be introduced until PHP 5.6
             return hash_equals($hmac, $sig);
-        } else {
+        }
+        else
+        {
             return $hmac === $sig;
         }
     }
@@ -192,8 +204,8 @@ class Mailgun
 
     /**
      * @param string $endpointUrl
-     * @param array  $postData
-     * @param array  $files
+     * @param array $postData
+     * @param array $files
      *
      * @return \stdClass
      *
@@ -206,7 +218,7 @@ class Mailgun
 
     /**
      * @param string $endpointUrl
-     * @param array  $queryString
+     * @param array $queryString
      *
      * @return \stdClass
      *
@@ -243,7 +255,7 @@ class Mailgun
 
     /**
      * @param string $endpointUrl
-     * @param array  $putData
+     * @param array $putData
      *
      * @return \stdClass
      *
@@ -304,7 +316,7 @@ class Mailgun
 
     /**
      * @param string $workingDomain
-     * @param bool   $autoSend
+     * @param bool $autoSend
      *
      * @return BatchMessage
      *

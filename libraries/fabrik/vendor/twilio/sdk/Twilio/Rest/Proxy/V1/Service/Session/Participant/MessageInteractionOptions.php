@@ -15,58 +15,67 @@ use Twilio\Values;
 /**
  * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
  */
-abstract class MessageInteractionOptions {
+abstract class MessageInteractionOptions
+{
     /**
      * @param string $body Message body
      * @param string $mediaUrl Not supported in beta
      * @return CreateMessageInteractionOptions Options builder
      */
-    public static function create($body = Values::NONE, $mediaUrl = Values::NONE) {
+    public static function create($body = Values::NONE, $mediaUrl = Values::NONE)
+    {
         return new CreateMessageInteractionOptions($body, $mediaUrl);
     }
 }
 
-class CreateMessageInteractionOptions extends Options {
+class CreateMessageInteractionOptions extends Options
+{
     /**
      * @param string $body Message body
      * @param string $mediaUrl Not supported in beta
      */
-    public function __construct($body = Values::NONE, $mediaUrl = Values::NONE) {
+    public function __construct($body = Values::NONE, $mediaUrl = Values::NONE)
+    {
         $this->options['body'] = $body;
         $this->options['mediaUrl'] = $mediaUrl;
     }
 
     /**
      * The message to send to the participant
-     * 
+     *
      * @param string $body Message body
      * @return $this Fluent Builder
      */
-    public function setBody($body) {
+    public function setBody($body)
+    {
         $this->options['body'] = $body;
         return $this;
     }
 
     /**
      * Not currently supported during beta.
-     * 
+     *
      * @param string $mediaUrl Not supported in beta
      * @return $this Fluent Builder
      */
-    public function setMediaUrl($mediaUrl) {
+    public function setMediaUrl($mediaUrl)
+    {
         $this->options['mediaUrl'] = $mediaUrl;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

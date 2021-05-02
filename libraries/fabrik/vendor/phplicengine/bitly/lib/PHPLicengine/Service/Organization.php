@@ -22,46 +22,48 @@
 #################################################
 
 namespace PHPLicengine\Service;
+
 use PHPLicengine\Exception\ResponseException;
 use PHPLicengine\Exception\CurlException;
 use PHPLicengine\Api\ApiInterface;
 
-class Organization {
- 
-      private $url;
-      private $api;      
-      
-      public function __construct (ApiInterface $api)
-      {
-             $this->api = $api;
-             $this->url = 'https://api-ssl.bitly.com/v4/organizations';       
-      }
- 
-      /*
-      Retrieve Organizations
-      https://dev.bitly.com/v4/#operation/getOrganizations
-      */
-      public function getOrganizations() 
-      {
-             return $this->api->get($this->url);
-      }
-      
-      /*
-      Retrieve Organization Shorten Counts
-      https://dev.bitly.com/v4/#operation/getOrganizationShortenCounts
-      */
-      public function getOrganizationShortenCounts(string $organization_guid) 
-      {
-             return $this->api->get($this->url . '/'.$organization_guid.'/shorten_counts');
-      }
-      
-      /*
-      Retrieve an Organization
-      https://dev.bitly.com/v4/#operation/getOrganization
-      */
-      public function getOrganization(string $organization_guid) 
-      {
-             return $this->api->get($this->url . '/'.$organization_guid);
-      }      
- 
+class Organization
+{
+
+    private $url;
+    private $api;
+
+    public function __construct(ApiInterface $api)
+    {
+        $this->api = $api;
+        $this->url = 'https://api-ssl.bitly.com/v4/organizations';
+    }
+
+    /*
+    Retrieve Organizations
+    https://dev.bitly.com/v4/#operation/getOrganizations
+    */
+    public function getOrganizations()
+    {
+        return $this->api->get($this->url);
+    }
+
+    /*
+    Retrieve Organization Shorten Counts
+    https://dev.bitly.com/v4/#operation/getOrganizationShortenCounts
+    */
+    public function getOrganizationShortenCounts(string $organization_guid)
+    {
+        return $this->api->get($this->url . '/' . $organization_guid . '/shorten_counts');
+    }
+
+    /*
+    Retrieve an Organization
+    https://dev.bitly.com/v4/#operation/getOrganization
+    */
+    public function getOrganization(string $organization_guid)
+    {
+        return $this->api->get($this->url . '/' . $organization_guid);
+    }
+
 }

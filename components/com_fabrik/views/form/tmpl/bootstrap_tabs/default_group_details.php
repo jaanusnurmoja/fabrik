@@ -13,23 +13,28 @@
 defined('_JEXEC') or die('Restricted access');
 
 foreach ($this->elements as $element) :
-	if ($element->startRow) :?>
-		<div class="row-fluid">
-	<?php
-	endif;
+    if ($element->startRow) :?>
+        <div class="row-fluid">
+    <?php
+    endif;
 
-	if (!$element->hidden) :?>
-		<div class="<?php echo $element->span;?>">
-			<div class="row-fluid">
-				<div class="<?php echo FabrikHelperHTML::getGridSpan(4); ?>"><em><?php echo $element->label_raw ?></em></div>
-				<div class="<?php echo FabrikHelperHTML::getGridSpan(8); ?>"><?php echo $element->element;?></div>
-			</div>
-		</div>
+    if (!$element->hidden) :?>
+        <div class="<?php
+        echo $element->span; ?>">
+            <div class="row-fluid">
+                <div class="<?php
+                echo FabrikHelperHTML::getGridSpan(4); ?>"><em><?php
+                        echo $element->label_raw ?></em></div>
+                <div class="<?php
+                echo FabrikHelperHTML::getGridSpan(8); ?>"><?php
+                    echo $element->element; ?></div>
+            </div>
+        </div>
 
-	<?php
-	endif;
-	if ($element->endRow) :?>
-		</div>
-	<?php
-	endif;
+    <?php
+    endif;
+    if ($element->endRow) :?>
+        </div>
+    <?php
+    endif;
 endforeach;

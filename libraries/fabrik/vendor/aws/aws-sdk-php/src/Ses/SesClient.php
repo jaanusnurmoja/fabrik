@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Ses;
 
 use Aws\Api\ApiProvider;

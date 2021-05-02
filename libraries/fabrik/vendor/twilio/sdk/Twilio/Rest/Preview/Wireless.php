@@ -24,47 +24,55 @@ use Twilio\Version;
  * @method \Twilio\Rest\Preview\Wireless\RatePlanContext ratePlans(string $sid)
  * @method \Twilio\Rest\Preview\Wireless\SimContext sims(string $sid)
  */
-class Wireless extends Version {
-    protected $_commands = null;
+class Wireless extends Version
+{
+    protected $_commands  = null;
     protected $_ratePlans = null;
-    protected $_sims = null;
+    protected $_sims      = null;
 
     /**
      * Construct the Wireless version of Preview
-     * 
+     *
      * @param \Twilio\Domain $domain Domain that contains the version
      * @return \Twilio\Rest\Preview\Wireless Wireless version of Preview
      */
-    public function __construct(Domain $domain) {
+    public function __construct(Domain $domain)
+    {
         parent::__construct($domain);
         $this->version = 'wireless';
     }
 
     /**
-     * @return \Twilio\Rest\Preview\Wireless\CommandList 
+     * @return \Twilio\Rest\Preview\Wireless\CommandList
      */
-    protected function getCommands() {
-        if (!$this->_commands) {
+    protected function getCommands()
+    {
+        if (!$this->_commands)
+        {
             $this->_commands = new CommandList($this);
         }
         return $this->_commands;
     }
 
     /**
-     * @return \Twilio\Rest\Preview\Wireless\RatePlanList 
+     * @return \Twilio\Rest\Preview\Wireless\RatePlanList
      */
-    protected function getRatePlans() {
-        if (!$this->_ratePlans) {
+    protected function getRatePlans()
+    {
+        if (!$this->_ratePlans)
+        {
             $this->_ratePlans = new RatePlanList($this);
         }
         return $this->_ratePlans;
     }
 
     /**
-     * @return \Twilio\Rest\Preview\Wireless\SimList 
+     * @return \Twilio\Rest\Preview\Wireless\SimList
      */
-    protected function getSims() {
-        if (!$this->_sims) {
+    protected function getSims()
+    {
+        if (!$this->_sims)
+        {
             $this->_sims = new SimList($this);
         }
         return $this->_sims;
@@ -72,14 +80,16 @@ class Wireless extends Version {
 
     /**
      * Magic getter to lazy load root resources
-     * 
+     *
      * @param string $name Resource to return
      * @return \Twilio\ListResource The requested resource
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __get($name) {
+    public function __get($name)
+    {
         $method = 'get' . ucfirst($name);
-        if (method_exists($this, $method)) {
+        if (method_exists($this, $method))
+        {
             return $this->$method();
         }
 
@@ -88,16 +98,18 @@ class Wireless extends Version {
 
     /**
      * Magic caller to get resource contexts
-     * 
+     *
      * @param string $name Resource to return
      * @param array $arguments Context parameters
      * @return \Twilio\InstanceContext The requested resource context
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         $property = $this->$name;
-        if (method_exists($property, 'getContext')) {
-            return call_user_func_array(array($property, 'getContext'), $arguments);
+        if (method_exists($property, 'getContext'))
+        {
+            return call_user_func_array([$property, 'getContext'], $arguments);
         }
 
         throw new TwilioException('Resource does not have a context');
@@ -105,10 +117,11 @@ class Wireless extends Version {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Preview.Wireless]';
     }
 }

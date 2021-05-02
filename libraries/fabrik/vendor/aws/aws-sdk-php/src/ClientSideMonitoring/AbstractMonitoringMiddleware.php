@@ -19,8 +19,8 @@ abstract class AbstractMonitoringMiddleware
 {
     private static $socket;
 
-    private $nextHandler;
-    private $options;
+    private   $nextHandler;
+    private   $options;
     protected $credentialProvider;
     protected $region;
     protected $service;
@@ -28,9 +28,11 @@ abstract class AbstractMonitoringMiddleware
     protected static function getAwsExceptionHeader(AwsException $e, $headerName)
     {
         $response = $e->getResponse();
-        if ($response !== null) {
+        if ($response !== null)
+        {
             $header = $response->getHeader($headerName);
-            if (!empty($header[0])) {
+            if (!empty($header[0]))
+            {
                 return $header[0];
             }
         }
@@ -39,7 +41,8 @@ abstract class AbstractMonitoringMiddleware
 
     protected static function getResultHeader(ResultInterface $result, $headerName)
     {
-        if (isset($result['@metadata']['headers'][$headerName])) {
+        if (isset($result['@metadata']['headers'][$headerName]))
+        {
             return $result['@metadata']['headers'][$headerName];
         }
         return null;
@@ -47,11 +50,14 @@ abstract class AbstractMonitoringMiddleware
 
     protected static function getExceptionHeader(\Exception $e, $headerName)
     {
-        if ($e instanceof ResponseContainerInterface) {
+        if ($e instanceof ResponseContainerInterface)
+        {
             $response = $e->getResponse();
-            if ($response instanceof ResponseInterface) {
+            if ($response instanceof ResponseInterface)
+            {
                 $header = $response->getHeader($headerName);
-                if (!empty($header[0])) {
+                if (!empty($header[0]))
+                {
                     return $header[0];
                 }
             }
@@ -74,7 +80,8 @@ abstract class AbstractMonitoringMiddleware
         $options,
         $region,
         $service
-    ) {
+    )
+    {
         $this->nextHandler = $handler;
         $this->credentialProvider = $credentialProvider;
         $this->options = $options;
@@ -86,8 +93,8 @@ abstract class AbstractMonitoringMiddleware
      * Standard invoke pattern for middleware execution to be implemented by
      * child classes.
      *
-     * @param  CommandInterface $cmd
-     * @param  RequestInterface $request
+     * @param CommandInterface $cmd
+     * @param RequestInterface $request
      * @return Promise\PromiseInterface
      */
     public function __invoke(CommandInterface $cmd, RequestInterface $request)
@@ -96,7 +103,8 @@ abstract class AbstractMonitoringMiddleware
         $eventData = null;
         $enabled = $this->isEnabled();
 
-        if ($enabled) {
+        if ($enabled)
+        {
             $cmd['@http']['collect_stats'] = true;
             $eventData = $this->populateRequestEventData(
                 $cmd,
@@ -105,19 +113,23 @@ abstract class AbstractMonitoringMiddleware
             );
         }
 
-        $g = function ($value) use ($eventData, $enabled) {
-            if ($enabled) {
+        $g = function ($value) use ($eventData, $enabled)
+        {
+            if ($enabled)
+            {
                 $eventData = $this->populateResultEventData(
                     $value,
                     $eventData
                 );
                 $this->sendEventData($eventData);
 
-                if ($value instanceof MonitoringEventsInterface) {
+                if ($value instanceof MonitoringEventsInterface)
+                {
                     $value->appendMonitoringEvent($eventData);
                 }
             }
-            if ($value instanceof \Exception || $value instanceof \Throwable) {
+            if ($value instanceof \Exception || $value instanceof \Throwable)
+            {
                 return Promise\rejection_for($value);
             }
             return $value;
@@ -134,14 +146,15 @@ abstract class AbstractMonitoringMiddleware
     private function getNewEvent(
         CommandInterface $cmd,
         RequestInterface $request
-    ) {
+    )
+    {
         $event = [
-            'Api' => $cmd->getName(),
-            'ClientId' => $this->getClientId(),
-            'Region' => $this->getRegion(),
-            'Service' => $this->getService(),
-            'Timestamp' => (int) floor(microtime(true) * 1000),
-            'Version' => 1
+            'Api'       => $cmd->getName(),
+            'ClientId'  => $this->getClientId(),
+            'Region'    => $this->getRegion(),
+            'Service'   => $this->getService(),
+            'Timestamp' => (int)floor(microtime(true) * 1000),
+            'Version'   => 1
         ];
         return $event;
     }
@@ -183,10 +196,13 @@ abstract class AbstractMonitoringMiddleware
         CommandInterface $cmd,
         RequestInterface $request,
         array $event
-    ) {
+    )
+    {
         $dataFormat = static::getRequestData($request);
-        foreach ($dataFormat as $eventKey => $value) {
-            if ($value !== null) {
+        foreach ($dataFormat as $eventKey => $value)
+        {
+            if ($value !== null)
+            {
                 $event[$eventKey] = $value;
             }
         }
@@ -204,10 +220,13 @@ abstract class AbstractMonitoringMiddleware
     protected function populateResultEventData(
         $result,
         array $event
-    ) {
+    )
+    {
         $dataFormat = static::getResponseData($result);
-        foreach ($dataFormat as $eventKey => $value) {
-            if ($value !== null) {
+        foreach ($dataFormat as $eventKey => $value)
+        {
+            if ($value !== null)
+            {
                 $event[$eventKey] = $value;
             }
         }
@@ -225,10 +244,12 @@ abstract class AbstractMonitoringMiddleware
      */
     private function prepareSocket($forceNewConnection = false)
     {
-        if (!is_resource(self::$socket)
+        if (
+            !is_resource(self::$socket)
             || $forceNewConnection
             || socket_last_error(self::$socket)
-        ) {
+        )
+        {
             self::$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
             socket_clear_error(self::$socket);
             socket_connect(self::$socket, '127.0.0.1', $this->getPort());
@@ -249,7 +270,8 @@ abstract class AbstractMonitoringMiddleware
         $socket = $this->prepareSocket();
         $datagram = json_encode($eventData);
         $result = socket_write($socket, $datagram, strlen($datagram));
-        if ($result === false) {
+        if ($result === false)
+        {
             $this->prepareSocket(true);
         }
         return $result;
@@ -262,7 +284,8 @@ abstract class AbstractMonitoringMiddleware
      */
     private function unwrappedOptions()
     {
-        if (!($this->options instanceof ConfigurationInterface)) {
+        if (!($this->options instanceof ConfigurationInterface))
+        {
             $this->options = ConfigurationProvider::unwrap($this->options);
         }
         return $this->options;

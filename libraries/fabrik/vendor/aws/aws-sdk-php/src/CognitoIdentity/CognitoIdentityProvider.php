@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CognitoIdentity;
 
 use Aws\Credentials\Credentials;
@@ -20,34 +21,37 @@ class CognitoIdentityProvider
         array $clientOptions,
         array $logins = [],
         $accountId = null
-    ) {
+    )
+    {
         $this->identityPoolId = $poolId;
         $this->logins = $logins;
         $this->accountId = $accountId;
         $this->client = new CognitoIdentityClient($clientOptions + [
-            'credentials' => false,
-        ]);
+                'credentials' => false,
+            ]);
     }
 
     public function __invoke()
     {
-        return Promise\coroutine(function () {
+        return Promise\coroutine(function ()
+        {
             $params = $this->logins ? ['Logins' => $this->logins] : [];
             $getIdParams = $params + ['IdentityPoolId' => $this->identityPoolId];
-            if ($this->accountId) {
+            if ($this->accountId)
+            {
                 $getIdParams['AccountId'] = $this->accountId;
             }
 
             $id = (yield $this->client->getId($getIdParams));
             $result = (yield $this->client->getCredentialsForIdentity([
-                'IdentityId' => $id['IdentityId'],
-            ] + $params));
+                    'IdentityId' => $id['IdentityId'],
+                ] + $params));
 
             yield new Credentials(
                 $result['Credentials']['AccessKeyId'],
                 $result['Credentials']['SecretKey'],
                 $result['Credentials']['SessionToken'],
-                (int) $result['Credentials']['Expiration']->format('U')
+                (int)$result['Credentials']['Expiration']->format('U')
             );
         });
     }

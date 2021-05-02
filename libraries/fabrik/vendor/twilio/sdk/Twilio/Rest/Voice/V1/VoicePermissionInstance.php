@@ -17,33 +17,38 @@ use Twilio\Version;
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
  */
-class VoicePermissionInstance extends InstanceResource {
+class VoicePermissionInstance extends InstanceResource
+{
     /**
      * Initialize the VoicePermissionInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
-     * @return \Twilio\Rest\Voice\V1\VoicePermissionInstance 
+     * @return \Twilio\Rest\Voice\V1\VoicePermissionInstance
      */
-    public function __construct(Version $version, array $payload) {
+    public function __construct(Version $version, array $payload)
+    {
         parent::__construct($version);
 
-        $this->solution = array();
+        $this->solution = [];
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -53,10 +58,11 @@ class VoicePermissionInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Voice.V1.VoicePermissionInstance]';
     }
 }

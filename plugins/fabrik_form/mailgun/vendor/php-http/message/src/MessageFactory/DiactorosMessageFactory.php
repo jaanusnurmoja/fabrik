@@ -33,7 +33,8 @@ final class DiactorosMessageFactory implements MessageFactory
         array $headers = [],
         $body = null,
         $protocolVersion = '1.1'
-    ) {
+    )
+    {
         return (new Request(
             $uri,
             $method,
@@ -51,7 +52,8 @@ final class DiactorosMessageFactory implements MessageFactory
         array $headers = [],
         $body = null,
         $protocolVersion = '1.1'
-    ) {
+    )
+    {
         return (new Response(
             $this->streamFactory->createStream($body),
             $statusCode,

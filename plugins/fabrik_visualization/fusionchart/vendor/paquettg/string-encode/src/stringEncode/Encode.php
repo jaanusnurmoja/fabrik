@@ -1,121 +1,123 @@
 <?php
+
 namespace stringEncode;
 
-class Encode {
+class Encode
+{
 
-	/**
-	 * The encoding that the string is currently in.
-	 *
-	 * @var string
-	 */
-	protected $from;
-	
-	/**
-	 * The encoding that we would like the string to be in.
-	 *
-	 * @var string
-	 */
-	protected $to;
+    /**
+     * The encoding that the string is currently in.
+     *
+     * @var string
+     */
+    protected $from;
 
-	/**
-	 * Sets the default charsets for thie package.
-	 */
-	public function __construct()
-	{
-		// default from encoding
-		$this->from = 'CP1252';
+    /**
+     * The encoding that we would like the string to be in.
+     *
+     * @var string
+     */
+    protected $to;
 
-		// default to encoding
-		$this->to = 'UTF-8';
-	}
+    /**
+     * Sets the default charsets for thie package.
+     */
+    public function __construct()
+    {
+        // default from encoding
+        $this->from = 'CP1252';
 
-	/**
-	 * Sets the charset that we will be converting to.
-	 *
-	 * @param string $charset
-	 * @chainable
-	 */
-	public function to($charset)
-	{
-		$this->to = strtoupper($charset);
-		return $this;
-	}
+        // default to encoding
+        $this->to = 'UTF-8';
+    }
 
-	/**
-	 * Sets the charset that we will be converting from.
-	 *
-	 * @param string $charset
-	 * @chainable
-	 */
-	public function from($charset)
-	{
-		$this->from = strtoupper($charset);
-	}
+    /**
+     * Sets the charset that we will be converting to.
+     *
+     * @param string $charset
+     * @chainable
+     */
+    public function to($charset)
+    {
+        $this->to = strtoupper($charset);
+        return $this;
+    }
 
-	/**
-	 * Returns the to and from charset that we will be using.
-	 *
-	 * @return array
-	 */
-	public function charset()
-	{
-		return [
-			'from' => $this->from,
-			'to'   => $this->to,
-		];
-	}
+    /**
+     * Sets the charset that we will be converting from.
+     *
+     * @param string $charset
+     * @chainable
+     */
+    public function from($charset)
+    {
+        $this->from = strtoupper($charset);
+    }
 
-	/**
-	 * Attempts to detect the encoding of the given string from the encodingList.
-	 *
-	 * @param string $str
-	 * @param array $encodingList
-	 * @return bool
-	 */
-	public function detect($str, $encodingList = ['UTF-8', 'CP1252'])
-	{
-		$charset = mb_detect_encoding($str, $encodingList);
-		if ($charset === false)
-		{
-			// could not detect charset
-			return false;
-		}
+    /**
+     * Returns the to and from charset that we will be using.
+     *
+     * @return array
+     */
+    public function charset()
+    {
+        return [
+            'from' => $this->from,
+            'to'   => $this->to,
+        ];
+    }
 
-		$this->from = $charset;
-		return true;
-	}
+    /**
+     * Attempts to detect the encoding of the given string from the encodingList.
+     *
+     * @param string $str
+     * @param array $encodingList
+     * @return bool
+     */
+    public function detect($str, $encodingList = ['UTF-8', 'CP1252'])
+    {
+        $charset = mb_detect_encoding($str, $encodingList);
+        if ($charset === false)
+        {
+            // could not detect charset
+            return false;
+        }
 
-	/**
-	 * Attempts to convert the string to the proper charset.
-	 *
-	 * @return string
-	 */
-	public  function convert($str)
-	{
-		if ($this->from != $this->to)
-		{
-			$str = iconv($this->from, $this->to, $str);
-		}
+        $this->from = $charset;
+        return true;
+    }
 
-		if ($str === false)
-		{
-			// the convertion was a failure
-			throw new Exception('The convertion from "'.$this->from.'" to "'.$this->to.'" was a failure.');
-		}
+    /**
+     * Attempts to convert the string to the proper charset.
+     *
+     * @return string
+     */
+    public function convert($str)
+    {
+        if ($this->from != $this->to)
+        {
+            $str = iconv($this->from, $this->to, $str);
+        }
 
-		// deal with BOM issue for utf-8 text
-		if ($this->to == 'UTF-8')
-		{
-			if (substr($str, 0, 3) == "\xef\xbb\xbf")
-			{
-				$str = substr($str, 3);
-			}
-			if (substr($str, -3, 3) == "\xef\xbb\xbf")
-			{
-				$str = substr($str, 0, -3);
-			}
-		}
+        if ($str === false)
+        {
+            // the convertion was a failure
+            throw new Exception('The convertion from "' . $this->from . '" to "' . $this->to . '" was a failure.');
+        }
 
-		return $str;
-	}
+        // deal with BOM issue for utf-8 text
+        if ($this->to == 'UTF-8')
+        {
+            if (substr($str, 0, 3) == "\xef\xbb\xbf")
+            {
+                $str = substr($str, 3);
+            }
+            if (substr($str, -3, 3) == "\xef\xbb\xbf")
+            {
+                $str = substr($str, 0, -3);
+            }
+        }
+
+        return $str;
+    }
 }

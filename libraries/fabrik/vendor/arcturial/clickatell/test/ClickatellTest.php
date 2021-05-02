@@ -1,4 +1,5 @@
 <?php
+
 namespace Clickatell;
 
 use PHPUnit_Framework_TestCase;
@@ -16,7 +17,7 @@ class ClickatellTest extends PHPUnit_Framework_TestCase
         $class = new ReflectionClass($clickatell);
         $method = $class->getMethod('curl');
         $method->setAccessible(true);
-        $return = $method->invokeArgs($clickatell, array($uri, $args));
+        $return = $method->invokeArgs($clickatell, [$uri, $args]);
 
         $this->assertSame(200, $return->getStatus());
         $this->assertTrue(strlen($return->getBody()) > 0);

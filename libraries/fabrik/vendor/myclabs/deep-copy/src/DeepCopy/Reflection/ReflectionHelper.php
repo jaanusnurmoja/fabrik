@@ -15,26 +15,29 @@ class ReflectionHelper
      *
      * Standard \ReflectionClass->getProperties() does not return private properties from ancestor classes.
      *
-     * @author muratyaman@gmail.com
-     * @see http://php.net/manual/en/reflectionclass.getproperties.php
-     *
      * @param ReflectionClass $ref
      *
      * @return ReflectionProperty[]
+     * @author muratyaman@gmail.com
+     * @see http://php.net/manual/en/reflectionclass.getproperties.php
+     *
      */
     public static function getProperties(ReflectionClass $ref)
     {
         $props = $ref->getProperties();
-        $propsArr = array();
+        $propsArr = [];
 
-        foreach ($props as $prop) {
+        foreach ($props as $prop)
+        {
             $propertyName = $prop->getName();
             $propsArr[$propertyName] = $prop;
         }
 
-        if ($parentClass = $ref->getParentClass()) {
+        if ($parentClass = $ref->getParentClass())
+        {
             $parentPropsArr = self::getProperties($parentClass);
-            foreach ($propsArr as $key => $property) {
+            foreach ($propsArr as $key => $property)
+            {
                 $parentPropsArr[$key] = $property;
             }
 
@@ -50,20 +53,22 @@ class ReflectionHelper
      * @param object|string $object
      * @param string $name
      *
-     * @throws PropertyException
+     * @return ReflectionProperty
      * @throws ReflectionException
      *
-     * @return ReflectionProperty
+     * @throws PropertyException
      */
     public static function getProperty($object, $name)
     {
         $reflection = is_object($object) ? new ReflectionObject($object) : new ReflectionClass($object);
 
-        if ($reflection->hasProperty($name)) {
+        if ($reflection->hasProperty($name))
+        {
             return $reflection->getProperty($name);
         }
 
-        if ($parentClass = $reflection->getParentClass()) {
+        if ($parentClass = $reflection->getParentClass())
+        {
             return self::getProperty($parentClass->getName(), $name);
         }
 

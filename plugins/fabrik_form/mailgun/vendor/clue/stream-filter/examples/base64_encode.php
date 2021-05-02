@@ -6,8 +6,10 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // encoding requires buffering in chunks of 3 bytes each
 $buffer = '';
-Clue\StreamFilter\append(STDIN, function ($chunk = null) use (&$buffer) {
-    if ($chunk === null) {
+Clue\StreamFilter\append(STDIN, function ($chunk = null) use (&$buffer)
+{
+    if ($chunk === null)
+    {
         return base64_encode($buffer);
     }
     $buffer .= $chunk;

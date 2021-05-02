@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Signature;
 
 /**
@@ -21,9 +22,11 @@ trait SignatureTrait
     {
         $k = $shortDate . '_' . $region . '_' . $service . '_' . $secretKey;
 
-        if (!isset($this->cache[$k])) {
+        if (!isset($this->cache[$k]))
+        {
             // Clear the cache when it reaches 50 entries
-            if (++$this->cacheSize > 50) {
+            if (++$this->cacheSize > 50)
+            {
                 $this->cache = [];
                 $this->cacheSize = 0;
             }

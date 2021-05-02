@@ -30,41 +30,44 @@ use Twilio\Version;
  * @property \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\SharedCostList sharedCost
  * @property \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\MachineToMachineList machineToMachine
  */
-class AvailablePhoneNumberCountryContext extends InstanceContext {
-    protected $_local = null;
-    protected $_tollFree = null;
-    protected $_mobile = null;
-    protected $_national = null;
-    protected $_voip = null;
-    protected $_sharedCost = null;
+class AvailablePhoneNumberCountryContext extends InstanceContext
+{
+    protected $_local            = null;
+    protected $_tollFree         = null;
+    protected $_mobile           = null;
+    protected $_national         = null;
+    protected $_voip             = null;
+    protected $_sharedCost       = null;
     protected $_machineToMachine = null;
 
     /**
      * Initialize the AvailablePhoneNumberCountryContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $accountSid The account_sid
      * @param string $countryCode The country_code
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountryContext 
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountryContext
      */
-    public function __construct(Version $version, $accountSid, $countryCode) {
+    public function __construct(Version $version, $accountSid, $countryCode)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('accountSid' => $accountSid, 'countryCode' => $countryCode, );
+        $this->solution = ['accountSid' => $accountSid, 'countryCode' => $countryCode,];
 
         $this->uri = '/Accounts/' . rawurlencode($accountSid) . '/AvailablePhoneNumbers/' . rawurlencode($countryCode) . '.json';
     }
 
     /**
      * Fetch a AvailablePhoneNumberCountryInstance
-     * 
+     *
      * @return AvailablePhoneNumberCountryInstance Fetched
      *                                             AvailablePhoneNumberCountryInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -82,11 +85,13 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Access the local
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\LocalList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\LocalList
      */
-    protected function getLocal() {
-        if (!$this->_local) {
+    protected function getLocal()
+    {
+        if (!$this->_local)
+        {
             $this->_local = new LocalList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -99,11 +104,13 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Access the tollFree
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\TollFreeList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\TollFreeList
      */
-    protected function getTollFree() {
-        if (!$this->_tollFree) {
+    protected function getTollFree()
+    {
+        if (!$this->_tollFree)
+        {
             $this->_tollFree = new TollFreeList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -116,11 +123,13 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Access the mobile
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\MobileList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\MobileList
      */
-    protected function getMobile() {
-        if (!$this->_mobile) {
+    protected function getMobile()
+    {
+        if (!$this->_mobile)
+        {
             $this->_mobile = new MobileList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -133,11 +142,13 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Access the national
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\NationalList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\NationalList
      */
-    protected function getNational() {
-        if (!$this->_national) {
+    protected function getNational()
+    {
+        if (!$this->_national)
+        {
             $this->_national = new NationalList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -150,11 +161,13 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Access the voip
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\VoipList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\VoipList
      */
-    protected function getVoip() {
-        if (!$this->_voip) {
+    protected function getVoip()
+    {
+        if (!$this->_voip)
+        {
             $this->_voip = new VoipList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -167,11 +180,13 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Access the sharedCost
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\SharedCostList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\SharedCostList
      */
-    protected function getSharedCost() {
-        if (!$this->_sharedCost) {
+    protected function getSharedCost()
+    {
+        if (!$this->_sharedCost)
+        {
             $this->_sharedCost = new SharedCostList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -184,11 +199,13 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Access the machineToMachine
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\MachineToMachineList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\MachineToMachineList
      */
-    protected function getMachineToMachine() {
-        if (!$this->_machineToMachine) {
+    protected function getMachineToMachine()
+    {
+        if (!$this->_machineToMachine)
+        {
             $this->_machineToMachine = new MachineToMachineList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -201,13 +218,15 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Magic getter to lazy load subresources
-     * 
+     *
      * @param string $name Subresource to return
      * @return \Twilio\ListResource The requested subresource
      * @throws \Twilio\Exceptions\TwilioException For unknown subresources
      */
-    public function __get($name) {
-        if (property_exists($this, '_' . $name)) {
+    public function __get($name)
+    {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -217,16 +236,18 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Magic caller to get resource contexts
-     * 
+     *
      * @param string $name Resource to return
      * @param array $arguments Context parameters
      * @return \Twilio\InstanceContext The requested resource context
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         $property = $this->$name;
-        if (method_exists($property, 'getContext')) {
-            return call_user_func_array(array($property, 'getContext'), $arguments);
+        if (method_exists($property, 'getContext'))
+        {
+            return call_user_func_array([$property, 'getContext'], $arguments);
         }
 
         throw new TwilioException('Resource does not have a context');
@@ -234,12 +255,14 @@ class AvailablePhoneNumberCountryContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Api.V2010.AvailablePhoneNumberCountryContext ' . implode(' ', $context) . ']';

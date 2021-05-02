@@ -10,16 +10,25 @@ $d = $displayData;
 
 <?php
 if ($d->useThumb) :
-	?>
-	<a class="download-archive fabrik-filetype-<?php echo $d->ext;?>" title="<?php echo $d->file; ?>" href="<?php echo $d->file; ?>">
-		<img src="<?php echo $d->thumb;?>" alt="<?php echo $d->filename; ?>">
-	</a>
+    ?>
+    <a class="download-archive fabrik-filetype-<?php
+    echo $d->ext; ?>" title="<?php
+    echo $d->file; ?>" href="<?php
+    echo $d->file; ?>">
+        <img src="<?php
+        echo $d->thumb; ?>" alt="<?php
+        echo $d->filename; ?>">
+    </a>
 <?php
 else :
-	?>
-	<a class="download-archive fabrik-filetype-<?php echo $d->ext;?>" title="<?php echo $d->file; ?>" href="<?php echo $d->file; ?>">
-		<?php echo $d->filename; ?>
-	</a>
+    ?>
+    <a class="download-archive fabrik-filetype-<?php
+    echo $d->ext; ?>" title="<?php
+    echo $d->file; ?>" href="<?php
+    echo $d->file; ?>">
+        <?php
+        echo $d->filename; ?>
+    </a>
 <?php
 endif;
 

@@ -17,7 +17,7 @@ final class DiscoveryFailedException extends \Exception implements Exception
     private $exceptions;
 
     /**
-     * @param string       $message
+     * @param string $message
      * @param \Exception[] $exceptions
      */
     public function __construct($message, array $exceptions = [])
@@ -33,8 +33,9 @@ final class DiscoveryFailedException extends \Exception implements Exception
     public static function create($exceptions)
     {
         $message = 'Could not find resource using any discovery strategy. Find more information at http://docs.php-http.org/en/latest/discovery.html#common-errors';
-        foreach ($exceptions as $e) {
-            $message .= "\n - ".$e->getMessage();
+        foreach ($exceptions as $e)
+        {
+            $message .= "\n - " . $e->getMessage();
         }
         $message .= "\n\n";
 

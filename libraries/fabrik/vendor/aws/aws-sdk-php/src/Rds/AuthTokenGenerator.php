@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Rds;
 
 use Aws\Credentials\CredentialsInterface;
@@ -24,10 +25,13 @@ class AuthTokenGenerator
      */
     public function __construct($creds)
     {
-        if ($creds instanceof CredentialsInterface) {
+        if ($creds instanceof CredentialsInterface)
+        {
             $promise = new Promise\FulfilledPromise($creds);
             $this->credentialProvider = Aws\constantly($promise);
-        } else {
+        }
+        else
+        {
             $this->credentialProvider = $creds;
         }
     }
@@ -52,7 +56,7 @@ class AuthTokenGenerator
         $signer = new SignatureV4('rds-db', $region);
         $provider = $this->credentialProvider;
 
-        $url = (string) $signer->presign(
+        $url = (string)$signer->presign(
             $request,
             $provider()->wait(),
             '+15 minutes'

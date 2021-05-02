@@ -9,21 +9,24 @@
 
 namespace Twilio\TwiML;
 
-class FaxResponse extends TwiML {
+class FaxResponse extends TwiML
+{
     /**
      * FaxResponse constructor.
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct('Response', null);
     }
 
     /**
      * Add Receive child.
-     * 
+     *
      * @param array $attributes Optional attributes
      * @return TwiML Child element.
      */
-    public function receive($attributes = array()) {
+    public function receive($attributes = [])
+    {
         return $this->nest(new Fax\Receive($attributes));
     }
 }

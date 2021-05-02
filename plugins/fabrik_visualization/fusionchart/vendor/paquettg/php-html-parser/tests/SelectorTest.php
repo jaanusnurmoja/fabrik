@@ -4,39 +4,40 @@ use PHPHtmlParser\Selector;
 use PHPHtmlParser\Dom\HtmlNode;
 use PHPHtmlParser\Dom\Tag;
 
-class SelectorTest extends PHPUnit_Framework_TestCase {
-    
+class SelectorTest extends PHPUnit_Framework_TestCase
+{
+
     public function testParseSelectorStringId()
     {
-        $selector  = new Selector('#all');
+        $selector = new Selector('#all');
         $selectors = $selector->getSelectors();
         $this->assertEquals('id', $selectors[0][0]['key']);
     }
 
     public function testParseSelectorStringClass()
     {
-        $selector  = new Selector('div.post');
+        $selector = new Selector('div.post');
         $selectors = $selector->getSelectors();
         $this->assertEquals('class', $selectors[0][0]['key']);
     }
 
     public function testParseSelectorStringAttribute()
     {
-        $selector  = new Selector('div[visible=yes]');
+        $selector = new Selector('div[visible=yes]');
         $selectors = $selector->getSelectors();
         $this->assertEquals('yes', $selectors[0][0]['value']);
     }
 
     public function testParseSelectorStringNoKey()
     {
-        $selector  = new Selector('div[!visible]');
+        $selector = new Selector('div[!visible]');
         $selectors = $selector->getSelectors();
         $this->assertTrue($selectors[0][0]['noKey']);
     }
 
     public function testFind()
     {
-        $root   = new HtmlNode('root');
+        $root = new HtmlNode('root');
         $parent = new HtmlNode('div');
         $child1 = new HtmlNode('a');
         $child2 = new HtmlNode('p');
@@ -108,7 +109,7 @@ class SelectorTest extends PHPUnit_Framework_TestCase {
 
     public function testFindWild()
     {
-        $root   = new HtmlNode(new Tag('root'));
+        $root = new HtmlNode(new Tag('root'));
         $parent = new HtmlNode(new Tag('div'));
         $child1 = new HtmlNode(new Tag('a'));
         $child2 = new HtmlNode(new Tag('p'));
@@ -124,7 +125,7 @@ class SelectorTest extends PHPUnit_Framework_TestCase {
 
     public function testFindMultipleSelectors()
     {
-        $root   = new HtmlNode(new Tag('root'));
+        $root = new HtmlNode(new Tag('root'));
         $parent = new HtmlNode(new Tag('div'));
         $child1 = new HtmlNode(new Tag('a'));
         $child2 = new HtmlNode(new Tag('p'));
@@ -160,7 +161,7 @@ class SelectorTest extends PHPUnit_Framework_TestCase {
 
     public function testFindChildMultipleLevelsDeep()
     {
-        $root   = new HtmlNode(new Tag('root'));
+        $root = new HtmlNode(new Tag('root'));
         $parent = new HtmlNode(new Tag('div'));
         $child1 = new HtmlNode(new Tag('ul'));
         $child2 = new HtmlNode(new Tag('li'));
@@ -174,7 +175,7 @@ class SelectorTest extends PHPUnit_Framework_TestCase {
 
     public function testFindAllChildren()
     {
-        $root   = new HtmlNode(new Tag('root'));
+        $root = new HtmlNode(new Tag('root'));
         $parent = new HtmlNode(new Tag('div'));
         $child1 = new HtmlNode(new Tag('ul'));
         $child2 = new HtmlNode(new Tag('span'));
@@ -190,7 +191,7 @@ class SelectorTest extends PHPUnit_Framework_TestCase {
 
     public function testFindChildUsingChildSelector()
     {
-        $root   = new HtmlNode(new Tag('root'));
+        $root = new HtmlNode(new Tag('root'));
         $parent = new HtmlNode(new Tag('div'));
         $child1 = new HtmlNode(new Tag('ul'));
         $child2 = new HtmlNode(new Tag('span'));

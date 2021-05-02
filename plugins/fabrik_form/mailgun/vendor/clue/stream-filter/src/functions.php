@@ -18,8 +18,9 @@ function append($stream, $callback, $read_write = STREAM_FILTER_ALL)
 {
     $ret = @stream_filter_append($stream, register(), $read_write, $callback);
 
-    if ($ret === false) {
-        $error = error_get_last() + array('message' => '');
+    if ($ret === false)
+    {
+        $error = error_get_last() + ['message' => ''];
         throw new RuntimeException('Unable to append filter: ' . $error['message']);
     }
 
@@ -40,8 +41,9 @@ function prepend($stream, $callback, $read_write = STREAM_FILTER_ALL)
 {
     $ret = @stream_filter_prepend($stream, register(), $read_write, $callback);
 
-    if ($ret === false) {
-        $error = error_get_last() + array('message' => '');
+    if ($ret === false)
+    {
+        $error = error_get_last() + ['message' => ''];
         throw new RuntimeException('Unable to prepend filter: ' . $error['message']);
     }
 
@@ -59,8 +61,8 @@ function prepend($stream, $callback, $read_write = STREAM_FILTER_ALL)
  * explicitly passing a `null` value (which many filters do not accept).
  * Please refer to the individual filter definition for more details.
  *
- * @param string $filter     built-in filter name. See stream_get_filters() or http://php.net/manual/en/filters.php
- * @param mixed  $parameters (optional) parameters to pass to the built-in filter as-is
+ * @param string $filter built-in filter name. See stream_get_filters() or http://php.net/manual/en/filters.php
+ * @param mixed $parameters (optional) parameters to pass to the built-in filter as-is
  * @return callable a filter callback which can be append()'ed or prepend()'ed
  * @throws RuntimeException on error
  * @link http://php.net/manual/en/filters.php
@@ -70,21 +72,26 @@ function prepend($stream, $callback, $read_write = STREAM_FILTER_ALL)
 function fun($filter, $parameters = null)
 {
     $fp = fopen('php://memory', 'w');
-    if (func_num_args() === 1) {
+    if (func_num_args() === 1)
+    {
         $filter = @stream_filter_append($fp, $filter, STREAM_FILTER_WRITE);
-    } else {
+    }
+    else
+    {
         $filter = @stream_filter_append($fp, $filter, STREAM_FILTER_WRITE, $parameters);
     }
 
-    if ($filter === false) {
+    if ($filter === false)
+    {
         fclose($fp);
-        $error = error_get_last() + array('message' => '');
+        $error = error_get_last() + ['message' => ''];
         throw new RuntimeException('Unable to access built-in filter: ' . $error['message']);
     }
 
     // append filter function which buffers internally
     $buffer = '';
-    append($fp, function ($chunk) use (&$buffer) {
+    append($fp, function ($chunk) use (&$buffer)
+    {
         $buffer .= $chunk;
 
         // always return empty string in order to skip actually writing to stream resource
@@ -93,11 +100,14 @@ function fun($filter, $parameters = null)
 
     $closed = false;
 
-    return function ($chunk = null) use ($fp, $filter, &$buffer, &$closed) {
-        if ($closed) {
+    return function ($chunk = null) use ($fp, $filter, &$buffer, &$closed)
+    {
+        if ($closed)
+        {
             throw new \RuntimeException('Unable to perform operation on closed stream');
         }
-        if ($chunk === null) {
+        if ($chunk === null)
+        {
             $closed = true;
             $buffer = '';
             fclose($fp);
@@ -122,7 +132,8 @@ function fun($filter, $parameters = null)
  */
 function remove($filter)
 {
-    if (@stream_filter_remove($filter) === false) {
+    if (@stream_filter_remove($filter) === false)
+    {
         throw new RuntimeException('Unable to remove given filter');
     }
 }
@@ -138,7 +149,8 @@ function remove($filter)
 function register()
 {
     static $registered = null;
-    if ($registered === null) {
+    if ($registered === null)
+    {
         $registered = 'stream-callback';
         stream_filter_register($registered, __NAMESPACE__ . '\CallbackFilter');
     }

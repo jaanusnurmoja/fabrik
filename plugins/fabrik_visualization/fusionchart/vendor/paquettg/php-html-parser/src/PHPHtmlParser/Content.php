@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser;
 
 /**
@@ -38,7 +39,7 @@ class Content
     protected $blank = " \t\r\n";
     protected $equal = ' =/>';
     protected $slash = " />\r\n\t";
-    protected $attr = ' >';
+    protected $attr  = ' >';
 
     /**
      * Content constructor.
@@ -48,8 +49,8 @@ class Content
     public function __construct($content)
     {
         $this->content = $content;
-        $this->size    = strlen($content);
-        $this->pos     = 0;
+        $this->size = strlen($content);
+        $this->pos = 0;
     }
 
     /**
@@ -71,11 +72,13 @@ class Content
     public function char($char = null)
     {
         $pos = $this->pos;
-        if ( ! is_null($char)) {
+        if (!is_null($char))
+        {
             $pos = $char;
         }
 
-        if ( ! isset($this->content[$pos])) {
+        if (!isset($this->content[$pos]))
+        {
             return '';
         }
 
@@ -104,7 +107,8 @@ class Content
     public function rewind($count)
     {
         $this->pos -= $count;
-        if ($this->pos < 0) {
+        if ($this->pos < 0)
+        {
             $this->pos = 0;
         }
 
@@ -121,23 +125,28 @@ class Content
      */
     public function copyUntil($string, $char = false, $escape = false)
     {
-        if ($this->pos >= $this->size) {
+        if ($this->pos >= $this->size)
+        {
             // nothing left
             return '';
         }
 
-        if ($escape) {
+        if ($escape)
+        {
             $position = $this->pos;
-            $found    = false;
-            while ( ! $found) {
+            $found = false;
+            while (!$found)
+            {
                 $position = strpos($this->content, $string, $position);
-                if ($position === false) {
+                if ($position === false)
+                {
                     // reached the end
                     $found = true;
                     continue;
                 }
 
-                if ($this->char($position - 1) == '\\') {
+                if ($this->char($position - 1) == '\\')
+                {
                     // this character is escaped
                     ++$position;
                     continue;
@@ -145,22 +154,28 @@ class Content
 
                 $found = true;
             }
-        } elseif ($char) {
+        }
+        elseif ($char)
+        {
             $position = strcspn($this->content, $string, $this->pos);
             $position += $this->pos;
-        } else {
+        }
+        else
+        {
             $position = strpos($this->content, $string, $this->pos);
         }
 
-        if ($position === false) {
+        if ($position === false)
+        {
             // could not find character, just return the remaining of the content
-            $return    = substr($this->content, $this->pos, $this->size - $this->pos);
+            $return = substr($this->content, $this->pos, $this->size - $this->pos);
             $this->pos = $this->size;
 
             return $return;
         }
 
-        if ($position == $this->pos) {
+        if ($position == $this->pos)
+        {
             // we are at the right place
             return '';
         }
@@ -187,8 +202,9 @@ class Content
         $foundString = $this->copyUntil($string, true, true);
 
         $position = strcspn($foundString, $unless);
-        if ($position == strlen($foundString)) {
-            return $string.$foundString;
+        if ($position == strlen($foundString))
+        {
+            return $string . $foundString;
         }
         // rewind changes and return nothing
         $this->pos = $lastPos;
@@ -225,7 +241,8 @@ class Content
 
         // make it chainable if they don't want a copy
         $return = $this;
-        if ($copy) {
+        if ($copy)
+        {
             $return = substr($this->content, $this->pos, $len);
         }
 

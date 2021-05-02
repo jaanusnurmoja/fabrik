@@ -27,7 +27,7 @@ use PHPUnit\Framework\TestCase;
 
 class AppTest extends TestCase
 {
-    
+
     public function testGetOAuthApp()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -35,10 +35,10 @@ class AppTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/apps/test')
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/apps/test')
+            );
         $bitlink = new App($mock);
         $bitlink->getOAuthApp('test');
-    } 
+    }
 
 }

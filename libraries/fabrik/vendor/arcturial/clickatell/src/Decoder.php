@@ -67,7 +67,8 @@ class Decoder
 
         // Check if the decoded response contains a "global error". If the entire
         // packet failed there is no need to even try handling it further.
-        if (isset($decoded['error'])) {
+        if (isset($decoded['error']))
+        {
             // The assumption here is that every response will behave the same and when it's an
             // error it will always contain a description and code field.
             throw new Exception($decoded['error']['description'], $decoded['error']['code']);
@@ -86,17 +87,20 @@ class Decoder
     public function unwrapLegacy()
     {
         $lines = explode("\n", trim($this->body, "\n"));
-        $result = array();
+        $result = [];
 
-        foreach ($lines as $line) {
+        foreach ($lines as $line)
+        {
             preg_match_all("/([A-Za-z]+):((.(?![A-Za-z]+:))*)/", $line, $matches);
 
-            $row = array();
-            foreach ($matches[1] as $index => $status) {
+            $row = [];
+            foreach ($matches[1] as $index => $status)
+            {
                 $row[$status] = trim($matches[2][$index]);
             }
 
-            if (isset($row['ERR'])) {
+            if (isset($row['ERR']))
+            {
                 $error = explode(",", $row['ERR']);
                 $row['error'] = true;
                 $row['code'] = count($error) == 2 ? $error[0] : 0;
@@ -105,7 +109,8 @@ class Decoder
 
                 // If this response is a single row response, then we will throw
                 // an exception to alert the user of any failures.
-                if (count($lines) == 1) {
+                if (count($lines) == 1)
+                {
                     throw new Exception($row['error'], $row['code']);
                 }
             }

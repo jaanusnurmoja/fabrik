@@ -2,7 +2,7 @@
 /**
  * @package php-svg-lib
  * @link    http://github.com/PhenX/php-svg-lib
- * @author  Fabien Ménager <fabien.menager@gmail.com>
+ * @author  Fabien Mï¿½nager <fabien.menager@gmail.com>
  * @license GNU LGPLv3+ http://www.gnu.org/copyleft/lesser.html
  */
 
@@ -21,12 +21,12 @@ abstract class AbstractTag
     /** @var Style */
     protected $style;
 
-    protected $attributes = array();
+    protected $attributes = [];
 
     protected $hasShape = true;
 
     /** @var self[] */
-    protected $children = array();
+    protected $children = [];
 
     public function __construct(Document $document, $tagName)
     {
@@ -34,19 +34,23 @@ abstract class AbstractTag
         $this->tagName = $tagName;
     }
 
-    public function getDocument(){
+    public function getDocument()
+    {
         return $this->document;
     }
 
     /**
      * @return Group|null
      */
-    public function getParentGroup() {
+    public function getParentGroup()
+    {
         $stack = $this->getDocument()->getStack();
-        for ($i = count($stack)-2; $i >= 0; $i--) {
+        for ($i = count($stack) - 2; $i >= 0; $i--)
+        {
             $tag = $stack[$i];
 
-            if ($tag instanceof Group || $tag instanceof Document) {
+            if ($tag instanceof Group || $tag instanceof Document)
+            {
                 return $tag;
             }
         }
@@ -58,7 +62,8 @@ abstract class AbstractTag
     {
         $this->attributes = $attributes;
 
-        if (!$this->getDocument()->inDefs) {
+        if (!$this->getDocument()->inDefs)
+        {
             $this->before($attributes);
             $this->start($attributes);
         }
@@ -66,7 +71,8 @@ abstract class AbstractTag
 
     public function handleEnd()
     {
-        if (!$this->getDocument()->inDefs) {
+        if (!$this->getDocument()->inDefs)
+        {
             $this->end();
             $this->after();
         }
@@ -97,7 +103,8 @@ abstract class AbstractTag
     {
         $this->style = $style;
 
-        if ($style->display === "none") {
+        if ($style->display === "none")
+        {
             $this->hasShape = false;
         }
     }
@@ -117,7 +124,8 @@ abstract class AbstractTag
      *
      * @return Style
      */
-    protected function makeStyle($attributes) {
+    protected function makeStyle($attributes)
+    {
         $style = new Style();
         $style->inherit($this);
         $style->fromStyleSheets($this, $attributes);
@@ -129,12 +137,13 @@ abstract class AbstractTag
     protected function applyTransform($attributes)
     {
 
-        if (isset($attributes["transform"])) {
+        if (isset($attributes["transform"]))
+        {
             $surface = $this->document->getSurface();
 
             $transform = $attributes["transform"];
 
-            $match = array();
+            $match = [];
             preg_match_all(
                 '/(matrix|translate|scale|rotate|skewX|skewY)\((.*?)\)/is',
                 $transform,
@@ -142,17 +151,21 @@ abstract class AbstractTag
                 PREG_SET_ORDER
             );
 
-            $transformations = array();
-            if (count($match[0])) {
-                foreach ($match as $_match) {
+            $transformations = [];
+            if (count($match[0]))
+            {
+                foreach ($match as $_match)
+                {
                     $arguments = preg_split('/[ ,]+/', $_match[2]);
                     array_unshift($arguments, $_match[1]);
                     $transformations[] = $arguments;
                 }
             }
 
-            foreach ($transformations as $t) {
-                switch ($t[0]) {
+            foreach ($transformations as $t)
+            {
+                switch ($t[0])
+                {
                     case "matrix":
                         $surface->transform($t[1], $t[2], $t[3], $t[4], $t[5], $t[6]);
                         break;

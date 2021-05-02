@@ -29,7 +29,8 @@ class PredisCache extends CacheProvider
     protected function doFetch($id)
     {
         $result = $this->client->get($id);
-        if ($result === null) {
+        if ($result === null)
+        {
             return false;
         }
 
@@ -51,14 +52,17 @@ class PredisCache extends CacheProvider
      */
     protected function doSaveMultiple(array $keysAndValues, $lifetime = 0)
     {
-        if ($lifetime) {
+        if ($lifetime)
+        {
             $success = true;
 
             // Keys have lifetime, use SETEX for each of them
-            foreach ($keysAndValues as $key => $value) {
-                $response = (string) $this->client->setex($key, $lifetime, serialize($value));
+            foreach ($keysAndValues as $key => $value)
+            {
+                $response = (string)$this->client->setex($key, $lifetime, serialize($value));
 
-                if ($response == 'OK') {
+                if ($response == 'OK')
+                {
                     continue;
                 }
 
@@ -69,11 +73,12 @@ class PredisCache extends CacheProvider
         }
 
         // No lifetime, use MSET
-        $response = $this->client->mset(array_map(static function ($value) {
+        $response = $this->client->mset(array_map(static function ($value)
+        {
             return serialize($value);
         }, $keysAndValues));
 
-        return (string) $response == 'OK';
+        return (string)$response == 'OK';
     }
 
     /**
@@ -81,7 +86,7 @@ class PredisCache extends CacheProvider
      */
     protected function doContains($id)
     {
-        return (bool) $this->client->exists($id);
+        return (bool)$this->client->exists($id);
     }
 
     /**
@@ -90,9 +95,12 @@ class PredisCache extends CacheProvider
     protected function doSave($id, $data, $lifeTime = 0)
     {
         $data = serialize($data);
-        if ($lifeTime > 0) {
+        if ($lifeTime > 0)
+        {
             $response = $this->client->setex($id, $lifeTime, $data);
-        } else {
+        }
+        else
+        {
             $response = $this->client->set($id, $data);
         }
 
@@ -133,11 +141,11 @@ class PredisCache extends CacheProvider
         $info = $this->client->info();
 
         return [
-            Cache::STATS_HITS              => $info['Stats']['keyspace_hits'],
-            Cache::STATS_MISSES            => $info['Stats']['keyspace_misses'],
-            Cache::STATS_UPTIME            => $info['Server']['uptime_in_seconds'],
-            Cache::STATS_MEMORY_USAGE      => $info['Memory']['used_memory'],
-            Cache::STATS_MEMORY_AVAILABLE  => false,
+            Cache::STATS_HITS             => $info['Stats']['keyspace_hits'],
+            Cache::STATS_MISSES           => $info['Stats']['keyspace_misses'],
+            Cache::STATS_UPTIME           => $info['Server']['uptime_in_seconds'],
+            Cache::STATS_MEMORY_USAGE     => $info['Memory']['used_memory'],
+            Cache::STATS_MEMORY_AVAILABLE => false,
         ];
     }
 }

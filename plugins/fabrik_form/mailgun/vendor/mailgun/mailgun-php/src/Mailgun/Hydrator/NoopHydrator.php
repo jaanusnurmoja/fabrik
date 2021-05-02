@@ -20,7 +20,7 @@ final class NoopHydrator implements Hydrator
 {
     /**
      * @param ResponseInterface $response
-     * @param string            $class
+     * @param string $class
      *
      * @throws \LogicException
      */

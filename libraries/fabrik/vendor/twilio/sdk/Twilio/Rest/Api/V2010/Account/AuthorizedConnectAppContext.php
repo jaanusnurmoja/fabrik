@@ -13,32 +13,35 @@ use Twilio\InstanceContext;
 use Twilio\Values;
 use Twilio\Version;
 
-class AuthorizedConnectAppContext extends InstanceContext {
+class AuthorizedConnectAppContext extends InstanceContext
+{
     /**
      * Initialize the AuthorizedConnectAppContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $accountSid The account_sid
      * @param string $connectAppSid The connect_app_sid
-     * @return \Twilio\Rest\Api\V2010\Account\AuthorizedConnectAppContext 
+     * @return \Twilio\Rest\Api\V2010\Account\AuthorizedConnectAppContext
      */
-    public function __construct(Version $version, $accountSid, $connectAppSid) {
+    public function __construct(Version $version, $accountSid, $connectAppSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('accountSid' => $accountSid, 'connectAppSid' => $connectAppSid, );
+        $this->solution = ['accountSid' => $accountSid, 'connectAppSid' => $connectAppSid,];
 
         $this->uri = '/Accounts/' . rawurlencode($accountSid) . '/AuthorizedConnectApps/' . rawurlencode($connectAppSid) . '.json';
     }
 
     /**
      * Fetch a AuthorizedConnectAppInstance
-     * 
+     *
      * @return AuthorizedConnectAppInstance Fetched AuthorizedConnectAppInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -56,12 +59,14 @@ class AuthorizedConnectAppContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Api.V2010.AuthorizedConnectAppContext ' . implode(' ', $context) . ']';

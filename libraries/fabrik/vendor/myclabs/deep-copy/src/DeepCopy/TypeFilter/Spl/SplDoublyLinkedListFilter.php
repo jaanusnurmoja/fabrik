@@ -35,9 +35,11 @@ class SplDoublyLinkedListFilter implements TypeFilter
     {
         $copier = $this->copier;
 
-        $copy = function (SplDoublyLinkedList $list) use ($copier) {
+        $copy = function (SplDoublyLinkedList $list) use ($copier)
+        {
             // Replace each element in the list with a deep copy of itself
-            for ($i = 1; $i <= $list->count(); $i++) {
+            for ($i = 1; $i <= $list->count(); $i++)
+            {
                 $copy = $copier->recursiveCopy($list->shift());
 
                 $list->push($copy);

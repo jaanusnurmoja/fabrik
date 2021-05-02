@@ -1,1 +1,3 @@
-.test { background:-webkit-linear-gradient(top right, white, black)}
+.test {
+    background: -webkit-linear-gradient(top right, white, black)
+}

@@ -16,7 +16,8 @@
  * This way it is possible to use FPDI for both FPDF and TCPDF with one FPDI version.
  */
 
-if (!class_exists('TCPDF', false)) {
+if (!class_exists('TCPDF', false))
+{
     /**
      * Class fpdi_bridge
      */
@@ -25,7 +26,9 @@ if (!class_exists('TCPDF', false)) {
         // empty body
     }
 
-} else {
+}
+else
+{
 
     /**
      * Class fpdi_bridge
@@ -37,7 +40,7 @@ if (!class_exists('TCPDF', false)) {
          *
          * @var array
          */
-        protected $_tpls = array();
+        protected $_tpls = [];
 
         /**
          * Name-prefix of Templates used in Resources-Dictionary
@@ -63,7 +66,8 @@ if (!class_exists('TCPDF', false)) {
         protected function _getxobjectdict()
         {
             $out = parent::_getxobjectdict();
-            foreach ($this->_tpls as $tplIdx => $tpl) {
+            foreach ($this->_tpls as $tplIdx => $tpl)
+            {
                 $out .= sprintf('%s%d %d 0 R', $this->tplPrefix, $tplIdx, $tpl['n']);
             }
 
@@ -79,9 +83,11 @@ if (!class_exists('TCPDF', false)) {
          */
         protected function _prepareValue(&$value)
         {
-            switch ($value[0]) {
+            switch ($value[0])
+            {
                 case pdf_parser::TYPE_STRING:
-                    if ($this->encrypted) {
+                    if ($this->encrypted)
+                    {
                         $value[1] = $this->_unescape($value[1]);
                         $value[1] = $this->_encrypt_data($this->_currentObjId, $value[1]);
                         $value[1] = TCPDF_STATIC::_escape($value[1]);
@@ -89,17 +95,19 @@ if (!class_exists('TCPDF', false)) {
                     break;
 
                 case pdf_parser::TYPE_STREAM:
-                    if ($this->encrypted) {
+                    if ($this->encrypted)
+                    {
                         $value[2][1] = $this->_encrypt_data($this->_currentObjId, $value[2][1]);
-                        $value[1][1]['/Length'] = array(
+                        $value[1][1]['/Length'] = [
                             pdf_parser::TYPE_NUMERIC,
                             strlen($value[2][1])
-                        );
+                        ];
                     }
                     break;
 
                 case pdf_parser::TYPE_HEX:
-                    if ($this->encrypted) {
+                    if ($this->encrypted)
+                    {
                         $value[1] = $this->hex2str($value[1]);
                         $value[1] = $this->_encrypt_data($this->_currentObjId, $value[1]);
 
@@ -119,11 +127,16 @@ if (!class_exists('TCPDF', false)) {
         protected function _unescape($s)
         {
             $out = '';
-            for ($count = 0, $n = strlen($s); $count < $n; $count++) {
-                if ($s[$count] != '\\' || $count == $n-1) {
+            for ($count = 0, $n = strlen($s); $count < $n; $count++)
+            {
+                if ($s[$count] != '\\' || $count == $n - 1)
+                {
                     $out .= $s[$count];
-                } else {
-                    switch ($s[++$count]) {
+                }
+                else
+                {
+                    switch ($s[++$count])
+                    {
                         case ')':
                         case '(':
                         case '\\':
@@ -145,29 +158,40 @@ if (!class_exists('TCPDF', false)) {
                             $out .= chr(0x0A);
                             break;
                         case "\r":
-                            if ($count != $n-1 && $s[$count+1] == "\n")
+                            if ($count != $n - 1 && $s[$count + 1] == "\n")
                                 $count++;
                             break;
                         case "\n":
                             break;
                         default:
                             // Octal-Values
-                            if (ord($s[$count]) >= ord('0') &&
-                                ord($s[$count]) <= ord('9')) {
-                                $oct = ''. $s[$count];
+                            if (
+                                ord($s[$count]) >= ord('0') &&
+                                ord($s[$count]) <= ord('9')
+                            )
+                            {
+                                $oct = '' . $s[$count];
 
-                                if (ord($s[$count+1]) >= ord('0') &&
-                                    ord($s[$count+1]) <= ord('9')) {
+                                if (
+                                    ord($s[$count + 1]) >= ord('0') &&
+                                    ord($s[$count + 1]) <= ord('9')
+                                )
+                                {
                                     $oct .= $s[++$count];
 
-                                    if (ord($s[$count+1]) >= ord('0') &&
-                                        ord($s[$count+1]) <= ord('9')) {
+                                    if (
+                                        ord($s[$count + 1]) >= ord('0') &&
+                                        ord($s[$count + 1]) <= ord('9')
+                                    )
+                                    {
                                         $oct .= $s[++$count];
                                     }
                                 }
 
                                 $out .= chr(octdec($oct));
-                            } else {
+                            }
+                            else
+                            {
                                 $out .= $s[$count];
                             }
                     }
@@ -185,7 +209,8 @@ if (!class_exists('TCPDF', false)) {
         public function hex2str($data)
         {
             $data = preg_replace('/[^0-9A-Fa-f]/', '', rtrim($data, '>'));
-            if ((strlen($data) % 2) == 1) {
+            if ((strlen($data) % 2) == 1)
+            {
                 $data .= '0';
             }
 

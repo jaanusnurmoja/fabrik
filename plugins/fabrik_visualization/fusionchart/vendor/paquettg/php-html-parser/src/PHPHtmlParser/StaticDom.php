@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser;
 
 use PHPHtmlParser\Exceptions\NotLoadedException;
@@ -19,14 +20,17 @@ final class StaticDom
      *
      * @param string $method
      * @param array $arguments
-     * @throws NotLoadedException
      * @return mixed
+     * @throws NotLoadedException
      */
     public static function __callStatic($method, $arguments)
     {
-        if (self::$dom instanceof Dom) {
+        if (self::$dom instanceof Dom)
+        {
             return call_user_func_array([self::$dom, $method], $arguments);
-        } else {
+        }
+        else
+        {
             throw new NotLoadedException('The dom is not loaded. Can not call a dom method.');
         }
     }
@@ -41,11 +45,13 @@ final class StaticDom
      */
     public static function mount($className = 'Dom', Dom $dom = null)
     {
-        if (class_exists($className)) {
+        if (class_exists($className))
+        {
             return false;
         }
         class_alias(__CLASS__, $className);
-        if ($dom instanceof Dom) {
+        if ($dom instanceof Dom)
+        {
             self::$dom = $dom;
         }
 
@@ -61,7 +67,7 @@ final class StaticDom
      */
     public static function load($str)
     {
-        $dom       = new Dom;
+        $dom = new Dom;
         self::$dom = $dom;
 
         return $dom->load($str);
@@ -76,7 +82,7 @@ final class StaticDom
      */
     public static function loadFromFile($file)
     {
-        $dom       = new Dom;
+        $dom = new Dom;
         self::$dom = $dom;
 
         return $dom->loadFromFile($file);
@@ -93,9 +99,10 @@ final class StaticDom
      */
     public static function loadFromUrl($url, $options = [], CurlInterface $curl = null)
     {
-        $dom       = new Dom;
+        $dom = new Dom;
         self::$dom = $dom;
-        if (is_null($curl)) {
+        if (is_null($curl))
+        {
             // use the default curl interface
             $curl = new Curl;
         }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DatabaseMigrationService;
 
 use Aws\AwsClient;
@@ -94,4 +95,6 @@ use Aws\AwsClient;
  * @method \Aws\Result testConnection(array $args = [])
  * @method \GuzzleHttp\Promise\Promise testConnectionAsync(array $args = [])
  */
-class DatabaseMigrationServiceClient extends AwsClient {}
+class DatabaseMigrationServiceClient extends AwsClient
+{
+}

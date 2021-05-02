@@ -2,9 +2,9 @@
   font-family: 'Journal';
   src: url('journal.eot');
   src: url('journal.eot?#iefix') format('embedded-opentype'),
-       url('journal.woff') format('woff'),
-       url('journal.ttf') format('truetype'),
-       url('journal.svg#JournalRegular') format('svg');
+  url('journal.woff') format('woff'),
+  url('journal.ttf') format('truetype'),
+  url('journal.svg#JournalRegular') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -21,7 +21,7 @@
   padding: 0;
 
   color: #000;
-  font: italic normal 1em/1.375 Georgia,Times,serif;
+  font: italic normal 1em/1.375 Georgia, Times, serif;
 }
 
 .sigPad label.error {
@@ -183,7 +183,7 @@
   cursor: default;
 
   color: #145394;
-  font: normal 1.875em/50px "Journal",Georgia,Times,serif;
+  font: normal 1.875em/50px "Journal", Georgia, Times, serif;
 }
 
 .typeItDesc,
@@ -195,7 +195,7 @@
   border-top: 3px solid #ccc;
 
   color: #000;
-  font: italic normal 1em/1.375 Georgia,Times,serif;
+  font: italic normal 1em/1.375 Georgia, Times, serif;
 }
 
 p.error {

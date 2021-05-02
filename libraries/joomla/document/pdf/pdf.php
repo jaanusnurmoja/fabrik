@@ -33,9 +33,9 @@ class JDocumentpdf extends JDocumentHTML
     /**
      * Class constructor
      *
-     * @param   array  $options  Associative array of options
+     * @param array $options Associative array of options
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         parent::__construct($options);
 
@@ -77,12 +77,12 @@ class JDocumentpdf extends JDocumentHTML
      * Legal seems to be more lenient than a4 for example
      * If doing landscape set large paper size
      *
-     * @param   string  $size         Paper size E.g A4,legal
-     * @param   string  $orientation  Paper orientation landscape|portrait
-     *
-     * @since 3.0.7
+     * @param string $size Paper size E.g A4,legal
+     * @param string $orientation Paper orientation landscape|portrait
      *
      * @return  void
+     * @since 3.0.7
+     *
      */
     public function setPaper($size = 'A4', $orientation = 'landscape')
     {
@@ -93,7 +93,7 @@ class JDocumentpdf extends JDocumentHTML
     /**
      * Sets the document name
      *
-     * @param   string  $name  Document name
+     * @param string $name Document name
      *
      * @return  void
      */
@@ -105,7 +105,7 @@ class JDocumentpdf extends JDocumentHTML
     /**
      * Returns the document name
      *
-     * @return	string
+     * @return    string
      */
     public function getName()
     {
@@ -115,15 +115,15 @@ class JDocumentpdf extends JDocumentHTML
     /**
      * Render the document.
      *
-     * @param   boolean  $cache   If true, cache the output
-     * @param   array    $params  Associative array of attributes
+     * @param boolean $cache If true, cache the output
+     * @param array $params Associative array of attributes
      *
-     * @return	string
+     * @return    string
      */
-    public function render($cache = false, $params = array())
+    public function render($cache = false, $params = [])
     {
         // mb_encoding foo when content-type had been set to text/html; uft-8;
-        $this->_metaTags['http-equiv'] = array();
+        $this->_metaTags['http-equiv'] = [];
         $this->_metaTags['http-equiv']['content-type'] = 'text/html';
 
         // Testing using futural font.
@@ -136,7 +136,7 @@ class JDocumentpdf extends JDocumentHTML
          * I think we need this to handle some HTML entities when rendering otherlanguages (like Polish),
          * but haven't tested it much
          */
-        $data = mb_convert_encoding($data,'HTML-ENTITIES','UTF-8');
+        $data = mb_convert_encoding($data, 'HTML-ENTITIES', 'UTF-8');
 
         $pdf->load_html($data);
         $config = JComponentHelper::getParams('com_fabrik');
@@ -157,13 +157,13 @@ class JDocumentpdf extends JDocumentHTML
     /**
      * Get the contents of a document include
      *
-     * @param   string  $type     The type of renderer
-     * @param   string  $name     The name of the element to render
-     * @param   array   $attribs  Associative array of remaining attributes.
+     * @param string $type The type of renderer
+     * @param string $name The name of the element to render
+     * @param array $attribs Associative array of remaining attributes.
      *
      * @return  The output of the renderer
      */
-    public function getBuffer($type = null, $name = null, $attribs = array())
+    public function getBuffer($type = null, $name = null, $attribs = [])
     {
         if ($type == 'head' || $type == 'component')
         {

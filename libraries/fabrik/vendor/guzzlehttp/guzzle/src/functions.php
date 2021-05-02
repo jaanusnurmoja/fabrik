@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp;
 
 use GuzzleHttp\Handler\CurlHandler;
@@ -9,21 +10,23 @@ use GuzzleHttp\Handler\StreamHandler;
 /**
  * Expands a URI template
  *
- * @param string $template  URI template
- * @param array  $variables Template variables
+ * @param string $template URI template
+ * @param array $variables Template variables
  *
  * @return string
  */
 function uri_template($template, array $variables)
 {
-    if (extension_loaded('uri_template')) {
+    if (extension_loaded('uri_template'))
+    {
         // @codeCoverageIgnoreStart
         return \uri_template($template, $variables);
         // @codeCoverageIgnoreEnd
     }
 
     static $uriTemplate;
-    if (!$uriTemplate) {
+    if (!$uriTemplate)
+    {
         $uriTemplate = new UriTemplate();
     }
 
@@ -40,7 +43,8 @@ function uri_template($template, array $variables)
  */
 function describe_type($input)
 {
-    switch (gettype($input)) {
+    switch (gettype($input))
+    {
         case 'object':
             return 'object(' . get_class($input) . ')';
         case 'array':
@@ -64,7 +68,8 @@ function headers_from_lines($lines)
 {
     $headers = [];
 
-    foreach ($lines as $line) {
+    foreach ($lines as $line)
+    {
         $parts = explode(':', $line, 2);
         $headers[trim($parts[0])][] = isset($parts[1])
             ? trim($parts[1])
@@ -83,9 +88,12 @@ function headers_from_lines($lines)
  */
 function debug_resource($value = null)
 {
-    if (is_resource($value)) {
+    if (is_resource($value))
+    {
         return $value;
-    } elseif (defined('STDOUT')) {
+    }
+    elseif (defined('STDOUT'))
+    {
         return STDOUT;
     }
 
@@ -97,25 +105,33 @@ function debug_resource($value = null)
  *
  * The returned handler is not wrapped by any default middlewares.
  *
- * @throws \RuntimeException if no viable Handler is available.
  * @return callable Returns the best handler for the given system.
+ * @throws \RuntimeException if no viable Handler is available.
  */
 function choose_handler()
 {
     $handler = null;
-    if (function_exists('curl_multi_exec') && function_exists('curl_exec')) {
+    if (function_exists('curl_multi_exec') && function_exists('curl_exec'))
+    {
         $handler = Proxy::wrapSync(new CurlMultiHandler(), new CurlHandler());
-    } elseif (function_exists('curl_exec')) {
+    }
+    elseif (function_exists('curl_exec'))
+    {
         $handler = new CurlHandler();
-    } elseif (function_exists('curl_multi_exec')) {
+    }
+    elseif (function_exists('curl_multi_exec'))
+    {
         $handler = new CurlMultiHandler();
     }
 
-    if (ini_get('allow_url_fopen')) {
+    if (ini_get('allow_url_fopen'))
+    {
         $handler = $handler
             ? Proxy::wrapStreaming($handler, new StreamHandler())
             : new StreamHandler();
-    } elseif (!$handler) {
+    }
+    elseif (!$handler)
+    {
         throw new \RuntimeException('GuzzleHttp requires cURL, the '
             . 'allow_url_fopen ini setting, or a custom HTTP handler.');
     }
@@ -132,9 +148,11 @@ function default_user_agent()
 {
     static $defaultAgent = '';
 
-    if (!$defaultAgent) {
+    if (!$defaultAgent)
+    {
         $defaultAgent = 'GuzzleHttp/' . Client::VERSION;
-        if (extension_loaded('curl') && function_exists('curl_version')) {
+        if (extension_loaded('curl') && function_exists('curl_version'))
+        {
             $defaultAgent .= ' curl/' . \curl_version()['version'];
         }
         $defaultAgent .= ' PHP/' . PHP_VERSION;
@@ -178,20 +196,25 @@ function default_ca_bundle()
         'C:\\windows\\curl-ca-bundle.crt',
     ];
 
-    if ($cached) {
+    if ($cached)
+    {
         return $cached;
     }
 
-    if ($ca = ini_get('openssl.cafile')) {
+    if ($ca = ini_get('openssl.cafile'))
+    {
         return $cached = $ca;
     }
 
-    if ($ca = ini_get('curl.cainfo')) {
+    if ($ca = ini_get('curl.cainfo'))
+    {
         return $cached = $ca;
     }
 
-    foreach ($cafiles as $filename) {
-        if (file_exists($filename)) {
+    foreach ($cafiles as $filename)
+    {
+        if (file_exists($filename))
+        {
             return $cached = $filename;
         }
     }
@@ -224,7 +247,8 @@ EOT
 function normalize_header_keys(array $headers)
 {
     $result = [];
-    foreach (array_keys($headers) as $key) {
+    foreach (array_keys($headers) as $key)
+    {
         $result[strtolower($key)] = $key;
     }
 
@@ -245,37 +269,48 @@ function normalize_header_keys(array $headers)
  * 3. The area starts with "." and the area is the last part of the host. e.g.
  *    '.mit.edu' will match any host that ends with '.mit.edu'.
  *
- * @param string $host         Host to check against the patterns.
- * @param array  $noProxyArray An array of host patterns.
+ * @param string $host Host to check against the patterns.
+ * @param array $noProxyArray An array of host patterns.
  *
  * @return bool
  */
 function is_host_in_noproxy($host, array $noProxyArray)
 {
-    if (strlen($host) === 0) {
+    if (strlen($host) === 0)
+    {
         throw new \InvalidArgumentException('Empty host provided');
     }
 
     // Strip port if present.
-    if (strpos($host, ':')) {
+    if (strpos($host, ':'))
+    {
         $host = explode($host, ':', 2)[0];
     }
 
-    foreach ($noProxyArray as $area) {
+    foreach ($noProxyArray as $area)
+    {
         // Always match on wildcards.
-        if ($area === '*') {
+        if ($area === '*')
+        {
             return true;
-        } elseif (empty($area)) {
+        }
+        elseif (empty($area))
+        {
             // Don't match on empty values.
             continue;
-        } elseif ($area === $host) {
+        }
+        elseif ($area === $host)
+        {
             // Exact matches.
             return true;
-        } else {
+        }
+        else
+        {
             // Special match if the area when prefixed with ".". Remove any
             // existing leading "." and add a new leading ".".
             $area = '.' . ltrim($area, '.');
-            if (substr($host, -(strlen($area))) === $area) {
+            if (substr($host, -(strlen($area))) === $area)
+            {
                 return true;
             }
         }
@@ -287,11 +322,11 @@ function is_host_in_noproxy($host, array $noProxyArray)
 /**
  * Wrapper for json_decode that throws when an error occurs.
  *
- * @param string $json    JSON data to parse
- * @param bool $assoc     When true, returned objects will be converted
+ * @param string $json JSON data to parse
+ * @param bool $assoc When true, returned objects will be converted
  *                        into associative arrays.
- * @param int    $depth   User specified recursion depth.
- * @param int    $options Bitmask of JSON decode options.
+ * @param int $depth User specified recursion depth.
+ * @param int $options Bitmask of JSON decode options.
  *
  * @return mixed
  * @throws \InvalidArgumentException if the JSON cannot be decoded.
@@ -300,7 +335,8 @@ function is_host_in_noproxy($host, array $noProxyArray)
 function json_decode($json, $assoc = false, $depth = 512, $options = 0)
 {
     $data = \json_decode($json, $assoc, $depth, $options);
-    if (JSON_ERROR_NONE !== json_last_error()) {
+    if (JSON_ERROR_NONE !== json_last_error())
+    {
         throw new \InvalidArgumentException(
             'json_decode error: ' . json_last_error_msg()
         );
@@ -312,9 +348,9 @@ function json_decode($json, $assoc = false, $depth = 512, $options = 0)
 /**
  * Wrapper for JSON encoding that throws when an error occurs.
  *
- * @param mixed $value   The value being encoded
- * @param int    $options JSON encode option bitmask
- * @param int    $depth   Set the maximum depth. Must be greater than zero.
+ * @param mixed $value The value being encoded
+ * @param int $options JSON encode option bitmask
+ * @param int $depth Set the maximum depth. Must be greater than zero.
  *
  * @return string
  * @throws \InvalidArgumentException if the JSON cannot be encoded.
@@ -323,7 +359,8 @@ function json_decode($json, $assoc = false, $depth = 512, $options = 0)
 function json_encode($value, $options = 0, $depth = 512)
 {
     $json = \json_encode($value, $options, $depth);
-    if (JSON_ERROR_NONE !== json_last_error()) {
+    if (JSON_ERROR_NONE !== json_last_error())
+    {
         throw new \InvalidArgumentException(
             'json_encode error: ' . json_last_error_msg()
         );

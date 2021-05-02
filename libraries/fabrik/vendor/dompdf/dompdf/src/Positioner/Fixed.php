@@ -28,7 +28,8 @@ class Fixed extends AbstractPositioner
         $initialcb_style = $root->get_style();
 
         $p = $frame->find_block_parent();
-        if ($p) {
+        if ($p)
+        {
             $p->add_line();
         }
 
@@ -48,15 +49,21 @@ class Fixed extends AbstractPositioner
         $left = $style->length_in_pt($style->left, $initialcb["w"]);
 
         $y = $margin_top;
-        if (isset($top)) {
+        if (isset($top))
+        {
             $y = (float)$top + $margin_top;
-            if ($top === "auto") {
+            if ($top === "auto")
+            {
                 $y = $margin_top;
-                if (isset($bottom) && $bottom !== "auto") {
+                if (isset($bottom) && $bottom !== "auto")
+                {
                     $y = $initialcb["h"] - $bottom - $margin_bottom;
-                    if ($frame->is_auto_height()) {
+                    if ($frame->is_auto_height())
+                    {
                         $y -= $height;
-                    } else {
+                    }
+                    else
+                    {
                         $y -= $frame->get_margin_height();
                     }
                 }
@@ -64,15 +71,21 @@ class Fixed extends AbstractPositioner
         }
 
         $x = $margin_left;
-        if (isset($left)) {
+        if (isset($left))
+        {
             $x = (float)$left + $margin_left;
-            if ($left === "auto") {
+            if ($left === "auto")
+            {
                 $x = $margin_left;
-                if (isset($right) && $right !== "auto") {
+                if (isset($right) && $right !== "auto")
+                {
                     $x = $initialcb["w"] - $right - $margin_right;
-                    if ($frame->is_auto_width()) {
+                    if ($frame->is_auto_width())
+                    {
                         $x -= $width;
-                    } else {
+                    }
+                    else
+                    {
                         $x -= $frame->get_margin_width();
                     }
                 }
@@ -82,7 +95,8 @@ class Fixed extends AbstractPositioner
         $frame->set_position($x, $y);
 
         $children = $frame->get_children();
-        foreach ($children as $child) {
+        foreach ($children as $child)
+        {
             $child->set_position($x, $y);
         }
     }

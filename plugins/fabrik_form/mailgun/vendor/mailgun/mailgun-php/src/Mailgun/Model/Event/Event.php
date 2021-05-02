@@ -124,7 +124,7 @@ class Event
     /**
      * @param string $event
      * @param string $id
-     * @param float  $timestamp
+     * @param float $timestamp
      */
     public function __construct($event, $id, $timestamp)
     {
@@ -132,7 +132,7 @@ class Event
         $this->id = $id;
         $this->timestamp = $timestamp;
         $this->eventDate = new \DateTime();
-        $this->eventDate->setTimestamp((int) $timestamp);
+        $this->eventDate->setTimestamp((int)$timestamp);
     }
 
     /**
@@ -144,55 +144,72 @@ class Event
     {
         $event = new self($data['event'], $data['id'], $data['timestamp']);
 
-        if (isset($data['tags'])) {
+        if (isset($data['tags']))
+        {
             $event->setTags($data['tags']);
         }
-        if (isset($data['envelope'])) {
+        if (isset($data['envelope']))
+        {
             $event->setEnvelope($data['envelope']);
         }
-        if (isset($data['campaigns'])) {
+        if (isset($data['campaigns']))
+        {
             $event->setCampaigns($data['campaigns']);
         }
-        if (isset($data['user-variables'])) {
+        if (isset($data['user-variables']))
+        {
             $event->setUserVariables($data['user-variables']);
         }
-        if (isset($data['flags'])) {
+        if (isset($data['flags']))
+        {
             $event->setFlags($data['flags']);
         }
-        if (isset($data['routes'])) {
+        if (isset($data['routes']))
+        {
             $event->setRoutes($data['routes']);
         }
-        if (isset($data['message'])) {
+        if (isset($data['message']))
+        {
             $event->setMessage($data['message']);
         }
-        if (isset($data['recipient'])) {
+        if (isset($data['recipient']))
+        {
             $event->setRecipient($data['recipient']);
         }
-        if (isset($data['method'])) {
+        if (isset($data['method']))
+        {
             $event->setMethod($data['method']);
         }
-        if (isset($data['delivery-status'])) {
+        if (isset($data['delivery-status']))
+        {
             $event->setDeliveryStatus($data['delivery-status']);
         }
-        if (isset($data['severity'])) {
+        if (isset($data['severity']))
+        {
             $event->setSeverity($data['severity']);
         }
-        if (isset($data['reason'])) {
+        if (isset($data['reason']))
+        {
             $event->setReason($data['reason']);
         }
-        if (isset($data['geolocation'])) {
+        if (isset($data['geolocation']))
+        {
             $event->setGeolocation($data['geolocation']);
         }
-        if (isset($data['ip'])) {
+        if (isset($data['ip']))
+        {
             $event->setIp($data['ip']);
         }
-        if (isset($data['client-info'])) {
+        if (isset($data['client-info']))
+        {
             $event->setClientInfo($data['client-info']);
         }
-        if (isset($data['url'])) {
+        if (isset($data['url']))
+        {
             $event->setUrl($data['url']);
         }
-        if (isset($data['storage'])) {
+        if (isset($data['storage']))
+        {
             $event->setStorage($data['storage']);
         }
 

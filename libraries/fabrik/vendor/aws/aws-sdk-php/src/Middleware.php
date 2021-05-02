@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Aws\Api\Service;
@@ -17,8 +18,8 @@ final class Middleware
      * be used to specify the source of data for an upload operation.
      *
      * @param Service $api
-     * @param string  $bodyParameter
-     * @param string  $sourceParameter
+     * @param string $bodyParameter
+     * @param string $sourceParameter
      *
      * @return callable
      */
@@ -26,12 +27,14 @@ final class Middleware
         Service $api,
         $bodyParameter = 'Body',
         $sourceParameter = 'SourceFile'
-    ) {
+    )
+    {
         return function (callable $handler) use (
             $api,
             $bodyParameter,
             $sourceParameter
-        ) {
+        )
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null)
@@ -40,13 +43,16 @@ final class Middleware
                 $api,
                 $bodyParameter,
                 $sourceParameter
-            ) {
+            )
+            {
                 $operation = $api->getOperation($command->getName());
                 $source = $command[$sourceParameter];
 
-                if ($source !== null
+                if (
+                    $source !== null
                     && $operation->getInput()->hasMember($bodyParameter)
-                ) {
+                )
+                {
                     $command[$bodyParameter] = new LazyOpenStream($source, 'r');
                     unset($command[$sourceParameter]);
                 }
@@ -66,11 +72,13 @@ final class Middleware
     public static function validation(Service $api, Validator $validator = null)
     {
         $validator = $validator ?: new Validator();
-        return function (callable $handler) use ($api, $validator) {
+        return function (callable $handler) use ($api, $validator)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($api, $validator, $handler) {
+            ) use ($api, $validator, $handler)
+            {
                 $operation = $api->getOperation($command->getName());
                 $validator->validate(
                     $command->getName(),
@@ -91,8 +99,10 @@ final class Middleware
      */
     public static function requestBuilder(callable $serializer)
     {
-        return function (callable $handler) use ($serializer) {
-            return function (CommandInterface $command) use ($serializer, $handler) {
+        return function (callable $handler) use ($serializer)
+        {
+            return function (CommandInterface $command) use ($serializer, $handler)
+            {
                 return $handler($command, $serializer($command));
             };
         };
@@ -101,7 +111,7 @@ final class Middleware
     /**
      * Creates a middleware that signs requests for a command.
      *
-     * @param callable $credProvider      Credentials provider function that
+     * @param callable $credProvider Credentials provider function that
      *                                    returns a promise that is resolved
      *                                    with a CredentialsInterface object.
      * @param callable $signatureFunction Function that accepts a Command
@@ -112,15 +122,18 @@ final class Middleware
      */
     public static function signer(callable $credProvider, callable $signatureFunction)
     {
-        return function (callable $handler) use ($signatureFunction, $credProvider) {
+        return function (callable $handler) use ($signatureFunction, $credProvider)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request
-            ) use ($handler, $signatureFunction, $credProvider) {
+            ) use ($handler, $signatureFunction, $credProvider)
+            {
                 $signer = $signatureFunction($command);
                 return $credProvider()->then(
                     function (CredentialsInterface $creds)
-                    use ($handler, $command, $signer, $request) {
+                    use ($handler, $command, $signer, $request)
+                    {
                         return $handler(
                             $command,
                             $signer->signRequest($request, $creds)
@@ -145,11 +158,13 @@ final class Middleware
      */
     public static function tap(callable $fn)
     {
-        return function (callable $handler) use ($fn) {
+        return function (callable $handler) use ($fn)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler, $fn) {
+            ) use ($handler, $fn)
+            {
                 $fn($command, $request);
                 return $handler($command, $request);
             };
@@ -166,9 +181,9 @@ final class Middleware
      * @param callable $decider Function that accepts the number of retries,
      *                          a request, [result], and [exception] and
      *                          returns true if the command is to be retried.
-     * @param callable $delay   Function that accepts the number of retries and
+     * @param callable $delay Function that accepts the number of retries and
      *                          returns the number of milliseconds to delay.
-     * @param bool $stats       Whether to collect statistics on retries and the
+     * @param bool $stats Whether to collect statistics on retries and the
      *                          associated delay.
      *
      * @return callable
@@ -177,14 +192,17 @@ final class Middleware
         callable $decider = null,
         callable $delay = null,
         $stats = false
-    ) {
+    )
+    {
         $decider = $decider ?: RetryMiddleware::createDefaultDecider();
         $delay = $delay ?: [RetryMiddleware::class, 'exponentialDelay'];
 
-        return function (callable $handler) use ($decider, $delay, $stats) {
+        return function (callable $handler) use ($decider, $delay, $stats)
+        {
             return new RetryMiddleware($decider, $delay, $handler, $stats);
         };
     }
+
     /**
      * Middleware wrapper function that adds an invocation id header to
      * requests, which is only applied after the build step.
@@ -196,11 +214,13 @@ final class Middleware
      */
     public static function invocationId()
     {
-        return function (callable $handler) {
+        return function (callable $handler)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request
-            ) use ($handler){
+            ) use ($handler)
+            {
                 return $handler($command, $request->withHeader(
                     'aws-sdk-invocation-id',
                     md5(uniqid(gethostname(), true))
@@ -208,6 +228,7 @@ final class Middleware
             };
         };
     }
+
     /**
      * Middleware wrapper function that adds a Content-Type header to requests.
      * This is only done when the Content-Type has not already been set, and the
@@ -220,15 +241,19 @@ final class Middleware
      */
     public static function contentType(array $operations)
     {
-        return function (callable $handler) use ($operations) {
+        return function (callable $handler) use ($operations)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler, $operations) {
-                if (!$request->hasHeader('Content-Type')
+            ) use ($handler, $operations)
+            {
+                if (
+                    !$request->hasHeader('Content-Type')
                     && in_array($command->getName(), $operations, true)
                     && ($uri = $request->getBody()->getMetadata('uri'))
-                ) {
+                )
+                {
                     $request = $request->withHeader(
                         'Content-Type',
                         Psr7\mimetype_from_filename($uri) ?: 'application/octet-stream'
@@ -251,19 +276,23 @@ final class Middleware
      */
     public static function history(History $history)
     {
-        return function (callable $handler) use ($history) {
+        return function (callable $handler) use ($history)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler, $history) {
+            ) use ($handler, $history)
+            {
                 $ticket = $history->start($command, $request);
                 return $handler($command, $request)
                     ->then(
-                        function ($result) use ($history, $ticket) {
+                        function ($result) use ($history, $ticket)
+                        {
                             $history->finish($ticket, $result);
                             return $result;
                         },
-                        function ($reason) use ($history, $ticket) {
+                        function ($reason) use ($history, $ticket)
+                        {
                             $history->finish($ticket, $reason);
                             return Promise\rejection_for($reason);
                         }
@@ -283,11 +312,13 @@ final class Middleware
      */
     public static function mapRequest(callable $f)
     {
-        return function (callable $handler) use ($f) {
+        return function (callable $handler) use ($f)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler, $f) {
+            ) use ($handler, $f)
+            {
                 return $handler($command, $f($request));
             };
         };
@@ -304,11 +335,13 @@ final class Middleware
      */
     public static function mapCommand(callable $f)
     {
-        return function (callable $handler) use ($f) {
+        return function (callable $handler) use ($f)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler, $f) {
+            ) use ($handler, $f)
+            {
                 return $handler($f($command), $request);
             };
         };
@@ -324,11 +357,13 @@ final class Middleware
      */
     public static function mapResult(callable $f)
     {
-        return function (callable $handler) use ($f) {
+        return function (callable $handler) use ($f)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler, $f) {
+            ) use ($handler, $f)
+            {
                 return $handler($command, $request)->then($f);
             };
         };
@@ -336,19 +371,24 @@ final class Middleware
 
     public static function timer()
     {
-        return function (callable $handler) {
+        return function (callable $handler)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler) {
+            ) use ($handler)
+            {
                 $start = microtime(true);
                 return $handler($command, $request)
                     ->then(
-                        function (ResultInterface $res) use ($start) {
-                            if (!isset($res['@metadata'])) {
+                        function (ResultInterface $res) use ($start)
+                        {
+                            if (!isset($res['@metadata']))
+                            {
                                 $res['@metadata'] = [];
                             }
-                            if (!isset($res['@metadata']['transferStats'])) {
+                            if (!isset($res['@metadata']['transferStats']))
+                            {
                                 $res['@metadata']['transferStats'] = [];
                             }
 
@@ -357,11 +397,13 @@ final class Middleware
 
                             return $res;
                         },
-                        function ($err) use ($start) {
-                            if ($err instanceof AwsException) {
+                        function ($err) use ($start)
+                        {
+                            if ($err instanceof AwsException)
+                            {
                                 $err->setTransferInfo([
-                                    'total_time' => microtime(true) - $start,
-                                ] + $err->getTransferInfo());
+                                        'total_time' => microtime(true) - $start,
+                                    ] + $err->getTransferInfo());
                             }
                             return Promise\rejection_for($err);
                         }

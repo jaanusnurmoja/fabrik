@@ -21,7 +21,7 @@ class Message extends HttpApi
 {
     /**
      * @param string $domain
-     * @param array  $params
+     * @param array $params
      *
      * @return SendResponse
      */
@@ -33,13 +33,16 @@ class Message extends HttpApi
 
         $postDataMultipart = [];
         $fields = ['attachment', 'inline'];
-        foreach ($fields as $fieldName) {
-            if (!isset($params[$fieldName])) {
+        foreach ($fields as $fieldName)
+        {
+            if (!isset($params[$fieldName]))
+            {
                 continue;
             }
 
             Assert::isArray($params[$fieldName]);
-            foreach ($params[$fieldName] as $file) {
+            foreach ($params[$fieldName] as $file)
+            {
                 $postDataMultipart[] = $this->prepareFile($fieldName, $file);
             }
 
@@ -54,9 +57,9 @@ class Message extends HttpApi
 
     /**
      * @param string $domain
-     * @param array  $recipients with all you send emails to. Including bcc and cc
-     * @param string $message    Message filepath or content
-     * @param array  $params
+     * @param array $recipients with all you send emails to. Including bcc and cc
+     * @param string $message Message filepath or content
+     * @param array $params
      */
     public function sendMime($domain, array $recipients, $message, array $params)
     {
@@ -69,12 +72,15 @@ class Message extends HttpApi
         $params['to'] = $recipients;
         $postDataMultipart = $this->prepareMultipartParameters($params);
 
-        if (is_file($message)) {
+        if (is_file($message))
+        {
             $fileData = ['filePath' => $message];
-        } else {
+        }
+        else
+        {
             $fileData = [
                 'fileContent' => $message,
-                'filename' => 'message',
+                'filename'    => 'message',
             ];
         }
         $postDataMultipart[] = $this->prepareFile('message', $fileData);
@@ -87,7 +93,7 @@ class Message extends HttpApi
      * Get stored message.
      *
      * @param string $url
-     * @param bool   $rawMessage if true we will use "Accept: message/rfc2822" header
+     * @param bool $rawMessage if true we will use "Accept: message/rfc2822" header
      *
      * @return ShowResponse
      */
@@ -96,7 +102,8 @@ class Message extends HttpApi
         Assert::notEmpty($url);
 
         $headers = [];
-        if ($rawMessage) {
+        if ($rawMessage)
+        {
             $headers['Accept'] = 'message/rfc2822';
         }
 
@@ -109,7 +116,7 @@ class Message extends HttpApi
      * Prepare a file.
      *
      * @param string $fieldName
-     * @param array  $filePath  array('fileContent' => 'content') or array('filePath' => '/foo/bar')
+     * @param array $filePath array('fileContent' => 'content') or array('filePath' => '/foo/bar')
      *
      * @return array
      *
@@ -119,28 +126,34 @@ class Message extends HttpApi
     {
         $filename = isset($filePath['filename']) ? $filePath['filename'] : null;
 
-        if (isset($filePath['fileContent'])) {
+        if (isset($filePath['fileContent']))
+        {
             // File from memory
             $resource = fopen('php://temp', 'r+');
             fwrite($resource, $filePath['fileContent']);
             rewind($resource);
-        } elseif (isset($filePath['filePath'])) {
+        }
+        elseif (isset($filePath['filePath']))
+        {
             // File form path
             $path = $filePath['filePath'];
 
             // Remove leading @ symbol
-            if (0 === strpos($path, '@')) {
+            if (0 === strpos($path, '@'))
+            {
                 $path = substr($path, 1);
             }
 
             $resource = fopen($path, 'r');
-        } else {
+        }
+        else
+        {
             throw new InvalidArgumentException('When using a file you need to specify parameter "fileContent" or "filePath"');
         }
 
         return [
-            'name' => $fieldName,
-            'content' => $resource,
+            'name'     => $fieldName,
+            'content'  => $resource,
             'filename' => $filename,
         ];
     }
@@ -155,11 +168,13 @@ class Message extends HttpApi
     private function prepareMultipartParameters(array $params)
     {
         $postDataMultipart = [];
-        foreach ($params as $key => $value) {
+        foreach ($params as $key => $value)
+        {
             // If $value is not an array we cast it to an array
-            foreach ((array) $value as $subValue) {
+            foreach ((array)$value as $subValue)
+            {
                 $postDataMultipart[] = [
-                    'name' => $key,
+                    'name'    => $key,
                     'content' => $subValue,
                 ];
             }

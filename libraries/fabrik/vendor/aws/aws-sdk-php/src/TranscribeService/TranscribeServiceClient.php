@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\TranscribeService;
 
 use Aws\AwsClient;
@@ -24,4 +25,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateVocabulary(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateVocabularyAsync(array $args = [])
  */
-class TranscribeServiceClient extends AwsClient {}
+class TranscribeServiceClient extends AwsClient
+{
+}

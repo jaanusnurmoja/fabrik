@@ -20,17 +20,21 @@ class UseTag extends AbstractTag
 
     protected function before($attributes)
     {
-        if (isset($attributes['x'])) {
+        if (isset($attributes['x']))
+        {
             $this->x = $attributes['x'];
         }
-        if (isset($attributes['y'])) {
+        if (isset($attributes['y']))
+        {
             $this->y = $attributes['y'];
         }
 
-        if (isset($attributes['width'])) {
+        if (isset($attributes['width']))
+        {
             $this->width = $attributes['width'];
         }
-        if (isset($attributes['height'])) {
+        if (isset($attributes['height']))
+        {
             $this->height = $attributes['height'];
         }
 
@@ -41,7 +45,8 @@ class UseTag extends AbstractTag
         $link = $attributes["xlink:href"];
         $this->reference = $document->getDef($link);
 
-        if ($this->reference) {
+        if ($this->reference)
+        {
             $this->reference->before($attributes);
         }
 
@@ -51,10 +56,12 @@ class UseTag extends AbstractTag
         $surface->translate($this->x, $this->y);
     }
 
-    protected function after() {
+    protected function after()
+    {
         parent::after();
 
-        if ($this->reference) {
+        if ($this->reference)
+        {
             $this->reference->after();
         }
 
@@ -65,7 +72,8 @@ class UseTag extends AbstractTag
     {
         parent::handle($attributes);
 
-        if (!$this->reference) {
+        if (!$this->reference)
+        {
             return;
         }
 
@@ -73,7 +81,8 @@ class UseTag extends AbstractTag
 
         $this->reference->handle($attributes);
 
-        foreach ($this->reference->children as $_child) {
+        foreach ($this->reference->children as $_child)
+        {
             $_attributes = array_merge($_child->attributes, $attributes);
             $_child->handle($_attributes);
         }
@@ -83,13 +92,15 @@ class UseTag extends AbstractTag
     {
         parent::handleEnd();
 
-        if (!$this->reference) {
+        if (!$this->reference)
+        {
             return;
         }
 
         $this->reference->handleEnd();
 
-        foreach ($this->reference->children as $_child) {
+        foreach ($this->reference->children as $_child)
+        {
             $_child->handleEnd();
         }
     }

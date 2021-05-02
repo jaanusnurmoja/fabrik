@@ -12,7 +12,8 @@ namespace Twilio\Rest\Api\V2010\Account;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class ConferenceOptions {
+abstract class ConferenceOptions
+{
     /**
      * @param string $dateCreatedBefore Filter by date created
      * @param string $dateCreated Filter by date created
@@ -24,8 +25,10 @@ abstract class ConferenceOptions {
      * @param string $status The status of the conference
      * @return ReadConferenceOptions Options builder
      */
-    public static function read($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE, $dateUpdatedBefore = Values::NONE, $dateUpdated = Values::NONE, $dateUpdatedAfter = Values::NONE, $friendlyName = Values::NONE, $status = Values::NONE) {
-        return new ReadConferenceOptions($dateCreatedBefore, $dateCreated, $dateCreatedAfter, $dateUpdatedBefore, $dateUpdated, $dateUpdatedAfter, $friendlyName, $status);
+    public static function read($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE, $dateUpdatedBefore = Values::NONE, $dateUpdated = Values::NONE, $dateUpdatedAfter = Values::NONE, $friendlyName = Values::NONE, $status = Values::NONE)
+    {
+        return new ReadConferenceOptions($dateCreatedBefore, $dateCreated, $dateCreatedAfter, $dateUpdatedBefore,
+            $dateUpdated, $dateUpdatedAfter, $friendlyName, $status);
     }
 
     /**
@@ -36,12 +39,14 @@ abstract class ConferenceOptions {
      * @param string $announceMethod Specify GET or POST, defaults to POST
      * @return UpdateConferenceOptions Options builder
      */
-    public static function update($status = Values::NONE, $announceUrl = Values::NONE, $announceMethod = Values::NONE) {
+    public static function update($status = Values::NONE, $announceUrl = Values::NONE, $announceMethod = Values::NONE)
+    {
         return new UpdateConferenceOptions($status, $announceUrl, $announceMethod);
     }
 }
 
-class ReadConferenceOptions extends Options {
+class ReadConferenceOptions extends Options
+{
     /**
      * @param string $dateCreatedBefore Filter by date created
      * @param string $dateCreated Filter by date created
@@ -52,7 +57,8 @@ class ReadConferenceOptions extends Options {
      * @param string $friendlyName Filter by friendly name
      * @param string $status The status of the conference
      */
-    public function __construct($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE, $dateUpdatedBefore = Values::NONE, $dateUpdated = Values::NONE, $dateUpdatedAfter = Values::NONE, $friendlyName = Values::NONE, $status = Values::NONE) {
+    public function __construct($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE, $dateUpdatedBefore = Values::NONE, $dateUpdated = Values::NONE, $dateUpdatedAfter = Values::NONE, $friendlyName = Values::NONE, $status = Values::NONE)
+    {
         $this->options['dateCreatedBefore'] = $dateCreatedBefore;
         $this->options['dateCreated'] = $dateCreated;
         $this->options['dateCreatedAfter'] = $dateCreatedAfter;
@@ -65,101 +71,112 @@ class ReadConferenceOptions extends Options {
 
     /**
      * Only show conferences that started on this date, given as `YYYY-MM-DD`. You can also specify inequality – for conferences that started at or before midnight on a date use  `DateCreated<=YYYY-MM-DD`, or specify  conferences that started at or after midnight on a date with `DateCreated>=YYYY-MM-DD`.
-     * 
+     *
      * @param string $dateCreatedBefore Filter by date created
      * @return $this Fluent Builder
      */
-    public function setDateCreatedBefore($dateCreatedBefore) {
+    public function setDateCreatedBefore($dateCreatedBefore)
+    {
         $this->options['dateCreatedBefore'] = $dateCreatedBefore;
         return $this;
     }
 
     /**
      * Only show conferences that started on this date, given as `YYYY-MM-DD`. You can also specify inequality – for conferences that started at or before midnight on a date use  `DateCreated<=YYYY-MM-DD`, or specify  conferences that started at or after midnight on a date with `DateCreated>=YYYY-MM-DD`.
-     * 
+     *
      * @param string $dateCreated Filter by date created
      * @return $this Fluent Builder
      */
-    public function setDateCreated($dateCreated) {
+    public function setDateCreated($dateCreated)
+    {
         $this->options['dateCreated'] = $dateCreated;
         return $this;
     }
 
     /**
      * Only show conferences that started on this date, given as `YYYY-MM-DD`. You can also specify inequality – for conferences that started at or before midnight on a date use  `DateCreated<=YYYY-MM-DD`, or specify  conferences that started at or after midnight on a date with `DateCreated>=YYYY-MM-DD`.
-     * 
+     *
      * @param string $dateCreatedAfter Filter by date created
      * @return $this Fluent Builder
      */
-    public function setDateCreatedAfter($dateCreatedAfter) {
+    public function setDateCreatedAfter($dateCreatedAfter)
+    {
         $this->options['dateCreatedAfter'] = $dateCreatedAfter;
         return $this;
     }
 
     /**
      * Only show conferences that were last updated on this date, given as `YYYY-MM-DD`. You can also specify inequality – for conferences that were last updated at or before midnight on a date use `DateUpdated<=YYYY-MM-DD`, or specify conferences updated at or after midnight on a given date with   `DateUpdated>=YYYY-MM-DD`.
-     * 
+     *
      * @param string $dateUpdatedBefore Filter by date updated
      * @return $this Fluent Builder
      */
-    public function setDateUpdatedBefore($dateUpdatedBefore) {
+    public function setDateUpdatedBefore($dateUpdatedBefore)
+    {
         $this->options['dateUpdatedBefore'] = $dateUpdatedBefore;
         return $this;
     }
 
     /**
      * Only show conferences that were last updated on this date, given as `YYYY-MM-DD`. You can also specify inequality – for conferences that were last updated at or before midnight on a date use `DateUpdated<=YYYY-MM-DD`, or specify conferences updated at or after midnight on a given date with   `DateUpdated>=YYYY-MM-DD`.
-     * 
+     *
      * @param string $dateUpdated Filter by date updated
      * @return $this Fluent Builder
      */
-    public function setDateUpdated($dateUpdated) {
+    public function setDateUpdated($dateUpdated)
+    {
         $this->options['dateUpdated'] = $dateUpdated;
         return $this;
     }
 
     /**
      * Only show conferences that were last updated on this date, given as `YYYY-MM-DD`. You can also specify inequality – for conferences that were last updated at or before midnight on a date use `DateUpdated<=YYYY-MM-DD`, or specify conferences updated at or after midnight on a given date with   `DateUpdated>=YYYY-MM-DD`.
-     * 
+     *
      * @param string $dateUpdatedAfter Filter by date updated
      * @return $this Fluent Builder
      */
-    public function setDateUpdatedAfter($dateUpdatedAfter) {
+    public function setDateUpdatedAfter($dateUpdatedAfter)
+    {
         $this->options['dateUpdatedAfter'] = $dateUpdatedAfter;
         return $this;
     }
 
     /**
      * Only show results who's friendly name exactly matches the string
-     * 
+     *
      * @param string $friendlyName Filter by friendly name
      * @return $this Fluent Builder
      */
-    public function setFriendlyName($friendlyName) {
+    public function setFriendlyName($friendlyName)
+    {
         $this->options['friendlyName'] = $friendlyName;
         return $this;
     }
 
     /**
      * A string representing the status of the conference. May be `init`, `in-progress`, or `completed`.
-     * 
+     *
      * @param string $status The status of the conference
      * @return $this Fluent Builder
      */
-    public function setStatus($status) {
+    public function setStatus($status)
+    {
         $this->options['status'] = $status;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -167,7 +184,8 @@ class ReadConferenceOptions extends Options {
     }
 }
 
-class UpdateConferenceOptions extends Options {
+class UpdateConferenceOptions extends Options
+{
     /**
      * @param string $status Specifying completed will end the conference and kick
      *                       all participants
@@ -175,7 +193,8 @@ class UpdateConferenceOptions extends Options {
      *                            URL for announcing something into a conference.
      * @param string $announceMethod Specify GET or POST, defaults to POST
      */
-    public function __construct($status = Values::NONE, $announceUrl = Values::NONE, $announceMethod = Values::NONE) {
+    public function __construct($status = Values::NONE, $announceUrl = Values::NONE, $announceMethod = Values::NONE)
+    {
         $this->options['status'] = $status;
         $this->options['announceUrl'] = $announceUrl;
         $this->options['announceMethod'] = $announceMethod;
@@ -183,48 +202,54 @@ class UpdateConferenceOptions extends Options {
 
     /**
      * Specifying `completed` will end the conference and kick all participants
-     * 
+     *
      * @param string $status Specifying completed will end the conference and kick
      *                       all participants
      * @return $this Fluent Builder
      */
-    public function setStatus($status) {
+    public function setStatus($status)
+    {
         $this->options['status'] = $status;
         return $this;
     }
 
     /**
      * The 'AnnounceUrl' attribute lets you specify a URL for announcing something into a conference. The URL may return an MP3, a WAV or a TwiML document with `<Play>` or `<Say>`.
-     * 
+     *
      * @param string $announceUrl The 'AnnounceUrl' attribute lets you specify a
      *                            URL for announcing something into a conference.
      * @return $this Fluent Builder
      */
-    public function setAnnounceUrl($announceUrl) {
+    public function setAnnounceUrl($announceUrl)
+    {
         $this->options['announceUrl'] = $announceUrl;
         return $this;
     }
 
     /**
      * Specify GET or POST, defaults to POST
-     * 
+     *
      * @param string $announceMethod Specify GET or POST, defaults to POST
      * @return $this Fluent Builder
      */
-    public function setAnnounceMethod($announceMethod) {
+    public function setAnnounceMethod($announceMethod)
+    {
         $this->options['announceMethod'] = $announceMethod;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

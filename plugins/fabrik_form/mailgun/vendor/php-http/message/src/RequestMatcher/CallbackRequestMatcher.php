@@ -30,6 +30,6 @@ final class CallbackRequestMatcher implements RequestMatcher
      */
     public function matches(RequestInterface $request)
     {
-        return (bool) call_user_func($this->callback, $request);
+        return (bool)call_user_func($this->callback, $request);
     }
 }

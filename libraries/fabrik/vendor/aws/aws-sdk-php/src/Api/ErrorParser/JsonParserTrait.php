@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\ErrorParser;
 
 use Aws\Api\Parser\PayloadParserTrait;
@@ -13,14 +14,14 @@ trait JsonParserTrait
 
     private function genericHandler(ResponseInterface $response)
     {
-        $code = (string) $response->getStatusCode();
+        $code = (string)$response->getStatusCode();
 
         return [
-            'request_id'  => (string) $response->getHeaderLine('x-amzn-requestid'),
-            'code'        => null,
-            'message'     => null,
-            'type'        => $code[0] == '4' ? 'client' : 'server',
-            'parsed'      => $this->parseJson($response->getBody(), $response)
+            'request_id' => (string)$response->getHeaderLine('x-amzn-requestid'),
+            'code'       => null,
+            'message'    => null,
+            'type'       => $code[0] == '4' ? 'client' : 'server',
+            'parsed'     => $this->parseJson($response->getBody(), $response)
         ];
     }
 }

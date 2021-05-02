@@ -52,7 +52,8 @@ class ZendDataCache extends CacheProvider
     protected function doFlush()
     {
         $namespace = $this->getNamespace();
-        if (empty($namespace)) {
+        if (empty($namespace))
+        {
             return zend_shm_cache_clear();
         }
 

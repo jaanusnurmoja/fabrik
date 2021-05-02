@@ -36,7 +36,7 @@ class ClickatellHttp extends Clickatell
      *
      * @param string $username The username
      * @param string $password The password
-     * @param int    $apiId    The clickatell API ID
+     * @param int $apiId The clickatell API ID
      */
     public function __construct($username, $password, $apiId)
     {
@@ -52,49 +52,53 @@ class ClickatellHttp extends Clickatell
     {
         $args = array_merge(
             $args,
-            array(
-                'user'      => $this->username,
-                'password'  => $this->password,
-                'api_id'    => $this->apiId
-            )
+            [
+                'user'     => $this->username,
+                'password' => $this->password,
+                'api_id'   => $this->apiId
+            ]
         );
 
         $query = http_build_query($args);
-        return $this->curl($uri, $query, array(), $method)->unwrapLegacy();
+        return $this->curl($uri, $query, [], $method)->unwrapLegacy();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function sendMessage($to, $message, $extra = array())
+    public function sendMessage($to, $message, $extra = [])
     {
-        $extra['to'] = implode(",", (array) $to);
+        $extra['to'] = implode(",", (array)$to);
         $extra['text'] = $message;
         $args = $this->getSendDefaults($extra);
 
-        try {
+        try
+        {
             $response = $this->get('http/sendmsg', $args);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
 
-            $response = array(
-                'error' => $e->getMessage(),
+            $response = [
+                'error'     => $e->getMessage(),
                 'errorCode' => $e->getCode()
-            );
+            ];
         }
 
-        !is_int(key($response)) && $response = array($response);
-        $return = array();
+        !is_int(key($response)) && $response = [$response];
+        $return = [];
 
         // We won't throw any exceptions if an error occurs since we could have
         // multiple messages in the packet and not all of them might have failed.
-        foreach ($response as $entry) {
+        foreach ($response as $entry)
+        {
 
-            $return[] = (object) array(
-                'id'            => (isset($entry['ID'])) ? $entry['ID'] : false,
-                'destination'   => (isset($entry['To'])) ? $entry['To'] : $args['to'],
-                'error'         => (isset($entry['error'])) ? $entry['error'] : false,
-                'errorCode'     => (isset($entry['code'])) ? $entry['code'] : false
-            );
+            $return[] = (object)[
+                'id'          => (isset($entry['ID'])) ? $entry['ID'] : false,
+                'destination' => (isset($entry['To'])) ? $entry['To'] : $args['to'],
+                'error'       => (isset($entry['error'])) ? $entry['error'] : false,
+                'errorCode'   => (isset($entry['code'])) ? $entry['code'] : false
+            ];
         }
 
         return $return;
@@ -105,11 +109,11 @@ class ClickatellHttp extends Clickatell
      */
     public function getBalance()
     {
-        $response = $this->get('http/getbalance', array());
+        $response = $this->get('http/getbalance', []);
 
-        return (object) array(
-            'balance' => (float) $response['Credit']
-        );
+        return (object)[
+            'balance' => (float)$response['Credit']
+        ];
     }
 
     /**
@@ -125,23 +129,26 @@ class ClickatellHttp extends Clickatell
      */
     public function routeCoverage($msisdn)
     {
-        try {
+        try
+        {
 
-            $response = $this->get('utils/routeCoverage', array('msisdn' => $msisdn));
+            $response = $this->get('utils/routeCoverage', ['msisdn' => $msisdn]);
 
-            return (object) array(
-                'routable'      => true,
-                'destination'   => $msisdn,
-                'charge'        => $response['Charge']
-            );
+            return (object)[
+                'routable'    => true,
+                'destination' => $msisdn,
+                'charge'      => $response['Charge']
+            ];
 
-        } catch (Exception $exception) {
+        }
+        catch (Exception $exception)
+        {
 
-            return (object) array(
-                'routable'      => false,
-                'destination'   => $msisdn,
-                'charge'        => 0
-            );
+            return (object)[
+                'routable'    => false,
+                'destination' => $msisdn,
+                'charge'      => 0
+            ];
         }
     }
 
@@ -150,14 +157,14 @@ class ClickatellHttp extends Clickatell
      */
     public function getMessageCharge($apiMsgId)
     {
-        $response = $this->get('http/getmsgcharge', array('apimsgid' => $apiMsgId));
+        $response = $this->get('http/getmsgcharge', ['apimsgid' => $apiMsgId]);
 
-        return (object) array(
-            'id'            => $apiMsgId,
-            'status'        => $response['status'],
-            'description'   => Diagnostic::getStatus($response['status']),
-            'charge'        => (float) $response['charge']
-        );
+        return (object)[
+            'id'          => $apiMsgId,
+            'status'      => $response['status'],
+            'description' => Diagnostic::getStatus($response['status']),
+            'charge'      => (float)$response['charge']
+        ];
     }
 
     /**
@@ -165,12 +172,12 @@ class ClickatellHttp extends Clickatell
      */
     public function stopMessage($apiMsgId)
     {
-        $response = $this->get('http/delmsg', array('apimsgid' => $apiMsgId));
+        $response = $this->get('http/delmsg', ['apimsgid' => $apiMsgId]);
 
-        return (object) array(
-            'id'            => $response['ID'],
-            'status'        => $response['Status'],
-            'description'   => Diagnostic::getStatus($response['Status']),
-        );
+        return (object)[
+            'id'          => $response['ID'],
+            'status'      => $response['Status'],
+            'description' => Diagnostic::getStatus($response['Status']),
+        ];
     }
 }

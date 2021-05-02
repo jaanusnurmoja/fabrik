@@ -5,22 +5,22 @@
 $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
-return array(
-    'Twilio\\' => array($vendorDir . '/twilio/sdk/Twilio'),
-    'Stripe\\' => array($vendorDir . '/stripe/stripe-php/lib'),
-    'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
-    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
-    'Pop\\Shipping\\' => array($vendorDir . '/popphp/pop-shipping/src'),
-    'PHPLicengine\\' => array($vendorDir . '/phplicengine/bitly/lib/PHPLicengine'),
-    'Mpdf\\' => array($vendorDir . '/mpdf/mpdf/src'),
-    'JmesPath\\' => array($vendorDir . '/mtdowling/jmespath.php/src'),
-    'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
-    'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
-    'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
-    'FontLib\\' => array($vendorDir . '/phenx/php-font-lib/src/FontLib'),
-    'Dompdf\\' => array($vendorDir . '/dompdf/dompdf/src'),
-    'Doctrine\\Common\\Cache\\' => array($vendorDir . '/doctrine/cache/lib/Doctrine/Common/Cache'),
-    'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
-    'Clickatell\\' => array($vendorDir . '/arcturial/clickatell/src', $vendorDir . '/arcturial/clickatell/test'),
-    'Aws\\' => array($vendorDir . '/aws/aws-sdk-php/src'),
-);
+return [
+    'Twilio\\'                  => [$vendorDir . '/twilio/sdk/Twilio'],
+    'Stripe\\'                  => [$vendorDir . '/stripe/stripe-php/lib'],
+    'Psr\\Log\\'                => [$vendorDir . '/psr/log/Psr/Log'],
+    'Psr\\Http\\Message\\'      => [$vendorDir . '/psr/http-message/src'],
+    'Pop\\Shipping\\'           => [$vendorDir . '/popphp/pop-shipping/src'],
+    'PHPLicengine\\'            => [$vendorDir . '/phplicengine/bitly/lib/PHPLicengine'],
+    'Mpdf\\'                    => [$vendorDir . '/mpdf/mpdf/src'],
+    'JmesPath\\'                => [$vendorDir . '/mtdowling/jmespath.php/src'],
+    'GuzzleHttp\\Psr7\\'        => [$vendorDir . '/guzzlehttp/psr7/src'],
+    'GuzzleHttp\\Promise\\'     => [$vendorDir . '/guzzlehttp/promises/src'],
+    'GuzzleHttp\\'              => [$vendorDir . '/guzzlehttp/guzzle/src'],
+    'FontLib\\'                 => [$vendorDir . '/phenx/php-font-lib/src/FontLib'],
+    'Dompdf\\'                  => [$vendorDir . '/dompdf/dompdf/src'],
+    'Doctrine\\Common\\Cache\\' => [$vendorDir . '/doctrine/cache/lib/Doctrine/Common/Cache'],
+    'DeepCopy\\'                => [$vendorDir . '/myclabs/deep-copy/src/DeepCopy'],
+    'Clickatell\\'              => [$vendorDir . '/arcturial/clickatell/src', $vendorDir . '/arcturial/clickatell/test'],
+    'Aws\\'                     => [$vendorDir . '/aws/aws-sdk-php/src'],
+];

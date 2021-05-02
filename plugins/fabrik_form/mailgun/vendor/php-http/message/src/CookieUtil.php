@@ -34,14 +34,17 @@ final class CookieUtil
      */
     public static function parseDate($dateValue)
     {
-        foreach (self::$dateFormats as $dateFormat) {
-            if (false !== $date = \DateTime::createFromFormat($dateFormat, $dateValue, new \DateTimeZone('GMT'))) {
+        foreach (self::$dateFormats as $dateFormat)
+        {
+            if (false !== $date = \DateTime::createFromFormat($dateFormat, $dateValue, new \DateTimeZone('GMT')))
+            {
                 return $date;
             }
         }
 
         // attempt a fallback for unusual formatting
-        if (false !== $date = date_create($dateValue, new \DateTimeZone('GMT'))) {
+        if (false !== $date = date_create($dateValue, new \DateTimeZone('GMT')))
+        {
             return $date;
         }
 

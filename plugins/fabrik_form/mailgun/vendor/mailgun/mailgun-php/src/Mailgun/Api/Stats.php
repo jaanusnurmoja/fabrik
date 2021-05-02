@@ -22,7 +22,7 @@ class Stats extends HttpApi
 {
     /**
      * @param string $domain
-     * @param array  $params
+     * @param array $params
      *
      * @return TotalResponse|array
      */

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\GuardDuty;
 
 use Aws\AwsClient;
@@ -90,4 +91,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateThreatIntelSet(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateThreatIntelSetAsync(array $args = [])
  */
-class GuardDutyClient extends AwsClient {}
+class GuardDutyClient extends AwsClient
+{
+}

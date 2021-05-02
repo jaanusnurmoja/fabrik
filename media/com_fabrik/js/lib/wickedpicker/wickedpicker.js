@@ -50,7 +50,8 @@
             show: null,
             clearable: false,
             closeOnClickOutside: true,
-            onClickOutside: function() {},
+            onClickOutside: function () {
+            },
         };
 
     /*
@@ -185,8 +186,7 @@
         showHideMeridiemControl: function () {
             if (this.options.twentyFour === false) {
                 $(this.meridiemElem).parent().show();
-            }
-            else {
+            } else {
                 $(this.meridiemElem).parent().hide();
             }
         },
@@ -198,8 +198,7 @@
             if (this.options.showSeconds) {
                 $(this.secondsElem).parent().show();
                 $(this.secondsElem).parent().prev('.wickedpicker__controls__control--separator').show()
-            }
-            else {
+            } else {
                 $(this.secondsElem).parent().hide();
                 $(this.secondsElem).parent().prev('.wickedpicker__controls__control--separator').hide();
             }
@@ -221,9 +220,9 @@
             $(element).on('click focus', function (event) {
                 //Prevent multiple firings
                 if ($(self.timepicker).is(':hidden')) {
-                  self.showPicker($(this));
-                  window.lastTimePickerControl = $(this); //Put the reference on this timepicker into global scope for unsing that in afterShow function
-                  $(self.hoursElem).focus();
+                    self.showPicker($(this));
+                    window.lastTimePickerControl = $(this); //Put the reference on this timepicker into global scope for unsing that in afterShow function
+                    $(self.hoursElem).focus();
                 }
             });
 
@@ -234,21 +233,20 @@
                 if ($(self.timepicker).is(':visible')) {
                     //Clicking the X
                     if ($(event.target).is(self.close)) {
-                      self.hideTimepicker(window.lastTimePickerControl);
+                        self.hideTimepicker(window.lastTimePickerControl);
                     } else if ($(event.target).closest(self.timepicker).length || $(event.target).closest($('.hasWickedpicker')).length) { //Clicking the Wickedpicker or one of it's inputs
-                      event.stopPropagation();
+                        event.stopPropagation();
                     } else {   //Everything else
-                      if (typeof self.options.onClickOutside === 'function') {
-                        self.options.onClickOutside();
-                      }
-                      else {
-                        console.warn("Type of onClickOutside must be a function");
-                      }
+                        if (typeof self.options.onClickOutside === 'function') {
+                            self.options.onClickOutside();
+                        } else {
+                            console.warn("Type of onClickOutside must be a function");
+                        }
 
-                      if (!self.options.closeOnClickOutside) {
-                        return;
-                      }
-                      self.hideTimepicker(window.lastTimePickerControl);
+                        if (!self.options.closeOnClickOutside) {
+                            return;
+                        }
+                        self.hideTimepicker(window.lastTimePickerControl);
                     }
                     window.lastTimePickerControl = null;
                 }
@@ -465,7 +463,7 @@
                 'Wickedpicker': this,
                 'input': element
             }, function (event) {
-                if(event.which!=1) return false;
+                if (event.which != 1) return false;
                 var operator = (this.className.indexOf('up') > -1) ? '+' : '-';
                 var passedData = event.data;
                 if (event.type == 'mousedown') {
@@ -537,7 +535,7 @@
         formatTime: function (hour, min, meridiem, seconds) {
             var formattedTime = hour + this.options.timeSeparator + min;
             if (this.options.showSeconds) {
-                formattedTime += this.options.timeSeparator  + seconds;
+                formattedTime += this.options.timeSeparator + seconds;
             }
             if (this.options.twentyFour === false) {
                 formattedTime += ' ' + meridiem;
@@ -564,12 +562,12 @@
          *
          * @param input
          */
-        makePickerInputClearable: function(input) {
+        makePickerInputClearable: function (input) {
             $(input).wrap('<div class="clearable-picker"></div>').after('<span data-clear-picker>&times;</span>');
 
             //When the x is clicked, clear its sibling input field
-            $('[data-clear-picker]').on('click', function(event) {
-               $(this).siblings('.hasWickedpicker').val('');
+            $('[data-clear-picker]').on('click', function (event) {
+                $(this).siblings('.hasWickedpicker').val('');
             });
         },
 
@@ -599,7 +597,7 @@
             var inputValue = $(this.element).val();
             return (inputValue === '') ? this.formatTime(this.selectedHour, this.selectedMin, this.selectedMeridiem, this.selectedSec) : inputValue;
         },
-        _hide: function() {
+        _hide: function () {
             this.hideTimepicker(this.element);
         }
     });
@@ -612,12 +610,10 @@
                     $.data(this, "plugin_" + pluginName, new Wickedpicker(this, options));
                 }
             });
-        }
-        else if ($(this).hasClass('hasWickedpicker')) {
+        } else if ($(this).hasClass('hasWickedpicker')) {
             if (index !== undefined) {
                 return $.data($(this)[index], 'plugin_' + pluginName)['_' + options]();
-            }
-            else {
+            } else {
                 return $.data($(this)[0], 'plugin_' + pluginName)['_' + options]();
             }
         }

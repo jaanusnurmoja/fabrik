@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Signature;
 
 use Aws\Exception\UnresolvedSignatureException;
@@ -41,7 +42,7 @@ use Aws\Exception\UnresolvedSignatureException;
 class SignatureProvider
 {
     private static $s3v4SignedServices = [
-        's3' => true,
+        's3'        => true,
         's3control' => true,
     ];
 
@@ -49,9 +50,9 @@ class SignatureProvider
      * Resolves and signature provider and ensures a non-null return value.
      *
      * @param callable $provider Provider function to invoke.
-     * @param string   $version  Signature version.
-     * @param string   $service  Service name.
-     * @param string   $region   Region name.
+     * @param string $version Signature version.
+     * @param string $service Service name.
+     * @param string $region Region name.
      *
      * @return SignatureInterface
      * @throws UnresolvedSignatureException
@@ -59,7 +60,8 @@ class SignatureProvider
     public static function resolve(callable $provider, $version, $service, $region)
     {
         $result = $provider($version, $service, $region);
-        if ($result instanceof SignatureInterface) {
+        if ($result instanceof SignatureInterface)
+        {
             return $result;
         }
 
@@ -91,9 +93,11 @@ class SignatureProvider
     public static function memoize(callable $provider)
     {
         $cache = [];
-        return function ($version, $service, $region) use (&$cache, $provider) {
+        return function ($version, $service, $region) use (&$cache, $provider)
+        {
             $key = "($version)($service)($region)";
-            if (!isset($cache[$key])) {
+            if (!isset($cache[$key]))
+            {
                 $cache[$key] = $provider($version, $service, $region);
             }
             return $cache[$key];
@@ -112,8 +116,10 @@ class SignatureProvider
      */
     public static function version()
     {
-        return function ($version, $service, $region) {
-            switch ($version) {
+        return function ($version, $service, $region)
+        {
+            switch ($version)
+            {
                 case 's3v4':
                 case 'v4':
                     return !empty(self::$s3v4SignedServices[$service])

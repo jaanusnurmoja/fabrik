@@ -6,7 +6,7 @@
  */
 define(['jquery', 'fab/list-plugin'], function (jQuery, FbListPlugin) {
     var FbListPhp = new Class({
-        Extends   : FbListPlugin,
+        Extends: FbListPlugin,
         initialize: function (options) {
             this.parent(options);
         },

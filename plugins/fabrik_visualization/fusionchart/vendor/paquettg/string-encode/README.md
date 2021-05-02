@@ -8,12 +8,14 @@ String Encode is a simple PHP wrapper package to facilitate the encoding of stri
 Install
 -------
 
-This package can be found on [packagist](https://packagist.org/packages/paquettg/stringencode) and is best loaded using [composer](http://getcomposer.org/). It does require php 5.4 or higher, so keep that in consideration. 
+This package can be found on [packagist](https://packagist.org/packages/paquettg/stringencode) and is best loaded
+using [composer](http://getcomposer.org/). It does require php 5.4 or higher, so keep that in consideration.
 
 Usage
 -----
 
-This is a really simple package so there is not much to say about it. The following is just about the only usage for this package at the moment.
+This is a really simple package so there is not much to say about it. The following is just about the only usage for
+this package at the moment.
 
 ```php
 use stringEncode\Encode;

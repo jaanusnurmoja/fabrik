@@ -10,9 +10,8 @@ The `pop-shipping` component v2.1.0 is now end-of-life and will no longer be mai
 
 OVERVIEW
 --------
-`pop-shipping` is a component for calculating shipping rates with some of the known standard shipping
-vendors like UPS, FedEx and the US Post Office. It can also be extended to support other shipping vendors
-and their available APIs.
+`pop-shipping` is a component for calculating shipping rates with some of the known standard shipping vendors like UPS,
+FedEx and the US Post Office. It can also be extended to support other shipping vendors and their available APIs.
 
 `pop-shipping` is a component of the [Pop PHP Framework](http://www.popphp.org/).
 
@@ -28,13 +27,11 @@ BASIC USAGE
 
 ### Creating a shipping object
 
-Of course, using any of the shipping adapters will require you to have a registered account with
-the shipping vendor:
+Of course, using any of the shipping adapters will require you to have a registered account with the shipping vendor:
 
 ##### FedEx
 
-The FedEx API utilizes SOAP, so you'll have to obtain a copy of the WSDL file and
-point to its location on your sever:
+The FedEx API utilizes SOAP, so you'll have to obtain a copy of the WSDL file and point to its location on your sever:
 
 ```php
 use Pop\Shipping\Shipping;

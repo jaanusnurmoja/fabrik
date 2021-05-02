@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\ACMPCA;
 
 use Aws\AwsClient;
@@ -40,4 +41,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateCertificateAuthority(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateCertificateAuthorityAsync(array $args = [])
  */
-class ACMPCAClient extends AwsClient {}
+class ACMPCAClient extends AwsClient
+{
+}

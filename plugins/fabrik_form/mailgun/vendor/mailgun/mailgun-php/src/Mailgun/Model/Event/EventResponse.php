@@ -27,7 +27,7 @@ class EventResponse implements ApiResponse, PagingProvider
 
     /**
      * @param Event[] $items
-     * @param array   $paging
+     * @param array $paging
      */
     public function __construct(array $items, array $paging)
     {
@@ -38,8 +38,10 @@ class EventResponse implements ApiResponse, PagingProvider
     public static function create(array $data)
     {
         $events = [];
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $item) {
+        if (isset($data['items']))
+        {
+            foreach ($data['items'] as $item)
+            {
                 $events[] = Event::create($item);
             }
         }

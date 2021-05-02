@@ -27,7 +27,7 @@ class Route extends HttpApi
      * Fetches the list of Routes.
      *
      * @param int $limit Maximum number of records to return. (100 by default)
-     * @param int $skip  Number of records to skip. (0 by default)
+     * @param int $skip Number of records to skip. (0 by default)
      *
      * @return IndexResponse
      */
@@ -40,7 +40,7 @@ class Route extends HttpApi
 
         $params = [
             'limit' => $limit,
-            'skip' => $skip,
+            'skip'  => $skip,
         ];
 
         $response = $this->httpGet('/v3/routes', $params);
@@ -67,10 +67,10 @@ class Route extends HttpApi
     /**
      * Creates a new Route.
      *
-     * @param string $expression  A filter expression like "match_recipient('.*@gmail.com')"
-     * @param array  $actions     Route action. This action is executed when the expression evaluates to True. Example: "forward('alice@example.com')"
+     * @param string $expression A filter expression like "match_recipient('.*@gmail.com')"
+     * @param array $actions Route action. This action is executed when the expression evaluates to True. Example: "forward('alice@example.com')"
      * @param string $description An arbitrary string
-     * @param int    $priority    Integer: smaller number indicates higher priority. Higher priority routes are handled first. Defaults to 0.
+     * @param int $priority Integer: smaller number indicates higher priority. Higher priority routes are handled first. Defaults to 0.
      *
      * @return CreateResponse
      */
@@ -82,9 +82,9 @@ class Route extends HttpApi
         Assert::integer($priority);
 
         $params = [
-            'priority' => $priority,
-            'expression' => $expression,
-            'action' => $actions,
+            'priority'    => $priority,
+            'expression'  => $expression,
+            'action'      => $actions,
             'description' => $description,
         ];
 
@@ -97,11 +97,11 @@ class Route extends HttpApi
      * Updates a given Route by ID. All parameters are optional.
      * This API call only updates the specified fields leaving others unchanged.
      *
-     * @param string      $routeId     Route ID returned by the Routes::index() method
-     * @param string|null $expression  A filter expression like "match_recipient('.*@gmail.com')"
-     * @param array|null  $actions     Route action. This action is executed when the expression evaluates to True. Example: "forward('alice@example.com')"
+     * @param string $routeId Route ID returned by the Routes::index() method
+     * @param string|null $expression A filter expression like "match_recipient('.*@gmail.com')"
+     * @param array|null $actions Route action. This action is executed when the expression evaluates to True. Example: "forward('alice@example.com')"
      * @param string|null $description An arbitrary string
-     * @param int|null    $priority    Integer: smaller number indicates higher priority. Higher priority routes are handled first. Defaults to 0.
+     * @param int|null $priority Integer: smaller number indicates higher priority. Higher priority routes are handled first. Defaults to 0.
      *
      * @return UpdateResponse
      */
@@ -115,22 +115,26 @@ class Route extends HttpApi
 
         $params = [];
 
-        if (!empty($expression)) {
+        if (!empty($expression))
+        {
             $params['expression'] = trim($expression);
         }
 
-        foreach ($actions as $action) {
+        foreach ($actions as $action)
+        {
             Assert::stringNotEmpty($action);
 
             $params['action'] = isset($params['action']) ? $params['action'] : [];
             $params['action'][] = $action;
         }
 
-        if (!empty($description)) {
+        if (!empty($description))
+        {
             $params['description'] = trim($description);
         }
 
-        if (!empty($priority)) {
+        if (!empty($priority))
+        {
             $params['priority'] = $priority;
         }
 

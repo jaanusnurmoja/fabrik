@@ -13,31 +13,34 @@ use Twilio\InstanceContext;
 use Twilio\Values;
 use Twilio\Version;
 
-class NumberContext extends InstanceContext {
+class NumberContext extends InstanceContext
+{
     /**
      * Initialize the NumberContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $number The number
-     * @return \Twilio\Rest\Pricing\V1\Voice\NumberContext 
+     * @return \Twilio\Rest\Pricing\V1\Voice\NumberContext
      */
-    public function __construct(Version $version, $number) {
+    public function __construct(Version $version, $number)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('number' => $number, );
+        $this->solution = ['number' => $number,];
 
         $this->uri = '/Voice/Numbers/' . rawurlencode($number) . '';
     }
 
     /**
      * Fetch a NumberInstance
-     * 
+     *
      * @return NumberInstance Fetched NumberInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -50,12 +53,14 @@ class NumberContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Pricing.V1.NumberContext ' . implode(' ', $context) . ']';

@@ -32,8 +32,8 @@ class Tag
     private $lastSeen;
 
     /**
-     * @param string    $tag
-     * @param string    $description
+     * @param string $tag
+     * @param string $description
      * @param \DateTime $firstSeen
      * @param \DateTime $lastSeen
      */

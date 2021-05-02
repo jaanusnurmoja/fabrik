@@ -52,13 +52,16 @@ class Bounce
     {
         $bounce = new self($data['address']);
 
-        if (isset($data['code'])) {
+        if (isset($data['code']))
+        {
             $bounce->setCode($data['code']);
         }
-        if (isset($data['error'])) {
+        if (isset($data['error']))
+        {
             $bounce->setError($data['error']);
         }
-        if (isset($data['created_at'])) {
+        if (isset($data['created_at']))
+        {
             $bounce->setCreatedAt(new \DateTime($data['created_at']));
         }
 

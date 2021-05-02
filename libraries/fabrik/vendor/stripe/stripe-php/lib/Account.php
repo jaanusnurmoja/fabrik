@@ -49,7 +49,8 @@ class Account extends ApiResource
     use ApiOperations\Create;
     use ApiOperations\Delete;
     use ApiOperations\NestedResource;
-    use ApiOperations\Retrieve {
+    use ApiOperations\Retrieve
+    {
         retrieve as protected _retrieve;
     }
     use ApiOperations\Update;
@@ -57,7 +58,8 @@ class Account extends ApiResource
     public static function getSavedNestedResources()
     {
         static $savedNestedResources = null;
-        if ($savedNestedResources === null) {
+        if ($savedNestedResources === null)
+        {
             $savedNestedResources = new Util\Set([
                 'external_account',
                 'bank_account',
@@ -72,9 +74,12 @@ class Account extends ApiResource
 
     public function instanceUrl()
     {
-        if ($this['id'] === null) {
+        if ($this['id'] === null)
+        {
             return '/v1/account';
-        } else {
+        }
+        else
+        {
             return parent::instanceUrl();
         }
     }
@@ -88,7 +93,8 @@ class Account extends ApiResource
      */
     public static function retrieve($id = null, $opts = null)
     {
-        if (!$opts && is_string($id) && substr($id, 0, 3) === 'sk_') {
+        if (!$opts && is_string($id) && substr($id, 0, 3) === 'sk_')
+        {
             $opts = $id;
             $id = null;
         }
@@ -133,7 +139,7 @@ class Account extends ApiResource
     public function deauthorize($clientId = null, $opts = null)
     {
         $params = [
-            'client_id' => $clientId,
+            'client_id'      => $clientId,
             'stripe_user_id' => $this->id,
         ];
         return OAuth::deauthorize($params, $opts);
@@ -280,9 +286,11 @@ class Account extends ApiResource
     public function serializeParameters($force = false)
     {
         $update = parent::serializeParameters($force);
-        if (isset($this->_values['legal_entity'])) {
+        if (isset($this->_values['legal_entity']))
+        {
             $entity = $this['legal_entity'];
-            if (isset($entity->_values['additional_owners'])) {
+            if (isset($entity->_values['additional_owners']))
+            {
                 $owners = $entity['additional_owners'];
                 $entityUpdate = isset($update['legal_entity']) ? $update['legal_entity'] : [];
                 $entityUpdate['additional_owners'] = $this->serializeAdditionalOwners($entity, $owners);
@@ -294,25 +302,34 @@ class Account extends ApiResource
 
     private function serializeAdditionalOwners($legalEntity, $additionalOwners)
     {
-        if (isset($legalEntity->_originalValues['additional_owners'])) {
+        if (isset($legalEntity->_originalValues['additional_owners']))
+        {
             $originalValue = $legalEntity->_originalValues['additional_owners'];
-        } else {
+        }
+        else
+        {
             $originalValue = [];
         }
-        if (($originalValue) && (count($originalValue) > count($additionalOwners))) {
+        if (($originalValue) && (count($originalValue) > count($additionalOwners)))
+        {
             throw new \InvalidArgumentException(
                 "You cannot delete an item from an array, you must instead set a new array"
             );
         }
 
         $updateArr = [];
-        foreach ($additionalOwners as $i => $v) {
+        foreach ($additionalOwners as $i => $v)
+        {
             $update = ($v instanceof StripeObject) ? $v->serializeParameters() : $v;
 
-            if ($update !== []) {
-                if (!$originalValue ||
+            if ($update !== [])
+            {
+                if (
+                    !$originalValue ||
                     !array_key_exists($i, $originalValue) ||
-                    ($update != $legalEntity->serializeParamsValue($originalValue[$i], null, false, true))) {
+                    ($update != $legalEntity->serializeParamsValue($originalValue[$i], null, false, true))
+                )
+                {
                     $updateArr[$i] = $update;
                 }
             }

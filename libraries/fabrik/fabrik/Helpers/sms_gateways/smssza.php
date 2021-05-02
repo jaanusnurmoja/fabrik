@@ -23,31 +23,31 @@ use Fabrik\Helpers\Sms;
  */
 class Smssza extends JObject
 {
-	/**
-	 * URL To Post SMS to
-	 *
-	 * @var string
-	 */
-	protected $url = 'http://148.251.196.36/app/smsapi/index.php?key=%s&type=text&contacts=%s&senderid=%s&msg=%s&time=';
+    /**
+     * URL To Post SMS to
+     *
+     * @var string
+     */
+    protected $url = 'http://148.251.196.36/app/smsapi/index.php?key=%s&type=text&contacts=%s&senderid=%s&msg=%s&time=';
 
-	/**
-	 * Send SMS
-	 *
-	 * @param   string  $message  sms message
-	 * @param   array   $opts     Options
-	 *
-	 * @return  void
-	 */
+    /**
+     * Send SMS
+     *
+     * @param string $message sms message
+     * @param array $opts Options
+     *
+     * @return  void
+     */
 
-	public function process($message, $opts)
-	{
-		$username = ArrayHelper::getValue($opts, 'sms-username');
-		$password = ArrayHelper::getValue($opts, 'sms-password');
-		$smsfrom = ArrayHelper::getValue($opts, 'sms-from');
-		$smsto = ArrayHelper::getValue($opts, 'sms-to');
+    public function process($message, $opts)
+    {
+        $username = ArrayHelper::getValue($opts, 'sms-username');
+        $password = ArrayHelper::getValue($opts, 'sms-password');
+        $smsfrom = ArrayHelper::getValue($opts, 'sms-from');
+        $smsto = ArrayHelper::getValue($opts, 'sms-to');
 
-		$url = sprintf($this->url, $username, $smsto, $smsfrom, urlencode($message));
-		$response = Sms::doRequest('GET', $url, '');
-		return strstr($response, 'api_') !== false;
-	}
+        $url = sprintf($this->url, $username, $smsto, $smsfrom, urlencode($message));
+        $response = Sms::doRequest('GET', $url, '');
+        return strstr($response, 'api_') !== false;
+    }
 }

@@ -26,36 +26,39 @@ use Twilio\Version;
  * @method \Twilio\Rest\Api\V2010\Account\Sip\Domain\IpAccessControlListMappingContext ipAccessControlListMappings(string $sid)
  * @method \Twilio\Rest\Api\V2010\Account\Sip\Domain\CredentialListMappingContext credentialListMappings(string $sid)
  */
-class DomainContext extends InstanceContext {
+class DomainContext extends InstanceContext
+{
     protected $_ipAccessControlListMappings = null;
-    protected $_credentialListMappings = null;
-    protected $_auth = null;
+    protected $_credentialListMappings      = null;
+    protected $_auth                        = null;
 
     /**
      * Initialize the DomainContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $accountSid The unique sid that identifies this account
      * @param string $sid Fetch by unique Domain Sid
-     * @return \Twilio\Rest\Api\V2010\Account\Sip\DomainContext 
+     * @return \Twilio\Rest\Api\V2010\Account\Sip\DomainContext
      */
-    public function __construct(Version $version, $accountSid, $sid) {
+    public function __construct(Version $version, $accountSid, $sid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('accountSid' => $accountSid, 'sid' => $sid, );
+        $this->solution = ['accountSid' => $accountSid, 'sid' => $sid,];
 
         $this->uri = '/Accounts/' . rawurlencode($accountSid) . '/SIP/Domains/' . rawurlencode($sid) . '.json';
     }
 
     /**
      * Fetch a DomainInstance
-     * 
+     *
      * @return DomainInstance Fetched DomainInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -73,30 +76,31 @@ class DomainContext extends InstanceContext {
 
     /**
      * Update the DomainInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return DomainInstance Updated DomainInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array(
-            'FriendlyName' => $options['friendlyName'],
-            'VoiceFallbackMethod' => $options['voiceFallbackMethod'],
-            'VoiceFallbackUrl' => $options['voiceFallbackUrl'],
-            'VoiceMethod' => $options['voiceMethod'],
+        $data = Values::of([
+            'FriendlyName'              => $options['friendlyName'],
+            'VoiceFallbackMethod'       => $options['voiceFallbackMethod'],
+            'VoiceFallbackUrl'          => $options['voiceFallbackUrl'],
+            'VoiceMethod'               => $options['voiceMethod'],
             'VoiceStatusCallbackMethod' => $options['voiceStatusCallbackMethod'],
-            'VoiceStatusCallbackUrl' => $options['voiceStatusCallbackUrl'],
-            'VoiceUrl' => $options['voiceUrl'],
-            'SipRegistration' => Serialize::booleanToString($options['sipRegistration']),
-            'DomainName' => $options['domainName'],
-        ));
+            'VoiceStatusCallbackUrl'    => $options['voiceStatusCallbackUrl'],
+            'VoiceUrl'                  => $options['voiceUrl'],
+            'SipRegistration'           => Serialize::booleanToString($options['sipRegistration']),
+            'DomainName'                => $options['domainName'],
+        ]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -110,21 +114,24 @@ class DomainContext extends InstanceContext {
 
     /**
      * Deletes the DomainInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->version->delete('delete', $this->uri);
     }
 
     /**
      * Access the ipAccessControlListMappings
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\IpAccessControlListMappingList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\IpAccessControlListMappingList
      */
-    protected function getIpAccessControlListMappings() {
-        if (!$this->_ipAccessControlListMappings) {
+    protected function getIpAccessControlListMappings()
+    {
+        if (!$this->_ipAccessControlListMappings)
+        {
             $this->_ipAccessControlListMappings = new IpAccessControlListMappingList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -137,11 +144,13 @@ class DomainContext extends InstanceContext {
 
     /**
      * Access the credentialListMappings
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\CredentialListMappingList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\CredentialListMappingList
      */
-    protected function getCredentialListMappings() {
-        if (!$this->_credentialListMappings) {
+    protected function getCredentialListMappings()
+    {
+        if (!$this->_credentialListMappings)
+        {
             $this->_credentialListMappings = new CredentialListMappingList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -154,11 +163,13 @@ class DomainContext extends InstanceContext {
 
     /**
      * Access the auth
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\AuthTypesList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\AuthTypesList
      */
-    protected function getAuth() {
-        if (!$this->_auth) {
+    protected function getAuth()
+    {
+        if (!$this->_auth)
+        {
             $this->_auth = new AuthTypesList(
                 $this->version,
                 $this->solution['accountSid'],
@@ -171,13 +182,15 @@ class DomainContext extends InstanceContext {
 
     /**
      * Magic getter to lazy load subresources
-     * 
+     *
      * @param string $name Subresource to return
      * @return \Twilio\ListResource The requested subresource
      * @throws \Twilio\Exceptions\TwilioException For unknown subresources
      */
-    public function __get($name) {
-        if (property_exists($this, '_' . $name)) {
+    public function __get($name)
+    {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -187,16 +200,18 @@ class DomainContext extends InstanceContext {
 
     /**
      * Magic caller to get resource contexts
-     * 
+     *
      * @param string $name Resource to return
      * @param array $arguments Context parameters
      * @return \Twilio\InstanceContext The requested resource context
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         $property = $this->$name;
-        if (method_exists($property, 'getContext')) {
-            return call_user_func_array(array($property, 'getContext'), $arguments);
+        if (method_exists($property, 'getContext'))
+        {
+            return call_user_func_array([$property, 'getContext'], $arguments);
         }
 
         throw new TwilioException('Resource does not have a context');
@@ -204,12 +219,14 @@ class DomainContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Api.V2010.DomainContext ' . implode(' ', $context) . ']';

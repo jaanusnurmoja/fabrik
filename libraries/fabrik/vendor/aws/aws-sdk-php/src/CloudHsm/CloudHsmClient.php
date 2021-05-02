@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudHsm;
 
 use Aws\Api\ApiProvider;
@@ -55,9 +56,12 @@ class CloudHsmClient extends AwsClient
     public function __call($name, array $args)
     {
         // Overcomes a naming collision with `AwsClient::getConfig`.
-        if (lcfirst($name) === 'getConfigFiles') {
+        if (lcfirst($name) === 'getConfigFiles')
+        {
             $name = 'GetConfig';
-        } elseif (lcfirst($name) === 'getConfigFilesAsync') {
+        }
+        elseif (lcfirst($name) === 'getConfigFilesAsync')
+        {
             $name = 'GetConfigAsync';
         }
 

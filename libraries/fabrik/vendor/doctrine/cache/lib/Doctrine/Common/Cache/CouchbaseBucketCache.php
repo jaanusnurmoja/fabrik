@@ -34,7 +34,8 @@ final class CouchbaseBucketCache extends CacheProvider
 
     public function __construct(Bucket $bucket)
     {
-        if (version_compare(phpversion('couchbase'), self::MINIMUM_VERSION) < 0) {
+        if (version_compare(phpversion('couchbase'), self::MINIMUM_VERSION) < 0)
+        {
             // Manager is required to flush cache and pull stats.
             throw new RuntimeException(sprintf('ext-couchbase:^%s is required.', self::MINIMUM_VERSION));
         }
@@ -49,13 +50,17 @@ final class CouchbaseBucketCache extends CacheProvider
     {
         $id = $this->normalizeKey($id);
 
-        try {
+        try
+        {
             $document = $this->bucket->get($id);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             return false;
         }
 
-        if ($document instanceof Document && $document->value !== false) {
+        if ($document instanceof Document && $document->value !== false)
+        {
             return unserialize($document->value);
         }
 
@@ -69,14 +74,18 @@ final class CouchbaseBucketCache extends CacheProvider
     {
         $id = $this->normalizeKey($id);
 
-        try {
+        try
+        {
             $document = $this->bucket->get($id);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             return false;
         }
 
-        if ($document instanceof Document) {
-            return ! $document->error;
+        if ($document instanceof Document)
+        {
+            return !$document->error;
         }
 
         return false;
@@ -91,18 +100,22 @@ final class CouchbaseBucketCache extends CacheProvider
 
         $lifeTime = $this->normalizeExpiry($lifeTime);
 
-        try {
+        try
+        {
             $encoded = serialize($data);
 
             $document = $this->bucket->upsert($id, $encoded, [
-                'expiry' => (int) $lifeTime,
+                'expiry' => (int)$lifeTime,
             ]);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             return false;
         }
 
-        if ($document instanceof Document) {
-            return ! $document->error;
+        if ($document instanceof Document)
+        {
+            return !$document->error;
         }
 
         return false;
@@ -115,14 +128,18 @@ final class CouchbaseBucketCache extends CacheProvider
     {
         $id = $this->normalizeKey($id);
 
-        try {
+        try
+        {
             $document = $this->bucket->remove($id);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             return $e->getCode() === self::KEY_NOT_FOUND;
         }
 
-        if ($document instanceof Document) {
-            return ! $document->error;
+        if ($document instanceof Document)
+        {
+            return !$document->error;
         }
 
         return false;
@@ -141,7 +158,8 @@ final class CouchbaseBucketCache extends CacheProvider
 
         $manager->flush();
 
-        if ($this->doContains(__METHOD__)) {
+        if ($this->doContains(__METHOD__))
+        {
             $this->doDelete(__METHOD__);
 
             return false;
@@ -155,26 +173,27 @@ final class CouchbaseBucketCache extends CacheProvider
      */
     protected function doGetStats()
     {
-        $manager          = $this->bucket->manager();
-        $stats            = $manager->info();
-        $nodes            = $stats['nodes'];
-        $node             = $nodes[0];
+        $manager = $this->bucket->manager();
+        $stats = $manager->info();
+        $nodes = $stats['nodes'];
+        $node = $nodes[0];
         $interestingStats = $node['interestingStats'];
 
         return [
-            Cache::STATS_HITS   => $interestingStats['get_hits'],
-            Cache::STATS_MISSES => $interestingStats['cmd_get'] - $interestingStats['get_hits'],
-            Cache::STATS_UPTIME => $node['uptime'],
+            Cache::STATS_HITS             => $interestingStats['get_hits'],
+            Cache::STATS_MISSES           => $interestingStats['cmd_get'] - $interestingStats['get_hits'],
+            Cache::STATS_UPTIME           => $node['uptime'],
             Cache::STATS_MEMORY_USAGE     => $interestingStats['mem_used'],
             Cache::STATS_MEMORY_AVAILABLE => $node['memoryFree'],
         ];
     }
 
-    private function normalizeKey(string $id) : string
+    private function normalizeKey(string $id): string
     {
         $normalized = substr($id, 0, self::MAX_KEY_LENGTH);
 
-        if ($normalized === false) {
+        if ($normalized === false)
+        {
             return $id;
         }
 
@@ -186,9 +205,10 @@ final class CouchbaseBucketCache extends CacheProvider
      *
      * @src https://developer.couchbase.com/documentation/server/4.1/developer-guide/expiry.html
      */
-    private function normalizeExpiry(int $expiry) : int
+    private function normalizeExpiry(int $expiry): int
     {
-        if ($expiry > self::THIRTY_DAYS_IN_SECONDS) {
+        if ($expiry > self::THIRTY_DAYS_IN_SECONDS)
+        {
             return time() + $expiry;
         }
 

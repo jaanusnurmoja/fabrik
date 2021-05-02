@@ -13,11 +13,11 @@
 define(['jquery', 'element/databasejoin/databasejoin', 'fab/autocomplete-bootstrap-cdd'], function (jQuery, FbDatabasejoin, FabCddAutocomplete) {
     window.FbCascadingdropdown = new Class({
 
-        options : {
+        options: {
             watchInSameGroup: true
         },
 
-        Extends   : FbDatabasejoin,
+        Extends: FbDatabasejoin,
         initialize: function (element, options) {
             this.ignoreAjax = false;
             this.setPlugin('cascadingdropdown');
@@ -98,16 +98,16 @@ define(['jquery', 'element/databasejoin/databasejoin', 'fab/autocomplete-bootstr
             formData = this.form.getFormElementData();
 
             data = {
-                'option'                    : 'com_fabrik',
-                'format'                    : 'raw',
-                'task'                      : 'plugin.pluginAjax',
-                'plugin'                    : 'cascadingdropdown',
-                'method'                    : 'ajax_getOptions',
-                'element_id'                : this.options.id,
-                'v'                         : v,
-                'formid'                    : this.form.id,
+                'option': 'com_fabrik',
+                'format': 'raw',
+                'task': 'plugin.pluginAjax',
+                'plugin': 'cascadingdropdown',
+                'method': 'ajax_getOptions',
+                'element_id': this.options.id,
+                'v': v,
+                'formid': this.form.id,
                 'fabrik_cascade_ajax_update': 1,
-                'lang'                      : this.options.lang
+                'lang': this.options.lang
             };
             data = Object.append(formData, data);
             if (this.myAjax) {
@@ -116,13 +116,13 @@ define(['jquery', 'element/databasejoin/databasejoin', 'fab/autocomplete-bootstr
                 this.myAjax.cancel();
             }
             this.myAjax = new Request({
-                url        : '',
-                method     : 'post',
-                'data'     : data,
-                onComplete : function () {
+                url: '',
+                method: 'post',
+                'data': data,
+                onComplete: function () {
                     this.spinner.hide();
                 }.bind(this),
-                onSuccess  : function (json) {
+                onSuccess: function (json) {
                     var origValue = this.getValue(),
                         updateField,
                         c;
@@ -155,9 +155,9 @@ define(['jquery', 'element/databasejoin/databasejoin', 'fab/autocomplete-bootstr
 
                             if (this.options.showDesc === true && item.description) {
                                 var className = this.options.showPleaseSelect ?
-                                'notice description-' + (k) : 'notice description-' + (k - 1);
+                                    'notice description-' + (k) : 'notice description-' + (k - 1);
                                 new Element('div', {
-                                    styles : {display: 'none'},
+                                    styles: {display: 'none'},
                                     'class': className
                                 }).set('html', item.description).inject(c);
                             }
@@ -171,7 +171,7 @@ define(['jquery', 'element/databasejoin/databasejoin', 'fab/autocomplete-bootstr
                                 updateField = (item.value !== '' && item.value === origValue) || singleResult;
                                 this.addOption(item.value, item.text, updateField);
                                 new Element('option', {
-                                    'value'   : item.value,
+                                    'value': item.value,
                                     'selected': 'selected'
                                 }).set('text', item.text).inject(this.element);
                             }
@@ -246,8 +246,7 @@ define(['jquery', 'element/databasejoin/databasejoin', 'fab/autocomplete-bootstr
                     // this.options.watch = this.options.watch + '_' + c;
                     if (this.options.watch.test(/_(\d+)$/)) {
                         this.options.watch = this.options.watch.replace(/_(\d+)$/, '_' + c);
-                    }
-                    else {
+                    } else {
                         this.options.watch = this.options.watch + '_' + c;
                     }
                 }
@@ -310,7 +309,7 @@ define(['jquery', 'element/databasejoin/databasejoin', 'fab/autocomplete-bootstr
             c.getElements('.notice').each(function (d) {
                 if (d === show) {
                     myFx = new Fx.Style(show, 'opacity', {
-                        duration  : 400,
+                        duration: 400,
                         transition: Fx.Transitions.linear
                     });
                     myFx.set(0);

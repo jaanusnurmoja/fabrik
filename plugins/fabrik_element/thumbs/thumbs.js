@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbThumbs = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options, thumb) {
             this.field = document.id(element);
             this.parent(element, options);
@@ -55,8 +55,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     this.thumbdown.addEvent('click', function (e) {
                         this.doAjax('down');
                     }.bind(this));
-                }
-                else {
+                } else {
                     this.thumbup.addEvent('click', function (e) {
                         e.stop();
                         this.doNoAccess();
@@ -87,8 +86,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                             down.removeClass('btn-danger');
                         }
                     }
-                }
-                else {
+                } else {
                     this.doNoAccess();
                 }
             }.bind(this));
@@ -105,8 +103,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                             down.addClass('btn-danger');
                             up.removeClass('btn-success');
                         }
-                    }
-                    else {
+                    } else {
                         this.doNoAccess();
                     }
                 }.bind(this));
@@ -118,25 +115,25 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             if (this.options.editable === false) {
                 this.spinner.show();
                 var data = {
-                    'option'     : 'com_fabrik',
-                    'format'     : 'raw',
-                    'task'       : 'plugin.pluginAjax',
-                    'plugin'     : 'thumbs',
-                    'method'     : 'ajax_rate',
-                    'g'          : 'element',
-                    'element_id' : this.options.elid,
-                    'row_id'     : this.options.row_id,
+                    'option': 'com_fabrik',
+                    'format': 'raw',
+                    'task': 'plugin.pluginAjax',
+                    'plugin': 'thumbs',
+                    'method': 'ajax_rate',
+                    'g': 'element',
+                    'element_id': this.options.elid,
+                    'row_id': this.options.row_id,
                     'elementname': this.options.elid,
-                    'userid'     : this.options.userid,
-                    'thumb'      : th,
-                    'listid'     : this.options.listid,
-                    'formid'     : this.options.formid,
-                    'add'        : add
+                    'userid': this.options.userid,
+                    'thumb': th,
+                    'listid': this.options.listid,
+                    'formid': this.options.formid,
+                    'add': add
                 };
 
                 new Request({
-                    url       : '',
-                    'data'    : data,
+                    url: '',
+                    'data': data,
                     onComplete: function (r) {
                         r = JSON.parse(r);
                         this.spinner.hide();

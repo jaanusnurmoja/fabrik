@@ -1,6 +1,6 @@
 # Change Log
 
-The change log describes what is "Added", "Removed", "Changed" or "Fixed" between each release. 
+The change log describes what is "Added", "Removed", "Changed" or "Fixed" between each release.
 
 ## 2.4.1
 
@@ -25,16 +25,16 @@ The change log describes what is "Added", "Removed", "Changed" or "Fixed" betwee
 - Add cached property for DNS record
 - Add domain verification
 - `HttpClientException::getResponseCode()`
-- Added `AbstractDomainResponse` that `VerifyResponse` and `CreateResponse` extends. 
+- Added `AbstractDomainResponse` that `VerifyResponse` and `CreateResponse` extends.
 
 ### Fixed
 
 - Possible empty content of `WebhookIndexResponse`.
-- Typo in `TotalResponse` that caused the content to be empty. 
+- Typo in `TotalResponse` that caused the content to be empty.
 
 ### Changed
 
-- Allow some parameters to `Domain::create` to be optional. 
+- Allow some parameters to `Domain::create` to be optional.
 
 ## 2.3.4
 
@@ -53,7 +53,8 @@ The change log describes what is "Added", "Removed", "Changed" or "Fixed" betwee
 
 ### Fixed
 
-- When parsing an address in `MessageBuilder` we surround the recipient name with double quotes instead of single quotes.   
+- When parsing an address in `MessageBuilder` we surround the recipient name with double quotes instead of single
+  quotes.
 
 ## 2.3.1
 
@@ -69,26 +70,26 @@ The change log describes what is "Added", "Removed", "Changed" or "Fixed" betwee
 
 ## 2.2.0
 
-This version contains a new way of using the API. Each endpoint return a domain object and the
-endpoints are grouped like the API documentation. 
+This version contains a new way of using the API. Each endpoint return a domain object and the endpoints are grouped
+like the API documentation.
 
 ### Added
 
 - Api classes in Mailgun\Api\*
 - Api models/responses in Mailgun\Model\*
-- Added Hydrators to hydrate PSR-7 responses to arrays or domain objects. 
+- Added Hydrators to hydrate PSR-7 responses to arrays or domain objects.
 - All exceptions extend `Mailgun\Exception`.
 - New exceptions in `Mailgun\Exception` namespace.
-- Added `HttpClientConfigurator` to configure the HTTP client. 
+- Added `HttpClientConfigurator` to configure the HTTP client.
 - Added HttpClient plugins `History` and `ReplaceUriPlugin`
-- Assertions with Webmozart\Assert 
+- Assertions with Webmozart\Assert
 - `Mailgun\Mailgun::getLastResponse()`
 - `Mailgun\Connection\RestClient::getAttachment($url)`
 - Clear license information
 
 ### Fixed
 
-- Fix disordered POST parameters. We do not use array syntax. 
+- Fix disordered POST parameters. We do not use array syntax.
 - Code styles
 
 ### Deprecated
@@ -168,46 +169,51 @@ The following classes will be removed in version 3.0.
 ## 1.7 (2014-1-30)
 
 Bugfixes:
-  - patched bug for attachments related to duplicate aggregator bug in Guzzle (#32 @travelton)
+
+- patched bug for attachments related to duplicate aggregator bug in Guzzle (#32 @travelton)
 
 ## 1.6 (2014-1-13)
 
 Enhancement:
-  - adjust file attachment/inline name (#21 @travelton)
+
+- adjust file attachment/inline name (#21 @travelton)
 
 Bugfixes:
-  - fixed issue with unordered route actions (#23 @travelton)
+
+- fixed issue with unordered route actions (#23 @travelton)
 
 ## 1.5 (2013-12-13)
 
 Enhancement:
-  - added ability to define non-https endpoint for debugging purposes (#23 @travelton)
+
+- added ability to define non-https endpoint for debugging purposes (#23 @travelton)
 
 ## 1.4 (2013-10-16)
 
 Bugfixes:
-  - template IDs were missing from recipient-variables (#15 @travelton)
-  - batch jobs trigger on to, cc, and bcc (#18 @travelton)
-  - batch jobs include recipient-variables for to, cc, and bcc (#18 @travelton)
-  - added method to return message-ids, for easier access (#19 @travelton)
+
+- template IDs were missing from recipient-variables (#15 @travelton)
+- batch jobs trigger on to, cc, and bcc (#18 @travelton)
+- batch jobs include recipient-variables for to, cc, and bcc (#18 @travelton)
+- added method to return message-ids, for easier access (#19 @travelton)
 
 ## 1.3 (2013-09-12)
 
 Bugfixes:
-  
-  - relaxed Guzzle requirement (#7 @travelton)
-  - fixed reply-to bug (#9 @travelton)
+
+- relaxed Guzzle requirement (#7 @travelton)
+- fixed reply-to bug (#9 @travelton)
 
 ## 1.2 (2013-09-05)
 
 Bugfixes:
 
-  - fixed exception handling constants (@travelton)
-  - fixed MessageBuilder $baseAddress return (#1 @yoye)
-  - adjusted scope of recipient-variables (#3 @yoye)
-  - fixed misspellings of Exceptions (#2 @dboggus)
-  - undefined DEFAULT_TIME_ZONE (#4 @yoye)
-  - added message IDs to return for BatchMessage (@travelton)
+- fixed exception handling constants (@travelton)
+- fixed MessageBuilder $baseAddress return (#1 @yoye)
+- adjusted scope of recipient-variables (#3 @yoye)
+- fixed misspellings of Exceptions (#2 @dboggus)
+- undefined DEFAULT_TIME_ZONE (#4 @yoye)
+- added message IDs to return for BatchMessage (@travelton)
 
 ## 1.1 (2013-08-21)
 

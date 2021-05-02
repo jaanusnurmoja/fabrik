@@ -25,63 +25,63 @@ use \RuntimeException;
  */
 class Sms
 {
-	/**
-	 * Send sms
-	 *
-	 * @param   string  $method    post/get
-	 * @param   string  $url       url to request
-	 * @param   string  $vars      querystring vars to post
-	 * @param   string  $auth      auth
-	 * @param   string  $callback  method
-	 *
-	 * @return  mixed data or curl error
-	 */
+    /**
+     * Send sms
+     *
+     * @param string $method post/get
+     * @param string $url url to request
+     * @param string $vars querystring vars to post
+     * @param string $auth auth
+     * @param string $callback method
+     *
+     * @return  mixed data or curl error
+     */
 
-	public static function doRequest($method, $url, $vars, $auth = '', $callback = false)
-	{
-		$app = JFactory::getApplication();
-		if (!function_exists('curl_init'))
-		{
-			throw new RuntimeException(Text::_('COM_FABRIK_ERR_CURL_NOT_INSTALLED'));
-		}
+    public static function doRequest($method, $url, $vars, $auth = '', $callback = false)
+    {
+        $app = JFactory::getApplication();
+        if (!function_exists('curl_init'))
+        {
+            throw new RuntimeException(Text::_('COM_FABRIK_ERR_CURL_NOT_INSTALLED'));
+        }
 
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_USERAGENT, $app->input->server->getString('HTTP_USER_AGENT'));
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
-		curl_setopt($ch, CURLOPT_COOKIEFILE, 'cookie.txt');
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_USERAGENT, $app->input->server->getString('HTTP_USER_AGENT'));
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
+        curl_setopt($ch, CURLOPT_COOKIEFILE, 'cookie.txt');
 
-		if ($method == 'POST')
-		{
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $vars);
-		}
+        if ($method == 'POST')
+        {
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $vars);
+        }
 
-		if (!empty($auth))
-		{
-			curl_setopt($ch, CURLOPT_USERPWD, $auth);
-		}
+        if (!empty($auth))
+        {
+            curl_setopt($ch, CURLOPT_USERPWD, $auth);
+        }
 
-		$data = curl_exec($ch);
-		curl_close($ch);
+        $data = curl_exec($ch);
+        curl_close($ch);
 
-		if ($data)
-		{
-			if ($callback)
-			{
-				return call_user_func($callback, $data);
-			}
-			else
-			{
-				return $data;
-			}
-		}
-		else
-		{
-			return curl_error($ch);
-		}
-	}
+        if ($data)
+        {
+            if ($callback)
+            {
+                return call_user_func($callback, $data);
+            }
+            else
+            {
+                return $data;
+            }
+        }
+        else
+        {
+            return curl_error($ch);
+        }
+    }
 }

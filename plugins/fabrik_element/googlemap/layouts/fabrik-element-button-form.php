@@ -7,9 +7,16 @@ $d = $displayData;
 
 ?>
 
-<button class="<?php echo $d->class; ?>" id="<?php echo $d->id; ?>" name="<?php echo $d->name; ?>">
-	<?php if ($d->icon !== '') : ?>
-		<span class="<?php echo $d->icon; ?>"></span>
-	<?php endif; ?>
-	<?php echo $d->label; ?>
+<button class="<?php
+echo $d->class; ?>" id="<?php
+echo $d->id; ?>" name="<?php
+echo $d->name; ?>">
+    <?php
+    if ($d->icon !== '') : ?>
+        <span class="<?php
+        echo $d->icon; ?>"></span>
+    <?php
+    endif; ?>
+    <?php
+    echo $d->label; ?>
 </button>

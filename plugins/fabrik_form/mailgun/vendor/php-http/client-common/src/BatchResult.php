@@ -48,7 +48,8 @@ final class BatchResult
     {
         $responses = [];
 
-        foreach ($this->responses as $request) {
+        foreach ($this->responses as $request)
+        {
             $responses[] = $this->responses[$request];
         }
 
@@ -78,9 +79,12 @@ final class BatchResult
      */
     public function getResponseFor(RequestInterface $request)
     {
-        try {
+        try
+        {
             return $this->responses[$request];
-        } catch (\UnexpectedValueException $e) {
+        }
+        catch (\UnexpectedValueException $e)
+        {
             throw new \UnexpectedValueException('Request not found', $e->getCode(), $e);
         }
     }
@@ -88,7 +92,7 @@ final class BatchResult
     /**
      * Adds a response in an immutable way.
      *
-     * @param RequestInterface  $request
+     * @param RequestInterface $request
      * @param ResponseInterface $response
      *
      * @return BatchResult the new BatchResult with this request-response pair added to it
@@ -120,7 +124,8 @@ final class BatchResult
     {
         $exceptions = [];
 
-        foreach ($this->exceptions as $request) {
+        foreach ($this->exceptions as $request)
+        {
             $exceptions[] = $this->exceptions[$request];
         }
 
@@ -150,9 +155,12 @@ final class BatchResult
      */
     public function getExceptionFor(RequestInterface $request)
     {
-        try {
+        try
+        {
             return $this->exceptions[$request];
-        } catch (\UnexpectedValueException $e) {
+        }
+        catch (\UnexpectedValueException $e)
+        {
             throw new \UnexpectedValueException('Request not found', $e->getCode(), $e);
         }
     }
@@ -161,7 +169,7 @@ final class BatchResult
      * Adds an exception in an immutable way.
      *
      * @param RequestInterface $request
-     * @param Exception        $exception
+     * @param Exception $exception
      *
      * @return BatchResult the new BatchResult with this request-exception pair added to it
      */

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Serializer;
 
 use Aws\Api\Service;
@@ -25,15 +26,16 @@ class JsonRpcSerializer
     private $contentType;
 
     /**
-     * @param Service  $api           Service description
-     * @param string   $endpoint      Endpoint to connect to
+     * @param Service $api Service description
+     * @param string $endpoint Endpoint to connect to
      * @param JsonBody $jsonFormatter Optional JSON formatter to use
      */
     public function __construct(
         Service $api,
         $endpoint,
         JsonBody $jsonFormatter = null
-    ) {
+    )
+    {
         $this->endpoint = $endpoint;
         $this->api = $api;
         $this->jsonFormatter = $jsonFormatter ?: new JsonBody($this->api);

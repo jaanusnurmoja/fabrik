@@ -3,6 +3,7 @@
 // Injecting custom JavaScript while exporting
 
 require __DIR__ . '/../vendor/autoload.php';
+
 // Use the sdk
 use FusionExport\ExportManager;
 use FusionExport\ExportConfig;
@@ -18,6 +19,7 @@ $exportManager = new ExportManager();
 // Call the export() method with the export config
 $files = $exportManager->export($exportConfig, '.', true);
 
-foreach ($files as $file) {
+foreach ($files as $file)
+{
     echo $file . "\n";
 }

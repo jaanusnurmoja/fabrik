@@ -2,7 +2,7 @@
 /**
  * @package php-svg-lib
  * @link    http://github.com/PhenX/php-svg-lib
- * @author  Fabien Ménager <fabien.menager@gmail.com>
+ * @author  Fabien Mï¿½nager <fabien.menager@gmail.com>
  * @license GNU LGPLv3+ http://www.gnu.org/copyleft/lesser.html
  */
 
@@ -10,11 +10,11 @@ namespace Svg\Tag;
 
 class Image extends AbstractTag
 {
-    protected $x = 0;
-    protected $y = 0;
-    protected $width = 0;
+    protected $x      = 0;
+    protected $y      = 0;
+    protected $width  = 0;
     protected $height = 0;
-    protected $href = null;
+    protected $href   = null;
 
     protected function before($attributes)
     {
@@ -32,21 +32,26 @@ class Image extends AbstractTag
         $height = $this->document->getHeight();
         $this->y = $height;
 
-        if (isset($attributes['x'])) {
+        if (isset($attributes['x']))
+        {
             $this->x = $attributes['x'];
         }
-        if (isset($attributes['y'])) {
+        if (isset($attributes['y']))
+        {
             $this->y = $height - $attributes['y'];
         }
 
-        if (isset($attributes['width'])) {
+        if (isset($attributes['width']))
+        {
             $this->width = $attributes['width'];
         }
-        if (isset($attributes['height'])) {
+        if (isset($attributes['height']))
+        {
             $this->height = $attributes['height'];
         }
 
-        if (isset($attributes['xlink:href'])) {
+        if (isset($attributes['xlink:href']))
+        {
             $this->href = $attributes['xlink:href'];
         }
 

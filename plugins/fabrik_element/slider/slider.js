@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbSlider = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('slider');
             this.parent(element, options);
@@ -37,7 +37,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     this.element.getElement('.fabrikslider-line'),
                     this.element.getElement('.knob'),
                     {
-                        onChange  : function (pos) {
+                        onChange: function (pos) {
                             this.output.value = pos;
                             this.options.value = pos;
                             this.output2.set('text', pos);
@@ -49,7 +49,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                             this.output.fireEvent('blur', new Event.Mock(this.output, 'change'));
                             this.element.fireEvent('change', new Event.Mock(this.element, 'change'));
                         }.bind(this),
-                        steps     : this.options.steps
+                        steps: this.options.steps
                     }
                 ).set(v);
 

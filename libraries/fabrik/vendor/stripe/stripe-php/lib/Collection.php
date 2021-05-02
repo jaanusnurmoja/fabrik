@@ -82,11 +82,13 @@ class Collection extends StripeObject
     private function extractPathAndUpdateParams($params)
     {
         $url = parse_url($this->url);
-        if (!isset($url['path'])) {
+        if (!isset($url['path']))
+        {
             throw new Error\Api("Could not parse list url into parts: $url");
         }
 
-        if (isset($url['query'])) {
+        if (isset($url['query']))
+        {
             // If the URL contains a query param, parse it out into $params so they
             // don't interact weirdly with each other.
             $query = [];

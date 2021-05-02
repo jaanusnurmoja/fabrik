@@ -12,7 +12,8 @@ class Set implements IteratorAggregate
     public function __construct($members = [])
     {
         $this->_elts = [];
-        foreach ($members as $item) {
+        foreach ($members as $item)
+        {
             $this->_elts[$item] = true;
         }
     }

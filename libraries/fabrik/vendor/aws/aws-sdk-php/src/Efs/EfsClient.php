@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Efs;
 
 use Aws\AwsClient;
@@ -31,4 +32,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateFileSystem(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateFileSystemAsync(array $args = [])
  */
-class EfsClient extends AwsClient {}
+class EfsClient extends AwsClient
+{
+}

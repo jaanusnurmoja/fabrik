@@ -3,6 +3,7 @@
  * The MIT License
  * Copyright (c) 2007 Andy Smith
  */
+
 namespace Abraham\TwitterOAuth;
 
 /**
@@ -47,17 +48,20 @@ abstract class SignatureMethod
         $built = $this->buildSignature($request, $consumer, $token);
 
         // Check for zero length, although unlikely here
-        if (strlen($built) == 0 || strlen($signature) == 0) {
+        if (strlen($built) == 0 || strlen($signature) == 0)
+        {
             return false;
         }
 
-        if (strlen($built) != strlen($signature)) {
+        if (strlen($built) != strlen($signature))
+        {
             return false;
         }
 
         // Avoid a timing leak with a (hopefully) time insensitive compare
         $result = 0;
-        for ($i = 0; $i < strlen($signature); $i++) {
+        for ($i = 0; $i < strlen($signature); $i++)
+        {
             $result |= ord($built{$i}) ^ ord($signature{$i});
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Signature;
 
 use Aws\Credentials\CredentialsInterface;
@@ -15,8 +16,10 @@ class S3SignatureV4 extends SignatureV4
     public function signRequest(
         RequestInterface $request,
         CredentialsInterface $credentials
-    ) {
-        if (!$request->hasHeader('x-amz-content-sha256')) {
+    )
+    {
+        if (!$request->hasHeader('x-amz-content-sha256'))
+        {
             $request = $request->withHeader(
                 'X-Amz-Content-Sha256',
                 $this->getPayload($request)
@@ -34,8 +37,10 @@ class S3SignatureV4 extends SignatureV4
         CredentialsInterface $credentials,
         $expires,
         array $options = []
-    ) {
-        if (!$request->hasHeader('x-amz-content-sha256')) {
+    )
+    {
+        if (!$request->hasHeader('x-amz-content-sha256'))
+        {
             $request = $request->withHeader(
                 'X-Amz-Content-Sha256',
                 $this->getPresignedPayload($request)
@@ -60,7 +65,8 @@ class S3SignatureV4 extends SignatureV4
     protected function createCanonicalizedPath($path)
     {
         // Only remove one slash in case of keys that have a preceding slash
-        if (substr($path, 0, 1) === '/') {
+        if (substr($path, 0, 1) === '/')
+        {
             $path = substr($path, 1);
         }
         return '/' . $path;

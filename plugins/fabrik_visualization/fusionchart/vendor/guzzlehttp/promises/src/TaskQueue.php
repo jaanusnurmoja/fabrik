@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Promise;
 
 /**
@@ -13,16 +14,20 @@ namespace GuzzleHttp\Promise;
 class TaskQueue implements TaskQueueInterface
 {
     private $enableShutdown = true;
-    private $queue = [];
+    private $queue          = [];
 
     public function __construct($withShutdown = true)
     {
-        if ($withShutdown) {
-            register_shutdown_function(function () {
-                if ($this->enableShutdown) {
+        if ($withShutdown)
+        {
+            register_shutdown_function(function ()
+            {
+                if ($this->enableShutdown)
+                {
                     // Only run the tasks if an E_ERROR didn't occur.
                     $err = error_get_last();
-                    if (!$err || ($err['type'] ^ E_ERROR)) {
+                    if (!$err || ($err['type'] ^ E_ERROR))
+                    {
                         $this->run();
                     }
                 }
@@ -43,7 +48,8 @@ class TaskQueue implements TaskQueueInterface
     public function run()
     {
         /** @var callable $task */
-        while ($task = array_shift($this->queue)) {
+        while ($task = array_shift($this->queue))
+        {
             $task();
         }
     }

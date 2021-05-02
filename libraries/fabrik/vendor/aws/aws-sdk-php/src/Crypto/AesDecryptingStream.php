@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto;
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
@@ -44,7 +45,8 @@ class AesDecryptingStream implements AesStreamInterface
         StreamInterface $cipherText,
         $key,
         CipherMethod $cipherMethod
-    ) {
+    )
+    {
         $this->stream = $cipherText;
         $this->key = $key;
         $this->cipherMethod = clone $cipherMethod;
@@ -69,7 +71,8 @@ class AesDecryptingStream implements AesStreamInterface
     {
         $plainTextSize = $this->stream->getSize();
 
-        if ($this->cipherMethod->requiresPadding()) {
+        if ($this->cipherMethod->requiresPadding())
+        {
             // PKCS7 padding requires that between 1 and self::BLOCK_SIZE be
             // added to the plaintext to make it an even number of blocks. The
             // plaintext is between strlen($cipherText) - self::BLOCK_SIZE and
@@ -87,7 +90,8 @@ class AesDecryptingStream implements AesStreamInterface
 
     public function read($length)
     {
-        if ($length > strlen($this->buffer)) {
+        if ($length > strlen($this->buffer))
+        {
             $this->buffer .= $this->decryptBlock(
                 self::BLOCK_SIZE * ceil(($length - strlen($this->buffer)) / self::BLOCK_SIZE)
             );
@@ -101,11 +105,14 @@ class AesDecryptingStream implements AesStreamInterface
 
     public function seek($offset, $whence = SEEK_SET)
     {
-        if ($offset === 0 && $whence === SEEK_SET) {
+        if ($offset === 0 && $whence === SEEK_SET)
+        {
             $this->buffer = '';
             $this->cipherMethod->seek(0, SEEK_SET);
             $this->stream->seek(0, SEEK_SET);
-        } else {
+        }
+        else
+        {
             throw new LogicException('AES encryption streams only support being'
                 . ' rewound, not arbitrary seeking.');
         }
@@ -113,19 +120,23 @@ class AesDecryptingStream implements AesStreamInterface
 
     private function decryptBlock($length)
     {
-        if ($this->stream->eof()) {
+        if ($this->stream->eof())
+        {
             return '';
         }
 
         $cipherText = '';
-        do {
+        do
+        {
             $cipherText .= $this->stream->read($length - strlen($cipherText));
         } while (strlen($cipherText) < $length && !$this->stream->eof());
 
         $options = OPENSSL_RAW_DATA;
-        if (!$this->stream->eof()
+        if (
+            !$this->stream->eof()
             && $this->stream->getSize() !== $this->stream->tell()
-        ) {
+        )
+        {
             $options |= OPENSSL_ZERO_PADDING;
         }
 

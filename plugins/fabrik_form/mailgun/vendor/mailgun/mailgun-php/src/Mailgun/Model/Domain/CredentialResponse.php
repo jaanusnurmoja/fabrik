@@ -34,15 +34,20 @@ final class CredentialResponse implements ApiResponse
     public static function create(array $data)
     {
         $items = [];
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $item) {
+        if (isset($data['items']))
+        {
+            foreach ($data['items'] as $item)
+            {
                 $items[] = CredentialResponseItem::create($item);
             }
         }
 
-        if (isset($data['total_count'])) {
+        if (isset($data['total_count']))
+        {
             $count = $data['total_count'];
-        } else {
+        }
+        else
+        {
             $count = count($items);
         }
 
@@ -50,7 +55,7 @@ final class CredentialResponse implements ApiResponse
     }
 
     /**
-     * @param int                      $totalCount
+     * @param int $totalCount
      * @param CredentialResponseItem[] $items
      */
     private function __construct($totalCount, array $items)

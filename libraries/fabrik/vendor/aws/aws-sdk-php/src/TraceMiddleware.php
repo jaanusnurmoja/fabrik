@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Aws\Exception\AwsException;
@@ -22,15 +23,15 @@ class TraceMiddleware
 
     private static $authStrings = [
         // S3Signature
-        '/AWSAccessKeyId=[A-Z0-9]{20}&/i' => 'AWSAccessKeyId=[KEY]&',
+        '/AWSAccessKeyId=[A-Z0-9]{20}&/i'                           => 'AWSAccessKeyId=[KEY]&',
         // SignatureV4 Signature and S3Signature
-        '/Signature=.+/i' => 'Signature=[SIGNATURE]',
+        '/Signature=.+/i'                                           => 'Signature=[SIGNATURE]',
         // SignatureV4 access key ID
-        '/Credential=[A-Z0-9]{20}\//i' => 'Credential=[KEY]/',
+        '/Credential=[A-Z0-9]{20}\//i'                              => 'Credential=[KEY]/',
         // S3 signatures
-        '/AWS [A-Z0-9]{20}:.+/' => 'AWS AKI[KEY]:[SIGNATURE]',
+        '/AWS [A-Z0-9]{20}:.+/'                                     => 'AWS AKI[KEY]:[SIGNATURE]',
         // STS Presigned URLs
-        '/X-Amz-Security-Token=[^&]+/i' => 'X-Amz-Security-Token=[TOKEN]',
+        '/X-Amz-Security-Token=[^&]+/i'                             => 'X-Amz-Security-Token=[TOKEN]',
         // Crypto *Stream Keys
         '/\["key.{27,36}Stream.{9}\]=>\s+.{7}\d{2}\) "\X{16,64}"/U' => '["key":[CONTENT KEY]]',
     ];
@@ -59,13 +60,16 @@ class TraceMiddleware
     public function __construct(array $config = [])
     {
         $this->config = $config + [
-            'logfn'        => function ($value) { echo $value; },
-            'stream_size'  => 524288,
-            'scrub_auth'   => true,
-            'http'         => true,
-            'auth_strings' => [],
-            'auth_headers' => [],
-        ];
+                'logfn'        => function ($value)
+                {
+                    echo $value;
+                },
+                'stream_size'  => 524288,
+                'scrub_auth'   => true,
+                'http'         => true,
+                'auth_strings' => [],
+                'auth_headers' => [],
+            ];
 
         $this->config['auth_strings'] += self::$authStrings;
         $this->config['auth_headers'] += self::$authHeaders;
@@ -75,11 +79,13 @@ class TraceMiddleware
     {
         $this->prevOutput = $this->prevInput = [];
 
-        return function (callable $next) use ($step, $name) {
+        return function (callable $next) use ($step, $name)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($next, $step, $name) {
+            ) use ($next, $step, $name)
+            {
                 $this->createHttpDebug($command);
                 $start = microtime(true);
                 $this->stepInput([
@@ -90,7 +96,8 @@ class TraceMiddleware
                 ]);
 
                 return $next($command, $request)->then(
-                    function ($value) use ($step, $name, $command, $start) {
+                    function ($value) use ($step, $name, $command, $start)
+                    {
                         $this->flushHttpDebug($command);
                         $this->stepOutput($start, [
                             'step'   => $step,
@@ -100,7 +107,8 @@ class TraceMiddleware
                         ]);
                         return $value;
                     },
-                    function ($reason) use ($step, $name, $start, $command) {
+                    function ($reason) use ($step, $name, $start, $command)
+                    {
                         $this->flushHttpDebug($command);
                         $this->stepOutput($start, [
                             'step'   => $step,
@@ -135,7 +143,8 @@ class TraceMiddleware
     private function compareStep(array $a, array $b, $title, array $keys)
     {
         $changes = [];
-        foreach ($keys as $key) {
+        foreach ($keys as $key)
+        {
             $av = isset($a[$key]) ? $a[$key] : null;
             $bv = isset($b[$key]) ? $b[$key] : null;
             $this->compareArray($av, $bv, $key, $changes);
@@ -192,20 +201,22 @@ class TraceMiddleware
 
     private function exceptionArray($e)
     {
-        if (!($e instanceof \Exception)) {
+        if (!($e instanceof \Exception))
+        {
             return $e;
         }
 
         $result = [
-            'instance'   => spl_object_hash($e),
-            'class'      => get_class($e),
-            'message'    => $e->getMessage(),
-            'file'       => $e->getFile(),
-            'line'       => $e->getLine(),
-            'trace'      => $e->getTraceAsString(),
+            'instance' => spl_object_hash($e),
+            'class'    => get_class($e),
+            'message'  => $e->getMessage(),
+            'file'     => $e->getFile(),
+            'line'     => $e->getLine(),
+            'trace'    => $e->getTraceAsString(),
         ];
 
-        if ($e instanceof AwsException) {
+        if ($e instanceof AwsException)
+        {
             $result += [
                 'type'       => $e->getAwsErrorType(),
                 'code'       => $e->getAwsErrorCode(),
@@ -222,38 +233,54 @@ class TraceMiddleware
 
     private function compareArray($a, $b, $path, array &$diff)
     {
-        if ($a === $b) {
+        if ($a === $b)
+        {
             return;
         }
 
-        if (is_array($a)) {
-            $b = (array) $b;
+        if (is_array($a))
+        {
+            $b = (array)$b;
             $keys = array_unique(array_merge(array_keys($a), array_keys($b)));
-            foreach ($keys as $k) {
-                if (!array_key_exists($k, $a)) {
+            foreach ($keys as $k)
+            {
+                if (!array_key_exists($k, $a))
+                {
                     $this->compareArray(null, $b[$k], "{$path}.{$k}", $diff);
-                } elseif (!array_key_exists($k, $b)) {
+                }
+                elseif (!array_key_exists($k, $b))
+                {
                     $this->compareArray($a[$k], null, "{$path}.{$k}", $diff);
-                } else {
+                }
+                else
+                {
                     $this->compareArray($a[$k], $b[$k], "{$path}.{$k}", $diff);
                 }
             }
-        } elseif ($a !== null && $b === null) {
+        }
+        elseif ($a !== null && $b === null)
+        {
             $diff[] = "{$path} was unset";
-        } elseif ($a === null && $b !== null) {
+        }
+        elseif ($a === null && $b !== null)
+        {
             $diff[] = sprintf("%s was set to %s", $path, $this->str($b));
-        } else {
+        }
+        else
+        {
             $diff[] = sprintf("%s changed from %s to %s", $path, $this->str($a), $this->str($b));
         }
     }
 
     private function str($value)
     {
-        if (is_scalar($value)) {
-            return (string) $value;
+        if (is_scalar($value))
+        {
+            return (string)$value;
         }
 
-        if ($value instanceof \Exception) {
+        if ($value instanceof \Exception)
+        {
             $value = $this->exceptionArray($value);
         }
 
@@ -265,20 +292,22 @@ class TraceMiddleware
     private function streamStr(StreamInterface $body)
     {
         return $body->getSize() < $this->config['stream_size']
-            ? (string) $body
+            ? (string)$body
             : 'stream(size=' . $body->getSize() . ')';
     }
 
     private function createHttpDebug(CommandInterface $command)
     {
-        if ($this->config['http'] && !isset($command['@http']['debug'])) {
+        if ($this->config['http'] && !isset($command['@http']['debug']))
+        {
             $command['@http']['debug'] = fopen('php://temp', 'w+');
         }
     }
 
     private function flushHttpDebug(CommandInterface $command)
     {
-        if ($res = $command['@http']['debug']) {
+        if ($res = $command['@http']['debug'])
+        {
             rewind($res);
             $this->write(stream_get_contents($res));
             fclose($res);
@@ -288,11 +317,14 @@ class TraceMiddleware
 
     private function write($value)
     {
-        if ($this->config['scrub_auth']) {
-            foreach ($this->config['auth_strings'] as $pattern => $replacement) {
+        if ($this->config['scrub_auth'])
+        {
+            foreach ($this->config['auth_strings'] as $pattern => $replacement)
+            {
                 $value = preg_replace_callback(
                     $pattern,
-                    function ($matches) use ($replacement) {
+                    function ($matches) use ($replacement)
+                    {
                         return $replacement;
                     },
                     $value
@@ -305,7 +337,8 @@ class TraceMiddleware
 
     private function redactHeaders(array $headers)
     {
-        if ($this->config['scrub_auth']) {
+        if ($this->config['scrub_auth'])
+        {
             $headers = $this->config['auth_headers'] + $headers;
         }
 

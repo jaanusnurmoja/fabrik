@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Serializer;
 
 use Aws\Api\MapShape;
@@ -29,7 +30,7 @@ class XmlBody
      * Builds the XML body based on an array of arguments.
      *
      * @param Shape $shape Operation being constructed
-     * @param array $args  Associative array of arguments
+     * @param array $args Associative array of arguments
      *
      * @return string
      */
@@ -48,7 +49,8 @@ class XmlBody
     {
         $xml->startElement($name);
 
-        if ($ns = $shape['xmlNamespace']) {
+        if ($ns = $shape['xmlNamespace'])
+        {
             $xml->writeAttribute(
                 isset($ns['prefix']) ? "xmlns:{$ns['prefix']}" : 'xmlns',
                 $shape['xmlNamespace']['uri']
@@ -70,9 +72,12 @@ class XmlBody
         ];
 
         $type = 'add_' . $shape['type'];
-        if (isset($methods[$type])) {
+        if (isset($methods[$type]))
+        {
             $this->{$type}($shape, $name, $value, $xml);
-        } else {
+        }
+        else
+        {
             $this->defaultShape($shape, $name, $value, $xml);
         }
     }
@@ -89,10 +94,12 @@ class XmlBody
         $name,
         array $value,
         \XMLWriter $xml
-    ) {
+    )
+    {
         $this->startElement($shape, $name, $xml);
 
-        foreach ($this->getStructureMembers($shape, $value) as $k => $definition) {
+        foreach ($this->getStructureMembers($shape, $value) as $k => $definition)
+        {
             $this->format(
                 $definition['member'],
                 $definition['member']['locationName'] ?: $k,
@@ -108,17 +115,22 @@ class XmlBody
     {
         $members = [];
 
-        foreach ($value as $k => $v) {
-            if ($v !== null && $shape->hasMember($k)) {
+        foreach ($value as $k => $v)
+        {
+            if ($v !== null && $shape->hasMember($k))
+            {
                 $definition = [
                     'member' => $shape->getMember($k),
                     'value'  => $v,
                 ];
 
-                if ($definition['member']['xmlAttribute']) {
+                if ($definition['member']['xmlAttribute'])
+                {
                     // array_unshift_associative
                     $members = [$k => $definition] + $members;
-                } else {
+                }
+                else
+                {
                     $members[$k] = $definition;
                 }
             }
@@ -132,21 +144,27 @@ class XmlBody
         $name,
         array $value,
         XMLWriter $xml
-    ) {
+    )
+    {
         $items = $shape->getMember();
 
-        if ($shape['flattened']) {
+        if ($shape['flattened'])
+        {
             $elementName = $name;
-        } else {
+        }
+        else
+        {
             $this->startElement($shape, $name, $xml);
             $elementName = $items['locationName'] ?: 'member';
         }
 
-        foreach ($value as $v) {
+        foreach ($value as $v)
+        {
             $this->format($items, $elementName, $v, $xml);
         }
 
-        if (!$shape['flattened']) {
+        if (!$shape['flattened'])
+        {
             $xml->endElement();
         }
     }
@@ -156,14 +174,16 @@ class XmlBody
         $name,
         array $value,
         XMLWriter $xml
-    ) {
+    )
+    {
         $xmlEntry = $shape['flattened'] ? $shape['locationName'] : 'entry';
         $xmlKey = $shape->getKey()['locationName'] ?: 'key';
         $xmlValue = $shape->getValue()['locationName'] ?: 'value';
 
         $this->startElement($shape, $name, $xml);
 
-        foreach ($value as $key => $v) {
+        foreach ($value as $key => $v)
+        {
             $this->startElement($shape, $xmlEntry, $xml);
             $this->format($shape->getKey(), $xmlKey, $key, $xml);
             $this->format($shape->getValue(), $xmlValue, $v, $xml);
@@ -185,7 +205,8 @@ class XmlBody
         $name,
         $value,
         XMLWriter $xml
-    ) {
+    )
+    {
         $this->startElement($shape, $name, $xml);
         $timestampFormat = !empty($shape['timestampFormat'])
             ? $shape['timestampFormat']
@@ -199,7 +220,8 @@ class XmlBody
         $name,
         $value,
         XMLWriter $xml
-    ) {
+    )
+    {
         $this->startElement($shape, $name, $xml);
         $xml->writeRaw($value ? 'true' : 'false');
         $xml->endElement();
@@ -210,10 +232,14 @@ class XmlBody
         $name,
         $value,
         XMLWriter $xml
-    ) {
-        if ($shape['xmlAttribute']) {
+    )
+    {
+        if ($shape['xmlAttribute'])
+        {
             $xml->writeAttribute($shape['locationName'] ?: $name, $value);
-        } else {
+        }
+        else
+        {
             $this->defaultShape($shape, $name, $value, $xml);
         }
     }

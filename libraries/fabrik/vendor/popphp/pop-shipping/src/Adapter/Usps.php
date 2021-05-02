@@ -11,6 +11,7 @@
 /**
  * @namespace
  */
+
 namespace Pop\Shipping\Adapter;
 
 /**
@@ -109,27 +110,29 @@ class Usps extends AbstractAdapter
      *
      * Method to instantiate an USPS shipping adapter object
      *
-     * @param  string  $username
-     * @param  string  $password
-     * @param  boolean $test
+     * @param string $username
+     * @param string $password
+     * @param boolean $test
      * @return Usps
      */
     public function __construct($username, $password, $test = false)
     {
         $this->testMode = (bool)$test;
-        $this->request  = str_replace(['[{username}]', '[{password}]'], [$username, $password], $this->request);
+        $this->request = str_replace(['[{username}]', '[{password}]'], [$username, $password], $this->request);
     }
 
     /**
      * Set ship to
      *
-     * @param  array $shipTo
+     * @param array $shipTo
      * @return void
      */
     public function shipTo(array $shipTo)
     {
-        foreach ($shipTo as $key => $value) {
-            if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip')) {
+        foreach ($shipTo as $key => $value)
+        {
+            if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip'))
+            {
                 $this->shipTo['ZipDestination'] = $value;
             }
         }
@@ -138,13 +141,15 @@ class Usps extends AbstractAdapter
     /**
      * Set ship from
      *
-     * @param  array $shipFrom
+     * @param array $shipFrom
      * @return void
      */
     public function shipFrom(array $shipFrom)
     {
-        foreach ($shipFrom as $key => $value) {
-            if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip')) {
+        foreach ($shipFrom as $key => $value)
+        {
+            if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip'))
+            {
                 $this->shipFrom['ZipOrigination'] = $value;
             }
         }
@@ -153,15 +158,18 @@ class Usps extends AbstractAdapter
     /**
      * Set container
      *
-     * @param  string $container
-     * @throws Exception
+     * @param string $container
      * @return void
+     * @throws Exception
      */
     public function setContainer($container = 'RECTANGULAR')
     {
-        if (($container == 'RECTANGULAR') || ($container == 'NONRECTANGULAR')) {
+        if (($container == 'RECTANGULAR') || ($container == 'NONRECTANGULAR'))
+        {
             $this->container = $container;
-        } else {
+        }
+        else
+        {
             throw new Exception('Error: The container type must be RECTANGULAR or NONRECTANGULAR.');
         }
     }
@@ -169,7 +177,7 @@ class Usps extends AbstractAdapter
     /**
      * Set machinable flag
      *
-     * @param  boolean $machinable
+     * @param boolean $machinable
      * @return void
      */
     public function setMachinable($machinable = false)
@@ -180,25 +188,34 @@ class Usps extends AbstractAdapter
     /**
      * Set dimensions
      *
-     * @param  array  $dimensions
-     * @param  string $unit
+     * @param array $dimensions
+     * @param string $unit
      * @return void
      */
     public function setDimensions(array $dimensions, $unit = null)
     {
-        foreach ($dimensions as $key => $value) {
-            if (strtolower($key) == 'length') {
+        foreach ($dimensions as $key => $value)
+        {
+            if (strtolower($key) == 'length')
+            {
                 $this->dimensions['Length'] = $value;
-            } else if (strtolower($key) == 'width') {
+            }
+            elseif (strtolower($key) == 'width')
+            {
                 $this->dimensions['Width'] = $value;
-            } else if (strtolower($key) == 'height') {
+            }
+            elseif (strtolower($key) == 'height')
+            {
                 $this->dimensions['Height'] = $value;
-            } else if (strtolower($key) == 'girth') {
+            }
+            elseif (strtolower($key) == 'girth')
+            {
                 $this->dimensions['Girth'] = $value;
             }
         }
 
-        if (max($this->dimensions) >= 12) {
+        if (max($this->dimensions) >= 12)
+        {
             $this->containerSize = 'LARGE';
         }
     }
@@ -206,16 +223,19 @@ class Usps extends AbstractAdapter
     /**
      * Set dimensions
      *
-     * @param  string $weight
-     * @param  string $unit
+     * @param string $weight
+     * @param string $unit
      * @return void
      */
     public function setWeight($weight, $unit = null)
     {
-        if (is_float($weight)) {
+        if (is_float($weight))
+        {
             $lbs = (floor($weight));
             $ozs = round(16 * ($weight - floor($weight)), 2);
-        } else {
+        }
+        else
+        {
             $lbs = $weight;
             $ozs = 0;
         }
@@ -226,7 +246,7 @@ class Usps extends AbstractAdapter
     /**
      * Send transaction
      *
-     * @param  boolean $verifyPeer
+     * @param boolean $verifyPeer
      * @return void
      */
     public function send($verifyPeer = true)
@@ -239,7 +259,8 @@ class Usps extends AbstractAdapter
             CURLOPT_RETURNTRANSFER => true
         ];
 
-        if (!$verifyPeer) {
+        if (!$verifyPeer)
+        {
             $options[CURLOPT_SSL_VERIFYPEER] = false;
         }
 
@@ -248,17 +269,25 @@ class Usps extends AbstractAdapter
 
         $this->response = simplexml_load_string($this->parseResponse($curl));
 
-        if (isset($this->response->Package)) {
+        if (isset($this->response->Package))
+        {
             $this->responseCode = 1;
-            foreach ($this->response->Package->Postage as $rate) {
-                $this->rates[str_replace(['&lt;', '&gt;'], ['<', '>'], (string)$rate->MailService)] = (string)$rate->Rate;
+            foreach ($this->response->Package->Postage as $rate)
+            {
+                $this->rates[str_replace(['&lt;', '&gt;'], ['<', '>'],
+                    (string)$rate->MailService)] = (string)$rate->Rate;
             }
             $this->rates = array_reverse($this->rates, true);
-        } else {
-            if (isset($this->response->Number)) {
-                $this->responseCode    = (string)$this->response->Number;
+        }
+        else
+        {
+            if (isset($this->response->Number))
+            {
+                $this->responseCode = (string)$this->response->Number;
                 $this->responseMessage = (string)$this->response->Description;
-            } else {
+            }
+            else
+            {
                 $this->responseCode = 0;
             }
         }
@@ -301,14 +330,18 @@ class Usps extends AbstractAdapter
         $this->request .= PHP_EOL . '        <Container>' . $this->container . '</Container>';
         $this->request .= PHP_EOL . '        <Size>' . $this->containerSize . '</Size>';
 
-        if ((null !== $this->dimensions['Length']) &&
+        if (
+            (null !== $this->dimensions['Length']) &&
             (null !== $this->dimensions['Width']) &&
-            (null !== $this->dimensions['Height'])) {
+            (null !== $this->dimensions['Height'])
+        )
+        {
             $this->request .= PHP_EOL . '        <Width>' . $this->dimensions['Width'] . '</Width>';
             $this->request .= PHP_EOL . '        <Length>' . $this->dimensions['Length'] . '</Length>';
             $this->request .= PHP_EOL . '        <Height>' . $this->dimensions['Height'] . '</Height>';
 
-            if (null == $this->dimensions['Girth']) {
+            if (null == $this->dimensions['Girth'])
+            {
                 $this->dimensions['Girth'] = (2 * $this->dimensions['Width']) + (2 * $this->dimensions['Height']);
             }
             $this->request .= PHP_EOL . '        <Girth>' . $this->dimensions['Girth'] . '</Girth>';

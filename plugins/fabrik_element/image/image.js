@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
     window.FbImage = new Class({
-        Extends   : FbFileElement,
+        Extends: FbFileElement,
         initialize: function (element, options) {
             this.setPlugin('image');
             this.folderlist = [];
@@ -91,13 +91,13 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             this.selectedFolder = this.getFolderPath();
             folder.empty();
             var myAjax = new Request({
-                url   : '',
+                url: '',
                 method: 'post',
                 'data': {
                     'option': 'com_fabrik',
                     'format': 'raw',
-                    'task'  : 'plugin.pluginAjax',
-                    'g'     : 'element',
+                    'task': 'plugin.pluginAjax',
+                    'g': 'element',
                     'plugin': 'image',
                     'method': 'ajax_files',
                     'element_id': this.options.id,
@@ -152,8 +152,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             if (val !== '') {
                 this.image.src = Fabrik.liveSite + '/' + val;
                 this.image.alt = val;
-            }
-            else {
+            } else {
                 this.image.src = '';
                 this.image.alt = '';
             }

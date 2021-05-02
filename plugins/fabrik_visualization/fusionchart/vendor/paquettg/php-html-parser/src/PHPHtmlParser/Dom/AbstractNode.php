@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser\Dom;
 
 use PHPHtmlParser\Exceptions\CircularException;
@@ -70,10 +71,12 @@ abstract class AbstractNode
     public function __get($key)
     {
         // check attribute first
-        if ( ! is_null($this->getAttribute($key))) {
+        if (!is_null($this->getAttribute($key)))
+        {
             return $this->getAttribute($key);
         }
-        switch (strtolower($key)) {
+        switch (strtolower($key))
+        {
             case 'outerhtml':
                 return $this->outerHtml();
             case 'innerhtml':
@@ -94,9 +97,9 @@ abstract class AbstractNode
      */
     public function __destruct()
     {
-        $this->tag      = null;
-        $this->attr     = [];
-        $this->parent   = null;
+        $this->tag = null;
+        $this->attr = [];
+        $this->parent = null;
         $this->children = [];
     }
 
@@ -138,8 +141,10 @@ abstract class AbstractNode
     public function setParent(InnerNode $parent)
     {
         // remove from old parent
-        if ( ! is_null($this->parent)) {
-            if ($this->parent->id() == $parent->id()) {
+        if (!is_null($this->parent))
+        {
+            if ($this->parent->id() == $parent->id())
+            {
                 // already the parent
                 return $this;
             }
@@ -166,7 +171,8 @@ abstract class AbstractNode
      */
     public function delete()
     {
-        if ( ! is_null($this->parent)) {
+        if (!is_null($this->parent))
+        {
             $this->parent->removeChild($this->id);
         }
 
@@ -194,7 +200,8 @@ abstract class AbstractNode
      */
     public function isAncestor($id)
     {
-        if ( ! is_null($this->getAncestor($id))) {
+        if (!is_null($this->getAncestor($id)))
+        {
             return true;
         }
 
@@ -209,8 +216,10 @@ abstract class AbstractNode
      */
     public function getAncestor($id)
     {
-        if ( ! is_null($this->parent)) {
-            if ($this->parent->id() == $id) {
+        if (!is_null($this->parent))
+        {
+            if ($this->parent->id() == $id)
+            {
                 return $this->parent;
             }
 
@@ -228,7 +237,8 @@ abstract class AbstractNode
      */
     public function nextSibling()
     {
-        if (is_null($this->parent)) {
+        if (is_null($this->parent))
+        {
             throw new ParentNotFoundException('Parent is not set for this node.');
         }
 
@@ -243,7 +253,8 @@ abstract class AbstractNode
      */
     public function previousSibling()
     {
-        if (is_null($this->parent)) {
+        if (is_null($this->parent))
+        {
             throw new ParentNotFoundException('Parent is not set for this node.');
         }
 
@@ -269,7 +280,8 @@ abstract class AbstractNode
     public function getAttributes()
     {
         $attributes = $this->tag->getAttributes();
-        foreach ($attributes as $name => $info) {
+        foreach ($attributes as $name => $info)
+        {
             $attributes[$name] = $info['value'];
         }
 
@@ -286,7 +298,8 @@ abstract class AbstractNode
     public function getAttribute($key)
     {
         $attribute = $this->tag->getAttribute($key);
-        if ( ! is_null($attribute)) {
+        if (!is_null($attribute))
+        {
             $attribute = $attribute['value'];
         }
 
@@ -334,7 +347,7 @@ abstract class AbstractNode
     /**
      * Function to locate a specific ancestor tag in the path to the root.
      *
-     * @param  string $tag
+     * @param string $tag
      * @return AbstractNode
      * @throws ParentNotFoundException
      */
@@ -343,15 +356,17 @@ abstract class AbstractNode
         // Start by including ourselves in the comparison.
         $node = $this;
 
-        while ( ! is_null($node)) {
-            if ($node->tag->name() == $tag) {
+        while (!is_null($node))
+        {
+            if ($node->tag->name() == $tag)
+            {
                 return $node;
             }
 
             $node = $node->getParent();
         }
 
-        throw new ParentNotFoundException('Could not find an ancestor with "'.$tag.'" tag');
+        throw new ParentNotFoundException('Could not find an ancestor with "' . $tag . '" tag');
     }
 
     /**
@@ -364,11 +379,13 @@ abstract class AbstractNode
     public function find($selector, $nth = null)
     {
         $selector = new Selector($selector);
-        $nodes    = $selector->find($this);
+        $nodes = $selector->find($this);
 
-        if ( ! is_null($nth)) {
+        if (!is_null($nth))
+        {
             // return nth-element or array
-            if (isset($nodes[$nth])) {
+            if (isset($nodes[$nth]))
+            {
                 return $nodes[$nth];
             }
 

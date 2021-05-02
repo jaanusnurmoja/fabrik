@@ -24,11 +24,14 @@ class AlipayAccount extends ApiResource
      */
     public function instanceUrl()
     {
-        if ($this['customer']) {
+        if ($this['customer'])
+        {
             $base = Customer::classUrl();
             $parent = $this['customer'];
             $path = 'sources';
-        } else {
+        }
+        else
+        {
             $msg = "Alipay accounts cannot be accessed without a customer ID.";
             throw new Error\InvalidRequest($msg, null);
         }
@@ -49,7 +52,7 @@ class AlipayAccount extends ApiResource
     public static function retrieve($_id, $_opts = null)
     {
         $msg = "Alipay accounts cannot be accessed without a customer ID. " .
-               "Retrieve an Alipay account using \$customer->sources->retrieve('alipay_account_id') instead.";
+            "Retrieve an Alipay account using \$customer->sources->retrieve('alipay_account_id') instead.";
         throw new Error\InvalidRequest($msg, null);
     }
 
@@ -66,7 +69,7 @@ class AlipayAccount extends ApiResource
     public static function update($_id, $_params = null, $_options = null)
     {
         $msg = "Alipay accounts cannot be accessed without a customer ID. " .
-               "Call save() on \$customer->sources->retrieve('alipay_account_id') instead.";
+            "Call save() on \$customer->sources->retrieve('alipay_account_id') instead.";
         throw new Error\InvalidRequest($msg, null);
     }
 }

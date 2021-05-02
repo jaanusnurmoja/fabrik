@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\RAM;
 
 use Aws\AwsClient;
@@ -38,4 +39,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateResourceShare(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateResourceShareAsync(array $args = [])
  */
-class RAMClient extends AwsClient {}
+class RAMClient extends AwsClient
+{
+}

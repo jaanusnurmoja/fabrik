@@ -12,47 +12,55 @@ namespace Twilio\Rest\Taskrouter\V1\Workspace\Workflow;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class WorkflowRealTimeStatisticsOptions {
+abstract class WorkflowRealTimeStatisticsOptions
+{
     /**
      * @param string $taskChannel Filter real-time and cumulative statistics by
      *                            TaskChannel.
      * @return FetchWorkflowRealTimeStatisticsOptions Options builder
      */
-    public static function fetch($taskChannel = Values::NONE) {
+    public static function fetch($taskChannel = Values::NONE)
+    {
         return new FetchWorkflowRealTimeStatisticsOptions($taskChannel);
     }
 }
 
-class FetchWorkflowRealTimeStatisticsOptions extends Options {
+class FetchWorkflowRealTimeStatisticsOptions extends Options
+{
     /**
      * @param string $taskChannel Filter real-time and cumulative statistics by
      *                            TaskChannel.
      */
-    public function __construct($taskChannel = Values::NONE) {
+    public function __construct($taskChannel = Values::NONE)
+    {
         $this->options['taskChannel'] = $taskChannel;
     }
 
     /**
      * Filter real-time and cumulative statistics by TaskChannel. Takes in a Unique Name ("voice", "sms", "default", etc.) or a TaskChannelSid.
-     * 
+     *
      * @param string $taskChannel Filter real-time and cumulative statistics by
      *                            TaskChannel.
      * @return $this Fluent Builder
      */
-    public function setTaskChannel($taskChannel) {
+    public function setTaskChannel($taskChannel)
+    {
         $this->options['taskChannel'] = $taskChannel;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

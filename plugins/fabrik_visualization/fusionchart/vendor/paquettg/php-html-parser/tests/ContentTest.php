@@ -2,7 +2,8 @@
 
 use PHPHtmlParser\Content;
 
-class ContentTest extends PHPUnit_Framework_TestCase {
+class ContentTest extends PHPUnit_Framework_TestCase
+{
 
     public function testChar()
     {
@@ -27,7 +28,7 @@ class ContentTest extends PHPUnit_Framework_TestCase {
     {
         $content = new Content('abcde');
         $content->fastForward(2)
-                ->rewind(1);
+            ->rewind(1);
         $this->assertEquals('b', $content->char());
     }
 
@@ -35,7 +36,7 @@ class ContentTest extends PHPUnit_Framework_TestCase {
     {
         $content = new Content('abcde');
         $content->fastForward(2)
-                ->rewind(100);
+            ->rewind(100);
         $this->assertEquals('a', $content->char());
     }
 

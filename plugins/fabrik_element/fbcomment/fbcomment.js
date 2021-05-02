@@ -6,13 +6,13 @@
  */
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
-	window.FbComment = new Class({
-		Extends   : FbElement,
-		initialize: function (element, options) {
-			this.setPlugin('fbComment');
-			this.parent(element, options);
-		}
-	});
+    window.FbComment = new Class({
+        Extends: FbElement,
+        initialize: function (element, options) {
+            this.setPlugin('fbComment');
+            this.parent(element, options);
+        }
+    });
 
-	return window.FbComment;
+    return window.FbComment;
 });

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudFront;
 
 use GuzzleHttp\Psr7;
@@ -32,12 +33,12 @@ class UrlSigner
      * extension be removed, some require the file name to be prefixed
      * - mp4:<path>, some require you to add "/cfx/st" into your URL).
      *
-     * @param string              $url     URL to sign (can include query
+     * @param string $url URL to sign (can include query
      *                                     string string and wildcards)
      * @param string|integer|null $expires UTC Unix timestamp used when signing
      *                                     with a canned policy. Not required
      *                                     when passing a custom $policy.
-     * @param string              $policy  JSON policy. Use this option when
+     * @param string $policy JSON policy. Use this option when
      *                                     creating a signed URL for a custom
      *                                     policy.
      *
@@ -50,7 +51,8 @@ class UrlSigner
         // Determine the scheme of the url
         $urlSections = explode('://', $url);
 
-        if (count($urlSections) < 2) {
+        if (count($urlSections) < 2)
+        {
             throw new \InvalidArgumentException("Invalid URL: {$url}");
         }
 
@@ -59,7 +61,7 @@ class UrlSigner
         $uri = new Uri($scheme . '://' . $urlSections[1]);
         $query = Psr7\parse_query($uri->getQuery(), PHP_QUERY_RFC3986);
         $signature = $this->signer->getSignature(
-            $this->createResource($scheme, (string) $uri),
+            $this->createResource($scheme, (string)$uri),
             $expires,
             $policy
         );
@@ -69,7 +71,7 @@ class UrlSigner
 
         return $scheme === 'rtmp'
             ? $this->createRtmpUrl($uri)
-            : (string) $uri;
+            : (string)$uri;
     }
 
     private function createRtmpUrl(UriInterface $uri)
@@ -77,7 +79,8 @@ class UrlSigner
         // Use a relative URL when creating Flash player URLs
         $result = ltrim($uri->getPath(), '/');
 
-        if ($query = $uri->getQuery()) {
+        if ($query = $uri->getQuery())
+        {
             $result .= '?' . $query;
         }
 
@@ -92,7 +95,8 @@ class UrlSigner
      */
     private function createResource($scheme, $url)
     {
-        switch ($scheme) {
+        switch ($scheme)
+        {
             case 'http':
             case 'http*':
             case 'https':
@@ -106,7 +110,8 @@ class UrlSigner
                 );
 
                 // Add a query string if present.
-                if (isset($parts['query'])) {
+                if (isset($parts['query']))
+                {
                     $resource .= "?{$parts['query']}";
                 }
 

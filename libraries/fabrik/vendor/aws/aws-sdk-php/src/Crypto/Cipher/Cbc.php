@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto\Cipher;
 
 use \InvalidArgumentException;
@@ -40,7 +41,8 @@ class Cbc implements CipherMethod
         $this->baseIv = $this->iv = $iv;
         $this->keySize = $keySize;
 
-        if (strlen($iv) !== openssl_cipher_iv_length($this->getOpenSslName())) {
+        if (strlen($iv) !== openssl_cipher_iv_length($this->getOpenSslName()))
+        {
             throw new InvalidArgumentException('Invalid initialization vector');
         }
     }
@@ -67,9 +69,12 @@ class Cbc implements CipherMethod
 
     public function seek($offset, $whence = SEEK_SET)
     {
-        if ($offset === 0 && $whence === SEEK_SET) {
+        if ($offset === 0 && $whence === SEEK_SET)
+        {
             $this->iv = $this->baseIv;
-        } else {
+        }
+        else
+        {
             throw new LogicException('CBC initialization only support being'
                 . ' rewound, not arbitrary seeking.');
         }

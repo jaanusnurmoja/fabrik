@@ -15,9 +15,9 @@ class TemplateBundler
     public function process()
     {
         if (!isset($this->template)) return;
-            
+
         $this->findResources();
-        
+
         $this->parseResources();
 
         $this->zipResourcesFiles();
@@ -28,12 +28,12 @@ class TemplateBundler
         return $this->templatePathInZip;
     }
 
-    public function getResourcesZip() 
+    public function getResourcesZip()
     {
         return $this->resourcesZipFile;
     }
 
-    public function getResourcesZipAsBase64() 
+    public function getResourcesZipAsBase64()
     {
         return base64_encode(file_get_contents($this->getResources()));
     }
@@ -41,7 +41,7 @@ class TemplateBundler
     private function findResources()
     {
         $dom = new Dom();
-        $dom->setOptions([ 
+        $dom->setOptions([
             'removeScripts' => false,
         ]);
 
@@ -51,35 +51,39 @@ class TemplateBundler
         $scripts = $dom->find('script')->toArray();
         $imgs = $dom->find('img')->toArray();
 
-        $links = array_map(function ($link) {
+        $links = array_map(function ($link)
+        {
             return $link->getAttribute('href');
         }, $links);
 
-        $scripts = array_map(function ($script) {
+        $scripts = array_map(function ($script)
+        {
             return $script->getAttribute('src');
         }, $scripts);
 
-        $imgs = array_map(function ($img) {
+        $imgs = array_map(function ($img)
+        {
             return $img->getAttribute('src');
         }, $imgs);
 
         $this->collectedResources = array_merge($links, $scripts, $imgs);
 
         $this->collectedResources = Helpers::resolvePaths(
-            $this->collectedResources, 
+            $this->collectedResources,
             dirname(realpath($this->template))
         );
 
         $this->collectedResources = array_unique($this->collectedResources);
-        
+
         $this->removeRemoteResources();
     }
 
-    private function removeRemoteResources() 
+    private function removeRemoteResources()
     {
         $this->collectedResources = array_filter(
-            $this->collectedResources, 
-            function ($res) {
+            $this->collectedResources,
+            function ($res)
+            {
                 if (Helpers::startsWith($res, 'http://')) return false;
 
                 if (Helpers::startsWith($res, 'https://')) return false;
@@ -101,11 +105,14 @@ class TemplateBundler
     private function sanitizeBasePath()
     {
         if (
-            isset($this->resourcesData) && 
+            isset($this->resourcesData) &&
             isset($this->resourcesData->basePath)
-        ) {
+        )
+        {
             $this->basePath = $this->resourcesData->basePath;
-        } else {
+        }
+        else
+        {
             $this->basePath = Helpers::findCommonPath($this->resourcesFiles);
         }
 
@@ -116,29 +123,33 @@ class TemplateBundler
     {
         $this->resourcesFiles = [];
 
-        if (isset($this->resourcesData)) {
+        if (isset($this->resourcesData))
+        {
             $includeFiles = [];
             $excludeFiles = [];
 
             $resourcesDir = dirname(realpath($this->resources));
 
-            if (isset($this->resourcesData->include)) {
+            if (isset($this->resourcesData->include))
+            {
                 $includeFiles = Helpers::globResolve(
-                    $this->resourcesData->include, 
+                    $this->resourcesData->include,
                     $resourcesDir
                 );
             }
 
-            if (isset($this->resourcesData->exclude)) {
+            if (isset($this->resourcesData->exclude))
+            {
                 $excludeFiles = Helpers::globResolve(
-                    $this->resourcesData->exclude, 
+                    $this->resourcesData->exclude,
                     $resourcesDir
                 );
             }
 
             $this->resourcesFiles = array_filter(
-                $includeFiles, 
-                function ($file) use ($excludeFiles) {
+                $includeFiles,
+                function ($file) use ($excludeFiles)
+                {
                     if (in_array($file, $excludeFiles)) return false;
                     return true;
                 }
@@ -149,14 +160,16 @@ class TemplateBundler
 
         $this->sanitizeBasePath();
 
-        $this->resourcesFiles = array_filter($this->resourcesFiles, function ($file) {
+        $this->resourcesFiles = array_filter($this->resourcesFiles, function ($file)
+        {
             if (Helpers::isChildPath($file, $this->basePath)) return true;
             return false;
         });
 
-        $this->resourcesFiles = array_map(function ($file) {
+        $this->resourcesFiles = array_map(function ($file)
+        {
             return [
-                'path' => $file,
+                'path'    => $file,
                 'zipPath' => Helpers::removeCommonPath($file, $this->basePath)
             ];
         }, $this->resourcesFiles);
@@ -168,17 +181,20 @@ class TemplateBundler
     {
         $absTemplatePath = realpath($this->template);
 
-        if (count($this->resourcesFiles) === 0) {
+        if (count($this->resourcesFiles) === 0)
+        {
             $this->templatePathInZip = basename($this->template);
-        } else {
+        }
+        else
+        {
             $this->templatePathInZip = Helpers::removeCommonPath(
-                $absTemplatePath, 
+                $absTemplatePath,
                 $this->basePath
             );
         }
 
         $this->resourcesFiles[] = [
-            'path' => $absTemplatePath,
+            'path'    => $absTemplatePath,
             'zipPath' => $this->templatePathInZip,
         ];
     }
@@ -192,10 +208,11 @@ class TemplateBundler
 
         $zip->open($this->resourcesZipFile, \ZipArchive::CREATE);
 
-        foreach ($this->resourcesFiles as $file) {
+        foreach ($this->resourcesFiles as $file)
+        {
             $zip->addFile($file['path'], $file['zipPath']);
         }
-        
+
         $zip->close();
     }
 }

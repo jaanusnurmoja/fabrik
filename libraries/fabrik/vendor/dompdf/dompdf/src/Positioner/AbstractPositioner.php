@@ -37,11 +37,13 @@ abstract class AbstractPositioner
     {
         list($x, $y) = $frame->get_position();
 
-        if (!$ignore_self) {
+        if (!$ignore_self)
+        {
             $frame->set_position($x + $offset_x, $y + $offset_y);
         }
 
-        foreach ($frame->get_children() as $child) {
+        foreach ($frame->get_children() as $child)
+        {
             $child->move($offset_x, $offset_y);
         }
     }

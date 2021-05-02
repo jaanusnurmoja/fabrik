@@ -13,14 +13,16 @@
 defined('_JEXEC') or die('Restricted access');
 
 if (!empty($this->linkedTables)) :?>
-	<ul class='linkedTables'>
-		<?php foreach ($this->linkedTables as $a) : ?>
-		<li>
-			<?php echo implode(" ", $a);?>
-			</li>
-		<?php
-		endforeach;
-		?>
-	</ul>
+    <ul class='linkedTables'>
+        <?php
+        foreach ($this->linkedTables as $a) : ?>
+            <li>
+                <?php
+                echo implode(" ", $a); ?>
+            </li>
+        <?php
+        endforeach;
+        ?>
+    </ul>
 <?php
 endif;

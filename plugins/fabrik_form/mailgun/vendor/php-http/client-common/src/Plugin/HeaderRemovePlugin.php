@@ -30,8 +30,10 @@ final class HeaderRemovePlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        foreach ($this->headers as $header) {
-            if ($request->hasHeader($header)) {
+        foreach ($this->headers as $header)
+        {
+            if ($request->hasHeader($header))
+            {
                 $request = $request->withoutHeader($header);
             }
         }

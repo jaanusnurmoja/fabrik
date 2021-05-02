@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DirectConnect;
 
 use Aws\AwsClient;
@@ -97,4 +98,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateVirtualInterfaceAttributes(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateVirtualInterfaceAttributesAsync(array $args = [])
  */
-class DirectConnectClient extends AwsClient {}
+class DirectConnectClient extends AwsClient
+{
+}

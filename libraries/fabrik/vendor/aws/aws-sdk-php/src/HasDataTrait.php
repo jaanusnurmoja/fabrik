@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 /**
@@ -25,7 +26,8 @@ trait HasDataTrait
      */
     public function & offsetGet($offset)
     {
-        if (isset($this->data[$offset])) {
+        if (isset($this->data[$offset]))
+        {
             return $this->data[$offset];
         }
 

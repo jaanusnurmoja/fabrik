@@ -4,7 +4,8 @@
 namespace Twilio\Jwt\Grants;
 
 
-class VoiceGrant implements Grant {
+class VoiceGrant implements Grant
+{
 
     private $incomingAllow;
     private $outgoingApplicationSid;
@@ -76,7 +77,8 @@ class VoiceGrant implements Grant {
      *
      * @return $this updated grant
      */
-    public function setOutgoingApplication($sid, $params) {
+    public function setOutgoingApplication($sid, $params)
+    {
         $this->outgoingApplicationSid = $sid;
         $this->outgoingApplicationParams = $params;
         return $this;
@@ -145,29 +147,34 @@ class VoiceGrant implements Grant {
      */
     public function getPayload()
     {
-        $payload = array();
-        if ($this->incomingAllow == true) {
-            $incoming = array();
+        $payload = [];
+        if ($this->incomingAllow == true)
+        {
+            $incoming = [];
             $incoming['allow'] = true;
             $payload['incoming'] = $incoming;
         }
 
-        if ($this->outgoingApplicationSid) {
-            $outgoing = array();
+        if ($this->outgoingApplicationSid)
+        {
+            $outgoing = [];
             $outgoing['application_sid'] = $this->outgoingApplicationSid;
 
-            if ($this->outgoingApplicationParams) {
+            if ($this->outgoingApplicationParams)
+            {
                 $outgoing['params'] = $this->outgoingApplicationParams;
             }
 
             $payload['outgoing'] = $outgoing;
         }
 
-        if ($this->pushCredentialSid) {
+        if ($this->pushCredentialSid)
+        {
             $payload['push_credential_sid'] = $this->pushCredentialSid;
         }
 
-        if ($this->endpointId) {
+        if ($this->endpointId)
+        {
             $payload['endpoint_id'] = $this->endpointId;
         }
 

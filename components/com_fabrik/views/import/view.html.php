@@ -24,80 +24,80 @@ jimport('joomla.application.component.view');
  */
 class FabrikViewImport extends FabrikView
 {
-	/**
-	 * Display the view
-	 *
-	 * @param   string $tpl template
-	 *
-	 * @return  this
-	 */
-	public function display($tpl = null)
-	{
-		$srcs = FabrikHelperHTML::framework();
-		FabrikHelperHTML::script($srcs);
+    /**
+     * Display the view
+     *
+     * @param string $tpl template
+     *
+     * @return  this
+     */
+    public function display($tpl = null)
+    {
+        $srcs = FabrikHelperHTML::framework();
+        FabrikHelperHTML::script($srcs);
         FabrikHelperHTML::iniRequireJs();
-		$input        = $this->app->input;
-		$this->listid = $input->getInt('listid', 0);
-		$this->model  = JModelLegacy::getInstance('List', 'FabrikFEModel');
-		$this->model->setId($this->listid);
-		$this->table = $this->model->getTable();
-		$this->form  = $this->get('Form');
+        $input = $this->app->input;
+        $this->listid = $input->getInt('listid', 0);
+        $this->model = JModelLegacy::getInstance('List', 'FabrikFEModel');
+        $this->model->setId($this->listid);
+        $this->table = $this->model->getTable();
+        $this->form = $this->get('Form');
 
-		if (!$this->model->canCSVImport())
-		{
-			throw new RuntimeException('Naughty naughty!', 400);
-		}
+        if (!$this->model->canCSVImport())
+        {
+            throw new RuntimeException('Naughty naughty!', 400);
+        }
 
-		$layout = FabrikWorker::j3() ? 'bootstrap' : 'default';
-		$this->setLayout($layout);
-		$this->fieldsets = $this->setFieldSets();
-		parent::display($tpl);
+        $layout = FabrikWorker::j3() ? 'bootstrap' : 'default';
+        $this->setLayout($layout);
+        $this->fieldsets = $this->setFieldSets();
+        parent::display($tpl);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Set which fieldsets should be used
-	 *
-	 * @since   3.0.7
-	 *
-	 * @return  array  fieldset names
-	 */
-	private function setFieldSets()
-	{
-		$input = $this->app->input;
+    /**
+     * Set which fieldsets should be used
+     *
+     * @return  array  fieldset names
+     * @since   3.0.7
+     *
+     */
+    private function setFieldSets()
+    {
+        $input = $this->app->input;
 
-		// From list data view in admin
-		$id = $input->getInt('listid', 0);
+        // From list data view in admin
+        $id = $input->getInt('listid', 0);
 
-		// From list of lists checkbox selection
-		$cid = $input->get('cid', array(0), 'array');
-		$cid = ArrayHelper::toInteger($cid);
+        // From list of lists checkbox selection
+        $cid = $input->get('cid', [0], 'array');
+        $cid = ArrayHelper::toInteger($cid);
 
-		if ($id === 0)
-		{
-			$id = $cid[0];
-		}
+        if ($id === 0)
+        {
+            $id = $cid[0];
+        }
 
-		if (($id !== 0))
-		{
-			$db    = FabrikWorker::getDbo();
-			$query = $db->getQuery(true);
-			$query->select('label')->from('#__{package}_lists')->where('id = ' . $id);
-			$db->setQuery($query);
-			$this->listName = $db->loadResult();
-		}
+        if (($id !== 0))
+        {
+            $db = FabrikWorker::getDbo();
+            $query = $db->getQuery(true);
+            $query->select('label')->from('#__{package}_lists')->where('id = ' . $id);
+            $db->setQuery($query);
+            $this->listName = $db->loadResult();
+        }
 
-		$fieldsets = array('details');
+        $fieldsets = ['details'];
 
-		if ($this->model->canEmpty())
-		{
-			$fieldsets[] = 'drop';
-		}
+        if ($this->model->canEmpty())
+        {
+            $fieldsets[] = 'drop';
+        }
 
-		$fieldsets[] = $id === 0 ? 'creation' : 'append';
-		$fieldsets[] = 'format';
+        $fieldsets[] = $id === 0 ? 'creation' : 'append';
+        $fieldsets[] = 'format';
 
-		return $fieldsets;
-	}
+        return $fieldsets;
+    }
 }

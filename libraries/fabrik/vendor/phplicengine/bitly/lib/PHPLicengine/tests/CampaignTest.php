@@ -27,7 +27,7 @@ use PHPUnit\Framework\TestCase;
 
 class CampaignTest extends TestCase
 {
-    
+
     public function testCreateChannel()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -35,13 +35,13 @@ class CampaignTest extends TestCase
             ->expects($this->once())
             ->method('post')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/channels'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/channels'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Campaign($mock);
         $bitlink->createChannel(['key' => 'value']);
-    } 
-    
+    }
+
     public function testGetChannels()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -49,12 +49,12 @@ class CampaignTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/channels'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/channels'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Campaign($mock);
         $bitlink->getChannels(['key' => 'value']);
-    } 
+    }
 
     public function testCreateCampaign()
     {
@@ -63,12 +63,12 @@ class CampaignTest extends TestCase
             ->expects($this->once())
             ->method('post')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/campaigns'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/campaigns'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Campaign($mock);
         $bitlink->createCampaign(['key' => 'value']);
-    } 
+    }
 
     public function testGetCampaigns()
     {
@@ -77,13 +77,13 @@ class CampaignTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/campaigns'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/campaigns'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Campaign($mock);
         $bitlink->getCampaigns(['key' => 'value']);
-    } 
-    
+    }
+
     public function testGetCampaign()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -91,11 +91,11 @@ class CampaignTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/campaigns/test')
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/campaigns/test')
+            );
         $bitlink = new Campaign($mock);
         $bitlink->getCampaign('test');
-    } 
+    }
 
     public function testUpdateCampaign()
     {
@@ -104,12 +104,12 @@ class CampaignTest extends TestCase
             ->expects($this->once())
             ->method('patch')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/campaigns/test'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/campaigns/test'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Campaign($mock);
         $bitlink->updateCampaign('test', ['key' => 'value']);
-    } 
+    }
 
     public function testGetChannel()
     {
@@ -118,11 +118,11 @@ class CampaignTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/channels/test')
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/channels/test')
+            );
         $bitlink = new Campaign($mock);
         $bitlink->getChannel('test');
-    } 
+    }
 
     public function testUpdateChannel()
     {
@@ -131,11 +131,11 @@ class CampaignTest extends TestCase
             ->expects($this->once())
             ->method('patch')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/channels/test'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/channels/test'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Campaign($mock);
         $bitlink->updateChannel('test', ['key' => 'value']);
-    } 
+    }
 
 }

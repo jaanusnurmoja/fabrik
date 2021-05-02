@@ -47,8 +47,8 @@ final class UpdateConnectionResponse implements ApiResponse
 
     /**
      * @param string $message
-     * @param bool   $noVerify
-     * @param bool   $requireTLS
+     * @param bool $noVerify
+     * @param bool $requireTLS
      */
     private function __construct($message, $noVerify, $requireTLS)
     {

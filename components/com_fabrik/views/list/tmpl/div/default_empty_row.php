@@ -18,7 +18,7 @@ defined('_JEXEC') or die('Restricted access');
 // The number of columns to split the list rows into
 $columns = 3;
 
-$items = array();
+$items = [];
 
 $items[] = $this->loadTemplate('row');
 

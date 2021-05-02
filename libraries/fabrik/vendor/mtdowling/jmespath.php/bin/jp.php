@@ -18,14 +18,21 @@ EOT;
 
 $args = [];
 $currentKey = null;
-for ($i = 1, $total = count($argv); $i < $total; $i++) {
-    if ($i % 2) {
-        if (substr($argv[$i], 0, 2) == '--') {
+for ($i = 1, $total = count($argv); $i < $total; $i++)
+{
+    if ($i % 2)
+    {
+        if (substr($argv[$i], 0, 2) == '--')
+        {
             $currentKey = str_replace('--', '', $argv[$i]);
-        } else {
+        }
+        else
+        {
             $currentKey = trim($argv[$i]);
         }
-    } else {
+    }
+    else
+    {
         $args[$currentKey] = $argv[$i];
         $currentKey = null;
     }
@@ -33,8 +40,10 @@ for ($i = 1, $total = count($argv); $i < $total; $i++) {
 
 $expression = $currentKey;
 
-if (isset($args['file']) || isset($args['suite']) || isset($args['case'])) {
-    if (!isset($args['file']) || !isset($args['suite']) || !isset($args['case'])) {
+if (isset($args['file']) || isset($args['suite']) || isset($args['case']))
+{
+    if (!isset($args['file']) || !isset($args['suite']) || !isset($args['case']))
+    {
         die($description);
     }
     // Manually run a compliance test
@@ -43,21 +52,31 @@ if (isset($args['file']) || isset($args['suite']) || isset($args['case'])) {
     $json = json_decode(file_get_contents($path), true);
     $set = $json[$args['suite']];
     $data = $set['given'];
-    if (!isset($expression)) {
+    if (!isset($expression))
+    {
         $expression = $set['cases'][$args['case']]['expression'];
         echo "Expects\n=======\n";
-        if (isset($set['cases'][$args['case']]['result'])) {
+        if (isset($set['cases'][$args['case']]['result']))
+        {
             echo json_encode($set['cases'][$args['case']]['result'], JSON_PRETTY_PRINT) . "\n\n";
-        } elseif (isset($set['cases'][$args['case']]['error'])) {
+        }
+        elseif (isset($set['cases'][$args['case']]['error']))
+        {
             echo "{$set['cases'][$argv['case']]['error']} error\n\n";
-        } else {
+        }
+        else
+        {
             echo "NULL\n\n";
         }
     }
-} elseif (isset($expression)) {
+}
+elseif (isset($expression))
+{
     // Pass in an expression and STDIN as a standalone argument
     $data = json_decode(stream_get_contents(STDIN), true);
-} else {
+}
+else
+{
     die($description);
 }
 

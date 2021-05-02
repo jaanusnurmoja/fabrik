@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\MediaLive;
 
 use Aws\AwsClient;
@@ -56,4 +57,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateInputSecurityGroup(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateInputSecurityGroupAsync(array $args = [])
  */
-class MediaLiveClient extends AwsClient {}
+class MediaLiveClient extends AwsClient
+{
+}

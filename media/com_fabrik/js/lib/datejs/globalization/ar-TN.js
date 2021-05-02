@@ -9,7 +9,7 @@ Date.CultureInfo = {
     abbreviatedDayNames: ["أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
     shortestDayNames: ["حد", "ثن", "ثل", "رع", "خم", "جم", "سب"],
     firstLetterDayNames: ["ح", "ن", "ث", "ر", "خ", "ج", "س"],
-    
+
     /* Month Name Strings */
     monthNames: ["جانفي", "فيفري", "مارس", "افريل", "ماي", "جوان", "جويلية", "اوت", "سبتمبر", "اكتوبر", "نوفمبر", "ديسمبر"],
     abbreviatedMonthNames: ["جان", "فيف", "مار", "أفر", "ماي", "جوا", "جوي", "أوت", "سبت", "أكت", "نوف", "ديس"],
@@ -20,15 +20,15 @@ Date.CultureInfo = {
 
     firstDayOfWeek: 1,
     twoDigitYearMax: 2029,
-    
+
     /**
-     * The dateElementOrder is based on the order of the 
-     * format specifiers in the formatPatterns.DatePattern. 
+     * The dateElementOrder is based on the order of the
+     * format specifiers in the formatPatterns.DatePattern.
      *
      * Example:
      <pre>
      shortDatePattern    dateElementOrder
-     ------------------  ---------------- 
+     ------------------  ----------------
      "M/d/yyyy"          "mdy"
      "dd/MM/yyyy"        "dmy"
      "yyyy-MM-dd"        "ymd"
@@ -39,7 +39,7 @@ Date.CultureInfo = {
      * string being parsed.
      */
     dateElementOrder: "dmy",
-    
+
     /* Standard date and time format patterns */
     formatPatterns: {
         shortDate: "dd/MM/yy",
@@ -56,31 +56,31 @@ Date.CultureInfo = {
 
     /**
      * NOTE: If a string format is not parsing correctly, but
-     * you would expect it parse, the problem likely lies below. 
-     * 
+     * you would expect it parse, the problem likely lies below.
+     *
      * The following regex patterns control most of the string matching
      * within the parser.
-     * 
+     *
      * The Month name and Day name patterns were automatically generated
-     * and in general should be (mostly) correct. 
+     * and in general should be (mostly) correct.
      *
      * Beyond the month and day name patterns are natural language strings.
      * Example: "next", "today", "months"
      *
-     * These natural language string may NOT be correct for this culture. 
+     * These natural language string may NOT be correct for this culture.
      * If they are not correct, please translate and edit this file
-     * providing the correct regular expression pattern. 
+     * providing the correct regular expression pattern.
      *
      * If you modify this file, please post your revised CultureInfo file
      * to the Datejs Forum located at http://www.datejs.com/forums/.
      *
      * Please mark the subject of the post with [CultureInfo]. Example:
      *    Subject: [CultureInfo] Translated "da-DK" Danish(Denmark)
-     * 
+     *
      * We will add the modified patterns to the master source files.
      *
-     * As well, please review the list of "Future Strings" section below. 
-     */	
+     * As well, please review the list of "Future Strings" section below.
+     */
     regexPatterns: {
         jan: /^جان(في)?/i,
         feb: /^فيف(ري)?/i,
@@ -94,8 +94,8 @@ Date.CultureInfo = {
         oct: /^أكت(وبر)?/i,
         nov: /^نوف(مبر)?/i,
         dec: /^ديس(مبر)?/i,
-        
-	sun: /^الأحد|(أ|ا)حد|ح(د)?/i,
+
+        sun: /^الأحد|(أ|ا)حد|ح(د)?/i,
         mon: /^الإثنين|(إ|ا)ثنين|(ث)?ن/i,
         tue: /^الثلاثاء|ث(ل|لاثاء)?/i,
         wed: /^الأربعاء|(أ|ا)ربعاء|ر(ع)?/i,
@@ -112,35 +112,38 @@ Date.CultureInfo = {
         today: /^اليوم/i,
         tomorrow: /^(الغد|غد(ا)?)/i,
         now: /^(ال)?آن/i,
-        
+
         millisecond: /^(ال)?ج(زء(ا))?( من( ال(أ|ا)لف من)? |( )?.( )?)(ال)?ث(انية)?(.)?/i,
-	second: /^(ال)?ث(انية|وان(ي)?)?(.)?/i,
-	minute: /^(ال)?د(قيقة|قائق)?(.)?/i,
-	hour: /^(ال)?س(اعة|اعات)?(.)?/i,
-	week: /^(ال)?(إ|ا)س(بوع|ابيع)/i,
-	month: /^(ال)?((أ|ا)?شهر|شهور)/i,
-	day: /(ال)?(يوم|أيام)/i,
-	year: /^(ال)?سن(ة|ين|ون|وات)/i,
-		
-	shortMeridian: /^(ص|م)/i,
-	longMeridian: /^(صباح(ا)?|مساء(ا)?)/i,
-    	timezone: /^((gmt)?\s*(\+|\-)\s*\d\d\d\d?)|gmt|utc|((ب(ال)?)?توقيت )?((ال)?(جمهورية )?(ال)?تونس(ية)?|تونس|وسط أوروبا(صيفي)?|cet|cest|central europe (summer)? tim(e|ing))/i,
+        second: /^(ال)?ث(انية|وان(ي)?)?(.)?/i,
+        minute: /^(ال)?د(قيقة|قائق)?(.)?/i,
+        hour: /^(ال)?س(اعة|اعات)?(.)?/i,
+        week: /^(ال)?(إ|ا)س(بوع|ابيع)/i,
+        month: /^(ال)?((أ|ا)?شهر|شهور)/i,
+        day: /(ال)?(يوم|أيام)/i,
+        year: /^(ال)?سن(ة|ين|ون|وات)/i,
+
+        shortMeridian: /^(ص|م)/i,
+        longMeridian: /^(صباح(ا)?|مساء(ا)?)/i,
+        timezone: /^((gmt)?\s*(\+|\-)\s*\d\d\d\d?)|gmt|utc|((ب(ال)?)?توقيت )?((ال)?(جمهورية )?(ال)?تونس(ية)?|تونس|وسط أوروبا(صيفي)?|cet|cest|central europe (summer)? tim(e|ing))/i,
         ordinalSuffix: /^\s*(st|nd|rd|th)/i,
         timeContext: /^\s*(\:|a(?!u|p)|p)/i
     },
 
-	timezones: [{name:"UTC", offset:"+000"}, {name:"GMT", offset:"+000"}, {name:"CET", offset:"+0100"}, {name:"CEST", offset:"+0200"}]
+    timezones: [{name: "UTC", offset: "+000"}, {name: "GMT", offset: "+000"}, {
+        name: "CET",
+        offset: "+0100"
+    }, {name: "CEST", offset: "+0200"}]
 };
 
 /********************
  ** Future Strings **
  ********************
- * 
- * The following list of strings may not be currently being used, but 
- * may be incorporated into the Datejs library later. 
+ *
+ * The following list of strings may not be currently being used, but
+ * may be incorporated into the Datejs library later.
  *
  * We would appreciate any help translating the strings below.
- * 
+ *
  * If you modify this file, please post your revised CultureInfo file
  * to the Datejs Forum located at http://www.datejs.com/forums/.
  *

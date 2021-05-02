@@ -22,17 +22,17 @@ jimport('joomla.application.component.controller');
  */
 class FabrikControllerVisualizationtimeline extends FabrikControllerVisualization
 {
-	/**
-	 * Get a series of timeline events
-	 *
-	 * @return  void
-	 */
-	public function ajax_getEvents()
-	{
-		$viewName = 'timeline';
-		$model    = $this->getModel($viewName);
-		$id       = $this->input->getInt('visualizationid', 0);
-		$model->setId($id);
-		$model->onAjax_getEvents();
-	}
+    /**
+     * Get a series of timeline events
+     *
+     * @return  void
+     */
+    public function ajax_getEvents()
+    {
+        $viewName = 'timeline';
+        $model = $this->getModel($viewName);
+        $id = $this->input->getInt('visualizationid', 0);
+        $model->setId($id);
+        $model->onAjax_getEvents();
+    }
 }

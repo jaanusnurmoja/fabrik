@@ -23,42 +23,43 @@ jimport('joomla.application.component.controller');
  */
 class FabrikControllerCroncronnotification extends JControllerLegacy
 {
-	/**
-	 * Display the view
-	 *
-	 * @return  void
-	 */
-	public function display()
-	{
-		$document = JFactory::getDocument();
-		$viewName = 'cronnotification';
-		$viewType	= $document->getType();
+    /**
+     * Display the view
+     *
+     * @return  void
+     */
+    public function display()
+    {
+        $document = JFactory::getDocument();
+        $viewName = 'cronnotification';
+        $viewType = $document->getType();
 
-		// Set the default view name from the Request
-		$view = $this->getView($viewName, $viewType);
+        // Set the default view name from the Request
+        $view = $this->getView($viewName, $viewType);
 
-		// Push a model into the view
+        // Push a model into the view
 
-		if ($model	= &$this->getModel($viewName))
-		{
-			$view->setModel($model, true);
-		}
+        if ($model = &$this->getModel($viewName))
+        {
+            $view->setModel($model, true);
+        }
 
-		// Display the view
-		$view->error = $this->getError();
+        // Display the view
+        $view->error = $this->getError();
 
-		return $view->display();
-	}
+        return $view->display();
+    }
 
-	/**
-	 * Delete a notification
-	 *
-	 * @return false
-	 */
-	public function delete()
-	{
-		$model = $this->getModel('cronnotification');
-		$model->delete();
-		$this->setRedirect('index.php?option=com_fabrik&view=cron&controller=cron.cronnotification', FText::_('NOTIFICATIONS_REMOVED'));
-	}
+    /**
+     * Delete a notification
+     *
+     * @return false
+     */
+    public function delete()
+    {
+        $model = $this->getModel('cronnotification');
+        $model->delete();
+        $this->setRedirect('index.php?option=com_fabrik&view=cron&controller=cron.cronnotification',
+            FText::_('NOTIFICATIONS_REMOVED'));
+    }
 }

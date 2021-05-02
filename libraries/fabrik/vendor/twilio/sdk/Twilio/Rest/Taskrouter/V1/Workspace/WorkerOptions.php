@@ -12,7 +12,8 @@ namespace Twilio\Rest\Taskrouter\V1\Workspace;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class WorkerOptions {
+abstract class WorkerOptions
+{
     /**
      * @param string $activityName Filter by workers that are in a particular
      *                             Activity by Friendly Name
@@ -28,8 +29,10 @@ abstract class WorkerOptions {
      *                             TaskQueue by SID
      * @return ReadWorkerOptions Options builder
      */
-    public static function read($activityName = Values::NONE, $activitySid = Values::NONE, $available = Values::NONE, $friendlyName = Values::NONE, $targetWorkersExpression = Values::NONE, $taskQueueName = Values::NONE, $taskQueueSid = Values::NONE) {
-        return new ReadWorkerOptions($activityName, $activitySid, $available, $friendlyName, $targetWorkersExpression, $taskQueueName, $taskQueueSid);
+    public static function read($activityName = Values::NONE, $activitySid = Values::NONE, $available = Values::NONE, $friendlyName = Values::NONE, $targetWorkersExpression = Values::NONE, $taskQueueName = Values::NONE, $taskQueueSid = Values::NONE)
+    {
+        return new ReadWorkerOptions($activityName, $activitySid, $available, $friendlyName, $targetWorkersExpression,
+            $taskQueueName, $taskQueueSid);
     }
 
     /**
@@ -38,7 +41,8 @@ abstract class WorkerOptions {
      * @param string $attributes JSON object describing this worker.
      * @return CreateWorkerOptions Options builder
      */
-    public static function create($activitySid = Values::NONE, $attributes = Values::NONE) {
+    public static function create($activitySid = Values::NONE, $attributes = Values::NONE)
+    {
         return new CreateWorkerOptions($activitySid, $attributes);
     }
 
@@ -48,12 +52,14 @@ abstract class WorkerOptions {
      * @param string $friendlyName The friendly_name
      * @return UpdateWorkerOptions Options builder
      */
-    public static function update($activitySid = Values::NONE, $attributes = Values::NONE, $friendlyName = Values::NONE) {
+    public static function update($activitySid = Values::NONE, $attributes = Values::NONE, $friendlyName = Values::NONE)
+    {
         return new UpdateWorkerOptions($activitySid, $attributes, $friendlyName);
     }
 }
 
-class ReadWorkerOptions extends Options {
+class ReadWorkerOptions extends Options
+{
     /**
      * @param string $activityName Filter by workers that are in a particular
      *                             Activity by Friendly Name
@@ -68,7 +74,8 @@ class ReadWorkerOptions extends Options {
      * @param string $taskQueueSid Filter by workers that are eligible for a
      *                             TaskQueue by SID
      */
-    public function __construct($activityName = Values::NONE, $activitySid = Values::NONE, $available = Values::NONE, $friendlyName = Values::NONE, $targetWorkersExpression = Values::NONE, $taskQueueName = Values::NONE, $taskQueueSid = Values::NONE) {
+    public function __construct($activityName = Values::NONE, $activitySid = Values::NONE, $available = Values::NONE, $friendlyName = Values::NONE, $targetWorkersExpression = Values::NONE, $taskQueueName = Values::NONE, $taskQueueSid = Values::NONE)
+    {
         $this->options['activityName'] = $activityName;
         $this->options['activitySid'] = $activitySid;
         $this->options['available'] = $available;
@@ -80,95 +87,105 @@ class ReadWorkerOptions extends Options {
 
     /**
      * Filter by workers that are in a particular Activity by Friendly Name
-     * 
+     *
      * @param string $activityName Filter by workers that are in a particular
      *                             Activity by Friendly Name
      * @return $this Fluent Builder
      */
-    public function setActivityName($activityName) {
+    public function setActivityName($activityName)
+    {
         $this->options['activityName'] = $activityName;
         return $this;
     }
 
     /**
      * Filter by workers that are in a particular Activity by SID
-     * 
+     *
      * @param string $activitySid Filter by workers that are in a particular
      *                            Activity by SID
      * @return $this Fluent Builder
      */
-    public function setActivitySid($activitySid) {
+    public function setActivitySid($activitySid)
+    {
         $this->options['activitySid'] = $activitySid;
         return $this;
     }
 
     /**
      * Filter by workers that are available or unavailable. (Note: This can be 'true', '1' or 'yes' to indicate a true value. All other values will represent false)
-     * 
+     *
      * @param string $available Filter by workers that are available or unavailable.
      * @return $this Fluent Builder
      */
-    public function setAvailable($available) {
+    public function setAvailable($available)
+    {
         $this->options['available'] = $available;
         return $this;
     }
 
     /**
      * Filter by a worker's friendly name
-     * 
+     *
      * @param string $friendlyName Filter by a worker's friendly name
      * @return $this Fluent Builder
      */
-    public function setFriendlyName($friendlyName) {
+    public function setFriendlyName($friendlyName)
+    {
         $this->options['friendlyName'] = $friendlyName;
         return $this;
     }
 
     /**
      * Filter by workers that would match an expression on a TaskQueue. This is helpful for debugging which workers would match a potential queue.
-     * 
+     *
      * @param string $targetWorkersExpression Filter by workers that would match an
      *                                        expression on a TaskQueue.
      * @return $this Fluent Builder
      */
-    public function setTargetWorkersExpression($targetWorkersExpression) {
+    public function setTargetWorkersExpression($targetWorkersExpression)
+    {
         $this->options['targetWorkersExpression'] = $targetWorkersExpression;
         return $this;
     }
 
     /**
      * Filter by workers that are eligible for a TaskQueue by Friendly Name
-     * 
+     *
      * @param string $taskQueueName Filter by workers that are eligible for a
      *                              TaskQueue by Friendly Name
      * @return $this Fluent Builder
      */
-    public function setTaskQueueName($taskQueueName) {
+    public function setTaskQueueName($taskQueueName)
+    {
         $this->options['taskQueueName'] = $taskQueueName;
         return $this;
     }
 
     /**
      * Filter by workers that are eligible for a TaskQueue by SID
-     * 
+     *
      * @param string $taskQueueSid Filter by workers that are eligible for a
      *                             TaskQueue by SID
      * @return $this Fluent Builder
      */
-    public function setTaskQueueSid($taskQueueSid) {
+    public function setTaskQueueSid($taskQueueSid)
+    {
         $this->options['taskQueueSid'] = $taskQueueSid;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -176,49 +193,56 @@ class ReadWorkerOptions extends Options {
     }
 }
 
-class CreateWorkerOptions extends Options {
+class CreateWorkerOptions extends Options
+{
     /**
      * @param string $activitySid A valid Activity describing the worker's initial
      *                            state.
      * @param string $attributes JSON object describing this worker.
      */
-    public function __construct($activitySid = Values::NONE, $attributes = Values::NONE) {
+    public function __construct($activitySid = Values::NONE, $attributes = Values::NONE)
+    {
         $this->options['activitySid'] = $activitySid;
         $this->options['attributes'] = $attributes;
     }
 
     /**
      * A valid Activity describing the worker's initial state. See Activities for more information. If not provided, new Workers will be use the DefaultActivitySid configured on the Workspace.
-     * 
+     *
      * @param string $activitySid A valid Activity describing the worker's initial
      *                            state.
      * @return $this Fluent Builder
      */
-    public function setActivitySid($activitySid) {
+    public function setActivitySid($activitySid)
+    {
         $this->options['activitySid'] = $activitySid;
         return $this;
     }
 
     /**
      * JSON object describing this worker. For example: `{ 'email: 'Bob@foo.com', 'phone': '8675309' }`. This data will be passed to the Assignment Callback URL whenever TaskRouter assigns a Task to this worker. Defaults to {}.
-     * 
+     *
      * @param string $attributes JSON object describing this worker.
      * @return $this Fluent Builder
      */
-    public function setAttributes($attributes) {
+    public function setAttributes($attributes)
+    {
         $this->options['attributes'] = $attributes;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -226,13 +250,15 @@ class CreateWorkerOptions extends Options {
     }
 }
 
-class UpdateWorkerOptions extends Options {
+class UpdateWorkerOptions extends Options
+{
     /**
      * @param string $activitySid The activity_sid
      * @param string $attributes The attributes
      * @param string $friendlyName The friendly_name
      */
-    public function __construct($activitySid = Values::NONE, $attributes = Values::NONE, $friendlyName = Values::NONE) {
+    public function __construct($activitySid = Values::NONE, $attributes = Values::NONE, $friendlyName = Values::NONE)
+    {
         $this->options['activitySid'] = $activitySid;
         $this->options['attributes'] = $attributes;
         $this->options['friendlyName'] = $friendlyName;
@@ -240,46 +266,52 @@ class UpdateWorkerOptions extends Options {
 
     /**
      * The activity_sid
-     * 
+     *
      * @param string $activitySid The activity_sid
      * @return $this Fluent Builder
      */
-    public function setActivitySid($activitySid) {
+    public function setActivitySid($activitySid)
+    {
         $this->options['activitySid'] = $activitySid;
         return $this;
     }
 
     /**
      * The attributes
-     * 
+     *
      * @param string $attributes The attributes
      * @return $this Fluent Builder
      */
-    public function setAttributes($attributes) {
+    public function setAttributes($attributes)
+    {
         $this->options['attributes'] = $attributes;
         return $this;
     }
 
     /**
      * The friendly_name
-     * 
+     *
      * @param string $friendlyName The friendly_name
      * @return $this Fluent Builder
      */
-    public function setFriendlyName($friendlyName) {
+    public function setFriendlyName($friendlyName)
+    {
         $this->options['friendlyName'] = $friendlyName;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

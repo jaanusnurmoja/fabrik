@@ -23,73 +23,73 @@ require_once JPATH_SITE . '/components/com_fabrik/views/list/view.base.php';
  */
 class FabrikViewList extends FabrikViewListBase
 {
-	/**
-	 * Execute and display a template script.
-	 *
-	 * @param   string $tpl The name of the template file to parse; automatically searches through the template paths.
-	 *
-	 * @return  mixed  A string if successful, otherwise a JError object.
-	 */
-	public function display($tpl = null)
-	{
-		$input = $this->app->input;
-		
-		$model = $this->getModel();
-		$model->setId($input->getInt('listid'));
-		// Get the active menu item
+    /**
+     * Execute and display a template script.
+     *
+     * @param string $tpl The name of the template file to parse; automatically searches through the template paths.
+     *
+     * @return  mixed  A string if successful, otherwise a JError object.
+     */
+    public function display($tpl = null)
+    {
+        $input = $this->app->input;
 
-		if (!parent::access($model))
-		{
-			exit;
-		}
+        $model = $this->getModel();
+        $model->setId($input->getInt('listid'));
+        // Get the active menu item
 
-		$form = $model->getFormModel();
-		$joins = $model->getJoins();
-		$form->getJoinGroupIds($joins);
+        if (!parent::access($model))
+        {
+            exit;
+        }
 
-		//$params = $model->getParams();
-		//$params->def('icons', $this->app->get('icons'));
-		//$pop = ($input->get('tmpl') == 'component') ? 1 : 0;
-		//$params->set('popup', $pop);
-		$view = $input->get('view', 'list');
+        $form = $model->getFormModel();
+        $joins = $model->getJoins();
+        $form->getJoinGroupIds($joins);
 
-		$groups    = $form->getGroupsHiarachy();
-		$gkeys     = array_keys($groups);
-		$JSONarray = array();
-		$JSONHtml  = array();
+        //$params = $model->getParams();
+        //$params->def('icons', $this->app->get('icons'));
+        //$pop = ($input->get('tmpl') == 'component') ? 1 : 0;
+        //$params->set('popup', $pop);
+        $view = $input->get('view', 'list');
 
-		for ($i = 0; $i < count($gkeys); $i++)
-		{
-			$groupModel  = $groups[$gkeys[$i]];
-			$groupTable  = $groupModel->getGroup();
-			$group       = new stdClass;
-			$groupParams = $groupModel->getParams();
-			$aElements   = array();
+        $groups = $form->getGroupsHiarachy();
+        $gkeys = array_keys($groups);
+        $JSONarray = [];
+        $JSONHtml = [];
 
-			// Check if group is actually a table join
-			$repeatGroup = 1;
-			$foreignKey  = null;
-			$elementModels = $groupModel->getPublishedElements();
+        for ($i = 0; $i < count($gkeys); $i++)
+        {
+            $groupModel = $groups[$gkeys[$i]];
+            $groupTable = $groupModel->getGroup();
+            $group = new stdClass;
+            $groupParams = $groupModel->getParams();
+            $aElements = [];
 
-			foreach ($elementModels as $elementModel)
-			{
-				$elId = $elementModel->getElement()->id;
-				$fullname = $elementModel->getFullName(true, false);
-				
-				if ($elementModel->getElement()->plugin == 'tags' && $elId == $input->get('elID'))
-				{
-					$data = $elementModel->allTagsJSON($elId);
-					foreach($data as $d)
-					{
-						if (stristr($d->text, $input->get('like')))
-						{
-							$tagdata[] = $d; 
-						}
-					}
-				}
+            // Check if group is actually a table join
+            $repeatGroup = 1;
+            $foreignKey = null;
+            $elementModels = $groupModel->getPublishedElements();
 
-			}
-		}
-		echo json_encode($tagdata);
-	}
+            foreach ($elementModels as $elementModel)
+            {
+                $elId = $elementModel->getElement()->id;
+                $fullname = $elementModel->getFullName(true, false);
+
+                if ($elementModel->getElement()->plugin == 'tags' && $elId == $input->get('elID'))
+                {
+                    $data = $elementModel->allTagsJSON($elId);
+                    foreach ($data as $d)
+                    {
+                        if (stristr($d->text, $input->get('like')))
+                        {
+                            $tagdata[] = $d;
+                        }
+                    }
+                }
+
+            }
+        }
+        echo json_encode($tagdata);
+    }
 }

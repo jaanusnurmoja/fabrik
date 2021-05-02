@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Parser;
 
 use Aws\Api\Parser\Exception\ParserException;
@@ -9,15 +10,16 @@ trait PayloadParserTrait
     /**
      * @param string $json
      *
+     * @return array
      * @throws ParserException
      *
-     * @return array
      */
     private function parseJson($json, $response)
     {
         $jsonPayload = json_decode($json, true);
 
-        if (JSON_ERROR_NONE !== json_last_error()) {
+        if (JSON_ERROR_NONE !== json_last_error())
+        {
             throw new ParserException(
                 'Error parsing JSON: ' . json_last_error_msg(),
                 0,
@@ -32,27 +34,33 @@ trait PayloadParserTrait
     /**
      * @param string $xml
      *
+     * @return \SimpleXMLElement
      * @throws ParserException
      *
-     * @return \SimpleXMLElement
      */
     private function parseXml($xml, $response)
     {
         $priorSetting = libxml_use_internal_errors(true);
-        try {
+        try
+        {
             libxml_clear_errors();
             $xmlPayload = new \SimpleXMLElement($xml);
-            if ($error = libxml_get_last_error()) {
+            if ($error = libxml_get_last_error())
+            {
                 throw new \RuntimeException($error->message);
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             throw new ParserException(
                 "Error parsing XML: {$e->getMessage()}",
                 0,
                 $e,
                 ['response' => $response]
             );
-        } finally {
+        }
+        finally
+        {
             libxml_use_internal_errors($priorSetting);
         }
 

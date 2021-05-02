@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 /**
@@ -21,7 +22,7 @@ class PhpHash implements HashInterface
     /**
      * @param string $algo Hashing algorithm. One of PHP's hash_algos()
      *     return values (e.g. md5, sha1, etc...).
-     * @param array  $options Associative array of hashing options:
+     * @param array $options Associative array of hashing options:
      *     - key: Secret key used with the hashing algorithm.
      *     - base64: Set to true to base64 encode the value when complete.
      */
@@ -33,7 +34,8 @@ class PhpHash implements HashInterface
 
     public function update($data)
     {
-        if ($this->hash !== null) {
+        if ($this->hash !== null)
+        {
             $this->reset();
         }
 
@@ -42,13 +44,15 @@ class PhpHash implements HashInterface
 
     public function complete()
     {
-        if ($this->hash) {
+        if ($this->hash)
+        {
             return $this->hash;
         }
 
         $this->hash = hash_final($this->getContext(), true);
 
-        if (isset($this->options['base64']) && $this->options['base64']) {
+        if (isset($this->options['base64']) && $this->options['base64'])
+        {
             $this->hash = base64_encode($this->hash);
         }
 
@@ -63,11 +67,12 @@ class PhpHash implements HashInterface
     /**
      * Get a hash context or create one if needed
      *
-     * @return resource|\HashContext 
+     * @return resource|\HashContext
      */
     private function getContext()
     {
-        if (!$this->context) {
+        if (!$this->context)
+        {
             $key = isset($this->options['key']) ? $this->options['key'] : null;
             $this->context = hash_init(
                 $this->algo,

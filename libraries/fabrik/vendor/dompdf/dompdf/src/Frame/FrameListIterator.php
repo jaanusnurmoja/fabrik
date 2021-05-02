@@ -1,4 +1,5 @@
 <?php
+
 namespace Dompdf\Frame;
 
 use Iterator;
@@ -80,7 +81,8 @@ class FrameListIterator implements Iterator
     public function next()
     {
         $ret = $this->_cur;
-        if (!$ret) {
+        if (!$ret)
+        {
             return null;
         }
 

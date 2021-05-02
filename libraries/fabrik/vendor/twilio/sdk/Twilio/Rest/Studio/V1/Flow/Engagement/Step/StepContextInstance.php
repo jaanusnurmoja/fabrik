@@ -22,45 +22,49 @@ use Twilio\Version;
  * @property string stepSid
  * @property string url
  */
-class StepContextInstance extends InstanceResource {
+class StepContextInstance extends InstanceResource
+{
     /**
      * Initialize the StepContextInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $flowSid Flow Sid.
      * @param string $engagementSid Engagement Sid.
      * @param string $stepSid Step Sid.
-     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\Step\StepContextInstance 
+     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\Step\StepContextInstance
      */
-    public function __construct(Version $version, array $payload, $flowSid, $engagementSid, $stepSid) {
+    public function __construct(Version $version, array $payload, $flowSid, $engagementSid, $stepSid)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'context' => Values::array_get($payload, 'context'),
+        $this->properties = [
+            'accountSid'    => Values::array_get($payload, 'account_sid'),
+            'context'       => Values::array_get($payload, 'context'),
             'engagementSid' => Values::array_get($payload, 'engagement_sid'),
-            'flowSid' => Values::array_get($payload, 'flow_sid'),
-            'stepSid' => Values::array_get($payload, 'step_sid'),
-            'url' => Values::array_get($payload, 'url'),
-        );
+            'flowSid'       => Values::array_get($payload, 'flow_sid'),
+            'stepSid'       => Values::array_get($payload, 'step_sid'),
+            'url'           => Values::array_get($payload, 'url'),
+        ];
 
-        $this->solution = array(
-            'flowSid' => $flowSid,
+        $this->solution = [
+            'flowSid'       => $flowSid,
             'engagementSid' => $engagementSid,
-            'stepSid' => $stepSid,
-        );
+            'stepSid'       => $stepSid,
+        ];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Studio\V1\Flow\Engagement\Step\StepContextContext Context for this StepContextInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new StepContextContext(
                 $this->version,
                 $this->solution['flowSid'],
@@ -74,27 +78,31 @@ class StepContextInstance extends InstanceResource {
 
     /**
      * Fetch a StepContextInstance
-     * 
+     *
      * @return StepContextInstance Fetched StepContextInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -104,12 +112,14 @@ class StepContextInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Studio.V1.StepContextInstance ' . implode(' ', $context) . ']';

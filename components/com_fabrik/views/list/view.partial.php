@@ -26,94 +26,94 @@ require_once JPATH_SITE . '/components/com_fabrik/views/list/view.base.php';
  */
 class FabrikViewList extends FabrikViewListBase
 {
-	/**
-	 * Tabbed content
-	 *
-	 * @var array
-	 */
-	public $tabs = array();
+    /**
+     * Tabbed content
+     *
+     * @var array
+     */
+    public $tabs = [];
 
-	/**
-	 * Display the template
-	 *
-	 * @param   string  $tpl  Template
-	 *
-	 * @return void
-	 */
-	public function display($tpl = null)
-	{
-		if (parent::display($tpl) !== false)
-		{
-			/** @var FabrikFEModelList $model */
-			$model = $this->getModel();
-			$this->tabs = $model->loadTabs();
+    /**
+     * Display the template
+     *
+     * @param string $tpl Template
+     *
+     * @return void
+     */
+    public function display($tpl = null)
+    {
+        if (parent::display($tpl) !== false)
+        {
+            /** @var FabrikFEModelList $model */
+            $model = $this->getModel();
+            $this->tabs = $model->loadTabs();
 
-			if (!$this->app->isAdmin() && isset($this->params))
-			{
-				/** @var JObject $state */
-				$state = $model->getState();
-				$stateParams = $state->get('params');
+            if (!$this->app->isAdmin() && isset($this->params))
+            {
+                /** @var JObject $state */
+                $state = $model->getState();
+                $stateParams = $state->get('params');
 
-				if ($stateParams->get('menu-meta_description'))
-				{
-					$this->doc->setDescription($stateParams->get('menu-meta_description'));
-				}
+                if ($stateParams->get('menu-meta_description'))
+                {
+                    $this->doc->setDescription($stateParams->get('menu-meta_description'));
+                }
 
-				if ($stateParams->get('menu-meta_keywords'))
-				{
-					$this->doc->setMetadata('keywords', $stateParams->get('menu-meta_keywords'));
-				}
+                if ($stateParams->get('menu-meta_keywords'))
+                {
+                    $this->doc->setMetadata('keywords', $stateParams->get('menu-meta_keywords'));
+                }
 
-				if ($stateParams->get('robots'))
-				{
-					$this->doc->setMetadata('robots', $stateParams->get('robots'));
-				}
-			}
+                if ($stateParams->get('robots'))
+                {
+                    $this->doc->setMetadata('robots', $stateParams->get('robots'));
+                }
+            }
 
-			$this->output();
-		}
-	}
+            $this->output();
+        }
+    }
 
-	/**
-	 * Render the group by heading as a JLayout list.fabrik-group-by-heading
-	 *
-	 * @param   string  $groupedBy  Group by key for $this->grouptemplates
-	 * @param   array   $group      Group data
-	 *
-	 * @return string
-	 */
-	public function layoutGroupHeading($groupedBy, $group)
-	{
-		$displayData = new stdClass;
-		$displayData->emptyDataMessage = $this->emptyDataMessage;
-		$displayData->tmpl = $this->tmpl;
-		$displayData->title = $this->grouptemplates[$groupedBy];
-		$displayData->extra = $this->grouptemplatesExtra[$groupedBy];
-		$displayData->count = count($group);
-		$displayData->group_by_show_count = $this->params->get('group_by_show_count','1');
-		$layout = $this->getModel()->getLayout('list.fabrik-group-by-heading');
+    /**
+     * Render the group by heading as a JLayout list.fabrik-group-by-heading
+     *
+     * @param string $groupedBy Group by key for $this->grouptemplates
+     * @param array $group Group data
+     *
+     * @return string
+     */
+    public function layoutGroupHeading($groupedBy, $group)
+    {
+        $displayData = new stdClass;
+        $displayData->emptyDataMessage = $this->emptyDataMessage;
+        $displayData->tmpl = $this->tmpl;
+        $displayData->title = $this->grouptemplates[$groupedBy];
+        $displayData->extra = $this->grouptemplatesExtra[$groupedBy];
+        $displayData->count = count($group);
+        $displayData->group_by_show_count = $this->params->get('group_by_show_count', '1');
+        $layout = $this->getModel()->getLayout('list.fabrik-group-by-heading');
 
-		return $layout->render($displayData);
-	}
+        return $layout->render($displayData);
+    }
 
-	/**
-	 * Create and render layout of the list's filters
-	 *
-	 * @return string
-	 */
-	public function layoutFilters()
-	{
-		$displayData = new stdClass;
-		$displayData->filterMode = $this->filterMode;
-		$displayData->toggleFilters = $this->toggleFilters;
-		$displayData->filterCols = $this->filterCols;
-		$displayData->showClearFilters = $this->showClearFilters;
-		$displayData->gotOptionalFilters = $this->gotOptionalFilters;
-		$displayData->filters = $this->filters;
-		$displayData->filter_action = $this->filter_action;
-		$layoutFile =  $this->filterMode === 5 ? 'fabrik-filters-modal' : 'fabrik-filters';
-		$layout = $this->getModel()->getLayout('list.' . $layoutFile);
+    /**
+     * Create and render layout of the list's filters
+     *
+     * @return string
+     */
+    public function layoutFilters()
+    {
+        $displayData = new stdClass;
+        $displayData->filterMode = $this->filterMode;
+        $displayData->toggleFilters = $this->toggleFilters;
+        $displayData->filterCols = $this->filterCols;
+        $displayData->showClearFilters = $this->showClearFilters;
+        $displayData->gotOptionalFilters = $this->gotOptionalFilters;
+        $displayData->filters = $this->filters;
+        $displayData->filter_action = $this->filter_action;
+        $layoutFile = $this->filterMode === 5 ? 'fabrik-filters-modal' : 'fabrik-filters';
+        $layout = $this->getModel()->getLayout('list.' . $layoutFile);
 
-		return $layout->render($displayData);
-	}
+        return $layout->render($displayData);
+    }
 }

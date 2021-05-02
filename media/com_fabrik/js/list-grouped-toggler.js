@@ -16,7 +16,7 @@ define(['jquery'], function (jQuery) {
         options: {
             collapseOthers: false,
             startCollapsed: false,
-            bootstrap     : false
+            bootstrap: false
         },
 
         initialize: function (container, options) {

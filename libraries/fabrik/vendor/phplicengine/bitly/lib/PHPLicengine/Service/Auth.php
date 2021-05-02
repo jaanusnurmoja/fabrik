@@ -22,43 +22,45 @@
 #################################################
 
 namespace PHPLicengine\Service;
+
 use PHPLicengine\Exception\ResponseException;
 use PHPLicengine\Exception\CurlException;
 use PHPLicengine\Api\ApiInterface;
 
-class Auth {
- 
-      private $url;
-      private $api;      
+class Auth
+{
 
-      public function __construct (ApiInterface $api, array $config)
-      {
-             $this->api = $api;
-             $this->url = 'https://api-ssl.bitly.com/oauth/access_token';    
-             $key = base64_encode($config['clientid_username'].":".$config['clientsecret_password']);
-             $api->setApiKey($key);
-      }
- 
- 
-      /*
-      Exchanging a Username and Password for an Access Token
-      https://dev.bitly.com/v4/#section/Exchanging-a-Username-and-Password-for-an-Access-Token
-      */
-      public function exchangeToken(array $params)
-      {
-             $params['grant_type'] = 'password';
-             $result = $this->api->post($this->url, $params);
-             return json_decode($result->getResponse(), true)['access_token'];
-      }
+    private $url;
+    private $api;
 
-      /*
-      HTTP Basic Authentication Flow
-      https://dev.bitly.com/v4/#section/HTTP-Basic-Authentication-Flow
-      */
-      public function basicAuthFlow(array $params)
-      {
-             $result = $this->api->post($this->url, $params);
-             return $result->getResponse();
-      }
- 
+    public function __construct(ApiInterface $api, array $config)
+    {
+        $this->api = $api;
+        $this->url = 'https://api-ssl.bitly.com/oauth/access_token';
+        $key = base64_encode($config['clientid_username'] . ":" . $config['clientsecret_password']);
+        $api->setApiKey($key);
+    }
+
+
+    /*
+    Exchanging a Username and Password for an Access Token
+    https://dev.bitly.com/v4/#section/Exchanging-a-Username-and-Password-for-an-Access-Token
+    */
+    public function exchangeToken(array $params)
+    {
+        $params['grant_type'] = 'password';
+        $result = $this->api->post($this->url, $params);
+        return json_decode($result->getResponse(), true)['access_token'];
+    }
+
+    /*
+    HTTP Basic Authentication Flow
+    https://dev.bitly.com/v4/#section/HTTP-Basic-Authentication-Flow
+    */
+    public function basicAuthFlow(array $params)
+    {
+        $result = $this->api->post($this->url, $params);
+        return $result->getResponse();
+    }
+
 }

@@ -15,33 +15,36 @@ use Twilio\Serialize;
 use Twilio\Values;
 use Twilio\Version;
 
-class ReservationContext extends InstanceContext {
+class ReservationContext extends InstanceContext
+{
     /**
      * Initialize the ReservationContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $workspaceSid The workspace_sid
      * @param string $workerSid The worker_sid
      * @param string $sid The sid
-     * @return \Twilio\Rest\Taskrouter\V1\Workspace\Worker\ReservationContext 
+     * @return \Twilio\Rest\Taskrouter\V1\Workspace\Worker\ReservationContext
      */
-    public function __construct(Version $version, $workspaceSid, $workerSid, $sid) {
+    public function __construct(Version $version, $workspaceSid, $workerSid, $sid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('workspaceSid' => $workspaceSid, 'workerSid' => $workerSid, 'sid' => $sid, );
+        $this->solution = ['workspaceSid' => $workspaceSid, 'workerSid' => $workerSid, 'sid' => $sid,];
 
         $this->uri = '/Workspaces/' . rawurlencode($workspaceSid) . '/Workers/' . rawurlencode($workerSid) . '/Reservations/' . rawurlencode($sid) . '';
     }
 
     /**
      * Fetch a ReservationInstance
-     * 
+     *
      * @return ReservationInstance Fetched ReservationInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -60,72 +63,84 @@ class ReservationContext extends InstanceContext {
 
     /**
      * Update the ReservationInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return ReservationInstance Updated ReservationInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array(
-            'ReservationStatus' => $options['reservationStatus'],
-            'WorkerActivitySid' => $options['workerActivitySid'],
-            'Instruction' => $options['instruction'],
-            'DequeuePostWorkActivitySid' => $options['dequeuePostWorkActivitySid'],
-            'DequeueFrom' => $options['dequeueFrom'],
-            'DequeueRecord' => $options['dequeueRecord'],
-            'DequeueTimeout' => $options['dequeueTimeout'],
-            'DequeueTo' => $options['dequeueTo'],
-            'DequeueStatusCallbackUrl' => $options['dequeueStatusCallbackUrl'],
-            'CallFrom' => $options['callFrom'],
-            'CallRecord' => $options['callRecord'],
-            'CallTimeout' => $options['callTimeout'],
-            'CallTo' => $options['callTo'],
-            'CallUrl' => $options['callUrl'],
-            'CallStatusCallbackUrl' => $options['callStatusCallbackUrl'],
-            'CallAccept' => Serialize::booleanToString($options['callAccept']),
-            'RedirectCallSid' => $options['redirectCallSid'],
-            'RedirectAccept' => Serialize::booleanToString($options['redirectAccept']),
-            'RedirectUrl' => $options['redirectUrl'],
-            'To' => $options['to'],
-            'From' => $options['from'],
-            'StatusCallback' => $options['statusCallback'],
-            'StatusCallbackMethod' => $options['statusCallbackMethod'],
-            'StatusCallbackEvent' => Serialize::map($options['statusCallbackEvent'], function($e) { return $e; }),
-            'Timeout' => $options['timeout'],
-            'Record' => Serialize::booleanToString($options['record']),
-            'Muted' => Serialize::booleanToString($options['muted']),
-            'Beep' => $options['beep'],
-            'StartConferenceOnEnter' => Serialize::booleanToString($options['startConferenceOnEnter']),
-            'EndConferenceOnExit' => Serialize::booleanToString($options['endConferenceOnExit']),
-            'WaitUrl' => $options['waitUrl'],
-            'WaitMethod' => $options['waitMethod'],
-            'EarlyMedia' => Serialize::booleanToString($options['earlyMedia']),
-            'MaxParticipants' => $options['maxParticipants'],
-            'ConferenceStatusCallback' => $options['conferenceStatusCallback'],
-            'ConferenceStatusCallbackMethod' => $options['conferenceStatusCallbackMethod'],
-            'ConferenceStatusCallbackEvent' => Serialize::map($options['conferenceStatusCallbackEvent'], function($e) { return $e; }),
-            'ConferenceRecord' => $options['conferenceRecord'],
-            'ConferenceTrim' => $options['conferenceTrim'],
-            'RecordingChannels' => $options['recordingChannels'],
-            'RecordingStatusCallback' => $options['recordingStatusCallback'],
-            'RecordingStatusCallbackMethod' => $options['recordingStatusCallbackMethod'],
-            'ConferenceRecordingStatusCallback' => $options['conferenceRecordingStatusCallback'],
+        $data = Values::of([
+            'ReservationStatus'                       => $options['reservationStatus'],
+            'WorkerActivitySid'                       => $options['workerActivitySid'],
+            'Instruction'                             => $options['instruction'],
+            'DequeuePostWorkActivitySid'              => $options['dequeuePostWorkActivitySid'],
+            'DequeueFrom'                             => $options['dequeueFrom'],
+            'DequeueRecord'                           => $options['dequeueRecord'],
+            'DequeueTimeout'                          => $options['dequeueTimeout'],
+            'DequeueTo'                               => $options['dequeueTo'],
+            'DequeueStatusCallbackUrl'                => $options['dequeueStatusCallbackUrl'],
+            'CallFrom'                                => $options['callFrom'],
+            'CallRecord'                              => $options['callRecord'],
+            'CallTimeout'                             => $options['callTimeout'],
+            'CallTo'                                  => $options['callTo'],
+            'CallUrl'                                 => $options['callUrl'],
+            'CallStatusCallbackUrl'                   => $options['callStatusCallbackUrl'],
+            'CallAccept'                              => Serialize::booleanToString($options['callAccept']),
+            'RedirectCallSid'                         => $options['redirectCallSid'],
+            'RedirectAccept'                          => Serialize::booleanToString($options['redirectAccept']),
+            'RedirectUrl'                             => $options['redirectUrl'],
+            'To'                                      => $options['to'],
+            'From'                                    => $options['from'],
+            'StatusCallback'                          => $options['statusCallback'],
+            'StatusCallbackMethod'                    => $options['statusCallbackMethod'],
+            'StatusCallbackEvent'                     => Serialize::map($options['statusCallbackEvent'], function ($e)
+            {
+                return $e;
+            }),
+            'Timeout'                                 => $options['timeout'],
+            'Record'                                  => Serialize::booleanToString($options['record']),
+            'Muted'                                   => Serialize::booleanToString($options['muted']),
+            'Beep'                                    => $options['beep'],
+            'StartConferenceOnEnter'                  => Serialize::booleanToString($options['startConferenceOnEnter']),
+            'EndConferenceOnExit'                     => Serialize::booleanToString($options['endConferenceOnExit']),
+            'WaitUrl'                                 => $options['waitUrl'],
+            'WaitMethod'                              => $options['waitMethod'],
+            'EarlyMedia'                              => Serialize::booleanToString($options['earlyMedia']),
+            'MaxParticipants'                         => $options['maxParticipants'],
+            'ConferenceStatusCallback'                => $options['conferenceStatusCallback'],
+            'ConferenceStatusCallbackMethod'          => $options['conferenceStatusCallbackMethod'],
+            'ConferenceStatusCallbackEvent'           => Serialize::map($options['conferenceStatusCallbackEvent'],
+                function ($e)
+                {
+                    return $e;
+                }),
+            'ConferenceRecord'                        => $options['conferenceRecord'],
+            'ConferenceTrim'                          => $options['conferenceTrim'],
+            'RecordingChannels'                       => $options['recordingChannels'],
+            'RecordingStatusCallback'                 => $options['recordingStatusCallback'],
+            'RecordingStatusCallbackMethod'           => $options['recordingStatusCallbackMethod'],
+            'ConferenceRecordingStatusCallback'       => $options['conferenceRecordingStatusCallback'],
             'ConferenceRecordingStatusCallbackMethod' => $options['conferenceRecordingStatusCallbackMethod'],
-            'Region' => $options['region'],
-            'SipAuthUsername' => $options['sipAuthUsername'],
-            'SipAuthPassword' => $options['sipAuthPassword'],
-            'DequeueStatusCallbackEvent' => Serialize::map($options['dequeueStatusCallbackEvent'], function($e) { return $e; }),
-            'PostWorkActivitySid' => $options['postWorkActivitySid'],
-            'EndConferenceOnCustomerExit' => Serialize::booleanToString($options['endConferenceOnCustomerExit']),
-            'BeepOnCustomerEntrance' => Serialize::booleanToString($options['beepOnCustomerEntrance']),
-        ));
+            'Region'                                  => $options['region'],
+            'SipAuthUsername'                         => $options['sipAuthUsername'],
+            'SipAuthPassword'                         => $options['sipAuthPassword'],
+            'DequeueStatusCallbackEvent'              => Serialize::map($options['dequeueStatusCallbackEvent'],
+                function ($e)
+                {
+                    return $e;
+                }),
+            'PostWorkActivitySid'                     => $options['postWorkActivitySid'],
+            'EndConferenceOnCustomerExit'             => Serialize::booleanToString($options['endConferenceOnCustomerExit']),
+            'BeepOnCustomerEntrance'                  => Serialize::booleanToString($options['beepOnCustomerEntrance']),
+        ]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -140,12 +155,14 @@ class ReservationContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Taskrouter.V1.ReservationContext ' . implode(' ', $context) . ']';

@@ -35,15 +35,20 @@ final class IndexResponse implements ApiResponse
     {
         $items = [];
 
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $item) {
+        if (isset($data['items']))
+        {
+            foreach ($data['items'] as $item)
+            {
                 $items[] = Domain::create($item);
             }
         }
 
-        if (isset($data['total_count'])) {
+        if (isset($data['total_count']))
+        {
             $count = $data['total_count'];
-        } else {
+        }
+        else
+        {
             $count = count($items);
         }
 
@@ -51,7 +56,7 @@ final class IndexResponse implements ApiResponse
     }
 
     /**
-     * @param int      $totalCount
+     * @param int $totalCount
      * @param Domain[] $items
      */
     private function __construct($totalCount, array $items)

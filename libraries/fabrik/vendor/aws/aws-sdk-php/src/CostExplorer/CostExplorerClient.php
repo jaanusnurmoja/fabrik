@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CostExplorer;
 
 use Aws\AwsClient;
@@ -20,4 +21,6 @@ use Aws\AwsClient;
  * @method \Aws\Result getTags(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getTagsAsync(array $args = [])
  */
-class CostExplorerClient extends AwsClient {}
+class CostExplorerClient extends AwsClient
+{
+}

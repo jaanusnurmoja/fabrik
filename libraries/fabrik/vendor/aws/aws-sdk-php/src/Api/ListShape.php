@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -20,8 +21,10 @@ class ListShape extends Shape
      */
     public function getMember()
     {
-        if (!$this->member) {
-            if (!isset($this->definition['member'])) {
+        if (!$this->member)
+        {
+            if (!isset($this->definition['member']))
+            {
                 throw new \RuntimeException('No member attribute specified');
             }
             $this->member = Shape::create(

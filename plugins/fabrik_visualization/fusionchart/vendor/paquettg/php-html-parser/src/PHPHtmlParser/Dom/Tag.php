@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser\Dom;
 
 use PHPHtmlParser\Dom;
@@ -142,7 +143,8 @@ class Tag
     public function setAttribute($key, $value)
     {
         $key = strtolower($key);
-        if ( ! is_array($value)) {
+        if (!is_array($value))
+        {
             $value = [
                 'value'       => $value,
                 'doubleQuote' => true,
@@ -183,7 +185,8 @@ class Tag
      */
     public function setAttributes(array $attr)
     {
-        foreach ($attr as $key => $value) {
+        foreach ($attr as $key => $value)
+        {
             $this->setAttribute($key, $value);
         }
 
@@ -198,7 +201,8 @@ class Tag
     public function getAttributes()
     {
         $return = [];
-        foreach ($this->attr as $attr => $info) {
+        foreach ($this->attr as $attr => $info)
+        {
             $return[$attr] = $this->getAttribute($attr);
         }
 
@@ -213,11 +217,13 @@ class Tag
      */
     public function getAttribute($key)
     {
-        if ( ! isset($this->attr[$key])) {
+        if (!isset($this->attr[$key]))
+        {
             return null;
         }
         $value = $this->attr[$key]['value'];
-        if (is_string($value) && ! is_null($this->encode)) {
+        if (is_string($value) && !is_null($this->encode))
+        {
             // convert charset
             $this->attr[$key]['value'] = $this->encode->convert($value);
         }
@@ -232,25 +238,34 @@ class Tag
      */
     public function makeOpeningTag()
     {
-        $return = '<'.$this->name;
+        $return = '<' . $this->name;
 
         // add the attributes
-        foreach ($this->attr as $key => $info) {
+        foreach ($this->attr as $key => $info)
+        {
             $info = $this->getAttribute($key);
-            $val  = $info['value'];
-            if (is_null($val)) {
-                $return .= ' '.$key;
-            } elseif ($info['doubleQuote']) {
-                $return .= ' '.$key.'="'.$val.'"';
-            } else {
-                $return .= ' '.$key.'=\''.$val.'\'';
+            $val = $info['value'];
+            if (is_null($val))
+            {
+                $return .= ' ' . $key;
+            }
+            elseif ($info['doubleQuote'])
+            {
+                $return .= ' ' . $key . '="' . $val . '"';
+            }
+            else
+            {
+                $return .= ' ' . $key . '=\'' . $val . '\'';
             }
         }
 
-        if ($this->selfClosing) {
-            return $return.' />';
-        } else {
-            return $return.'>';
+        if ($this->selfClosing)
+        {
+            return $return . ' />';
+        }
+        else
+        {
+            return $return . '>';
         }
     }
 
@@ -261,10 +276,11 @@ class Tag
      */
     public function makeClosingTag()
     {
-        if ($this->selfClosing) {
+        if ($this->selfClosing)
+        {
             return '';
         }
 
-        return '</'.$this->name.'>';
+        return '</' . $this->name . '>';
     }
 }

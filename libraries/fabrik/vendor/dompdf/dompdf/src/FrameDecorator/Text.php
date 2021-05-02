@@ -7,6 +7,7 @@
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
+
 namespace Dompdf\FrameDecorator;
 
 use Dompdf\Dompdf;
@@ -33,7 +34,8 @@ class Text extends AbstractFrameDecorator
      */
     function __construct(Frame $frame, Dompdf $dompdf)
     {
-        if (!$frame->is_text_node()) {
+        if (!$frame->is_text_node())
+        {
             throw new Exception("Text_Decorator can only be applied to #text nodes.");
         }
 
@@ -110,7 +112,8 @@ class Text extends AbstractFrameDecorator
         Helpers::pre_r(($style->line_height / $size) * $this->_dompdf->getFontMetrics()->getFontHeight($font, $size));
         */
 
-        return ($style->line_height / ($size > 0 ? $size : 1)) * $this->_dompdf->getFontMetrics()->getFontHeight($font, $size);
+        return ($style->line_height / ($size > 0 ? $size : 1)) * $this->_dompdf->getFontMetrics()->getFontHeight($font,
+                $size);
     }
 
     /**
@@ -135,7 +138,8 @@ class Text extends AbstractFrameDecorator
         $char_spacing = (float)$style->length_in_pt($style->letter_spacing);
 
         // Re-adjust our width to account for the change in spacing
-        $style->width = $this->_dompdf->getFontMetrics()->getTextWidth($this->get_text(), $style->font_family, $style->font_size, $spacing, $char_spacing);
+        $style->width = $this->_dompdf->getFontMetrics()->getTextWidth($this->get_text(), $style->font_family,
+            $style->font_size, $spacing, $char_spacing);
     }
 
     /**
@@ -152,7 +156,8 @@ class Text extends AbstractFrameDecorator
         $word_spacing = (float)$style->length_in_pt($style->word_spacing);
         $char_spacing = (float)$style->length_in_pt($style->letter_spacing);
 
-        return $style->width = $this->_dompdf->getFontMetrics()->getTextWidth($text, $font, $size, $word_spacing, $char_spacing);
+        return $style->width = $this->_dompdf->getFontMetrics()->getTextWidth($text, $font, $size, $word_spacing,
+            $char_spacing);
     }
 
     // Text manipulation methods
@@ -166,7 +171,8 @@ class Text extends AbstractFrameDecorator
      */
     function split_text($offset)
     {
-        if ($offset == 0) {
+        if ($offset == 0)
+        {
             return null;
         }
 
@@ -177,7 +183,8 @@ class Text extends AbstractFrameDecorator
         $p = $this->get_parent();
         $p->insert_child_after($deco, $this, false);
 
-        if ($p instanceof Inline) {
+        if ($p instanceof Inline)
+        {
             $p->split($deco);
         }
 

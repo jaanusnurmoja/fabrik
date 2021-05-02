@@ -17,20 +17,22 @@ use Twilio\Version;
 /**
  * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
  */
-class ParticipantList extends ListResource {
+class ParticipantList extends ListResource
+{
     /**
      * Construct the ParticipantList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $serviceSid Service Sid.
      * @param string $sessionSid Session Sid.
-     * @return \Twilio\Rest\Proxy\V1\Service\Session\ParticipantList 
+     * @return \Twilio\Rest\Proxy\V1\Service\Session\ParticipantList
      */
-    public function __construct(Version $version, $serviceSid, $sessionSid) {
+    public function __construct(Version $version, $serviceSid, $sessionSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('serviceSid' => $serviceSid, 'sessionSid' => $sessionSid, );
+        $this->solution = ['serviceSid' => $serviceSid, 'sessionSid' => $sessionSid,];
 
         $this->uri = '/Services/' . rawurlencode($serviceSid) . '/Sessions/' . rawurlencode($sessionSid) . '/Participants';
     }
@@ -42,7 +44,7 @@ class ParticipantList extends ListResource {
      * is reached.
      * The results are returned as a generator, so this operation is memory
      * efficient.
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param int $limit Upper limit for the number of records to return. stream()
      *                   guarantees to never return more than limit.  Default is no
@@ -54,7 +56,8 @@ class ParticipantList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return \Twilio\Stream stream of results
      */
-    public function stream($options = array(), $limit = null, $pageSize = null) {
+    public function stream($options = [], $limit = null, $pageSize = null)
+    {
         $limits = $this->version->readLimits($limit, $pageSize);
 
         $page = $this->page($options, $limits['pageSize']);
@@ -66,7 +69,7 @@ class ParticipantList extends ListResource {
      * Reads ParticipantInstance records from the API as a list.
      * Unlike stream(), this operation is eager and will load `limit` records into
      * memory before returning.
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param int $limit Upper limit for the number of records to return. read()
      *                   guarantees to never return more than limit.  Default is no
@@ -78,28 +81,30 @@ class ParticipantList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return ParticipantInstance[] Array of results
      */
-    public function read($options = array(), $limit = null, $pageSize = null) {
+    public function read($options = [], $limit = null, $pageSize = null)
+    {
         return iterator_to_array($this->stream($options, $limit, $pageSize), false);
     }
 
     /**
      * Retrieve a single page of ParticipantInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param mixed $pageSize Number of records to return, defaults to 50
      * @param string $pageToken PageToken provided by the API
      * @param mixed $pageNumber Page Number, this value is simply for client state
      * @return \Twilio\Page Page of ParticipantInstance
      */
-    public function page($options = array(), $pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE) {
+    public function page($options = [], $pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE)
+    {
         $options = new Values($options);
-        $params = Values::of(array(
+        $params = Values::of([
             'Identifier' => $options['identifier'],
-            'PageToken' => $pageToken,
-            'Page' => $pageNumber,
-            'PageSize' => $pageSize,
-        ));
+            'PageToken'  => $pageToken,
+            'Page'       => $pageNumber,
+            'PageSize'   => $pageSize,
+        ]);
 
         $response = $this->version->page(
             'GET',
@@ -113,11 +118,12 @@ class ParticipantList extends ListResource {
     /**
      * Retrieve a specific page of ParticipantInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param string $targetUrl API-generated URL for the requested results page
      * @return \Twilio\Page Page of ParticipantInstance
      */
-    public function getPage($targetUrl) {
+    public function getPage($targetUrl)
+    {
         $response = $this->version->getDomain()->getClient()->request(
             'GET',
             $targetUrl
@@ -128,26 +134,27 @@ class ParticipantList extends ListResource {
 
     /**
      * Create a new ParticipantInstance
-     * 
+     *
      * @param string $identifier The phone number of this Participant.
      * @param array|Options $options Optional Arguments
      * @return ParticipantInstance Newly created ParticipantInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function create($identifier, $options = array()) {
+    public function create($identifier, $options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array(
-            'Identifier' => $identifier,
-            'FriendlyName' => $options['friendlyName'],
-            'ProxyIdentifier' => $options['proxyIdentifier'],
+        $data = Values::of([
+            'Identifier'         => $identifier,
+            'FriendlyName'       => $options['friendlyName'],
+            'ProxyIdentifier'    => $options['proxyIdentifier'],
             'ProxyIdentifierSid' => $options['proxyIdentifierSid'],
-        ));
+        ]);
 
         $payload = $this->version->create(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -161,11 +168,12 @@ class ParticipantList extends ListResource {
 
     /**
      * Constructs a ParticipantContext
-     * 
+     *
      * @param string $sid A string that uniquely identifies this Participant.
-     * @return \Twilio\Rest\Proxy\V1\Service\Session\ParticipantContext 
+     * @return \Twilio\Rest\Proxy\V1\Service\Session\ParticipantContext
      */
-    public function getContext($sid) {
+    public function getContext($sid)
+    {
         return new ParticipantContext(
             $this->version,
             $this->solution['serviceSid'],
@@ -176,10 +184,11 @@ class ParticipantList extends ListResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Proxy.V1.ParticipantList]';
     }
 }

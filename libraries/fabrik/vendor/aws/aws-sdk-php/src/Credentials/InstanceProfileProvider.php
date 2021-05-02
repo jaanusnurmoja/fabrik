@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Credentials;
 
 use Aws\Exception\CredentialsException;
@@ -47,8 +48,10 @@ class InstanceProfileProvider
      */
     public function __invoke()
     {
-        return Promise\coroutine(function () {
-            if (!$this->profile) {
+        return Promise\coroutine(function ()
+        {
+            if (!$this->profile)
+            {
                 $this->profile = (yield $this->request(self::CRED_PATH));
             }
             $json = (yield $this->request(self::CRED_PATH . $this->profile));
@@ -70,7 +73,8 @@ class InstanceProfileProvider
     private function request($url)
     {
         $disabled = getenv(self::ENV_DISABLE) ?: false;
-        if (strcasecmp($disabled, 'true') === 0) {
+        if (strcasecmp($disabled, 'true') === 0)
+        {
             throw new CredentialsException(
                 $this->createErrorMessage('EC2 metadata server access disabled')
             );
@@ -80,9 +84,11 @@ class InstanceProfileProvider
         $request = new Request('GET', self::SERVER_URI . $url);
 
         return $fn($request, ['timeout' => $this->timeout])
-            ->then(function (ResponseInterface $response) {
-                return (string) $response->getBody();
-            })->otherwise(function (array $reason) {
+            ->then(function (ResponseInterface $response)
+            {
+                return (string)$response->getBody();
+            })->otherwise(function (array $reason)
+            {
                 $reason = $reason['exception'];
                 $msg = $reason->getMessage();
                 throw new CredentialsException(
@@ -101,9 +107,10 @@ class InstanceProfileProvider
     {
         $result = json_decode($response, true);
 
-        if ($result['Code'] !== 'Success') {
+        if ($result['Code'] !== 'Success')
+        {
             throw new CredentialsException('Unexpected instance profile '
-                .  'response code: ' . $result['Code']);
+                . 'response code: ' . $result['Code']);
         }
 
         return $result;

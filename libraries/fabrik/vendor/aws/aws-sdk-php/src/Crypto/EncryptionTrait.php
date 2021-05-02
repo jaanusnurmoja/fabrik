@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto;
 
 use GuzzleHttp\Psr7;
@@ -8,9 +9,9 @@ use GuzzleHttp\Psr7\Stream;
 trait EncryptionTrait
 {
     private static $allowedOptions = [
-        'Cipher' => true,
+        'Cipher'  => true,
         'KeySize' => true,
-        'Aad' => true,
+        'Aad'     => true,
     ];
 
     /**
@@ -53,7 +54,8 @@ trait EncryptionTrait
         array $cipherOptions,
         MaterialsProvider $provider,
         MetadataEnvelope $envelope
-    ) {
+    )
+    {
         $materialsDescription = $provider->getMaterialsDescription();
 
         $cipherOptions = array_intersect_key(
@@ -61,27 +63,34 @@ trait EncryptionTrait
             self::$allowedOptions
         );
 
-        if (empty($cipherOptions['Cipher'])) {
+        if (empty($cipherOptions['Cipher']))
+        {
             throw new \InvalidArgumentException('An encryption cipher must be'
                 . ' specified in the "cipher_options".');
         }
 
-        if (!self::isSupportedCipher($cipherOptions['Cipher'])) {
+        if (!self::isSupportedCipher($cipherOptions['Cipher']))
+        {
             throw new \InvalidArgumentException('The cipher requested is not'
                 . ' supported by the SDK.');
         }
 
-        if (empty($cipherOptions['KeySize'])) {
+        if (empty($cipherOptions['KeySize']))
+        {
             $cipherOptions['KeySize'] = 256;
         }
-        if (!is_int($cipherOptions['KeySize'])) {
+        if (!is_int($cipherOptions['KeySize']))
+        {
             throw new \InvalidArgumentException('The cipher "KeySize" must be'
                 . ' an integer.');
         }
 
-        if (!MaterialsProvider::isSupportedKeySize(
+        if (
+        !MaterialsProvider::isSupportedKeySize(
             $cipherOptions['KeySize']
-        )) {
+        )
+        )
+        {
             throw new \InvalidArgumentException('The cipher "KeySize" requested'
                 . ' is not supported by AES (128, 192, or 256).');
         }
@@ -120,7 +129,8 @@ trait EncryptionTrait
             base64_encode(md5($plaintext));
         $envelope[MetadataEnvelope::MATERIALS_DESCRIPTION_HEADER] =
             json_encode($materialsDescription);
-        if (!empty($cipherOptions['Tag'])) {
+        if (!empty($cipherOptions['Tag']))
+        {
             $envelope[MetadataEnvelope::CRYPTO_TAG_LENGTH_HEADER] =
                 strlen($cipherOptions['Tag']) * 8;
         }
@@ -147,8 +157,10 @@ trait EncryptionTrait
         Stream $plaintext,
         $cek,
         &$cipherOptions
-    ) {
-        switch ($cipherOptions['Cipher']) {
+    )
+    {
+        switch ($cipherOptions['Cipher'])
+        {
             case 'gcm':
                 $cipherOptions['TagLength'] = 16;
 

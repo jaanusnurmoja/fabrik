@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use GuzzleHttp\Promise;
@@ -31,16 +32,17 @@ class ResultPaginator implements \Iterator
 
     /**
      * @param AwsClientInterface $client
-     * @param string             $operation
-     * @param array              $args
-     * @param array              $config
+     * @param string $operation
+     * @param array $args
+     * @param array $config
      */
     public function __construct(
         AwsClientInterface $client,
         $operation,
         array $args,
         array $config
-    ) {
+    )
+    {
         $this->client = $client;
         $this->operation = $operation;
         $this->args = $args;
@@ -68,14 +70,17 @@ class ResultPaginator implements \Iterator
      */
     public function each(callable $handleResult)
     {
-        return Promise\coroutine(function () use ($handleResult) {
+        return Promise\coroutine(function () use ($handleResult)
+        {
             $nextToken = null;
-            do {
+            do
+            {
                 $command = $this->createNextCommand($this->args, $nextToken);
                 $result = (yield $this->client->executeAsync($command));
                 $nextToken = $this->determineNextToken($result);
                 $retVal = $handleResult($result);
-                if ($retVal !== null) {
+                if ($retVal !== null)
+                {
                     yield Promise\promise_for($retVal);
                 }
             } while ($nextToken);
@@ -93,8 +98,9 @@ class ResultPaginator implements \Iterator
     public function search($expression)
     {
         // Apply JMESPath expression on each result, but as a flat sequence.
-        return flatmap($this, function (Result $result) use ($expression) {
-            return (array) $result->search($expression);
+        return flatmap($this, function (Result $result) use ($expression)
+        {
+            return (array)$result->search($expression);
         });
     }
 
@@ -118,11 +124,13 @@ class ResultPaginator implements \Iterator
 
     public function valid()
     {
-        if ($this->result) {
+        if ($this->result)
+        {
             return true;
         }
 
-        if ($this->nextToken || !$this->requestCount) {
+        if ($this->nextToken || !$this->requestCount)
+        {
             $this->result = $this->client->execute(
                 $this->createNextCommand($this->args, $this->nextToken)
             );
@@ -148,13 +156,16 @@ class ResultPaginator implements \Iterator
 
     private function determineNextToken(Result $result)
     {
-        if (!$this->config['output_token']) {
+        if (!$this->config['output_token'])
+        {
             return null;
         }
 
-        if ($this->config['more_results']
+        if (
+            $this->config['more_results']
             && !$result->search($this->config['more_results'])
-        ) {
+        )
+        {
             return null;
         }
 
@@ -162,7 +173,8 @@ class ResultPaginator implements \Iterator
             ? [$this->config['input_token'] => $this->config['output_token']]
             : array_combine($this->config['input_token'], $this->config['output_token']);
 
-        return array_filter(array_map(function ($outputToken) use ($result) {
+        return array_filter(array_map(function ($outputToken) use ($result)
+        {
             return $result->search($outputToken);
         }, $nextToken));
     }

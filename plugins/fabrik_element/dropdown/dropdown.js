@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbDropdown = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('fabrikdropdown');
             this.parent(element, options);
@@ -57,11 +57,10 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             }
             if (val === '' || label === '') {
                 window.alert(Joomla.JText._('PLG_ELEMENT_DROPDOWN_ENTER_VALUE_LABEL'));
-            }
-            else {
+            } else {
                 var opt = new Element('option', {
                     'selected': 'selected',
-                    'value'   : val
+                    'value': val
                 }).set('text', label).inject(document.id(this.element.id));
                 e.stop();
                 if (v) {

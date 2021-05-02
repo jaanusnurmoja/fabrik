@@ -8,7 +8,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbTextarea = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
 
             this.setPlugin('fabriktextarea');
@@ -97,7 +97,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 if (typeOf(element) !== 'null') {
                     this.warningFX = new Fx.Morph(element, {duration: 1000, transition: Fx.Transitions.Quart.easeOut});
                     this.origCol = element.getStyle('color');
-                    if (this.options.wysiwyg && typeof(tinymce) !== 'undefined') {
+                    if (this.options.wysiwyg && typeof (tinymce) !== 'undefined') {
 
                         // Joomla 3.2 + usess tinyMce 4
                         if (tinymce.majorVersion >= 4) {
@@ -181,7 +181,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         getCloneName: function () {
             // there's something messing up when wysiwyg in repeat and we delete before adding
             //var name = this.options.isGroupJoin ? this.options.htmlId : this.options.element;
-	        //var name = this.options.wysiwyg ? this.options.htmlId : this.options.element
+            //var name = this.options.wysiwyg ? this.options.htmlId : this.options.element
             var name = this.options.wysiwyg && this.options.isGroupJoin ? this.options.htmlId : this.options.element;
             return name;
         },
@@ -230,7 +230,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             if (this.options.wysiwyg && this.options.editable) {
                 var name = this.options.isGroupJoin ? this.options.htmlId : this.options.element;
                 document.id(name).addClass('fabrikinput');
-                var instance = typeof(tinyMCE) !== 'undefined' ? tinyMCE.get(name) : false;
+                var instance = typeof (tinyMCE) !== 'undefined' ? tinyMCE.get(name) : false;
                 if (instance) {
                     this.container = instance.getDoc();
                 } else {
@@ -277,8 +277,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         _addTinyEditor: function (id) {
             if (tinyMCE.majorVersion.toInt() >= 4) {
                 tinyMCE.execCommand('mceAddEditor', false, id);
-            }
-            else {
+            } else {
                 tinyMCE.execCommand('mceAddControl', false, id);
             }
         },
@@ -286,8 +285,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         _removeTinyEditor: function (id) {
             if (tinyMCE.majorVersion.toInt() >= 4) {
                 tinyMCE.execCommand('mceRemoveEditor', false, id);
-            }
-            else {
+            } else {
                 tinyMCE.execCommand('mceRemoveControl', false, id);
             }
         },

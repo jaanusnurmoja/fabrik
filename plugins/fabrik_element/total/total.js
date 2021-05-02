@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbTotal = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         observeGroupIds: [],
         observeElementGroups: [],
 
@@ -38,13 +38,13 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 }
             }.bind(this));
 
-            Fabrik.addEvent('fabrik.form.group.duplicate.end', function(form, event, groupId) {
+            Fabrik.addEvent('fabrik.form.group.duplicate.end', function (form, event, groupId) {
                 if (jQuery.inArray(groupId, this.observeGroupIds) !== -1) {
                     this.calc();
                 }
             }.bind(this));
 
-            Fabrik.addEvent('fabrik.form.group.delete.end', function(form, event, groupId) {
+            Fabrik.addEvent('fabrik.form.group.delete.end', function (form, event, groupId) {
                 if (jQuery.inArray(groupId, this.observeGroupIds) !== -1) {
                     this.calc();
                 }
@@ -62,8 +62,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 this.form.formElements[o].addNewEventAux(this.form.formElements[o].getChangeEvent(), function (e) {
                     this.calc(e);
                 }.bind(this));
-            }
-            else {
+            } else {
                 if (this.options.canRepeat) {
                     o2 = o + '_' + this.options.repeatCounter;
                     if (this.form.formElements[o2]) {
@@ -72,8 +71,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                                 this.calc(e);
                             }.bind(this));
                     }
-                }
-                else {
+                } else {
                     this.form.repeatGroupMarkers.each(function (v, k) {
                         o2 = '';
                         for (v2 = 0; v2 < v; v2++) {

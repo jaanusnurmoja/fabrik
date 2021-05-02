@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Serializer;
 
 use Aws\Api\Service;
@@ -20,7 +21,8 @@ class QuerySerializer
         Service $api,
         $endpoint,
         callable $paramBuilder = null
-    ) {
+    )
+    {
         $this->api = $api;
         $this->endpoint = $endpoint;
         $this->paramBuilder = $paramBuilder ?: new QueryParamBuilder();
@@ -46,7 +48,8 @@ class QuerySerializer
         $params = $command->toArray();
 
         // Only build up the parameters when there are parameters to build
-        if ($params) {
+        if ($params)
+        {
             $body += call_user_func(
                 $this->paramBuilder,
                 $operation->getInput(),

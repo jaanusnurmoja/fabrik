@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Api\Parser\AbstractParser;
@@ -16,8 +17,8 @@ use Psr\Http\Message\StreamInterface;
 class AmbiguousSuccessParser extends AbstractParser
 {
     private static $ambiguousSuccesses = [
-        'UploadPartCopy' => true,
-        'CopyObject' => true,
+        'UploadPartCopy'          => true,
+        'CopyObject'              => true,
         'CompleteMultipartUpload' => true,
     ];
 
@@ -30,7 +31,8 @@ class AmbiguousSuccessParser extends AbstractParser
         callable $parser,
         callable $errorParser,
         $exceptionClass = AwsException::class
-    ) {
+    )
+    {
         $this->parser = $parser;
         $this->errorParser = $errorParser;
         $this->exceptionClass = $exceptionClass;
@@ -39,13 +41,17 @@ class AmbiguousSuccessParser extends AbstractParser
     public function __invoke(
         CommandInterface $command,
         ResponseInterface $response
-    ) {
-        if (200 === $response->getStatusCode()
+    )
+    {
+        if (
+            200 === $response->getStatusCode()
             && isset(self::$ambiguousSuccesses[$command->getName()])
-        ) {
+        )
+        {
             $errorParser = $this->errorParser;
             $parsed = $errorParser($response);
-            if (isset($parsed['code']) && isset($parsed['message'])) {
+            if (isset($parsed['code']) && isset($parsed['message']))
+            {
                 throw new $this->exceptionClass(
                     $parsed['message'],
                     $command,
@@ -62,7 +68,8 @@ class AmbiguousSuccessParser extends AbstractParser
         StreamInterface $stream,
         StructureShape $member,
         $response
-    ) {
+    )
+    {
         return $this->parser->parseMemberFromStream($stream, $member, $response);
     }
 }

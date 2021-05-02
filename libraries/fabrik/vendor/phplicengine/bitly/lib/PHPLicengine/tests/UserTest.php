@@ -27,7 +27,7 @@ use PHPUnit\Framework\TestCase;
 
 class UserTest extends TestCase
 {
-    
+
     public function testUpdateUser()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -35,12 +35,12 @@ class UserTest extends TestCase
             ->expects($this->once())
             ->method('patch')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/user'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/user'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new User($mock);
         $bitlink->updateUser(['key' => 'value']);
-    } 
+    }
 
     public function testGetUser()
     {
@@ -49,10 +49,10 @@ class UserTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/user')
-                  );
+                $this->equalTo('https://api-ssl.bitly.com/v4/user')
+            );
         $bitlink = new User($mock);
         $bitlink->getUser();
-    } 
+    }
 
 }

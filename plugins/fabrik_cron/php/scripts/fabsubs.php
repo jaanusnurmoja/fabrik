@@ -44,7 +44,7 @@ $mailfrom = $config->get('mailfrom');
 $fromname = $config->get('fromname');
 $url = str_replace('/administrator', '', JURI::base());
 
-	$db->setQuery("SELECT s.id AS subid, p.id AS planid, pbc.duration, p.plan_name AS subscription, pbc.period_unit,
+$db->setQuery("SELECT s.id AS subid, p.id AS planid, pbc.duration, p.plan_name AS subscription, pbc.period_unit,
 u.username, u.email, u.name, s.userid,
 s.signup_date, '$sitename' AS sitename, '$mailfrom' AS mailfrom, '$url' AS url, '$fromname' AS fromname, s.recurring,
 s.lastpay_date,
@@ -74,28 +74,31 @@ ORDER BY daysleft ");
 $res = $db->loadObjectList();
 
 //var_dump($db->getQuery(), $res);exit;
-foreach ($res as $row) {
-	if (array_key_exists($row->daysleft, $auto_renewal_mails) && $row->recurring == 1) {
-		$mail = clone($auto_renewal_mails[$row->daysleft]);
-		foreach ($row as $k=>$v) {
-			$mail->subject = str_replace('{'.$k.'}', $v, $mail->subject);
-			$mail->body = str_replace('{'.$k.'}', $v, $mail->body);
-		}
-		echo "would mail: " . $row->email;
-		//$res = JUtility::sendMail($mailfrom, $fromname, $row->email, $mail->subject, $mail->body, true);
-	}
+foreach ($res as $row)
+{
+    if (array_key_exists($row->daysleft, $auto_renewal_mails) && $row->recurring == 1)
+    {
+        $mail = clone($auto_renewal_mails[$row->daysleft]);
+        foreach ($row as $k => $v)
+        {
+            $mail->subject = str_replace('{' . $k . '}', $v, $mail->subject);
+            $mail->body = str_replace('{' . $k . '}', $v, $mail->body);
+        }
+        echo "would mail: " . $row->email;
+        //$res = JUtility::sendMail($mailfrom, $fromname, $row->email, $mail->subject, $mail->body, true);
+    }
 
-	if (array_key_exists($row->daysleft, $expiration_mails) && $row->recurring == 0)
-	{
-		$mail = clone($expiration_mails[$row->daysleft]);
-		foreach ($row as $k=>$v)
-		{
-			$mail->subject = str_replace('{'.$k.'}', $v, $mail->subject);
-			$mail->body = str_replace('{'.$k.'}', $v, $mail->body);
-		}
-		echo "would mail: " . $row->email;
-		//$res = JUtility::sendMail($mailfrom, $fromname, $row->email, $mail->subject, $mail->body, true);
-	}
+    if (array_key_exists($row->daysleft, $expiration_mails) && $row->recurring == 0)
+    {
+        $mail = clone($expiration_mails[$row->daysleft]);
+        foreach ($row as $k => $v)
+        {
+            $mail->subject = str_replace('{' . $k . '}', $v, $mail->subject);
+            $mail->body = str_replace('{' . $k . '}', $v, $mail->body);
+        }
+        echo "would mail: " . $row->email;
+        //$res = JUtility::sendMail($mailfrom, $fromname, $row->email, $mail->subject, $mail->body, true);
+    }
 }
 
 // get list of valid subs users
@@ -129,7 +132,7 @@ $validSubsUserIds = $db->loadObjectList('userid');
 
 //expire subs that have expired. Create fall back plan if required
 
-	$db->setQuery("SELECT s.userid, u.username, s.lastpay_date, s.id AS subid, pbc.plan_name
+$db->setQuery("SELECT s.userid, u.username, s.lastpay_date, s.id AS subid, pbc.plan_name
 FROM `#__fabrik_subs_subscriptions` AS s
 INNER JOIN #__fabrik_subs_plans AS p ON p.id = s.plan
 INNER JOIN #__fabrik_subs_plan_billing_cycle AS pbc ON pbc.id = s.billing_cycle_id
@@ -154,59 +157,60 @@ INNER JOIN #__users AS u ON u.id = s.userid
 ORDER BY s.lastpay_date
  ");
 
-	$recalibratedUserIds = array();
+$recalibratedUserIds = [];
 
 
-	$ipn = new FabrikSubscriptionsIPN();
-	$rows = $db->loadObjectList();
+$ipn = new FabrikSubscriptionsIPN();
+$rows = $db->loadObjectList();
 //var_dump($db->getQuery(), $rows);exit;
-	$now = JFactory::getDate()->toSql();
-	$sub = FabTable::getInstance('Subscription', 'FabrikTable');
-	foreach ($rows as $row) {
-		$sub->load($row->subid);
-		$sub->status = 'Expired';
-		$sub->eot_date = $now;
-		echo "store Expired sub: " . $sub->id . " : " . $row->userid . " : " . $row->plan_name . "<br />\n";
-		$sub->store();
-	}
+$now = JFactory::getDate()->toSql();
+$sub = FabTable::getInstance('Subscription', 'FabrikTable');
+foreach ($rows as $row)
+{
+    $sub->load($row->subid);
+    $sub->status = 'Expired';
+    $sub->eot_date = $now;
+    echo "store Expired sub: " . $sub->id . " : " . $row->userid . " : " . $row->plan_name . "<br />\n";
+    $sub->store();
+}
 
-	foreach ($rows as $row)
-	{
-			echo "recalibrate user: " . $row->username . ' : ' . $row->lastpay_date;
-			echo "<br />\n";
-			$ipn->recalibrateUser($row->userid);
-	}
+foreach ($rows as $row)
+{
+    echo "recalibrate user: " . $row->username . ' : ' . $row->lastpay_date;
+    echo "<br />\n";
+    $ipn->recalibrateUser($row->userid);
+}
 
-	/*
-	echo "<br />\nActive Subs<br />\n";
-	foreach ($validSubsUserIds as $v)
-	{
-		//$ipn->recalibrateUser($v->userid);
-		echo $v->username . "(" . $v->name . " - " . $v->email . ") : " . $v->plan_name;
-		if ($v->recurring == 1)
-		{
-			echo " (recurring)";
-		}
-		echo "<br />\n";
-	}
+/*
+echo "<br />\nActive Subs<br />\n";
+foreach ($validSubsUserIds as $v)
+{
+    //$ipn->recalibrateUser($v->userid);
+    echo $v->username . "(" . $v->name . " - " . $v->email . ") : " . $v->plan_name;
+    if ($v->recurring == 1)
+    {
+        echo " (recurring)";
+    }
+    echo "<br />\n";
+}
 
-	echo "<br />\nValid subs total: " . count($validSubsUserIds) . "<br />\n";
-	echo "Recalibrated total: " . count($recalibratedUserIds) . "<br />\n";
+echo "<br />\nValid subs total: " . count($validSubsUserIds) . "<br />\n";
+echo "Recalibrated total: " . count($recalibratedUserIds) . "<br />\n";
 
 $db->setQuery("SELECT s.userid, u.username, s.lastpay_date, s.id AS subid, pbc.plan_name
 FROM `#__fabrik_subs_subscriptions` AS s
 INNER JOIN #__fabrik_subs_plans AS p ON p.id = s.plan
 INNER JOIN #__fabrik_subs_plan_billing_cycle AS pbc ON pbc.id = s.billing_cycle_id
 INNER JOIN #__users AS u ON u.id = s.userid
- WHERE s.status = 'Expired' AND s.lifetime = 0
- GROUP BY s.userid
- LIMIT 700,100
- ");
+WHERE s.status = 'Expired' AND s.lifetime = 0
+GROUP BY s.userid
+LIMIT 700,100
+");
 $rows = $db->loadObjectList();
 foreach ($rows as $row) {
-	echo "expired: " . $row->username . "<br />\n";
-	$ipn->recalibrateUser($row->userid);
+echo "expired: " . $row->username . "<br />\n";
+$ipn->recalibrateUser($row->userid);
 }
 echo "total: " . count($rows);
-	*/
-	exit;
+*/
+exit;

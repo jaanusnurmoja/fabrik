@@ -24,7 +24,8 @@ trait PaginationResponse
      */
     public function getNextUrl()
     {
-        if (!isset($this->paging['next'])) {
+        if (!isset($this->paging['next']))
+        {
             return;
         }
 
@@ -36,7 +37,8 @@ trait PaginationResponse
      */
     public function getPreviousUrl()
     {
-        if (!isset($this->paging['previous'])) {
+        if (!isset($this->paging['previous']))
+        {
             return;
         }
 
@@ -48,7 +50,8 @@ trait PaginationResponse
      */
     public function getFirstUrl()
     {
-        if (!isset($this->paging['first'])) {
+        if (!isset($this->paging['first']))
+        {
             return;
         }
 
@@ -60,7 +63,8 @@ trait PaginationResponse
      */
     public function getLastUrl()
     {
-        if (!isset($this->paging['last'])) {
+        if (!isset($this->paging['last']))
+        {
             return;
         }
 

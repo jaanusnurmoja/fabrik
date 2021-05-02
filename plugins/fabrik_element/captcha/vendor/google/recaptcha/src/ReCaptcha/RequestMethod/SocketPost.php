@@ -70,9 +70,12 @@ class SocketPost implements RequestMethod
      */
     public function __construct(Socket $socket = null)
     {
-        if (!is_null($socket)) {
+        if (!is_null($socket))
+        {
             $this->socket = $socket;
-        } else {
+        }
+        else
+        {
             $this->socket = new Socket();
         }
     }
@@ -88,7 +91,8 @@ class SocketPost implements RequestMethod
         $errno = 0;
         $errstr = '';
 
-        if (false === $this->socket->fsockopen('ssl://' . self::RECAPTCHA_HOST, 443, $errno, $errstr, 30)) {
+        if (false === $this->socket->fsockopen('ssl://' . self::RECAPTCHA_HOST, 443, $errno, $errstr, 30))
+        {
             return self::BAD_REQUEST;
         }
 
@@ -104,13 +108,15 @@ class SocketPost implements RequestMethod
         $this->socket->fwrite($request);
         $response = '';
 
-        while (!$this->socket->feof()) {
+        while (!$this->socket->feof())
+        {
             $response .= $this->socket->fgets(4096);
         }
 
         $this->socket->fclose();
 
-        if (0 !== strpos($response, 'HTTP/1.1 200 OK')) {
+        if (0 !== strpos($response, 'HTTP/1.1 200 OK'))
+        {
             return self::BAD_RESPONSE;
         }
 

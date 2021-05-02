@@ -11,15 +11,18 @@ namespace Twilio\Rest\Studio\V1\Flow\Engagement\Step;
 
 use Twilio\Page;
 
-class StepContextPage extends Page {
-    public function __construct($version, $response, $solution) {
+class StepContextPage extends Page
+{
+    public function __construct($version, $response, $solution)
+    {
         parent::__construct($version, $response);
 
         // Path Solution
         $this->solution = $solution;
     }
 
-    public function buildInstance(array $payload) {
+    public function buildInstance(array $payload)
+    {
         return new StepContextInstance(
             $this->version,
             $payload,
@@ -31,10 +34,11 @@ class StepContextPage extends Page {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Studio.V1.StepContextPage]';
     }
 }

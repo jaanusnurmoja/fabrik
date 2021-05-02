@@ -10,8 +10,8 @@
 
 header('Content-type: text/css');
 $c = $_REQUEST['c'];
-$buttonCount = (int) $_REQUEST['buttoncount'];
-$buttonTotal = $buttonCount === 0 ? '100%' : 30 * $buttonCount ."px";
+$buttonCount = (int)$_REQUEST['buttoncount'];
+$buttonTotal = $buttonCount === 0 ? '100%' : 30 * $buttonCount . "px";
 echo "
 
 .fabrikDataContainer {
@@ -74,4 +74,4 @@ div.rownumber {
 	margin-right: 2px;
 }
 
-";?>
+"; ?>

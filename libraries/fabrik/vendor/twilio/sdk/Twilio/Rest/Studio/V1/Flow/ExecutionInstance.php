@@ -28,49 +28,53 @@ use Twilio\Version;
  * @property string url
  * @property array links
  */
-class ExecutionInstance extends InstanceResource {
-    protected $_steps = null;
+class ExecutionInstance extends InstanceResource
+{
+    protected $_steps            = null;
     protected $_executionContext = null;
 
     /**
      * Initialize the ExecutionInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $flowSid Flow Sid.
      * @param string $sid Execution Sid.
-     * @return \Twilio\Rest\Studio\V1\Flow\ExecutionInstance 
+     * @return \Twilio\Rest\Studio\V1\Flow\ExecutionInstance
      */
-    public function __construct(Version $version, array $payload, $flowSid, $sid = null) {
+    public function __construct(Version $version, array $payload, $flowSid, $sid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'sid' => Values::array_get($payload, 'sid'),
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'flowSid' => Values::array_get($payload, 'flow_sid'),
-            'contactSid' => Values::array_get($payload, 'contact_sid'),
+        $this->properties = [
+            'sid'                   => Values::array_get($payload, 'sid'),
+            'accountSid'            => Values::array_get($payload, 'account_sid'),
+            'flowSid'               => Values::array_get($payload, 'flow_sid'),
+            'contactSid'            => Values::array_get($payload, 'contact_sid'),
             'contactChannelAddress' => Values::array_get($payload, 'contact_channel_address'),
-            'context' => Values::array_get($payload, 'context'),
-            'status' => Values::array_get($payload, 'status'),
-            'dateCreated' => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
-            'dateUpdated' => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
-            'url' => Values::array_get($payload, 'url'),
-            'links' => Values::array_get($payload, 'links'),
-        );
+            'context'               => Values::array_get($payload, 'context'),
+            'status'                => Values::array_get($payload, 'status'),
+            'dateCreated'           => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
+            'dateUpdated'           => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
+            'url'                   => Values::array_get($payload, 'url'),
+            'links'                 => Values::array_get($payload, 'links'),
+        ];
 
-        $this->solution = array('flowSid' => $flowSid, 'sid' => $sid ?: $this->properties['sid'], );
+        $this->solution = ['flowSid' => $flowSid, 'sid' => $sid ?: $this->properties['sid'],];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Studio\V1\Flow\ExecutionContext Context for this
      *                                                      ExecutionInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new ExecutionContext(
                 $this->version,
                 $this->solution['flowSid'],
@@ -83,55 +87,62 @@ class ExecutionInstance extends InstanceResource {
 
     /**
      * Fetch a ExecutionInstance
-     * 
+     *
      * @return ExecutionInstance Fetched ExecutionInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Deletes the ExecutionInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->proxy()->delete();
     }
 
     /**
      * Access the steps
-     * 
-     * @return \Twilio\Rest\Studio\V1\Flow\Execution\ExecutionStepList 
+     *
+     * @return \Twilio\Rest\Studio\V1\Flow\Execution\ExecutionStepList
      */
-    protected function getSteps() {
+    protected function getSteps()
+    {
         return $this->proxy()->steps;
     }
 
     /**
      * Access the executionContext
-     * 
-     * @return \Twilio\Rest\Studio\V1\Flow\Execution\ExecutionContextList 
+     *
+     * @return \Twilio\Rest\Studio\V1\Flow\Execution\ExecutionContextList
      */
-    protected function getExecutionContext() {
+    protected function getExecutionContext()
+    {
         return $this->proxy()->executionContext;
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -141,12 +152,14 @@ class ExecutionInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Studio.V1.ExecutionInstance ' . implode(' ', $context) . ']';

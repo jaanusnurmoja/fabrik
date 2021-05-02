@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Neptune;
 
 use Aws\AwsClient;
@@ -120,4 +121,6 @@ use Aws\AwsClient;
  * @method \Aws\Result restoreDBClusterToPointInTime(array $args = [])
  * @method \GuzzleHttp\Promise\Promise restoreDBClusterToPointInTimeAsync(array $args = [])
  */
-class NeptuneClient extends AwsClient {}
+class NeptuneClient extends AwsClient
+{
+}

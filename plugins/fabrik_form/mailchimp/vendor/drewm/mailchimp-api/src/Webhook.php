@@ -10,20 +10,20 @@ namespace DrewM\MailChimp;
  */
 class Webhook
 {
-    private static $eventSubscriptions = array();
+    private static $eventSubscriptions = [];
     private static $receivedWebhook    = null;
 
     /**
      * Subscribe to an incoming webhook request. The callback will be invoked when a matching webhook is received.
      *
-     * @param string   $event    Name of the webhook event, e.g. subscribe, unsubscribe, campaign
+     * @param string $event Name of the webhook event, e.g. subscribe, unsubscribe, campaign
      * @param callable $callback A callable function to invoke with the data from the received webhook
      *
      * @return void
      */
     public static function subscribe($event, callable $callback)
     {
-        if (!isset(self::$eventSubscriptions[$event])) self::$eventSubscriptions[$event] = array();
+        if (!isset(self::$eventSubscriptions[$event])) self::$eventSubscriptions[$event] = [];
         self::$eventSubscriptions[$event][] = $callback;
 
         self::receive();
@@ -38,15 +38,20 @@ class Webhook
      */
     public static function receive($input = null)
     {
-        if (is_null($input)) {
-            if (self::$receivedWebhook !== null) {
+        if (is_null($input))
+        {
+            if (self::$receivedWebhook !== null)
+            {
                 $input = self::$receivedWebhook;
-            } else {
+            }
+            else
+            {
                 $input = file_get_contents("php://input");
             }
         }
 
-        if (!is_null($input) && $input != '') {
+        if (!is_null($input) && $input != '')
+        {
             return self::processWebhook($input);
         }
 
@@ -64,7 +69,8 @@ class Webhook
     {
         self::$receivedWebhook = $input;
         parse_str($input, $result);
-        if ($result && isset($result['type'])) {
+        if ($result && isset($result['type']))
+        {
             self::dispatchWebhookEvent($result['type'], $result['data']);
             return $result;
         }
@@ -76,18 +82,20 @@ class Webhook
      * Call any subscribed callbacks for this event
      *
      * @param string $event The name of the callback event
-     * @param array  $data  An associative array of the webhook data
+     * @param array $data An associative array of the webhook data
      *
      * @return void
      */
     private static function dispatchWebhookEvent($event, $data)
     {
-        if (isset(self::$eventSubscriptions[$event])) {
-            foreach (self::$eventSubscriptions[$event] as $callback) {
+        if (isset(self::$eventSubscriptions[$event]))
+        {
+            foreach (self::$eventSubscriptions[$event] as $callback)
+            {
                 $callback($data);
             }
             // reset subscriptions
-            self::$eventSubscriptions[$event] = array();
+            self::$eventSubscriptions[$event] = [];
         }
     }
 }

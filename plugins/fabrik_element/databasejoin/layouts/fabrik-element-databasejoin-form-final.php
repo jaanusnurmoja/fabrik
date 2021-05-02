@@ -8,11 +8,11 @@ if (!empty($d->control)) :
 endif;
 
 if (!empty($d->frontEndSelect)) :
-    echo $d->frontEndSelect. "<br />\n";
+    echo $d->frontEndSelect . "<br />\n";
 endif;
 
 if (!empty($d->description)) :
-    echo $d->description. "<br />\n";
+    echo $d->description . "<br />\n";
 endif;
 
 ?>

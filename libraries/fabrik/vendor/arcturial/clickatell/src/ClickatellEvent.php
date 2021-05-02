@@ -24,8 +24,8 @@ namespace Clickatell;
  */
 class ClickatellEvent implements TransportInterface
 {
-    private $request = array();
-    private $response = array();
+    private $request  = [];
+    private $response = [];
     private $transport;
 
     /**
@@ -42,14 +42,15 @@ class ClickatellEvent implements TransportInterface
      * Trigger a specific request event
      *
      * @param string $event The event name
-     * @param object $args  The arguments
+     * @param object $args The arguments
      *
      * @return ClickatellEvent
      */
     private function request($event, $args)
     {
-        foreach ($this->request as $callable) {
-            call_user_func_array($callable, array($event, $args));
+        foreach ($this->request as $callable)
+        {
+            call_user_func_array($callable, [$event, $args]);
         }
 
         return $this;
@@ -59,14 +60,15 @@ class ClickatellEvent implements TransportInterface
      * Trigger a specific response event
      *
      * @param string $event The event name
-     * @param object $obj   The response
+     * @param object $obj The response
      *
      * @return object
      */
     private function response($event, $obj)
     {
-        foreach ($this->response as $callable) {
-            call_user_func_array($callable, array($event, $obj));
+        foreach ($this->response as $callable)
+        {
+            call_user_func_array($callable, [$event, $obj]);
         }
 
         return $obj;
@@ -101,14 +103,14 @@ class ClickatellEvent implements TransportInterface
     /**
      * {@inheritdoc}
      */
-    public function sendMessage($to, $message, $extra = array())
+    public function sendMessage($to, $message, $extra = [])
     {
         $event = __FUNCTION__;
-        $args = (object) array(
-            'to'        => $to,
-            'message'   => $message,
-            'extra'     => $extra
-        );
+        $args = (object)[
+            'to'      => $to,
+            'message' => $message,
+            'extra'   => $extra
+        ];
 
         $res = $this->request($event, $args)->transport->sendMessage($args->to, $args->message, $args->extra);
         return $this->response($event, $res);
@@ -120,7 +122,7 @@ class ClickatellEvent implements TransportInterface
     public function getBalance()
     {
         $event = __FUNCTION__;
-        $args = (object) array();
+        $args = (object)[];
 
         $res = $this->request($event, $args)->transport->getBalance();
         return $this->response($event, $res);
@@ -132,9 +134,9 @@ class ClickatellEvent implements TransportInterface
     public function stopMessage($apiMsgId)
     {
         $event = __FUNCTION__;
-        $args = (object) array(
+        $args = (object)[
             'apiMsgId' => $apiMsgId
-        );
+        ];
 
         $res = $this->request($event, $args)->transport->stopMessage($args->apiMsgId);
         return $this->response($event, $res);
@@ -146,9 +148,9 @@ class ClickatellEvent implements TransportInterface
     public function queryMessage($apiMsgId)
     {
         $event = __FUNCTION__;
-        $args = (object) array(
+        $args = (object)[
             'apiMsgId' => $apiMsgId
-        );
+        ];
 
         $res = $this->request($event, $args)->transport->queryMessage($args->apiMsgId);
         return $this->response($event, $res);
@@ -160,9 +162,9 @@ class ClickatellEvent implements TransportInterface
     public function routeCoverage($msisdn)
     {
         $event = __FUNCTION__;
-        $args = (object) array(
+        $args = (object)[
             'msisdn' => $msisdn
-        );
+        ];
 
         $res = $this->request($event, $args)->transport->routeCoverage($args->msisdn);
         return $this->response($event, $res);
@@ -174,9 +176,9 @@ class ClickatellEvent implements TransportInterface
     public function getMessageCharge($apiMsgId)
     {
         $event = __FUNCTION__;
-        $args = (object) array(
+        $args = (object)[
             'apiMsgId' => $apiMsgId
-        );
+        ];
 
         $res = $this->request($event, $args)->transport->getMessageCharge($args->apiMsgId);
         return $this->response($event, $res);

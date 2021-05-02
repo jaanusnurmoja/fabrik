@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Psr7;
 
 use Psr\Http\Message\ResponseInterface;
@@ -80,11 +81,11 @@ class Response implements ResponseInterface
     private $statusCode = 200;
 
     /**
-     * @param int                                  $status  Status code
-     * @param array                                $headers Response headers
-     * @param string|null|resource|StreamInterface $body    Response body
-     * @param string                               $version Protocol version
-     * @param string|null                          $reason  Reason phrase (when empty a default will be used based on the status code)
+     * @param int $status Status code
+     * @param array $headers Response headers
+     * @param string|null|resource|StreamInterface $body Response body
+     * @param string $version Protocol version
+     * @param string|null $reason Reason phrase (when empty a default will be used based on the status code)
      */
     public function __construct(
         $status = 200,
@@ -92,22 +93,28 @@ class Response implements ResponseInterface
         $body = null,
         $version = '1.1',
         $reason = null
-    ) {
-        if (filter_var($status, FILTER_VALIDATE_INT) === false) {
+    )
+    {
+        if (filter_var($status, FILTER_VALIDATE_INT) === false)
+        {
             throw new \InvalidArgumentException('Status code must be an integer value.');
         }
 
-        $this->statusCode = (int) $status;
+        $this->statusCode = (int)$status;
 
-        if ($body !== '' && $body !== null) {
+        if ($body !== '' && $body !== null)
+        {
             $this->stream = stream_for($body);
         }
 
         $this->setHeaders($headers);
-        if ($reason == '' && isset(self::$phrases[$this->statusCode])) {
+        if ($reason == '' && isset(self::$phrases[$this->statusCode]))
+        {
             $this->reasonPhrase = self::$phrases[$this->statusCode];
-        } else {
-            $this->reasonPhrase = (string) $reason;
+        }
+        else
+        {
+            $this->reasonPhrase = (string)$reason;
         }
 
         $this->protocol = $version;
@@ -126,8 +133,9 @@ class Response implements ResponseInterface
     public function withStatus($code, $reasonPhrase = '')
     {
         $new = clone $this;
-        $new->statusCode = (int) $code;
-        if ($reasonPhrase == '' && isset(self::$phrases[$new->statusCode])) {
+        $new->statusCode = (int)$code;
+        if ($reasonPhrase == '' && isset(self::$phrases[$new->statusCode]))
+        {
             $reasonPhrase = self::$phrases[$new->statusCode];
         }
         $new->reasonPhrase = $reasonPhrase;

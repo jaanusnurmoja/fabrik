@@ -66,8 +66,10 @@ class pdf_context
      */
     public function getPos()
     {
-        if ($this->_mode == 0) {
-            if (feof($this->file)) {
+        if ($this->_mode == 0)
+        {
+            if (feof($this->file))
+            {
                 $stat = fstat($this->file);
                 fseek($this->file, $stat['size']);
             }
@@ -75,7 +77,9 @@ class pdf_context
             $pos = ftell($this->file);
 
             return $pos;
-        } else {
+        }
+        else
+        {
             return 0;
         }
     }
@@ -90,8 +94,10 @@ class pdf_context
      */
     public function reset($pos = null, $l = 100)
     {
-        if ($this->_mode == 0) {
-            if (!is_null($pos)) {
+        if ($this->_mode == 0)
+        {
+            if (!is_null($pos))
+            {
                 fseek($this->file, $pos);
             }
 
@@ -99,12 +105,14 @@ class pdf_context
             $this->length = strlen($this->buffer);
             if ($this->length < $l)
                 $this->increaseLength($l - $this->length);
-        } else {
+        }
+        else
+        {
             $this->buffer = $this->file;
             $this->length = strlen($this->buffer);
         }
         $this->offset = 0;
-        $this->stack = array();
+        $this->stack = [];
     }
 
     /**
@@ -116,9 +124,12 @@ class pdf_context
      */
     public function ensureContent()
     {
-        if ($this->offset >= $this->length - 1) {
+        if ($this->offset >= $this->length - 1)
+        {
             return $this->increaseLength();
-        } else {
+        }
+        else
+        {
             return true;
         }
     }
@@ -131,11 +142,15 @@ class pdf_context
      */
     public function increaseLength($l = 100)
     {
-        if ($this->_mode == 0 && feof($this->file)) {
+        if ($this->_mode == 0 && feof($this->file))
+        {
             return false;
-        } else if ($this->_mode == 0) {
+        }
+        elseif ($this->_mode == 0)
+        {
             $totalLength = $this->length + $l;
-            do {
+            do
+            {
                 $toRead = $totalLength - $this->length;
                 if ($toRead < 1)
                     break;
@@ -144,7 +159,9 @@ class pdf_context
             } while ((($this->length = strlen($this->buffer)) != $totalLength) && !feof($this->file));
 
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }

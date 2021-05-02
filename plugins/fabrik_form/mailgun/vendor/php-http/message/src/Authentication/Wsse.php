@@ -38,9 +38,9 @@ final class Wsse implements Authentication
     public function authenticate(RequestInterface $request)
     {
         // TODO: generate better nonce?
-        $nonce = substr(md5(uniqid(uniqid().'_', true)), 0, 16);
+        $nonce = substr(md5(uniqid(uniqid() . '_', true)), 0, 16);
         $created = date('c');
-        $digest = base64_encode(sha1(base64_decode($nonce).$created.$this->password, true));
+        $digest = base64_encode(sha1(base64_decode($nonce) . $created . $this->password, true));
 
         $wsse = sprintf(
             'UsernameToken Username="%s", PasswordDigest="%s", Nonce="%s", Created="%s"',
@@ -52,7 +52,6 @@ final class Wsse implements Authentication
 
         return $request
             ->withHeader('Authorization', 'WSSE profile="UsernameToken"')
-            ->withHeader('X-WSSE', $wsse)
-        ;
+            ->withHeader('X-WSSE', $wsse);
     }
 }

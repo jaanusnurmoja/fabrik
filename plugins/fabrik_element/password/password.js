@@ -37,9 +37,8 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 this.getConfirmationField().value = this.element.value;
             }
 
-            Fabrik.addEvent('fabrik.form.doelementfx', function(form, method, id, groupfx) {
-                if (form === this.form && id === this.strElement)
-                {
+            Fabrik.addEvent('fabrik.form.doelementfx', function (form, method, id, groupfx) {
+                if (form === this.form && id === this.strElement) {
                     switch (method) {
                         case 'disable':
                             jQuery(this.getConfirmationField()).prop('disabled', true);
@@ -88,25 +87,22 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 } else {
                     html = '<span style="color:red">' + Joomla.JText._('PLG_ELEMENT_PASSWORD_WEAK') + '</span>';
                 }
-	            strength.set('html', html);
+                strength.set('html', html);
             } else {
                 // Bootstrap progress bar
                 var tipTitle = '', newBar;
                 if (strongRegex.test(pwd.value)) {
-	                tipTitle = Joomla.JText._('PLG_ELEMENT_PASSWORD_STRONG');
-	                newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-strong']);
-                }
-                else if (mediumRegex.test(pwd.value)) {
+                    tipTitle = Joomla.JText._('PLG_ELEMENT_PASSWORD_STRONG');
+                    newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-strong']);
+                } else if (mediumRegex.test(pwd.value)) {
                     tipTitle = Joomla.JText._('PLG_ELEMENT_PASSWORD_MEDIUM');
-	                newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-medium']);
-                }
-	            else if (enoughRegex.test(pwd.value)) {
-		            tipTitle = Joomla.JText._('PLG_ELEMENT_PASSWORD_WEAK');
-		            newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-weak']);
-	            }
-                else {
-	                tipTitle = Joomla.JText._('PLG_ELEMENT_PASSWORD_MORE_CHARACTERS');
-	                newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-more']);
+                    newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-medium']);
+                } else if (enoughRegex.test(pwd.value)) {
+                    tipTitle = Joomla.JText._('PLG_ELEMENT_PASSWORD_WEAK');
+                    newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-weak']);
+                } else {
+                    tipTitle = Joomla.JText._('PLG_ELEMENT_PASSWORD_MORE_CHARACTERS');
+                    newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-more']);
 
                 }
                 var options = {
@@ -122,5 +118,5 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         }
     });
 
-    return  window.FbPassword;
+    return window.FbPassword;
 });

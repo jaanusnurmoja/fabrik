@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Ssm;
 
 use Aws\AwsClient;
@@ -229,4 +230,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updatePatchBaseline(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updatePatchBaselineAsync(array $args = [])
  */
-class SsmClient extends AwsClient {}
+class SsmClient extends AwsClient
+{
+}

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Credentials;
 
 use Aws\Exception\CredentialsException;
@@ -30,11 +31,13 @@ class AssumeRoleCredentialProvider
      */
     public function __construct(array $config = [])
     {
-        if (!isset($config['assume_role_params'])) {
+        if (!isset($config['assume_role_params']))
+        {
             throw new \InvalidArgumentException(self::ERROR_MSG . "'assume_role_params'.");
         }
 
-        if (!isset($config['client'])) {
+        if (!isset($config['client']))
+        {
             throw new \InvalidArgumentException(self::ERROR_MSG . "'client'.");
         }
 
@@ -51,9 +54,11 @@ class AssumeRoleCredentialProvider
     {
         $client = $this->client;
         return $client->assumeRoleAsync($this->assumeRoleParams)
-            ->then(function (Result $result) {
+            ->then(function (Result $result)
+            {
                 return $this->client->createCredentials($result);
-            })->otherwise(function (\RuntimeException $exception) {
+            })->otherwise(function (\RuntimeException $exception)
+            {
                 throw new CredentialsException(
                     "Error in retrieving assume role credentials.",
                     0,

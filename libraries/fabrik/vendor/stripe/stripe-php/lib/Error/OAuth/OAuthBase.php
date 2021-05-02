@@ -11,7 +11,8 @@ class OAuthBase extends \Stripe\Error\Base
         $httpBody = null,
         $jsonBody = null,
         $httpHeaders = null
-    ) {
+    )
+    {
         parent::__construct($description, $httpStatus, $httpBody, $jsonBody, $httpHeaders);
         $this->errorCode = $code;
     }

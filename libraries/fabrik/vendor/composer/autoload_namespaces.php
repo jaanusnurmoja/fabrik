@@ -5,7 +5,7 @@
 $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
-return array(
-    'Svg\\' => array($vendorDir . '/phenx/php-svg-lib/src'),
-    'Sabberworm\\CSS' => array($vendorDir . '/sabberworm/php-css-parser/lib'),
-);
+return [
+    'Svg\\'           => [$vendorDir . '/phenx/php-svg-lib/src'],
+    'Sabberworm\\CSS' => [$vendorDir . '/sabberworm/php-css-parser/lib'],
+];

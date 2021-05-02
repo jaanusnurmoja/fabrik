@@ -33,21 +33,22 @@ class SocketPostTest extends \PHPUnit_Framework_TestCase
 
     public function testSubmitSuccess()
     {
-        $socket = $this->getMock('\\ReCaptcha\\RequestMethod\\Socket', array('fsockopen', 'fwrite', 'fgets', 'feof', 'fclose'));
+        $socket = $this->getMock('\\ReCaptcha\\RequestMethod\\Socket',
+            ['fsockopen', 'fwrite', 'fgets', 'feof', 'fclose']);
         $socket->expects($this->once())
-                ->method('fsockopen')
-                ->willReturn(true);
+            ->method('fsockopen')
+            ->willReturn(true);
         $socket->expects($this->once())
-                ->method('fwrite');
+            ->method('fwrite');
         $socket->expects($this->once())
-                ->method('fgets')
-                ->willReturn("HTTP/1.1 200 OK\n\nRESPONSEBODY");
+            ->method('fgets')
+            ->willReturn("HTTP/1.1 200 OK\n\nRESPONSEBODY");
         $socket->expects($this->exactly(2))
-                ->method('feof')
-                ->will($this->onConsecutiveCalls(false, true));
+            ->method('feof')
+            ->will($this->onConsecutiveCalls(false, true));
         $socket->expects($this->once())
-                ->method('fclose')
-                ->willReturn(true);
+            ->method('fclose')
+            ->willReturn(true);
 
         $ps = new SocketPost($socket);
         $response = $ps->submit(new RequestParameters("secret", "response", "remoteip", "version"));
@@ -56,21 +57,22 @@ class SocketPostTest extends \PHPUnit_Framework_TestCase
 
     public function testSubmitBadResponse()
     {
-        $socket = $this->getMock('\\ReCaptcha\\RequestMethod\\Socket', array('fsockopen', 'fwrite', 'fgets', 'feof', 'fclose'));
+        $socket = $this->getMock('\\ReCaptcha\\RequestMethod\\Socket',
+            ['fsockopen', 'fwrite', 'fgets', 'feof', 'fclose']);
         $socket->expects($this->once())
-                ->method('fsockopen')
-                ->willReturn(true);
+            ->method('fsockopen')
+            ->willReturn(true);
         $socket->expects($this->once())
-                ->method('fwrite');
+            ->method('fwrite');
         $socket->expects($this->once())
-                ->method('fgets')
-                ->willReturn("HTTP/1.1 500 NOPEn\\nBOBBINS");
+            ->method('fgets')
+            ->willReturn("HTTP/1.1 500 NOPEn\\nBOBBINS");
         $socket->expects($this->exactly(2))
-                ->method('feof')
-                ->will($this->onConsecutiveCalls(false, true));
+            ->method('feof')
+            ->will($this->onConsecutiveCalls(false, true));
         $socket->expects($this->once())
-                ->method('fclose')
-                ->willReturn(true);
+            ->method('fclose')
+            ->willReturn(true);
 
         $ps = new SocketPost($socket);
         $response = $ps->submit(new RequestParameters("secret", "response", "remoteip", "version"));
@@ -79,10 +81,10 @@ class SocketPostTest extends \PHPUnit_Framework_TestCase
 
     public function testSubmitBadRequest()
     {
-        $socket = $this->getMock('\\ReCaptcha\\RequestMethod\\Socket', array('fsockopen'));
+        $socket = $this->getMock('\\ReCaptcha\\RequestMethod\\Socket', ['fsockopen']);
         $socket->expects($this->once())
-                ->method('fsockopen')
-                ->willReturn(false);
+            ->method('fsockopen')
+            ->willReturn(false);
         $ps = new SocketPost($socket);
         $response = $ps->submit(new RequestParameters("secret", "response", "remoteip", "version"));
         $this->assertEquals(SocketPost::BAD_REQUEST, $response);

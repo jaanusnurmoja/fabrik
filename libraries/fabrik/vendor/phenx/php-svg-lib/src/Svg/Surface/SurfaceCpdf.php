@@ -32,21 +32,22 @@ class SurfaceCpdf implements SurfaceInterface
         $w = $dimensions["width"];
         $h = $dimensions["height"];
 
-        if (!$canvas) {
-            $canvas = new \CPdf\CPdf(array(0, 0, $w, $h));
+        if (!$canvas)
+        {
+            $canvas = new \CPdf\CPdf([0, 0, $w, $h]);
             $refl = new \ReflectionClass($canvas);
-            $canvas->fontcache = realpath(dirname($refl->getFileName()) . "/../../fonts/")."/";
+            $canvas->fontcache = realpath(dirname($refl->getFileName()) . "/../../fonts/") . "/";
         }
 
         // Flip PDF coordinate system so that the origin is in
         // the top left rather than the bottom left
-        $canvas->transform(array(
-            1,  0,
+        $canvas->transform([
+            1, 0,
             0, -1,
             0, $h
-        ));
+        ]);
 
-        $this->width  = $w;
+        $this->width = $w;
         $this->height = $h;
 
         $this->canvas = $canvas;
@@ -86,8 +87,8 @@ class SurfaceCpdf implements SurfaceInterface
         $sin_a = sin($a);
 
         $this->transform(
-            $cos_a,                         $sin_a,
-            -$sin_a,                         $cos_a,
+            $cos_a, $sin_a,
+            -$sin_a, $cos_a,
             0, 0
         );
     }
@@ -97,8 +98,8 @@ class SurfaceCpdf implements SurfaceInterface
         if (self::DEBUG) echo __FUNCTION__ . "\n";
 
         $this->transform(
-            1,  0,
-            0,  1,
+            1, 0,
+            0, 1,
             $x, $y
         );
     }
@@ -107,7 +108,7 @@ class SurfaceCpdf implements SurfaceInterface
     {
         if (self::DEBUG) echo __FUNCTION__ . "\n";
 
-        $this->canvas->transform(array($a, $b, $c, $d, $e, $f));
+        $this->canvas->transform([$a, $b, $c, $d, $e, $f]);
     }
 
     public function beginPath()
@@ -150,26 +151,31 @@ class SurfaceCpdf implements SurfaceInterface
     {
         if (self::DEBUG) echo __FUNCTION__ . "\n";
 
-        if (strpos($image, "data:") === 0) {
+        if (strpos($image, "data:") === 0)
+        {
             $parts = explode(',', $image, 2);
 
             $data = $parts[1];
             $base64 = false;
 
             $token = strtok($parts[0], ';');
-            while ($token !== false) {
-                if ($token == 'base64') {
+            while ($token !== false)
+            {
+                if ($token == 'base64')
+                {
                     $base64 = true;
                 }
 
                 $token = strtok(';');
             }
 
-            if ($base64) {
+            if ($base64)
+            {
                 $data = base64_decode($data);
             }
         }
-        else {
+        else
+        {
             $data = file_get_contents($image);
         }
 
@@ -184,18 +190,21 @@ class SurfaceCpdf implements SurfaceInterface
 
     public static function getimagesize($filename)
     {
-        static $cache = array();
+        static $cache = [];
 
-        if (isset($cache[$filename])) {
+        if (isset($cache[$filename]))
+        {
             return $cache[$filename];
         }
 
         list($width, $height, $type) = getimagesize($filename);
 
-        if ($width == null || $height == null) {
+        if ($width == null || $height == null)
+        {
             $data = file_get_contents($filename, null, null, 0, 26);
 
-            if (substr($data, 0, 2) === "BM") {
+            if (substr($data, 0, 2) === "BM")
+            {
                 $meta = unpack('vtype/Vfilesize/Vreserved/Voffset/Vheadersize/Vwidth/Vheight', $data);
                 $width = (int)$meta['width'];
                 $height = (int)$meta['height'];
@@ -203,14 +212,15 @@ class SurfaceCpdf implements SurfaceInterface
             }
         }
 
-        return $cache[$filename] = array($width, $height, $type);
+        return $cache[$filename] = [$width, $height, $type];
     }
 
     function image($img, $x, $y, $w, $h, $resolution = "normal")
     {
         list($width, $height, $type) = $this->getimagesize($img);
 
-        switch ($type) {
+        switch ($type)
+        {
             case IMAGETYPE_JPEG:
                 $this->canvas->addJpegFromFile($img, $x, $y - $h, $w, $h);
                 break;
@@ -290,7 +300,8 @@ class SurfaceCpdf implements SurfaceInterface
 
         $canvas = $this->canvas;
 
-        if ($rx <= 0.000001/* && $ry <= 0.000001*/) {
+        if ($rx <= 0.000001/* && $ry <= 0.000001*/)
+        {
             $canvas->rect($x, $y, $w, $h);
 
             return;
@@ -311,7 +322,7 @@ class SurfaceCpdf implements SurfaceInterface
         $this->arc($x + $w - $rx, $y + $rx, $rx, 270, 360);
 
         /* Start of the arc segment in the upper right corner */
-        $this->lineTo($x + $w, $y + $h - $rx );
+        $this->lineTo($x + $w, $y + $h - $rx);
 
         /* Arc segment in the upper right corner */
         $this->arc($x + $w - $rx, $y + $h - $rx, $rx, 0, 90);
@@ -323,7 +334,7 @@ class SurfaceCpdf implements SurfaceInterface
         $this->arc($x + $rx, $y + $h - $rx, $rx, 90, 180);
 
         /* Start of the arc segment in the lower left corner */
-        $this->lineTo($x , $y + $rx);
+        $this->lineTo($x, $y + $rx);
 
         /* Arc segment in the lower left corner */
         $this->arc($x + $rx, $y + $rx, $rx, 180, 270);
@@ -376,42 +387,50 @@ class SurfaceCpdf implements SurfaceInterface
         $this->style = $style;
         $canvas = $this->canvas;
 
-        if (is_array($style->stroke) && $stroke = $style->stroke) {
-            $canvas->setStrokeColor(array((float)$stroke[0]/255, (float)$stroke[1]/255, (float)$stroke[2]/255), true);
+        if (is_array($style->stroke) && $stroke = $style->stroke)
+        {
+            $canvas->setStrokeColor([(float)$stroke[0] / 255, (float)$stroke[1] / 255, (float)$stroke[2] / 255], true);
         }
 
-        if (is_array($style->fill) && $fill = $style->fill) {
-            $canvas->setColor(array((float)$fill[0]/255, (float)$fill[1]/255, (float)$fill[2]/255), true);
+        if (is_array($style->fill) && $fill = $style->fill)
+        {
+            $canvas->setColor([(float)$fill[0] / 255, (float)$fill[1] / 255, (float)$fill[2] / 255], true);
         }
 
-        if ($fillRule = strtolower($style->fillRule)) {
+        if ($fillRule = strtolower($style->fillRule))
+        {
             $canvas->setFillRule($fillRule);
         }
 
         $opacity = $style->opacity;
-        if ($opacity !== null && $opacity < 1.0) {
+        if ($opacity !== null && $opacity < 1.0)
+        {
             $canvas->setLineTransparency("Normal", $opacity);
             $canvas->currentLineTransparency = null;
 
             $canvas->setFillTransparency("Normal", $opacity);
             $canvas->currentFillTransparency = null;
         }
-        else {
+        else
+        {
             $fillOpacity = $style->fillOpacity;
-            if ($fillOpacity !== null && $fillOpacity < 1.0) {
+            if ($fillOpacity !== null && $fillOpacity < 1.0)
+            {
                 $canvas->setFillTransparency("Normal", $fillOpacity);
                 $canvas->currentFillTransparency = null;
             }
 
             $strokeOpacity = $style->strokeOpacity;
-            if ($strokeOpacity !== null && $strokeOpacity < 1.0) {
+            if ($strokeOpacity !== null && $strokeOpacity < 1.0)
+            {
                 $canvas->setLineTransparency("Normal", $strokeOpacity);
                 $canvas->currentLineTransparency = null;
             }
         }
 
         $dashArray = null;
-        if ($style->strokeDasharray) {
+        if ($style->strokeDasharray)
+        {
             $dashArray = preg_split('/\s*,\s*/', $style->strokeDasharray);
         }
 
@@ -427,56 +446,61 @@ class SurfaceCpdf implements SurfaceInterface
 
     public function setFont($family, $style, $weight)
     {
-        $map = array(
+        $map = [
             "serif"      => "Times",
             "sans-serif" => "Helvetica",
             "fantasy"    => "Symbol",
             "cursive"    => "Times",
             "monospace"  => "Courier",
 
-            "arial"      => "Helvetica",
-            "verdana"    => "Helvetica",
-        );
+            "arial"   => "Helvetica",
+            "verdana" => "Helvetica",
+        ];
 
-        $styleMap = array(
-            'Helvetica' => array(
+        $styleMap = [
+            'Helvetica' => [
                 'b'  => 'Helvetica-Bold',
                 'i'  => 'Helvetica-Oblique',
                 'bi' => 'Helvetica-BoldOblique',
-            ),
-            'Courier' => array(
+            ],
+            'Courier'   => [
                 'b'  => 'Courier-Bold',
                 'i'  => 'Courier-Oblique',
                 'bi' => 'Courier-BoldOblique',
-            ),
-            'Times' => array(
+            ],
+            'Times'     => [
                 ''   => 'Times-Roman',
                 'b'  => 'Times-Bold',
                 'i'  => 'Times-Italic',
                 'bi' => 'Times-BoldItalic',
-            ),
-        );
+            ],
+        ];
 
         $family = strtolower($family);
-        $style  = strtolower($style);
+        $style = strtolower($style);
         $weight = strtolower($weight);
 
-        if (isset($map[$family])) {
+        if (isset($map[$family]))
+        {
             $family = $map[$family];
         }
 
-        if (isset($styleMap[$family])) {
+        if (isset($styleMap[$family]))
+        {
             $key = "";
 
-            if ($weight === "bold" || $weight === "bolder" || (is_numeric($weight) && $weight >= 600)) {
+            if ($weight === "bold" || $weight === "bolder" || (is_numeric($weight) && $weight >= 600))
+            {
                 $key .= "b";
             }
 
-            if ($style === "italic" || $style === "oblique") {
+            if ($style === "italic" || $style === "oblique")
+            {
                 $key .= "i";
             }
 
-            if (isset($styleMap[$family][$key])) {
+            if (isset($styleMap[$family][$key]))
+            {
                 $family = $styleMap[$family][$key];
             }
         }

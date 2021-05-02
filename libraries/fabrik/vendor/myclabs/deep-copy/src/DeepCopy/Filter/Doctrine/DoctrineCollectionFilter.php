@@ -23,7 +23,8 @@ class DoctrineCollectionFilter implements Filter
         $oldCollection = $reflectionProperty->getValue($object);
 
         $newCollection = $oldCollection->map(
-            function ($item) use ($objectCopier) {
+            function ($item) use ($objectCopier)
+            {
                 return $objectCopier($item);
             }
         );

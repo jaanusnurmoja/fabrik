@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Transfer;
 
 use Aws\AwsClient;
@@ -42,4 +43,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateUser(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateUserAsync(array $args = [])
  */
-class TransferClient extends AwsClient {}
+class TransferClient extends AwsClient
+{
+}

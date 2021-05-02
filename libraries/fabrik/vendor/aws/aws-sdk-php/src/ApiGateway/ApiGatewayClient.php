@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\ApiGateway;
 
 use Aws\AwsClient;
@@ -263,7 +264,8 @@ class ApiGatewayClient extends AwsClient
         return function (
             CommandInterface $command,
             RequestInterface $request
-        ) use ($handler) {
+        ) use ($handler)
+        {
             $request = $request->withHeader('Accept', 'application/json');
 
             return $handler($command, $request);

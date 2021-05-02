@@ -90,17 +90,17 @@ define(['jquery'], function (jQuery) {
                 '&plugin=fabriklockrow&method=ajax_unlock';
 */
             var data = {
-                'option'     : 'com_fabrik',
-                'format'     : 'raw',
-                'task'       : 'plugin.pluginAjax',
-                'plugin'     : 'lockrow',
-                'g'          : 'element',
-                'method'     : 'ajax_unlock',
-                'formid'     : this.options.formid,
-                'element_id' : this.options.elid,
-                'row_id'     : rowid,
+                'option': 'com_fabrik',
+                'format': 'raw',
+                'task': 'plugin.pluginAjax',
+                'plugin': 'lockrow',
+                'g': 'element',
+                'method': 'ajax_unlock',
+                'formid': this.options.formid,
+                'element_id': this.options.elid,
+                'row_id': rowid,
                 'elementname': this.options.elid,
-                'userid'     : this.options.userid
+                'userid': this.options.userid
             };
 
             new Request({
@@ -129,7 +129,7 @@ define(['jquery'], function (jQuery) {
                         }
                     }
                 }.bind(this)
-        }).send();
+            }).send();
         },
 
         doAjaxLock: function (unlocked) {
@@ -147,17 +147,17 @@ define(['jquery'], function (jQuery) {
                 '&plugin=fabriklockrow&method=ajax_unlock';
 */
             var data = {
-                'option'     : 'com_fabrik',
-                'format'     : 'raw',
-                'task'       : 'plugin.pluginAjax',
-                'plugin'     : 'lockrow',
-                'g'          : 'element',
-                'method'     : 'ajax_lock',
-                'formid'     : this.options.formid,
-                'element_id' : this.options.elid,
-                'row_id'     : rowid,
+                'option': 'com_fabrik',
+                'format': 'raw',
+                'task': 'plugin.pluginAjax',
+                'plugin': 'lockrow',
+                'g': 'element',
+                'method': 'ajax_lock',
+                'formid': this.options.formid,
+                'element_id': this.options.elid,
+                'row_id': rowid,
                 'elementname': this.options.elid,
-                'userid'     : this.options.userid
+                'userid': this.options.userid
             };
 
             new Request({

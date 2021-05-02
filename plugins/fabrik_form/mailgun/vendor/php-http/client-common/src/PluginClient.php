@@ -41,22 +41,27 @@ final class PluginClient implements HttpClient, HttpAsyncClient
 
     /**
      * @param HttpClient|HttpAsyncClient $client
-     * @param Plugin[]                   $plugins
-     * @param array                      $options {
-     *
-     *     @var int      $max_restarts
-     *     @var Plugin[] $debug_plugins an array of plugins that are injected between each normal plugin
-     * }
+     * @param Plugin[] $plugins
+     * @param array $options {
      *
      * @throws \RuntimeException if client is not an instance of HttpClient or HttpAsyncClient
+     * @var Plugin[] $debug_plugins an array of plugins that are injected between each normal plugin
+     * }
+     *
+     * @var int $max_restarts
      */
     public function __construct($client, array $plugins = [], array $options = [])
     {
-        if ($client instanceof HttpAsyncClient) {
+        if ($client instanceof HttpAsyncClient)
+        {
             $this->client = $client;
-        } elseif ($client instanceof HttpClient) {
+        }
+        elseif ($client instanceof HttpClient)
+        {
             $this->client = new EmulatedHttpAsyncClient($client);
-        } else {
+        }
+        else
+        {
             throw new \RuntimeException('Client must be an instance of Http\\Client\\HttpClient or Http\\Client\\HttpAsyncClient');
         }
 
@@ -70,16 +75,21 @@ final class PluginClient implements HttpClient, HttpAsyncClient
     public function sendRequest(RequestInterface $request)
     {
         // If we don't have an http client, use the async call
-        if (!($this->client instanceof HttpClient)) {
+        if (!($this->client instanceof HttpClient))
+        {
             return $this->sendAsyncRequest($request)->wait();
         }
 
         // Else we want to use the synchronous call of the underlying client, and not the async one in the case
         // we have both an async and sync call
-        $pluginChain = $this->createPluginChain($this->plugins, function (RequestInterface $request) {
-            try {
+        $pluginChain = $this->createPluginChain($this->plugins, function (RequestInterface $request)
+        {
+            try
+            {
                 return new HttpFulfilledPromise($this->client->sendRequest($request));
-            } catch (HttplugException $exception) {
+            }
+            catch (HttplugException $exception)
+            {
                 return new HttpRejectedPromise($exception);
             }
         });
@@ -92,7 +102,8 @@ final class PluginClient implements HttpClient, HttpAsyncClient
      */
     public function sendAsyncRequest(RequestInterface $request)
     {
-        $pluginChain = $this->createPluginChain($this->plugins, function (RequestInterface $request) {
+        $pluginChain = $this->createPluginChain($this->plugins, function (RequestInterface $request)
+        {
             return $this->client->sendAsyncRequest($request);
         });
 
@@ -108,22 +119,27 @@ final class PluginClient implements HttpClient, HttpAsyncClient
      */
     private function configure(array $options = [])
     {
-        if (isset($options['debug_plugins'])) {
-            @trigger_error('The "debug_plugins" option is deprecated since 1.5 and will be removed in 2.0.', E_USER_DEPRECATED);
+        if (isset($options['debug_plugins']))
+        {
+            @trigger_error('The "debug_plugins" option is deprecated since 1.5 and will be removed in 2.0.',
+                E_USER_DEPRECATED);
         }
 
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
-            'max_restarts' => 10,
+            'max_restarts'  => 10,
             'debug_plugins' => [],
         ]);
 
         $resolver
             ->setAllowedTypes('debug_plugins', 'array')
-            ->setAllowedValues('debug_plugins', function (array $plugins) {
-                foreach ($plugins as $plugin) {
+            ->setAllowedValues('debug_plugins', function (array $plugins)
+            {
+                foreach ($plugins as $plugin)
+                {
                     // Make sure each object passed with the `debug_plugins` is an instance of Plugin.
-                    if (!$plugin instanceof Plugin) {
+                    if (!$plugin instanceof Plugin)
+                    {
                         return false;
                     }
                 }
@@ -137,7 +153,7 @@ final class PluginClient implements HttpClient, HttpAsyncClient
     /**
      * Create the plugin chain.
      *
-     * @param Plugin[] $pluginList     A list of plugins
+     * @param Plugin[] $pluginList A list of plugins
      * @param callable $clientCallable Callable making the HTTP call
      *
      * @return callable
@@ -150,13 +166,16 @@ final class PluginClient implements HttpClient, HttpAsyncClient
          * Inject debug plugins between each plugin.
          */
         $pluginListWithDebug = $this->options['debug_plugins'];
-        foreach ($pluginList as $plugin) {
+        foreach ($pluginList as $plugin)
+        {
             $pluginListWithDebug[] = $plugin;
             $pluginListWithDebug = array_merge($pluginListWithDebug, $this->options['debug_plugins']);
         }
 
-        while ($plugin = array_pop($pluginListWithDebug)) {
-            $lastCallable = function (RequestInterface $request) use ($plugin, $lastCallable, &$firstCallable) {
+        while ($plugin = array_pop($pluginListWithDebug))
+        {
+            $lastCallable = function (RequestInterface $request) use ($plugin, $lastCallable, &$firstCallable)
+            {
                 return $plugin->handleRequest($request, $lastCallable, $firstCallable);
             };
 
@@ -164,8 +183,10 @@ final class PluginClient implements HttpClient, HttpAsyncClient
         }
 
         $firstCalls = 0;
-        $firstCallable = function (RequestInterface $request) use ($lastCallable, &$firstCalls) {
-            if ($firstCalls > $this->options['max_restarts']) {
+        $firstCallable = function (RequestInterface $request) use ($lastCallable, &$firstCalls)
+        {
+            if ($firstCalls > $this->options['max_restarts'])
+            {
                 throw new LoopException('Too many restarts in plugin client', $request);
             }
 

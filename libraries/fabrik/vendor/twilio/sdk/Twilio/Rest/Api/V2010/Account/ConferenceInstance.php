@@ -28,48 +28,52 @@ use Twilio\Version;
  * @property string uri
  * @property array subresourceUris
  */
-class ConferenceInstance extends InstanceResource {
+class ConferenceInstance extends InstanceResource
+{
     protected $_participants = null;
-    protected $_recordings = null;
+    protected $_recordings   = null;
 
     /**
      * Initialize the ConferenceInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $accountSid The unique sid that identifies this account
      * @param string $sid Fetch by unique conference Sid
-     * @return \Twilio\Rest\Api\V2010\Account\ConferenceInstance 
+     * @return \Twilio\Rest\Api\V2010\Account\ConferenceInstance
      */
-    public function __construct(Version $version, array $payload, $accountSid, $sid = null) {
+    public function __construct(Version $version, array $payload, $accountSid, $sid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'dateCreated' => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
-            'dateUpdated' => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
-            'apiVersion' => Values::array_get($payload, 'api_version'),
-            'friendlyName' => Values::array_get($payload, 'friendly_name'),
-            'region' => Values::array_get($payload, 'region'),
-            'sid' => Values::array_get($payload, 'sid'),
-            'status' => Values::array_get($payload, 'status'),
-            'uri' => Values::array_get($payload, 'uri'),
+        $this->properties = [
+            'accountSid'      => Values::array_get($payload, 'account_sid'),
+            'dateCreated'     => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
+            'dateUpdated'     => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
+            'apiVersion'      => Values::array_get($payload, 'api_version'),
+            'friendlyName'    => Values::array_get($payload, 'friendly_name'),
+            'region'          => Values::array_get($payload, 'region'),
+            'sid'             => Values::array_get($payload, 'sid'),
+            'status'          => Values::array_get($payload, 'status'),
+            'uri'             => Values::array_get($payload, 'uri'),
             'subresourceUris' => Values::array_get($payload, 'subresource_uris'),
-        );
+        ];
 
-        $this->solution = array('accountSid' => $accountSid, 'sid' => $sid ?: $this->properties['sid'], );
+        $this->solution = ['accountSid' => $accountSid, 'sid' => $sid ?: $this->properties['sid'],];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Api\V2010\Account\ConferenceContext Context for this
      *                                                          ConferenceInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new ConferenceContext(
                 $this->version,
                 $this->solution['accountSid'],
@@ -82,56 +86,63 @@ class ConferenceInstance extends InstanceResource {
 
     /**
      * Fetch a ConferenceInstance
-     * 
+     *
      * @return ConferenceInstance Fetched ConferenceInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Update the ConferenceInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return ConferenceInstance Updated ConferenceInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         return $this->proxy()->update($options);
     }
 
     /**
      * Access the participants
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\Conference\ParticipantList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\Conference\ParticipantList
      */
-    protected function getParticipants() {
+    protected function getParticipants()
+    {
         return $this->proxy()->participants;
     }
 
     /**
      * Access the recordings
-     * 
-     * @return \Twilio\Rest\Api\V2010\Account\Conference\RecordingList 
+     *
+     * @return \Twilio\Rest\Api\V2010\Account\Conference\RecordingList
      */
-    protected function getRecordings() {
+    protected function getRecordings()
+    {
         return $this->proxy()->recordings;
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -141,12 +152,14 @@ class ConferenceInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Api.V2010.ConferenceInstance ' . implode(' ', $context) . ']';

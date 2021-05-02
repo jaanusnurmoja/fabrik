@@ -14,15 +14,15 @@
             </field>
 
             <field name="log_mode"
-				   type="radio"
-				   default="all"
+                   type="radio"
+                   default="all"
                    repeat="true"
                    label="PLG_FORM_LOG_MODE_LABEL"
                    description="PLG_FORM_LOG_MODE_DESC"
                    class="btn-group">
                 <option value="all">PLG_FORM_LOG_MODE_ALL</option>
                 <option value="include">PLG_FORM_LOG_MODE_INCLUDE</option>
-				<option value="exclude">PLG_FORM_LOG_MODE_EXCLUDE</option>
+                <option value="exclude">PLG_FORM_LOG_MODE_EXCLUDE</option>
             </field>
 
             <field name="log_fields"

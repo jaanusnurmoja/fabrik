@@ -21,18 +21,21 @@ final class FlexibleHttpClient implements HttpClient, HttpAsyncClient
      */
     public function __construct($client)
     {
-        if (!($client instanceof HttpClient) && !($client instanceof HttpAsyncClient)) {
+        if (!($client instanceof HttpClient) && !($client instanceof HttpAsyncClient))
+        {
             throw new \LogicException('Client must be an instance of Http\\Client\\HttpClient or Http\\Client\\HttpAsyncClient');
         }
 
         $this->httpClient = $client;
         $this->httpAsyncClient = $client;
 
-        if (!($this->httpClient instanceof HttpClient)) {
+        if (!($this->httpClient instanceof HttpClient))
+        {
             $this->httpClient = new EmulatedHttpClient($this->httpClient);
         }
 
-        if (!($this->httpAsyncClient instanceof HttpAsyncClient)) {
+        if (!($this->httpAsyncClient instanceof HttpAsyncClient))
+        {
             $this->httpAsyncClient = new EmulatedHttpAsyncClient($this->httpAsyncClient);
         }
     }

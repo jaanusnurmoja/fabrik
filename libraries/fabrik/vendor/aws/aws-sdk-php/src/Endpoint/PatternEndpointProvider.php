@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Endpoint;
 
 /**
@@ -24,8 +25,10 @@ class PatternEndpointProvider
         $region = isset($args['region']) ? $args['region'] : '';
         $keys = ["{$region}/{$service}", "{$region}/*", "*/{$service}", "*/*"];
 
-        foreach ($keys as $key) {
-            if (isset($this->patterns[$key])) {
+        foreach ($keys as $key)
+        {
+            if (isset($this->patterns[$key]))
+            {
                 return $this->expand(
                     $this->patterns[$key],
                     isset($args['scheme']) ? $args['scheme'] : 'https',

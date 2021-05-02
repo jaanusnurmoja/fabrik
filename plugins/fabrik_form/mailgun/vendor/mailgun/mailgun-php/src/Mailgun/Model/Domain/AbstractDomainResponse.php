@@ -48,22 +48,28 @@ abstract class AbstractDomainResponse implements ApiResponse
         $domain = null;
         $message = null;
 
-        if (isset($data['domain'])) {
+        if (isset($data['domain']))
+        {
             $domain = Domain::create($data['domain']);
         }
 
-        if (isset($data['message'])) {
+        if (isset($data['message']))
+        {
             $message = $data['message'];
         }
 
-        if (isset($data['receiving_dns_records'])) {
-            foreach ($data['receiving_dns_records'] as $item) {
+        if (isset($data['receiving_dns_records']))
+        {
+            foreach ($data['receiving_dns_records'] as $item)
+            {
                 $rx[] = DnsRecord::create($item);
             }
         }
 
-        if (isset($data['sending_dns_records'])) {
-            foreach ($data['sending_dns_records'] as $item) {
+        if (isset($data['sending_dns_records']))
+        {
+            foreach ($data['sending_dns_records'] as $item)
+            {
                 $tx[] = DnsRecord::create($item);
             }
         }
@@ -72,10 +78,10 @@ abstract class AbstractDomainResponse implements ApiResponse
     }
 
     /**
-     * @param Domain      $domainInfo
+     * @param Domain $domainInfo
      * @param DnsRecord[] $rxRecords
      * @param DnsRecord[] $txRecords
-     * @param string      $message
+     * @param string $message
      */
     private function __construct(Domain $domainInfo, array $rxRecords, array $txRecords, $message)
     {

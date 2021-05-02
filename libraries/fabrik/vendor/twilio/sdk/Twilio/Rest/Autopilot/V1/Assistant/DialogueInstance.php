@@ -16,47 +16,51 @@ use Twilio\Version;
 
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- * 
+ *
  * @property string accountSid
  * @property string assistantSid
  * @property string sid
  * @property array data
  * @property string url
  */
-class DialogueInstance extends InstanceResource {
+class DialogueInstance extends InstanceResource
+{
     /**
      * Initialize the DialogueInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $assistantSid The unique ID of the parent Assistant.
      * @param string $sid The sid
-     * @return \Twilio\Rest\Autopilot\V1\Assistant\DialogueInstance 
+     * @return \Twilio\Rest\Autopilot\V1\Assistant\DialogueInstance
      */
-    public function __construct(Version $version, array $payload, $assistantSid, $sid = null) {
+    public function __construct(Version $version, array $payload, $assistantSid, $sid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
+        $this->properties = [
+            'accountSid'   => Values::array_get($payload, 'account_sid'),
             'assistantSid' => Values::array_get($payload, 'assistant_sid'),
-            'sid' => Values::array_get($payload, 'sid'),
-            'data' => Values::array_get($payload, 'data'),
-            'url' => Values::array_get($payload, 'url'),
-        );
+            'sid'          => Values::array_get($payload, 'sid'),
+            'data'         => Values::array_get($payload, 'data'),
+            'url'          => Values::array_get($payload, 'url'),
+        ];
 
-        $this->solution = array('assistantSid' => $assistantSid, 'sid' => $sid ?: $this->properties['sid'], );
+        $this->solution = ['assistantSid' => $assistantSid, 'sid' => $sid ?: $this->properties['sid'],];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Autopilot\V1\Assistant\DialogueContext Context for this
      *                                                             DialogueInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new DialogueContext(
                 $this->version,
                 $this->solution['assistantSid'],
@@ -69,27 +73,31 @@ class DialogueInstance extends InstanceResource {
 
     /**
      * Fetch a DialogueInstance
-     * 
+     *
      * @return DialogueInstance Fetched DialogueInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -99,12 +107,14 @@ class DialogueInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Autopilot.V1.DialogueInstance ' . implode(' ', $context) . ']';

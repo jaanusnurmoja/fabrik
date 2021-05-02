@@ -1,8 +1,9 @@
-
 ## Available service classes
-Consult [Bitly API v4](https://dev.bitly.com/v4/) for required and available parameters to pass to each methods. Path parameters must be 
-first argument of methods as string if necessary and Query parameters must be passed as an array to the second argument of methods if ncessary. 
-If a method doesn't have a Path parameter, Query Parameter will be first argument.
+
+Consult [Bitly API v4](https://dev.bitly.com/v4/) for required and available parameters to pass to each methods. Path
+parameters must be first argument of methods as string if necessary and Query parameters must be passed as an array to
+the second argument of methods if ncessary. If a method doesn't have a Path parameter, Query Parameter will be first
+argument.
 
 * [Bitlink](#bitlink)
 * [Group](#group)
@@ -15,6 +16,7 @@ If a method doesn't have a Path parameter, Query Parameter will be first argumen
 * [Auth](#auth)
 
 ### Bitlink:
+
 ```php
 use PHPLicengine\Api\Api;
 use PHPLicengine\Service\Bitlink;
@@ -34,6 +36,7 @@ $result = $bitlink->getMetricsForBitlinkByReferringDomains('bit.ly/34nRNvl');
 ```
 
 ### Group:
+
 ```php
 use PHPLicengine\Api\Api;
 use PHPLicengine\Service\Group;
@@ -54,6 +57,7 @@ $result = $group->deleteGroup('Bjar7NnSIp0');
 ```
 
 ### Organization:
+
 ```php
 use PHPLicengine\Api\Api;
 use PHPLicengine\Service\Organization;
@@ -65,6 +69,7 @@ $result = $organization->getOrganization('Ojar7LjM8Bd');
 ```
 
 ### User:
+
 ```php
 use PHPLicengine\Api\Api;
 use PHPLicengine\Service\User;
@@ -75,6 +80,7 @@ $result = $user->getUser();
 ```
 
 ### App:
+
 ```php
 use PHPLicengine\Api\Api;
 use PHPLicengine\Service\App;
@@ -84,6 +90,7 @@ $result = $app->getOAuthApp($client_id);
 ```
 
 ### Bsd:
+
 ```php
 use PHPLicengine\Api\Api;
 use PHPLicengine\Service\Bsd;
@@ -93,6 +100,7 @@ $result = $bsd->getBSDs();
 ```
 
 ### Custom:
+
 ```php
 use PHPLicengine\Api\Api;
 use PHPLicengine\Service\Custom;
@@ -105,6 +113,7 @@ $result = $custom->getCustomBitlinkMetricsByDestination('bit.ly/34nRNvl');
 ```
 
 ### Campaign:
+
 ```php
 use PHPLicengine\Api\Api;
 use PHPLicengine\Service\Campaign;
@@ -121,8 +130,11 @@ $result = $campaign->updateChannel('$channel_guid', ['group_guid' => 'some value
 ```
 
 ### Auth:
-If you want to use [Exchanging a Username and Password for an Access Token](https://dev.bitly.com/v4/#section/Exchanging-a-Username-and-Password-for-an-Access-Token)
-set `$client_id` and `$client_secret` as `$config` array like below to pass to Auth class constructor, and pass `$bitlyusername` and 
+
+If you want to
+use [Exchanging a Username and Password for an Access Token](https://dev.bitly.com/v4/#section/Exchanging-a-Username-and-Password-for-an-Access-Token)
+set `$client_id` and `$client_secret` as `$config` array like below to pass to Auth class constructor, and
+pass `$bitlyusername` and
 `$bitlypassword` as `$params` array like below to `exchangeToken()` method:
 
 ```php
@@ -139,7 +151,8 @@ print($token);
 ```
 
 If you want to use [HTTP Basic Authentication Flow](https://dev.bitly.com/v4/#section/HTTP-Basic-Authentication-Flow)
-set `$bitlyusername` and `$bitlypassword` as `$config` array like below to pass to Auth class constructor, and pass `$client_id` and 
+set `$bitlyusername` and `$bitlypassword` as `$config` array like below to pass to Auth class constructor, and
+pass `$client_id` and
 `$client_secret` as `$params` array like below to `basicAuthFlow()` method:
 
 ```php
@@ -155,7 +168,8 @@ $token = $auth->basicAuthFlow($params);
 print($token);
 ```
 
-If you want to call any of Bitly services immediately after acquiring token, you don't need to instantiate Api class again to pass token to its constructor, you can just use:
+If you want to call any of Bitly services immediately after acquiring token, you don't need to instantiate Api class
+again to pass token to its constructor, you can just use:
 
 ```php
 $api->enableJson();

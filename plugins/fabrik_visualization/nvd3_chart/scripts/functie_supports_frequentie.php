@@ -22,24 +22,23 @@ $db->setQuery($query);
 $rows = $db->loadObjectList('functie_supports_frequentie');
 $total = 0;
 
-$data = array();
+$data = [];
 foreach ($rows as $key => $obj)
 {
-	$o = new stdClass;
-	$o->label = $labels[$key];
-	$o->value = $obj->value;
-	$data[$key] = $o;
+    $o = new stdClass;
+    $o->label = $labels[$key];
+    $o->value = $obj->value;
+    $data[$key] = $o;
 
 
 }
 $this->data = new stdClass;
 $this->data->key = 'todo2';
-$this->data->values = array();
-
+$this->data->values = [];
 
 
 foreach ($data as $data)
 {
-	$this->data->values[] = $data;
+    $this->data->values[] = $data;
 }
-$this->data = array($this->data);
+$this->data = [$this->data];

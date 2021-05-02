@@ -2,7 +2,7 @@
 /**
  * @package php-svg-lib
  * @link    http://github.com/PhenX/php-svg-lib
- * @author  Fabien Ménager <fabien.menager@gmail.com>
+ * @author  Fabien Mï¿½nager <fabien.menager@gmail.com>
  * @license GNU LGPLv3+ http://www.gnu.org/copyleft/lesser.html
  */
 
@@ -18,16 +18,20 @@ class Line extends Shape
 
     public function start($attributes)
     {
-        if (isset($attributes['x1'])) {
+        if (isset($attributes['x1']))
+        {
             $this->x1 = $attributes['x1'];
         }
-        if (isset($attributes['y1'])) {
+        if (isset($attributes['y1']))
+        {
             $this->y1 = $attributes['y1'];
         }
-        if (isset($attributes['x2'])) {
+        if (isset($attributes['x2']))
+        {
             $this->x2 = $attributes['x2'];
         }
-        if (isset($attributes['y2'])) {
+        if (isset($attributes['y2']))
+        {
             $this->y2 = $attributes['y2'];
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DynamoDb;
 
 use GuzzleHttp\Psr7;
@@ -18,10 +19,11 @@ class BinaryValue implements \JsonSerializable
      */
     public function __construct($value)
     {
-        if (!is_string($value)) {
+        if (!is_string($value))
+        {
             $value = Psr7\stream_for($value);
         }
-        $this->value = (string) $value;
+        $this->value = (string)$value;
     }
 
     public function jsonSerialize()

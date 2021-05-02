@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\SecurityHub;
 
 use Aws\AwsClient;
@@ -64,4 +65,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateInsight(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateInsightAsync(array $args = [])
  */
-class SecurityHubClient extends AwsClient {}
+class SecurityHubClient extends AwsClient
+{
+}

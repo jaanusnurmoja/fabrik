@@ -8,7 +8,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
      */
     window.FbFileElement = new Class({
 
-        Extends   : FbElement,
+        Extends: FbElement,
         ajaxFolder: function () {
             var self = this;
             this.folderlist = [];
@@ -70,7 +70,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 depth = parseInt(c.replace('crumb', ''), 10);
 
                 // Truncate the folder list to the selected crumb's depth
-                for (i = 1; i <= depth; i ++) {
+                for (i = 1; i <= depth; i++) {
                     link = jQuery(this.breadcrumbs.find('a')[i]);
                     self.folderlist.push(jQuery(link).html());
                 }
@@ -98,17 +98,17 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         doAjaxBrowse: function (dir) {
             var self = this;
             jQuery.ajax({
-                url       : '',
-                data      : {
-                    'dir'       : dir,
-                    'option'    : 'com_fabrik',
-                    'format'    : 'raw',
-                    'task'      : 'plugin.pluginAjax',
-                    'plugin'    : 'fileupload',
-                    'method'    : 'ajax_getFolders',
+                url: '',
+                data: {
+                    'dir': dir,
+                    'option': 'com_fabrik',
+                    'format': 'raw',
+                    'task': 'plugin.pluginAjax',
+                    'plugin': 'fileupload',
+                    'method': 'ajax_getFolders',
                     'element_id': this.options.id
                 },
-            }).done(function(r) {
+            }).done(function (r) {
                 r = JSON.parse(r);
                 self.folderdiv.empty();
 
@@ -139,5 +139,5 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         }
     });
 
-    return  window.FbFileElement;
+    return window.FbFileElement;
 });

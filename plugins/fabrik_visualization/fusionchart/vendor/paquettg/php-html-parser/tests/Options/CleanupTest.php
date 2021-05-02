@@ -2,7 +2,8 @@
 
 use PHPHtmlParser\Dom;
 
-class CleanupTest extends PHPUnit_Framework_TestCase {
+class CleanupTest extends PHPUnit_Framework_TestCase
+{
 
     public function testCleanupInputTrue()
     {

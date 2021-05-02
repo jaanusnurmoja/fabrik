@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\ApplicationAutoScaling;
 
 use Aws\AwsClient;
@@ -26,4 +27,6 @@ use Aws\AwsClient;
  * @method \Aws\Result registerScalableTarget(array $args = [])
  * @method \GuzzleHttp\Promise\Promise registerScalableTargetAsync(array $args = [])
  */
-class ApplicationAutoScalingClient extends AwsClient {}
+class ApplicationAutoScalingClient extends AwsClient
+{
+}

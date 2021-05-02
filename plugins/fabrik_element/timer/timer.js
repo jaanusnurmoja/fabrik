@@ -9,17 +9,17 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbTimer = new Class({
 
         options: {
-            defaultVal    : '',
-            editable      : false,
-            startCrono    : '15:00',
-            endCrono      : '00:00',
-            div           : false,
+            defaultVal: '',
+            editable: false,
+            startCrono: '15:00',
+            endCrono: '00:00',
+            div: false,
             stopOnComplete: true,
-            onComplete    : function () {
+            onComplete: function () {
             },
-            onEveryMinute : function () {
+            onEveryMinute: function () {
             },
-            onEveryHour   : function () {
+            onEveryHour: function () {
             }
         },
 

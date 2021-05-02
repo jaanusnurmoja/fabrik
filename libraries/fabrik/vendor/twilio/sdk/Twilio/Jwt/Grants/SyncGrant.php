@@ -118,17 +118,21 @@ class SyncGrant implements Grant
      */
     public function getPayload()
     {
-        $payload = array();
-        if ($this->serviceSid) {
+        $payload = [];
+        if ($this->serviceSid)
+        {
             $payload['service_sid'] = $this->serviceSid;
         }
-        if ($this->endpointId) {
+        if ($this->endpointId)
+        {
             $payload['endpoint_id'] = $this->endpointId;
         }
-        if ($this->deploymentRoleSid) {
+        if ($this->deploymentRoleSid)
+        {
             $payload['deployment_role_sid'] = $this->deploymentRoleSid;
         }
-        if ($this->pushCredentialSid) {
+        if ($this->pushCredentialSid)
+        {
             $payload['push_credential_sid'] = $this->pushCredentialSid;
         }
 

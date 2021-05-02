@@ -53,160 +53,160 @@ defined('_JEXEC') or die('Restricted access');
 class fabrikPayPalIPN
 {
 
-	/**
-	 *
-	 * In this example, we are assuming you have a form with a JUser and a PayPal plugin on it.,
-	 * where you want people to pay for signing up.  Because the JUser plugin creates the user BEFORE
-	 * the PayPal plugin runs, we don't know if the user ever hit "Pay" in PayPal.  So, we initially set
-	 * the user to be blocked (inactive, see Juser plugin settings).  We then use this IPN 'completed' method
-	 * to unblock the user when the payment confirmation IPN response arrive from PayPal.
-	 *
-	 * Obviously you will need to change the table and element names you are using for your registration form
-	 * to suit your setup.
-	 *
-	 * You may also wish to check that the $amount_paid ('mc_gross' attribute from PayPal) is the correct amount,
-	 * to prevent people from changing the amount they are paying from the PayPal redirect to (say) $1.
-	 *
-	 * @param unknown_type $listModel
-	 * @param unknown_type $request
-	 * @param unknown_type $set_list
-	 * @param unknown_type $err_msg
-	 * @return string
-	 */
-	function payment_status_Completed($listModel, $request, &$set_list, &$err_msg)
-	{
-		// Get the 'custom' values from the IPN call, which we provide by default
-		// when redirecting the original form submission to PayPal.
-		$custom = $request['custom'];
-		list($formid, $rowid, $ipn_value) = explode(":", $custom);
-		$amount_paid = $request['mc_gross'];
-		$db = $listModel->getDb();
-		// See if we can find the corresponding row from our registration table,
-		// and fetch our userid element from it.  The PayPal plugin will have written
-		// the newly created userid in to it during the original form submission.
-		$db->setQuery("SELECT `userid` FROM `registration_individual` WHERE `id` = " . $db->quote($rowid));
-		$userid = $db->loadResult();
-		if (!empty($userid) && (int) $userid > 42)
-		{
-			// If we found the userid, and it is in the normal user range, set the 'block' field in J!'s
-			// user table to 0.
-			$db->setQuery("UPDATE `#__users` SET `block` = '0' WHERE `id` = " . $db->quote($userid));
-			$db->execute();
-			// Also set the block field in our registration table to 0.
-			$db->setQuery("UPDATE `registration_individual` SET `block` = '0' WHERE `id` = " . $db->quote($rowid));
-			$db->execute();
-		}
-		return 'ok';
-	}
+    /**
+     *
+     * In this example, we are assuming you have a form with a JUser and a PayPal plugin on it.,
+     * where you want people to pay for signing up.  Because the JUser plugin creates the user BEFORE
+     * the PayPal plugin runs, we don't know if the user ever hit "Pay" in PayPal.  So, we initially set
+     * the user to be blocked (inactive, see Juser plugin settings).  We then use this IPN 'completed' method
+     * to unblock the user when the payment confirmation IPN response arrive from PayPal.
+     *
+     * Obviously you will need to change the table and element names you are using for your registration form
+     * to suit your setup.
+     *
+     * You may also wish to check that the $amount_paid ('mc_gross' attribute from PayPal) is the correct amount,
+     * to prevent people from changing the amount they are paying from the PayPal redirect to (say) $1.
+     *
+     * @param unknown_type $listModel
+     * @param unknown_type $request
+     * @param unknown_type $set_list
+     * @param unknown_type $err_msg
+     * @return string
+     */
+    function payment_status_Completed($listModel, $request, &$set_list, &$err_msg)
+    {
+        // Get the 'custom' values from the IPN call, which we provide by default
+        // when redirecting the original form submission to PayPal.
+        $custom = $request['custom'];
+        list($formid, $rowid, $ipn_value) = explode(":", $custom);
+        $amount_paid = $request['mc_gross'];
+        $db = $listModel->getDb();
+        // See if we can find the corresponding row from our registration table,
+        // and fetch our userid element from it.  The PayPal plugin will have written
+        // the newly created userid in to it during the original form submission.
+        $db->setQuery("SELECT `userid` FROM `registration_individual` WHERE `id` = " . $db->quote($rowid));
+        $userid = $db->loadResult();
+        if (!empty($userid) && (int)$userid > 42)
+        {
+            // If we found the userid, and it is in the normal user range, set the 'block' field in J!'s
+            // user table to 0.
+            $db->setQuery("UPDATE `#__users` SET `block` = '0' WHERE `id` = " . $db->quote($userid));
+            $db->execute();
+            // Also set the block field in our registration table to 0.
+            $db->setQuery("UPDATE `registration_individual` SET `block` = '0' WHERE `id` = " . $db->quote($rowid));
+            $db->execute();
+        }
+        return 'ok';
+    }
 
-	/**
-	 * This function will send an email to both the payer and the payee emails, letting you both know that the payment
-	 * is in a pending state.
-	 *
-	 * @param unknown_type $listModel
-	 * @param unknown_type $request
-	 * @param unknown_type $set_list
-	 * @param unknown_type $err_msg
-	 * @return string
-	 */
-	function payment_status_Pending($listModel, $request, &$set_list, &$err_msg)
-	{
-		$config = JFactory::getConfig();
-		$MailFrom = $config->get('mailfrom');
-		$FromName = $config->get('fromname');
-		$SiteName = $config->get('sitename');
+    /**
+     * This function will send an email to both the payer and the payee emails, letting you both know that the payment
+     * is in a pending state.
+     *
+     * @param unknown_type $listModel
+     * @param unknown_type $request
+     * @param unknown_type $set_list
+     * @param unknown_type $err_msg
+     * @return string
+     */
+    function payment_status_Pending($listModel, $request, &$set_list, &$err_msg)
+    {
+        $config = JFactory::getConfig();
+        $MailFrom = $config->get('mailfrom');
+        $FromName = $config->get('fromname');
+        $SiteName = $config->get('sitename');
 
-		$payer_email = $request['payer_email'];
-		$receiver_email = $request['receiver_email'];
+        $payer_email = $request['payer_email'];
+        $receiver_email = $request['receiver_email'];
 
-		$subject = "%s - Payment Pending";
-		$subject = sprintf($subject, $SiteName);
-		$subject = html_entity_decode($subject, ENT_QUOTES);
+        $subject = "%s - Payment Pending";
+        $subject = sprintf($subject, $SiteName);
+        $subject = html_entity_decode($subject, ENT_QUOTES);
 
-		$msgbuyer = 'Your payment on %s is pending. (Paypal transaction ID: %s)<br /><br />%s';
-		$msgbuyer = sprintf($msgbuyer, $SiteName, $txn_id, $SiteName);
-		$msgbuyer = html_entity_decode($msgbuyer, ENT_QUOTES);
-		$mail = JFactory::getMailer();
-		$res = $mail->sendMail($MailFrom, $FromName, $payer_email, $subject, $msgbuyer, true);
+        $msgbuyer = 'Your payment on %s is pending. (Paypal transaction ID: %s)<br /><br />%s';
+        $msgbuyer = sprintf($msgbuyer, $SiteName, $txn_id, $SiteName);
+        $msgbuyer = html_entity_decode($msgbuyer, ENT_QUOTES);
+        $mail = JFactory::getMailer();
+        $res = $mail->sendMail($MailFrom, $FromName, $payer_email, $subject, $msgbuyer, true);
 
-		$msgseller = 'Payment pending on %s. (Paypal transaction ID: %s)<br /><br />%s';
-		$msgseller = sprintf($msgseller, $SiteName, $txn_id, $SiteName);
-		$msgseller = html_entity_decode($msgseller, ENT_QUOTES);
-		$mail = JFactory::getMailer();
-		$res = $mail->sendMail($MailFrom, $FromName, $payer_email, $subject, $msgseller, true);
-		return 'ok';
-	}
+        $msgseller = 'Payment pending on %s. (Paypal transaction ID: %s)<br /><br />%s';
+        $msgseller = sprintf($msgseller, $SiteName, $txn_id, $SiteName);
+        $msgseller = html_entity_decode($msgseller, ENT_QUOTES);
+        $mail = JFactory::getMailer();
+        $res = $mail->sendMail($MailFrom, $FromName, $payer_email, $subject, $msgseller, true);
+        return 'ok';
+    }
 
-	/**
-	 *
-	 * This code will block the user if they reverse their payment.
-	 *
-	 * @param unknown_type $listModel
-	 * @param unknown_type $request
-	 * @param unknown_type $set_list
-	 * @param unknown_type $err_msg
-	 * @return string
-	 */
-	function payment_status_Reversed($listModel, $request, &$set_list, &$err_msg)
-	{
-		$custom = $request['custom'];
-		list($formid, $rowid, $ipn_value) = explode(":", $custom);
-		$db = $listModel->getDb();
-		$db->setQuery("SELECT `userid` FROM `registration_individual` WHERE `id` = " . $db->quote($rowid));
-		$userid = $db->loadResult();
-		if (!empty($userid) && (int) $userid > 42)
-		{
-			$db->setQuery("UPDATE `#__users` SET `block` = '1' WHERE `id` = " . $db->quote($userid));
-			$db->execute();
-			$db->setQuery("UPDATE `registration_individual` SET `block` = '1' WHERE `id` = " . $db->quote($rowid));
-			$db->execute();
-		}
-		return 'ok';
-	}
+    /**
+     *
+     * This code will block the user if they reverse their payment.
+     *
+     * @param unknown_type $listModel
+     * @param unknown_type $request
+     * @param unknown_type $set_list
+     * @param unknown_type $err_msg
+     * @return string
+     */
+    function payment_status_Reversed($listModel, $request, &$set_list, &$err_msg)
+    {
+        $custom = $request['custom'];
+        list($formid, $rowid, $ipn_value) = explode(":", $custom);
+        $db = $listModel->getDb();
+        $db->setQuery("SELECT `userid` FROM `registration_individual` WHERE `id` = " . $db->quote($rowid));
+        $userid = $db->loadResult();
+        if (!empty($userid) && (int)$userid > 42)
+        {
+            $db->setQuery("UPDATE `#__users` SET `block` = '1' WHERE `id` = " . $db->quote($userid));
+            $db->execute();
+            $db->setQuery("UPDATE `registration_individual` SET `block` = '1' WHERE `id` = " . $db->quote($rowid));
+            $db->execute();
+        }
+        return 'ok';
+    }
 
-	function payment_status_Cancelled_Reversal($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function payment_status_Cancelled_Reversal($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
-	function payment_status_Refunded($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function payment_status_Refunded($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
-	function txn_type_web_accept($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function txn_type_web_accept($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
-	function txn_type_subscr_signup($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function txn_type_subscr_signup($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
-	function txn_type_subscr_cancel($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function txn_type_subscr_cancel($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
-	function txn_type_subscr_modify($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function txn_type_subscr_modify($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
-	function txn_type_subscr_payment($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function txn_type_subscr_payment($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
-	function txn_type_subscr_failed($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function txn_type_subscr_failed($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
-	function txn_type_subscr_eot($listModel, $request, &$set_list, &$err_msg)
-	{
-		return 'ok';
-	}
+    function txn_type_subscr_eot($listModel, $request, &$set_list, &$err_msg)
+    {
+        return 'ok';
+    }
 
 }

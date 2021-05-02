@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -15,7 +16,7 @@ class TimestampShape extends Shape
     /**
      * Formats a timestamp value for a service.
      *
-     * @param mixed  $value  Value to format
+     * @param mixed $value Value to format
      * @param string $format Format used to serialize the value
      *
      * @return int|string
@@ -24,16 +25,22 @@ class TimestampShape extends Shape
      */
     public static function format($value, $format)
     {
-        if ($value instanceof \DateTime) {
+        if ($value instanceof \DateTime)
+        {
             $value = $value->getTimestamp();
-        } elseif (is_string($value)) {
+        }
+        elseif (is_string($value))
+        {
             $value = strtotime($value);
-        } elseif (!is_int($value)) {
+        }
+        elseif (!is_int($value))
+        {
             throw new \InvalidArgumentException('Unable to handle the provided'
                 . ' timestamp type: ' . gettype($value));
         }
 
-        switch ($format) {
+        switch ($format)
+        {
             case 'iso8601':
                 return gmdate('Y-m-d\TH:i:s\Z', $value);
             case 'rfc822':

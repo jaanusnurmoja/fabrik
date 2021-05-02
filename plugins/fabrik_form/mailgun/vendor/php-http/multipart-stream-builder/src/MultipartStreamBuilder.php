@@ -46,30 +46,33 @@ class MultipartStreamBuilder
     /**
      * Add a resource to the Multipart Stream.
      *
-     * @param string                          $name     the formpost name
+     * @param string $name the formpost name
      * @param string|resource|StreamInterface $resource
-     * @param array                           $options  {
-     *
-     *     @var array $headers additional headers ['header-name' => 'header-value']
-     *     @var string $filename
-     * }
+     * @param array $options {
      *
      * @return MultipartStreamBuilder
+     * @var string $filename
+     * }
+     *
+     * @var array $headers additional headers ['header-name' => 'header-value']
      */
     public function addResource($name, $resource, array $options = [])
     {
         $stream = $this->streamFactory->createStream($resource);
 
         // validate options['headers'] exists
-        if (!isset($options['headers'])) {
+        if (!isset($options['headers']))
+        {
             $options['headers'] = [];
         }
 
         // Try to add filename if it is missing
-        if (empty($options['filename'])) {
+        if (empty($options['filename']))
+        {
             $options['filename'] = null;
             $uri = $stream->getMetadata('uri');
-            if (substr($uri, 0, 6) !== 'php://') {
+            if (substr($uri, 0, 6) !== 'php://')
+            {
                 $options['filename'] = $uri;
             }
         }
@@ -88,17 +91,21 @@ class MultipartStreamBuilder
     public function build()
     {
         $streams = '';
-        foreach ($this->data as $data) {
+        foreach ($this->data as $data)
+        {
             // Add start and headers
-            $streams .= "--{$this->getBoundary()}\r\n".
-                $this->getHeaders($data['headers'])."\r\n";
+            $streams .= "--{$this->getBoundary()}\r\n" .
+                $this->getHeaders($data['headers']) . "\r\n";
 
             // Convert the stream to string
             /* @var $contentStream StreamInterface */
             $contentStream = $data['contents'];
-            if ($contentStream->isSeekable()) {
+            if ($contentStream->isSeekable())
+            {
                 $streams .= $contentStream->__toString();
-            } else {
+            }
+            else
+            {
                 $streams .= $contentStream->getContents();
             }
 
@@ -114,9 +121,9 @@ class MultipartStreamBuilder
     /**
      * Add extra headers if they are missing.
      *
-     * @param string          $name
+     * @param string $name
      * @param StreamInterface $stream
-     * @param string          $filename
+     * @param string $filename
      * @param array           &$headers
      */
     private function prepareHeaders($name, StreamInterface $stream, $filename, array &$headers)
@@ -124,23 +131,29 @@ class MultipartStreamBuilder
         $hasFilename = $filename === '0' || $filename;
 
         // Set a default content-disposition header if one was not provided
-        if (!$this->hasHeader($headers, 'content-disposition')) {
+        if (!$this->hasHeader($headers, 'content-disposition'))
+        {
             $headers['Content-Disposition'] = sprintf('form-data; name="%s"', $name);
-            if ($hasFilename) {
+            if ($hasFilename)
+            {
                 $headers['Content-Disposition'] .= sprintf('; filename="%s"', $this->basename($filename));
             }
         }
 
         // Set a default content-length header if one was not provided
-        if (!$this->hasHeader($headers, 'content-length')) {
-            if ($length = $stream->getSize()) {
-                $headers['Content-Length'] = (string) $length;
+        if (!$this->hasHeader($headers, 'content-length'))
+        {
+            if ($length = $stream->getSize())
+            {
+                $headers['Content-Length'] = (string)$length;
             }
         }
 
         // Set a default Content-Type if one was not provided
-        if (!$this->hasHeader($headers, 'content-type') && $hasFilename) {
-            if ($type = $this->getMimetypeHelper()->getMimetypeFromFilename($filename)) {
+        if (!$this->hasHeader($headers, 'content-type') && $hasFilename)
+        {
+            if ($type = $this->getMimetypeHelper()->getMimetypeFromFilename($filename))
+            {
                 $headers['Content-Type'] = $type;
             }
         }
@@ -156,7 +169,8 @@ class MultipartStreamBuilder
     private function getHeaders(array $headers)
     {
         $str = '';
-        foreach ($headers as $key => $value) {
+        foreach ($headers as $key => $value)
+        {
             $str .= sprintf("%s: %s\r\n", $key, $value);
         }
 
@@ -166,16 +180,18 @@ class MultipartStreamBuilder
     /**
      * Check if header exist.
      *
-     * @param array  $headers
-     * @param string $key     case insensitive
+     * @param array $headers
+     * @param string $key case insensitive
      *
      * @return bool
      */
     private function hasHeader(array $headers, $key)
     {
         $lowercaseHeader = strtolower($key);
-        foreach ($headers as $k => $v) {
-            if (strtolower($k) === $lowercaseHeader) {
+        foreach ($headers as $k => $v)
+        {
+            if (strtolower($k) === $lowercaseHeader)
+            {
                 return true;
             }
         }
@@ -190,7 +206,8 @@ class MultipartStreamBuilder
      */
     public function getBoundary()
     {
-        if ($this->boundary === null) {
+        if ($this->boundary === null)
+        {
             $this->boundary = uniqid('', true);
         }
 
@@ -214,7 +231,8 @@ class MultipartStreamBuilder
      */
     private function getMimetypeHelper()
     {
-        if ($this->mimetypeHelper === null) {
+        if ($this->mimetypeHelper === null)
+        {
             $this->mimetypeHelper = new ApacheMimetypeHelper();
         }
 
@@ -253,16 +271,17 @@ class MultipartStreamBuilder
      *
      * PHP's basename() does not properly support streams or filenames beginning with a non-US-ASCII character.
      *
-     * @author Drupal 8.2
-     *
      * @param string $path
      *
      * @return string
+     * @author Drupal 8.2
+     *
      */
     private function basename($path)
     {
         $separators = '/';
-        if (DIRECTORY_SEPARATOR != '/') {
+        if (DIRECTORY_SEPARATOR != '/')
+        {
             // For Windows OS add special separator.
             $separators .= DIRECTORY_SEPARATOR;
         }
@@ -271,7 +290,7 @@ class MultipartStreamBuilder
         $path = rtrim($path, $separators);
 
         // Returns the trailing part of the $path starting after one of the directory separators.
-        $filename = preg_match('@[^'.preg_quote($separators, '@').']+$@', $path, $matches) ? $matches[0] : '';
+        $filename = preg_match('@[^' . preg_quote($separators, '@') . ']+$@', $path, $matches) ? $matches[0] : '';
 
         return $filename;
     }

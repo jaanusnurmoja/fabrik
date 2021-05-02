@@ -19,7 +19,7 @@ class Exporter
     public function __construct(ExportConfig $exportConfig)
     {
         $this->exportConfig = $exportConfig;
-        
+
     }
 
     public function setExportConnectionConfig($exportServerHost, $exportServerPort)
@@ -31,40 +31,46 @@ class Exporter
     public function start($outputDir, $unzip)
     {
         $this->client = new \GuzzleHttp\Client();
-        
+
         $configData = $this->getFormattedExportConfigs();
         $url = $this->exportServerHost . ':' . $this->exportServerPort . "/api/v2.0/export";
         $multipartArray = $this->createMultipartData($configData);
-        
+
         $response = $this->client->request('POST', $url, [
             'multipart' => $multipartArray
         ]);
 
-        if (isset($configData['payload'])) {
+        if (isset($configData['payload']))
+        {
             unlink($configData['payload']);
         }
 
         return $this->saveResponse($response->getBody()->getContents(), $outputDir, $unzip);
     }
-    
+
     private function createMultipartData($configData)
     {
-        $multipart = array();
-        if(count($configData)>0){
-            foreach($configData as $key => $value){
-                $arr = array();
+        $multipart = [];
+        if (count($configData) > 0)
+        {
+            foreach ($configData as $key => $value)
+            {
+                $arr = [];
                 $arr['name'] = $key;
-                if(strcasecmp($key,'payload') == 0){
-                    $arr['contents'] = fopen($value,'r');
-                }else{
+                if (strcasecmp($key, 'payload') == 0)
+                {
+                    $arr['contents'] = fopen($value, 'r');
+                }
+                else
+                {
                     $arr['contents'] = $value;
                 }
-                array_push($multipart,$arr);
+                array_push($multipart, $arr);
             }
         }
         return $multipart;
     }
-    
+
     private function saveResponse($contents, $outputDir, $unzip)
     {
         $exportedFiles = [];
@@ -78,17 +84,19 @@ class Exporter
         $zipFile = new \ZipArchive();
         $exportedFiles = [];
 
-        if (!$zipFile->open($fileName)) {
+        if (!$zipFile->open($fileName))
+        {
             throw new \Exception('Failed to open exported archive file');
         }
-        
+
         $zipFile->extractTo($outputDir);
 
-        for ($i = 0; $i < $zipFile->numFiles; $i++) {
+        for ($i = 0; $i < $zipFile->numFiles; $i++)
+        {
             $path = realpath($outputDir . DIRECTORY_SEPARATOR . $zipFile->getNameIndex($i));
             $exportedFiles[] = $path;
         }
-        
+
         $zipFile->close();
         unlink($fileName);
 
@@ -99,7 +107,8 @@ class Exporter
     {
         $exportResult = json_decode($exportResult);
 
-        if (array_key_exists('error', $exportResult)) {
+        if (array_key_exists('error', $exportResult))
+        {
             return $exportResult->error;
         }
     }
@@ -111,7 +120,8 @@ class Exporter
 
     private function startsWith($haystack, $needle)
     {
-        if (strpos($haystack, $needle) === 0) {
+        if (strpos($haystack, $needle) === 0)
+        {
             return true;
         }
 

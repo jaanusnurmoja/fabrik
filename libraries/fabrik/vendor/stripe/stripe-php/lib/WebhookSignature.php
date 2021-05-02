@@ -17,22 +17,24 @@ abstract class WebhookSignature
      * @param string $secret secret used to generate the signature.
      * @param int $tolerance maximum difference allowed between the header's
      *  timestamp and the current time
-     * @throws \Stripe\Error\SignatureVerification if the verification fails.
      * @return bool
+     * @throws \Stripe\Error\SignatureVerification if the verification fails.
      */
     public static function verifyHeader($payload, $header, $secret, $tolerance = null)
     {
         // Extract timestamp and signatures from header
         $timestamp = self::getTimestamp($header);
         $signatures = self::getSignatures($header, self::EXPECTED_SCHEME);
-        if ($timestamp == -1) {
+        if ($timestamp == -1)
+        {
             throw new Error\SignatureVerification(
                 "Unable to extract timestamp and signatures from header",
                 $header,
                 $payload
             );
         }
-        if (empty($signatures)) {
+        if (empty($signatures))
+        {
             throw new Error\SignatureVerification(
                 "No signatures found with expected scheme",
                 $header,
@@ -45,13 +47,16 @@ abstract class WebhookSignature
         $signedPayload = "$timestamp.$payload";
         $expectedSignature = self::computeSignature($signedPayload, $secret);
         $signatureFound = false;
-        foreach ($signatures as $signature) {
-            if (Util\Util::secureCompare($expectedSignature, $signature)) {
+        foreach ($signatures as $signature)
+        {
+            if (Util\Util::secureCompare($expectedSignature, $signature))
+            {
                 $signatureFound = true;
                 break;
             }
         }
-        if (!$signatureFound) {
+        if (!$signatureFound)
+        {
             throw new Error\SignatureVerification(
                 "No signatures found matching the expected signature for payload",
                 $header,
@@ -60,7 +65,8 @@ abstract class WebhookSignature
         }
 
         // Check if timestamp is within tolerance
-        if (($tolerance > 0) && ((time() - $timestamp) > $tolerance)) {
+        if (($tolerance > 0) && ((time() - $timestamp) > $tolerance))
+        {
             throw new Error\SignatureVerification(
                 "Timestamp outside the tolerance zone",
                 $header,
@@ -82,10 +88,13 @@ abstract class WebhookSignature
     {
         $items = explode(",", $header);
 
-        foreach ($items as $item) {
+        foreach ($items as $item)
+        {
             $itemParts = explode("=", $item, 2);
-            if ($itemParts[0] == "t") {
-                if (!is_numeric($itemParts[1])) {
+            if ($itemParts[0] == "t")
+            {
+                if (!is_numeric($itemParts[1]))
+                {
                     return -1;
                 }
                 return intval($itemParts[1]);
@@ -107,9 +116,11 @@ abstract class WebhookSignature
         $signatures = [];
         $items = explode(",", $header);
 
-        foreach ($items as $item) {
+        foreach ($items as $item)
+        {
             $itemParts = explode("=", $item, 2);
-            if ($itemParts[0] == $scheme) {
+            if ($itemParts[0] == $scheme)
+            {
                 array_push($signatures, $itemParts[1]);
             }
         }

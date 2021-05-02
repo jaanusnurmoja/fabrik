@@ -19,7 +19,7 @@ interface Hydrator
 {
     /**
      * @param ResponseInterface $response
-     * @param string            $class
+     * @param string $class
      *
      * @return mixed
      *

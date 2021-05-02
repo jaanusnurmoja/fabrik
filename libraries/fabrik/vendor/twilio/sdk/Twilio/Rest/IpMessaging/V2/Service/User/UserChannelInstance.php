@@ -27,53 +27,57 @@ use Twilio\Version;
  * @property string url
  * @property string notificationLevel
  */
-class UserChannelInstance extends InstanceResource {
+class UserChannelInstance extends InstanceResource
+{
     /**
      * Initialize the UserChannelInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $serviceSid The unique id of the Service this channel belongs
      *                           to.
      * @param string $userSid The unique id of the User this Channel belongs to.
      * @param string $channelSid The unique id of a Channel.
-     * @return \Twilio\Rest\IpMessaging\V2\Service\User\UserChannelInstance 
+     * @return \Twilio\Rest\IpMessaging\V2\Service\User\UserChannelInstance
      */
-    public function __construct(Version $version, array $payload, $serviceSid, $userSid, $channelSid = null) {
+    public function __construct(Version $version, array $payload, $serviceSid, $userSid, $channelSid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'serviceSid' => Values::array_get($payload, 'service_sid'),
-            'channelSid' => Values::array_get($payload, 'channel_sid'),
-            'userSid' => Values::array_get($payload, 'user_sid'),
-            'memberSid' => Values::array_get($payload, 'member_sid'),
-            'status' => Values::array_get($payload, 'status'),
+        $this->properties = [
+            'accountSid'               => Values::array_get($payload, 'account_sid'),
+            'serviceSid'               => Values::array_get($payload, 'service_sid'),
+            'channelSid'               => Values::array_get($payload, 'channel_sid'),
+            'userSid'                  => Values::array_get($payload, 'user_sid'),
+            'memberSid'                => Values::array_get($payload, 'member_sid'),
+            'status'                   => Values::array_get($payload, 'status'),
             'lastConsumedMessageIndex' => Values::array_get($payload, 'last_consumed_message_index'),
-            'unreadMessagesCount' => Values::array_get($payload, 'unread_messages_count'),
-            'links' => Values::array_get($payload, 'links'),
-            'url' => Values::array_get($payload, 'url'),
-            'notificationLevel' => Values::array_get($payload, 'notification_level'),
-        );
+            'unreadMessagesCount'      => Values::array_get($payload, 'unread_messages_count'),
+            'links'                    => Values::array_get($payload, 'links'),
+            'url'                      => Values::array_get($payload, 'url'),
+            'notificationLevel'        => Values::array_get($payload, 'notification_level'),
+        ];
 
-        $this->solution = array(
+        $this->solution = [
             'serviceSid' => $serviceSid,
-            'userSid' => $userSid,
+            'userSid'    => $userSid,
             'channelSid' => $channelSid ?: $this->properties['channelSid'],
-        );
+        ];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\IpMessaging\V2\Service\User\UserChannelContext Context
      *                                                                     for this
      *                                                                     UserChannelInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new UserChannelContext(
                 $this->version,
                 $this->solution['serviceSid'],
@@ -87,39 +91,44 @@ class UserChannelInstance extends InstanceResource {
 
     /**
      * Fetch a UserChannelInstance
-     * 
+     *
      * @return UserChannelInstance Fetched UserChannelInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Update the UserChannelInstance
-     * 
+     *
      * @param string $notificationLevel Push notification level to be assigned to
      *                                  Channel of the User.
      * @return UserChannelInstance Updated UserChannelInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($notificationLevel) {
+    public function update($notificationLevel)
+    {
         return $this->proxy()->update($notificationLevel);
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -129,12 +138,14 @@ class UserChannelInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.IpMessaging.V2.UserChannelInstance ' . implode(' ', $context) . ']';

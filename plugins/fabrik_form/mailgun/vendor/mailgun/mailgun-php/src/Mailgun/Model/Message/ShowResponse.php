@@ -111,49 +111,64 @@ class ShowResponse implements ApiResponse
     {
         $response = new self();
 
-        if (isset($data['recipients'])) {
+        if (isset($data['recipients']))
+        {
             $response->setRecipients($data['recipients']);
         }
-        if (isset($data['sender'])) {
+        if (isset($data['sender']))
+        {
             $response->setSender($data['sender']);
         }
-        if (isset($data['from'])) {
+        if (isset($data['from']))
+        {
             $response->setFrom($data['from']);
         }
-        if (isset($data['subject'])) {
+        if (isset($data['subject']))
+        {
             $response->setSubject($data['subject']);
         }
-        if (isset($data['body-plain'])) {
+        if (isset($data['body-plain']))
+        {
             $response->setBodyPlain($data['body-plain']);
         }
-        if (isset($data['stripped-text'])) {
+        if (isset($data['stripped-text']))
+        {
             $response->setStrippedText($data['stripped-text']);
         }
-        if (isset($data['stripped-signature'])) {
+        if (isset($data['stripped-signature']))
+        {
             $response->setStrippedSignature($data['stripped-signature']);
         }
-        if (isset($data['body-html'])) {
+        if (isset($data['body-html']))
+        {
             $response->setBodyHtml($data['body-html']);
         }
-        if (isset($data['stripped-html'])) {
+        if (isset($data['stripped-html']))
+        {
             $response->setStrippedHtml($data['stripped-html']);
         }
-        if (isset($data['message-url'])) {
+        if (isset($data['message-url']))
+        {
             $response->setMessageUrl($data['message-url']);
         }
-        if (isset($data['message-headers'])) {
+        if (isset($data['message-headers']))
+        {
             $response->setMessageHeaders($data['message-headers']);
         }
-        if (isset($data['recipient'])) {
+        if (isset($data['recipient']))
+        {
             $response->setRecipient($data['recipient']);
         }
-        if (isset($data['body-mime'])) {
+        if (isset($data['body-mime']))
+        {
             $response->setBodyMime($data['body-mime']);
         }
-        if (isset($data['attachments'])) {
+        if (isset($data['attachments']))
+        {
             $response->setAttachments($data['attachments']);
         }
-        if (isset($data['content-id-map'])) {
+        if (isset($data['content-id-map']))
+        {
             $response->setContentIdMap($data['content-id-map']);
         }
 

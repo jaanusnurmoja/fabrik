@@ -12,29 +12,33 @@
 defined('_JEXEC') or die('Restricted access');
 
 if ($this->showFilters) :
-	?>
-    <form method="post" name="filter" action="<?php echo $this->filterFormURL; ?>">
-		<?php
-		foreach ($this->filters as $table => $filters) :
-			if (!empty($filters)) :
-				?>
+    ?>
+    <form method="post" name="filter" action="<?php
+    echo $this->filterFormURL; ?>">
+        <?php
+        foreach ($this->filters as $table => $filters) :
+            if (!empty($filters)) :
+                ?>
                 <table class="filtertable table table-striped">
                     <thead>
                     <tr>
-						<?php
-						if (count($this->filters) > 1) :
-						?>
-                        <th><?php echo FText::_($table) ?></th>
+                        <?php
+                        if (count($this->filters) > 1) :
+                        ?>
+                        <th><?php
+                            echo FText::_($table) ?></th>
                         <th style="text-align:right">
                             <?php
-							else :
-							?>
+                            else :
+                            ?>
                         <th colspan="2" style="text-align:right">
-							<?php
-							endif;
-							?>
+                            <?php
+                            endif;
+                            ?>
                             <a href="#" class="clearFilters">
-								<?php echo FabrikHelperHTML::icon('icon-refresh'); ?><?php echo FText::_('COM_FABRIK_CLEAR'); ?>
+                                <?php
+                                echo FabrikHelperHTML::icon('icon-refresh'); ?><?php
+                                echo FText::_('COM_FABRIK_CLEAR'); ?>
                             </a>
                         </th>
                     </tr>
@@ -44,32 +48,38 @@ if ($this->showFilters) :
                     <tr>
                         <th colspan="2" style="text-align:right;">
                             <button type="submit" class="btn btn-primary">
-								<?php echo FabrikHelperHTML::icon('icon-filter'); ?><?php echo FText::_('COM_FABRIK_GO') ?>
+                                <?php
+                                echo FabrikHelperHTML::icon('icon-filter'); ?><?php
+                                echo FText::_('COM_FABRIK_GO') ?>
                             </button>
                         </th>
                     </tr>
                     </tfoot>
 
                     <tbody>
-					<?php
-					$c = 0;
-					foreach ($filters as $filter) :
-						$required = $filter->required == 1 ? ' class="notempty"' : '';
-						?>
-                        <tr class="fabrik_row oddRow<?php echo($c % 2); ?>">
-                            <td<?php echo $required ?>><?php echo $filter->label ?> </td>
-                            <td><?php echo $filter->element ?></td>
+                    <?php
+                    $c = 0;
+                    foreach ($filters as $filter) :
+                        $required = $filter->required == 1 ? ' class="notempty"' : '';
+                        ?>
+                        <tr class="fabrik_row oddRow<?php
+                        echo($c % 2); ?>">
+                            <td<?php
+                            echo $required ?>><?php
+                                echo $filter->label ?> </td>
+                            <td><?php
+                                echo $filter->element ?></td>
                         </tr>
-						<?php
-						$c++;
-					endforeach;
-					?>
+                        <?php
+                        $c++;
+                    endforeach;
+                    ?>
                     </tbody>
                 </table>
-			<?php
-			endif;
-		endforeach;
-		?>
+            <?php
+            endif;
+        endforeach;
+        ?>
     </form>
 <?php
 endif;

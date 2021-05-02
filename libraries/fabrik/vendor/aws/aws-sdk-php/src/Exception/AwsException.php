@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Exception;
 
 use Aws\HasMonitoringEventsTrait;
@@ -33,17 +34,18 @@ class AwsException extends \RuntimeException implements
 
 
     /**
-     * @param string           $message Exception message
+     * @param string $message Exception message
      * @param CommandInterface $command
-     * @param array            $context Exception context
-     * @param \Exception       $previous  Previous exception (if any)
+     * @param array $context Exception context
+     * @param \Exception $previous Previous exception (if any)
      */
     public function __construct(
         $message,
         CommandInterface $command,
         array $context = [],
         \Exception $previous = null
-    ) {
+    )
+    {
         $this->command = $command;
         $this->response = isset($context['response']) ? $context['response'] : null;
         $this->request = isset($context['request']) ? $context['request'] : null;
@@ -67,7 +69,8 @@ class AwsException extends \RuntimeException implements
 
     public function __toString()
     {
-        if (!$this->getPrevious()) {
+        if (!$this->getPrevious())
+        {
             return parent::__toString();
         }
 
@@ -198,7 +201,8 @@ class AwsException extends \RuntimeException implements
      */
     public function getTransferInfo($name = null)
     {
-        if (!$name) {
+        if (!$name)
+        {
             return $this->transferInfo;
         }
 

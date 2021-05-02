@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -13,8 +14,8 @@ abstract class AbstractModel implements \ArrayAccess
     protected $shapeMap;
 
     /**
-     * @param array    $definition Service description
-     * @param ShapeMap $shapeMap   Shapemap used for creating shapes
+     * @param array $definition Service description
+     * @param ShapeMap $shapeMap Shapemap used for creating shapes
      */
     public function __construct(array $definition, ShapeMap $shapeMap)
     {
@@ -50,7 +51,8 @@ abstract class AbstractModel implements \ArrayAccess
 
     protected function shapeAt($key)
     {
-        if (!isset($this->definition[$key])) {
+        if (!isset($this->definition[$key]))
+        {
             throw new \InvalidArgumentException('Expected shape definition at '
                 . $key);
         }

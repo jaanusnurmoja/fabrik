@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser;
 
 /**
@@ -62,7 +63,8 @@ class Options
      */
     public function setOptions(array $options)
     {
-        foreach ($options as $key => $option) {
+        foreach ($options as $key => $option)
+        {
             $this->options[$key] = $option;
         }
 
@@ -78,7 +80,8 @@ class Options
      */
     public function get($key)
     {
-        if (isset($this->options[$key])) {
+        if (isset($this->options[$key]))
+        {
             return $this->options[$key];
         }
 

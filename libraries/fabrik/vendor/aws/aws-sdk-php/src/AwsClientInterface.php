@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Psr\Http\Message\UriInterface;
@@ -15,8 +16,8 @@ interface AwsClientInterface
      * Suffixing an operation name with "Async" will return a
      * promise that can be used to execute commands asynchronously.
      *
-     * @param string $name      Name of the command to execute.
-     * @param array  $arguments Arguments to pass to the getCommand method.
+     * @param string $name Name of the command to execute.
+     * @param array $arguments Arguments to pass to the getCommand method.
      *
      * @return ResultInterface
      * @throws \Exception
@@ -35,7 +36,7 @@ interface AwsClientInterface
      *   "headers".
      *
      * @param string $name Name of the operation to use in the command
-     * @param array  $args Arguments to pass to the command
+     * @param array $args Arguments to pass to the command
      *
      * @return CommandInterface
      * @throws \InvalidArgumentException if no command can be found by name
@@ -116,7 +117,7 @@ interface AwsClientInterface
      * Get a resource iterator for the specified operation.
      *
      * @param string $name Name of the iterator to retrieve.
-     * @param array  $args Command arguments to use with each command.
+     * @param array $args Command arguments to use with each command.
      *
      * @return \Iterator
      * @throws \UnexpectedValueException if the iterator config is invalid.
@@ -126,8 +127,8 @@ interface AwsClientInterface
     /**
      * Get a result paginator for the specified operation.
      *
-     * @param string $name   Name of the operation used for iterator
-     * @param array  $args   Command args to be used with each command
+     * @param string $name Name of the operation used for iterator
+     * @param array $args Command args to be used with each command
      *
      * @return \Aws\ResultPaginator
      * @throws \UnexpectedValueException if the iterator config is invalid.
@@ -139,7 +140,7 @@ interface AwsClientInterface
      *
      * @param string|callable $name Name of the waiter that defines the wait
      *                              configuration and conditions.
-     * @param array  $args          Args to be used with each command executed
+     * @param array $args Args to be used with each command executed
      *                              by the waiter. Waiter configuration options
      *                              can be provided in an associative array in
      *                              the @waiter key.
@@ -158,7 +159,7 @@ interface AwsClientInterface
      *
      * @param string|callable $name Name of the waiter that defines the wait
      *                              configuration and conditions.
-     * @param array  $args          Args to be used with each command executed
+     * @param array $args Args to be used with each command executed
      *                              by the waiter. Waiter configuration options
      *                              can be provided in an associative array in
      *                              the @waiter key.

@@ -26,13 +26,17 @@ final class HttpFulfilledPromise implements Promise
      */
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        if (null === $onFulfilled) {
+        if (null === $onFulfilled)
+        {
             return $this;
         }
 
-        try {
+        try
+        {
             return new self($onFulfilled($this->response));
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             return new HttpRejectedPromise($e);
         }
     }
@@ -50,7 +54,8 @@ final class HttpFulfilledPromise implements Promise
      */
     public function wait($unwrap = true)
     {
-        if ($unwrap) {
+        if ($unwrap)
+        {
             return $this->response;
         }
     }

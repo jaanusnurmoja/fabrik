@@ -32,12 +32,13 @@ class Absolute extends AbstractPositioner
         $bottom = $style->length_in_pt($style->bottom, $h);
         $left = $style->length_in_pt($style->left, $w);
 
-        if ($p && !($left === "auto" && $right === "auto")) {
+        if ($p && !($left === "auto" && $right === "auto"))
+        {
             // Get the parent's padding box (see http://www.w3.org/TR/CSS21/visuren.html#propdef-top)
             list($x, $y, $w, $h) = $p->get_padding_box();
         }
 
-        list($width, $height) = array($frame->get_margin_width(), $frame->get_margin_height());
+        list($width, $height) = [$frame->get_margin_width(), $frame->get_margin_height()];
 
         $orig_style = $frame->get_original_style();
         $orig_width = $orig_style->width;
@@ -56,28 +57,43 @@ class Absolute extends AbstractPositioner
          * right=fixed |     G     |     H      |
          *****************************/
 
-        if ($left === "auto") {
-            if ($right === "auto") {
+        if ($left === "auto")
+        {
+            if ($right === "auto")
+            {
                 // A or E - Keep the frame at the same position
                 $x = $x + $frame->find_block_parent()->get_current_line_box()->w;
-            } else {
-                if ($orig_width === "auto") {
+            }
+            else
+            {
+                if ($orig_width === "auto")
+                {
                     // C
                     $x += $w - $width - $right;
-                } else {
+                }
+                else
+                {
                     // G
                     $x += $w - $width - $right;
                 }
             }
-        } else {
-            if ($right === "auto") {
+        }
+        else
+        {
+            if ($right === "auto")
+            {
                 // B or F
                 $x += (float)$left;
-            } else {
-                if ($orig_width === "auto") {
+            }
+            else
+            {
+                if ($orig_width === "auto")
+                {
                     // D - TODO change width
                     $x += (float)$left;
-                } else {
+                }
+                else
+                {
                     // H - Everything is fixed: left + width win
                     $x += (float)$left;
                 }
@@ -85,28 +101,43 @@ class Absolute extends AbstractPositioner
         }
 
         // The same vertically
-        if ($top === "auto") {
-            if ($bottom === "auto") {
+        if ($top === "auto")
+        {
+            if ($bottom === "auto")
+            {
                 // A or E - Keep the frame at the same position
                 $y = $frame->find_block_parent()->get_current_line_box()->y;
-            } else {
-                if ($orig_height === "auto") {
+            }
+            else
+            {
+                if ($orig_height === "auto")
+                {
                     // C
                     $y += (float)$h - $height - (float)$bottom;
-                } else {
+                }
+                else
+                {
                     // G
                     $y += (float)$h - $height - (float)$bottom;
                 }
             }
-        } else {
-            if ($bottom === "auto") {
+        }
+        else
+        {
+            if ($bottom === "auto")
+            {
                 // B or F
                 $y += (float)$top;
-            } else {
-                if ($orig_height === "auto") {
+            }
+            else
+            {
+                if ($orig_height === "auto")
+                {
                     // D - TODO change height
                     $y += (float)$top;
-                } else {
+                }
+                else
+                {
                     // H - Everything is fixed: top + height win
                     $y += (float)$top;
                 }

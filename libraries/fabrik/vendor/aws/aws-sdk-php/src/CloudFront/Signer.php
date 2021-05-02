@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudFront;
 
 /**
@@ -21,7 +22,8 @@ class Signer
      */
     public function __construct($keyPairId, $privateKey)
     {
-        if (!extension_loaded('openssl')) {
+        if (!extension_loaded('openssl'))
+        {
             //@codeCoverageIgnoreStart
             throw new \RuntimeException('The openssl extension is required to '
                 . 'sign CloudFront urls.');
@@ -30,7 +32,8 @@ class Signer
 
         $this->keyPairId = $keyPairId;
 
-        if (!file_exists($privateKey)) {
+        if (!file_exists($privateKey))
+        {
             throw new \InvalidArgumentException("PK file not found: $privateKey");
         }
 
@@ -41,15 +44,15 @@ class Signer
     /**
      * Create the values used to construct signed URLs and cookies.
      *
-     * @param string              $resource     The CloudFront resource to which
+     * @param string $resource The CloudFront resource to which
      *                                          this signature will grant access.
      *                                          Not used when a custom policy is
      *                                          provided.
-     * @param string|integer|null $expires      UTC Unix timestamp used when
+     * @param string|integer|null $expires UTC Unix timestamp used when
      *                                          signing with a canned policy.
      *                                          Not required when passing a
      *                                          custom $policy.
-     * @param string              $policy       JSON policy. Use this option when
+     * @param string $policy JSON policy. Use this option when
      *                                          creating a signature for a custom
      *                                          policy.
      *
@@ -62,14 +65,19 @@ class Signer
     public function getSignature($resource = null, $expires = null, $policy = null)
     {
         $signatureHash = [];
-        if ($policy) {
+        if ($policy)
+        {
             $policy = preg_replace('/\s/s', '', $policy);
             $signatureHash['Policy'] = $this->encode($policy);
-        } elseif ($resource && $expires) {
-            $expires = (int) $expires; // Handle epoch passed as string
+        }
+        elseif ($resource && $expires)
+        {
+            $expires = (int)$expires; // Handle epoch passed as string
             $policy = $this->createCannedPolicy($resource, $expires);
             $signatureHash['Expires'] = $expires;
-        } else {
+        }
+        else
+        {
             throw new \InvalidArgumentException('Either a policy or a resource'
                 . ' and an expiration time must be provided.');
         }
@@ -85,7 +93,7 @@ class Signer
         return json_encode([
             'Statement' => [
                 [
-                    'Resource' => $resource,
+                    'Resource'  => $resource,
                     'Condition' => [
                         'DateLessThan' => ['AWS:EpochTime' => $expiration],
                     ],

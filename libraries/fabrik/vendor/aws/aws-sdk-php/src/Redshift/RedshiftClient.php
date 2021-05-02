@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Redshift;
 
 use Aws\AwsClient;
@@ -169,4 +170,6 @@ use Aws\AwsClient;
  * @method \Aws\Result rotateEncryptionKey(array $args = [])
  * @method \GuzzleHttp\Promise\Promise rotateEncryptionKeyAsync(array $args = [])
  */
-class RedshiftClient extends AwsClient {}
+class RedshiftClient extends AwsClient
+{
+}

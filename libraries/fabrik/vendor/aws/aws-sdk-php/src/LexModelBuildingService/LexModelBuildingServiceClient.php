@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\LexModelBuildingService;
 
 use Aws\AwsClient;
@@ -78,4 +79,6 @@ use Aws\AwsClient;
  * @method \Aws\Result startImport(array $args = [])
  * @method \GuzzleHttp\Promise\Promise startImportAsync(array $args = [])
  */
-class LexModelBuildingServiceClient extends AwsClient {}
+class LexModelBuildingServiceClient extends AwsClient
+{
+}

@@ -19,8 +19,7 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
             form.submit(function (event) {
                 if (typeof WFEditor !== 'undefined') {
                     WFEditor.getContent('message');
-                }
-                else if (typeof tinymce !== 'undefined') {
+                } else if (typeof tinymce !== 'undefined') {
                     if (tinyMCE.activeEditor) {
                         tinyMCE.activeEditor.save();
                     }
@@ -31,8 +30,8 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
                 }
                 Fabrik.loader.start(form);
                 jQuery.ajax({
-                    type  : 'POST', // define the type of HTTP verb we want to use (POST for our form)
-                    url   : url, // the url where we want to POST
+                    type: 'POST', // define the type of HTTP verb we want to use (POST for our form)
+                    url: url, // the url where we want to POST
                     //data  : jQuery(this).serialize(), // our data object
                     data: new FormData(this),
                     encode: true,
@@ -58,7 +57,7 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
             jQuery(document.body).on('click', '.delattachment', function (e) {
                 e.preventDefault();
                 if (jQuery('.addattachment').length > 1) {
-                   jQuery(this).closest('.attachment').remove();
+                    jQuery(this).closest('.attachment').remove();
                 }
             });
         },
@@ -94,8 +93,7 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
             if (typeOf(chxall) !== 'null') {
                 if (this.listform.getElement('input[name=checkAll]').checked) {
                     url += '&checkAll=1';
-                }
-                else {
+                } else {
                     url += '&checkAll=0';
                 }
             }
@@ -103,15 +101,15 @@ define(['jquery', 'fab/list-plugin', 'fab/fabrik'], function (jQuery, FbListPlug
             url += '&task=popupwin';
             var id = 'email-list-plugin';
             this.windowopts = {
-                id             : id,
-                title          : 'Email',
-                loadMethod     : 'xhr',
-                contentURL     : url,
-                width          : 520,
-                height         : 470,
-                evalScripts    : true,
-                minimizable    : false,
-                collapsible    : true,
+                id: id,
+                title: 'Email',
+                loadMethod: 'xhr',
+                contentURL: url,
+                width: 520,
+                height: 470,
+                evalScripts: true,
+                minimizable: false,
+                collapsible: true,
                 onContentLoaded: function () {
                     self.watchSubmit();
                     self.watchAttachments();

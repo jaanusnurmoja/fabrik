@@ -83,7 +83,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 }
 
                 // Could be added via a custom js file.
-                if (typeof(js) === 'function') {
+                if (typeof (js) === 'function') {
                     uid = Math.random(100) * 1000;
                 } else {
                     r = new RegExp('[^a-z|0-9]', 'gi');
@@ -108,7 +108,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                         if (target.length > 0 && subEls.contains(target[0])) {
 
                             // Replace this with that so that the js code runs on the correct element
-                            if (typeof(js) !== 'function') {
+                            if (typeof (js) !== 'function') {
                                 js = js.replace(/\bthis\b/g, 'that');
                                 eval(js);
                             } else {
@@ -139,8 +139,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             }
             if (val === '' || label === '') {
                 window.alert(Joomla.JText._('PLG_ELEMENT_CHECKBOX_ENTER_VALUE_LABEL'));
-            }
-            else {
+            } else {
                 var r = this.subElements.getLast().findClassUp('fabrikgrid_' + this.type).clone();
                 var i = r.getElement('input');
                 i.value = val;

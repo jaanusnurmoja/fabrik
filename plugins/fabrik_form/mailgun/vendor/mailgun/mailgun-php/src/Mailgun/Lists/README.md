@@ -1,24 +1,25 @@
 Mailgun - Lists
 ====================
 
-This is the Mailgun PHP *Lists* utilities. 
+This is the Mailgun PHP *Lists* utilities.
 
-The below assumes you've already installed the Mailgun PHP SDK in to your project. 
-If not, go back to the master README for instructions.
+The below assumes you've already installed the Mailgun PHP SDK in to your project. If not, go back to the master README
+for instructions.
 
 There is currently one utility provided.
 
-OptInHandler: Provides methods for authenticating an OptInRequest. 
+OptInHandler: Provides methods for authenticating an OptInRequest.
 
 The typical flow for using this utility would be as follows:  
-**Recipient Requests Subscribe** -> [Validate Recipient Address] -> [Generate Opt In Link] -> [Email Recipient Opt In Link]  
-**Recipient Clicks Opt In Link** -> [Validate Opt In Link] -> [Subscribe User] -> [Send final confirmation]  
+**Recipient Requests Subscribe** -> [Validate Recipient Address] -> [Generate Opt In Link]
+-> [Email Recipient Opt In Link]  
+**Recipient Clicks Opt In Link** -> [Validate Opt In Link] -> [Subscribe User] -> [Send final confirmation]
 
 The above flow is modeled below.
 
 Usage - Opt-In Handler (Recipient Requests Subscribe)
 -----------------------------------------------------
-Here's how to use Opt-In Handler to validate Opt-In requests. 
+Here's how to use Opt-In Handler to validate Opt-In requests.
 
 ```php
 # First, instantiate the SDK with your API credentials, domain, and required parameters for example. 
@@ -58,7 +59,7 @@ if($result->http_response_body->is_valid == true){
 
 Usage - Opt-In Handler (Recipient Clicks Opt In Link)
 -----------------------------------------------------
-Here's how to use Opt-In Handler to validate an Opt-In Hash. 
+Here's how to use Opt-In Handler to validate an Opt-In Hash.
 
 ```php
 # First, instantiate the SDK with your API credentials and domain. 
@@ -93,24 +94,21 @@ if($hashValidation){
 }
 ```
 
-A few notes:  
-1. 'a_secret_passphrase' can be anything. It's used as the *key* in hashing, 
-since your email address will vary.  
-2. validateHash() will return an array containing the recipient address and list 
-address.  
-3. You should *always* send an email confirmation before and after the 
-subscription request.  
-4. WARNING: On $_GET['hash'], you need to sanitize this value to prevent 
-malicious attempts to inject code.  
+A few notes:
+
+1. 'a_secret_passphrase' can be anything. It's used as the *key* in hashing, since your email address will vary.
+2. validateHash() will return an array containing the recipient address and list address.
+3. You should *always* send an email confirmation before and after the subscription request.
+4. WARNING: On $_GET['hash'], you need to sanitize this value to prevent malicious attempts to inject code.
 
 Available Functions
 -----------------------------------------------------
 
-`string generateHash(string $mailingList, string $secretAppId, string $recipientAddress)` 
+`string generateHash(string $mailingList, string $secretAppId, string $recipientAddress)`
 
-`array validateHash(string $secretAppId, string $uniqueHash)`  
+`array validateHash(string $secretAppId, string $uniqueHash)`
 
 More Documentation
 ------------------
-See the official [Mailgun Docs](http://documentation.mailgun.com/api-sending.html) 
+See the official [Mailgun Docs](http://documentation.mailgun.com/api-sending.html)
 for more information.

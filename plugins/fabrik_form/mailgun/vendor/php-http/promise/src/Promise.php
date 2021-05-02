@@ -37,7 +37,7 @@ interface Promise
      * The callback will be called when the value arrived and never more than once.
      *
      * @param callable $onFulfilled Called when a response will be available.
-     * @param callable $onRejected  Called when an exception occurs.
+     * @param callable $onRejected Called when an exception occurs.
      *
      * @return Promise A new resolved promise with value of the executed callback (onFulfilled / onRejected).
      */

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 use Aws\Exception\UnresolvedApiException;
@@ -55,9 +56,9 @@ class ApiProvider
      * Resolves an API provider and ensures a non-null return value.
      *
      * @param callable $provider Provider function to invoke.
-     * @param string   $type     Type of data ('api', 'waiter', 'paginator').
-     * @param string   $service  Service name.
-     * @param string   $version  API version.
+     * @param string $type Type of data ('api', 'waiter', 'paginator').
+     * @param string $service Service name.
+     * @param string $version API version.
      *
      * @return array
      * @throws UnresolvedApiException
@@ -66,19 +67,26 @@ class ApiProvider
     {
         // Execute the provider and return the result, if there is one.
         $result = $provider($type, $service, $version);
-        if (is_array($result)) {
-            if (!isset($result['metadata']['serviceIdentifier'])) {
+        if (is_array($result))
+        {
+            if (!isset($result['metadata']['serviceIdentifier']))
+            {
                 $result['metadata']['serviceIdentifier'] = $service;
             }
             return $result;
         }
 
         // Throw an exception with a message depending on the inputs.
-        if (!isset(self::$typeMap[$type])) {
+        if (!isset(self::$typeMap[$type]))
+        {
             $msg = "The type must be one of: " . implode(', ', self::$typeMap);
-        } elseif ($service) {
+        }
+        elseif ($service)
+        {
             $msg = "The {$service} service does not have version: {$version}.";
-        } else {
+        }
+        else
+        {
             $msg = "You must specify a service name to retrieve its API data.";
         }
 
@@ -118,8 +126,8 @@ class ApiProvider
      *   ...
      * ]
      *
-     * @param string $dir      Directory containing service models.
-     * @param array  $manifest The API version manifest data.
+     * @param string $dir Directory containing service models.
+     * @param array $manifest The API version manifest data.
      *
      * @return self
      */
@@ -153,11 +161,13 @@ class ApiProvider
      */
     public function getVersions($service)
     {
-        if (!isset($this->manifest)) {
+        if (!isset($this->manifest))
+        {
             $this->buildVersionsList($service);
         }
 
-        if (!isset($this->manifest[$service]['versions'])) {
+        if (!isset($this->manifest[$service]['versions']))
+        {
             return [];
         }
 
@@ -167,7 +177,7 @@ class ApiProvider
     /**
      * Execute the the provider.
      *
-     * @param string $type    Type of data ('api', 'waiter', 'paginator').
+     * @param string $type Type of data ('api', 'waiter', 'paginator').
      * @param string $service Service name.
      * @param string $version API version.
      *
@@ -176,40 +186,49 @@ class ApiProvider
     public function __invoke($type, $service, $version)
     {
         // Resolve the type or return null.
-        if (isset(self::$typeMap[$type])) {
+        if (isset(self::$typeMap[$type]))
+        {
             $type = self::$typeMap[$type];
-        } else {
+        }
+        else
+        {
             return null;
         }
 
         // Resolve the version or return null.
-        if (!isset($this->manifest)) {
+        if (!isset($this->manifest))
+        {
             $this->buildVersionsList($service);
         }
 
-        if (!isset($this->manifest[$service]['versions'][$version])) {
+        if (!isset($this->manifest[$service]['versions'][$version]))
+        {
             return null;
         }
 
         $version = $this->manifest[$service]['versions'][$version];
         $path = "{$this->modelsDir}/{$service}/{$version}/{$type}.json";
 
-        try {
+        try
+        {
             return \Aws\load_compiled_json($path);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e)
+        {
             return null;
         }
     }
 
     /**
      * @param string $modelsDir Directory containing service models.
-     * @param array  $manifest  The API version manifest data.
+     * @param array $manifest The API version manifest data.
      */
     private function __construct($modelsDir, array $manifest = null)
     {
         $this->manifest = $manifest;
         $this->modelsDir = rtrim($modelsDir, '/');
-        if (!is_dir($this->modelsDir)) {
+        if (!is_dir($this->modelsDir))
+        {
             throw new \InvalidArgumentException(
                 "The specified models directory, {$modelsDir}, was not found."
             );
@@ -223,16 +242,20 @@ class ApiProvider
     {
         $dir = "{$this->modelsDir}/{$service}/";
 
-        if (!is_dir($dir)) {
+        if (!is_dir($dir))
+        {
             return;
         }
 
         // Get versions, remove . and .., and sort in descending order.
         $results = array_diff(scandir($dir, SCANDIR_SORT_DESCENDING), ['..', '.']);
 
-        if (!$results) {
+        if (!$results)
+        {
             $this->manifest[$service] = ['versions' => []];
-        } else {
+        }
+        else
+        {
             $this->manifest[$service] = [
                 'versions' => [
                     'latest' => $results[0]

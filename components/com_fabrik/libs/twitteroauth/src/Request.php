@@ -3,20 +3,21 @@
  * The MIT License
  * Copyright (c) 2007 Andy Smith
  */
+
 namespace Abraham\TwitterOAuth;
 
 class Request
 {
-    protected $parameters;
-    protected $httpMethod;
-    protected $httpUrl;
+    protected     $parameters;
+    protected     $httpMethod;
+    protected     $httpUrl;
     public static $version = '1.0';
 
     /**
      * Constructor
      *
-     * @param string     $httpMethod
-     * @param string     $httpUrl
+     * @param string $httpMethod
+     * @param string $httpUrl
      * @param array|null $parameters
      */
     public function __construct($httpMethod, $httpUrl, array $parameters = [])
@@ -31,10 +32,10 @@ class Request
      * pretty much a helper function to set up the request
      *
      * @param Consumer $consumer
-     * @param Token    $token
-     * @param string   $httpMethod
-     * @param string   $httpUrl
-     * @param array    $parameters
+     * @param Token $token
+     * @param string $httpMethod
+     * @param string $httpUrl
+     * @param array $parameters
      *
      * @return Request
      */
@@ -44,14 +45,16 @@ class Request
         $httpMethod,
         $httpUrl,
         array $parameters = []
-    ) {
+    )
+    {
         $defaults = [
-            "oauth_version" => Request::$version,
-            "oauth_nonce" => Request::generateNonce(),
-            "oauth_timestamp" => time(),
+            "oauth_version"      => Request::$version,
+            "oauth_nonce"        => Request::generateNonce(),
+            "oauth_timestamp"    => time(),
             "oauth_consumer_key" => $consumer->key
         ];
-        if (null !== $token) {
+        if (null !== $token)
+        {
             $defaults['oauth_token'] = $token->key;
         }
 
@@ -107,7 +110,8 @@ class Request
 
         // Remove oauth_signature if present
         // Ref: Spec: 9.1.1 ("The oauth_signature parameter MUST be excluded.")
-        if (isset($params['oauth_signature'])) {
+        if (isset($params['oauth_signature']))
+        {
             unset($params['oauth_signature']);
         }
 
@@ -172,7 +176,8 @@ class Request
     {
         $postData = $this->toPostdata();
         $out = $this->getNormalizedHttpUrl();
-        if ($postData) {
+        if ($postData)
+        {
             $out .= '?' . $postData;
         }
         return $out;
@@ -198,11 +203,14 @@ class Request
     {
         $first = true;
         $out = 'Authorization: OAuth';
-        foreach ($this->parameters as $k => $v) {
-            if (substr($k, 0, 5) != "oauth") {
+        foreach ($this->parameters as $k => $v)
+        {
+            if (substr($k, 0, 5) != "oauth")
+            {
                 continue;
             }
-            if (is_array($v)) {
+            if (is_array($v))
+            {
                 throw new TwitterOAuthException('Arrays not supported in headers');
             }
             $out .= ($first) ? ' ' : ', ';
@@ -222,8 +230,8 @@ class Request
 
     /**
      * @param SignatureMethod $signatureMethod
-     * @param Consumer        $consumer
-     * @param Token           $token
+     * @param Consumer $consumer
+     * @param Token $token
      */
     public function signRequest(SignatureMethod $signatureMethod, Consumer $consumer, Token $token = null)
     {
@@ -234,8 +242,8 @@ class Request
 
     /**
      * @param SignatureMethod $signatureMethod
-     * @param Consumer        $consumer
-     * @param Token           $token
+     * @param Consumer $consumer
+     * @param Token $token
      *
      * @return string
      */

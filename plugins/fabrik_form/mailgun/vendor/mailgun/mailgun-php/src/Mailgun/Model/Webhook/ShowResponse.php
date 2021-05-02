@@ -37,7 +37,8 @@ class ShowResponse implements ApiResponse
     public static function create(array $data)
     {
         $webhook = [];
-        if (isset($data['webhook'])) {
+        if (isset($data['webhook']))
+        {
             $webhook = $data['webhook'];
         }
 
@@ -49,7 +50,8 @@ class ShowResponse implements ApiResponse
      */
     public function getWebhookUrl()
     {
-        if (isset($this->webhook['url'])) {
+        if (isset($this->webhook['url']))
+        {
             return $this->webhook['url'];
         }
     }

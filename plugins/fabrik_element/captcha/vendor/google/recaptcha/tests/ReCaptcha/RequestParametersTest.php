@@ -31,14 +31,18 @@ class RequestParametersTest extends \PHPUnit_Framework_TestCase
 
     public function provideValidData()
     {
-        return array(
-            array('SECRET', 'RESPONSE', 'REMOTEIP', 'VERSION',
-                array('secret' => 'SECRET', 'response' => 'RESPONSE', 'remoteip' => 'REMOTEIP', 'version' => 'VERSION'),
-                'secret=SECRET&response=RESPONSE&remoteip=REMOTEIP&version=VERSION'),
-            array('SECRET', 'RESPONSE', null, null,
-                array('secret' => 'SECRET', 'response' => 'RESPONSE'),
-                'secret=SECRET&response=RESPONSE'),
-        );
+        return [
+            [
+                'SECRET', 'RESPONSE', 'REMOTEIP', 'VERSION',
+                ['secret' => 'SECRET', 'response' => 'RESPONSE', 'remoteip' => 'REMOTEIP', 'version' => 'VERSION'],
+                'secret=SECRET&response=RESPONSE&remoteip=REMOTEIP&version=VERSION'
+            ],
+            [
+                'SECRET', 'RESPONSE', null, null,
+                ['secret' => 'SECRET', 'response' => 'RESPONSE'],
+                'secret=SECRET&response=RESPONSE'
+            ],
+        ];
     }
 
     /**

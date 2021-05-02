@@ -1,4 +1,5 @@
 <?php
+
 namespace JmesPath\Tests\Tree;
 
 use JmesPath\TreeCompiler;

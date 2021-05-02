@@ -3,8 +3,8 @@
 |  Assigned your USER ID & PASSWORD with TOKEN 
 |  This file is included in each of the SAMPLE Example
 \--------------------------------------------------------*/
-$USERNAME='';
-$PASSWORD='';
+$USERNAME = '';
+$PASSWORD = '';
 
 /*--------------------------------------------------------\
 |  Create a Lead using the salseforce account 

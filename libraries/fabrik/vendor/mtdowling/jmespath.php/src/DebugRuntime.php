@@ -1,4 +1,5 @@
 <?php
+
 namespace JmesPath;
 
 /**
@@ -21,7 +22,8 @@ class DebugRuntime
 
     public function __invoke($expression, $data)
     {
-        if ($this->runtime instanceof CompilerRuntime) {
+        if ($this->runtime instanceof CompilerRuntime)
+        {
             return $this->debugCompiled($expression, $data);
         }
 
@@ -31,7 +33,8 @@ class DebugRuntime
     private function debugInterpreted($expression, $data)
     {
         return $this->debugCallback(
-            function () use ($expression, $data) {
+            function () use ($expression, $data)
+            {
                 $runtime = $this->runtime;
                 return $runtime($expression, $data);
             },
@@ -43,7 +46,8 @@ class DebugRuntime
     private function debugCompiled($expression, $data)
     {
         $result = $this->debugCallback(
-            function () use ($expression, $data) {
+            function () use ($expression, $data)
+            {
                 $runtime = $this->runtime;
                 return $runtime($expression, $data);
             },
@@ -61,7 +65,8 @@ class DebugRuntime
         fwrite($this->out, "Tokens\n======\n\n");
         $tokens = $lexer->tokenize($expression);
 
-        foreach ($tokens as $t) {
+        foreach ($tokens as $t)
+        {
             fprintf(
                 $this->out,
                 "%3d  %-13s  %s\n", $t['pos'], $t['type'],

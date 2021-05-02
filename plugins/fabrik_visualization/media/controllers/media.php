@@ -22,18 +22,18 @@ jimport('joomla.application.component.controller');
  */
 class FabrikControllerVisualizationmedia extends FabrikControllerVisualization
 {
-	/**
-	 * Get Playlist
-	 *
-	 * @return  void
-	 */
-	public function getPlaylist()
-	{
-		$model = $this->getModel('media');
-		$conf  = JComponentHelper::getParams('com_fabrik');
-		$id    = $this->input->getInt('id', $conf->get('visualizationid', $this->input->getInt('visualizationid', 0)));
-		$model->setId($id);
-		$model->getVisualization();
-		echo $model->getPlaylist();
-	}
+    /**
+     * Get Playlist
+     *
+     * @return  void
+     */
+    public function getPlaylist()
+    {
+        $model = $this->getModel('media');
+        $conf = JComponentHelper::getParams('com_fabrik');
+        $id = $this->input->getInt('id', $conf->get('visualizationid', $this->input->getInt('visualizationid', 0)));
+        $model->setId($id);
+        $model->getVisualization();
+        echo $model->getPlaylist();
+    }
 }

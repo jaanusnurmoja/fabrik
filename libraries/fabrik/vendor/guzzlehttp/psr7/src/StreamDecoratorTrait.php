@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Psr7;
 
 use Psr\Http\Message\StreamInterface;
@@ -27,7 +28,8 @@ trait StreamDecoratorTrait
      */
     public function __get($name)
     {
-        if ($name == 'stream') {
+        if ($name == 'stream')
+        {
             $this->stream = $this->createStream();
             return $this->stream;
         }
@@ -37,15 +39,19 @@ trait StreamDecoratorTrait
 
     public function __toString()
     {
-        try {
-            if ($this->isSeekable()) {
+        try
+        {
+            if ($this->isSeekable())
+            {
                 $this->seek(0);
             }
             return $this->getContents();
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             // Really, PHP? https://bugs.php.net/bug.php?id=53648
             trigger_error('StreamDecorator::__toString exception: '
-                . (string) $e, E_USER_ERROR);
+                . (string)$e, E_USER_ERROR);
             return '';
         }
     }
@@ -59,7 +65,7 @@ trait StreamDecoratorTrait
      * Allow decorators to implement custom methods
      *
      * @param string $method Missing method name
-     * @param array  $args   Method arguments
+     * @param array $args Method arguments
      *
      * @return mixed
      */

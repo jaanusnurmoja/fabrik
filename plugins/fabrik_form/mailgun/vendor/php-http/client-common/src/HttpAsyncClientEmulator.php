@@ -27,9 +27,12 @@ trait HttpAsyncClientEmulator
      */
     public function sendAsyncRequest(RequestInterface $request)
     {
-        try {
+        try
+        {
             return new Promise\HttpFulfilledPromise($this->sendRequest($request));
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             return new Promise\HttpRejectedPromise($e);
         }
     }

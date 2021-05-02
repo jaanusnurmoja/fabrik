@@ -25,7 +25,8 @@ class SurfaceGmagick implements SurfaceInterface
 
     public function __construct($w, $h)
     {
-        if (self::DEBUG) {
+        if (self::DEBUG)
+        {
             echo __FUNCTION__ . "\n";
         }
         $this->width = $w;
@@ -38,7 +39,8 @@ class SurfaceGmagick implements SurfaceInterface
 
     function out()
     {
-        if (self::DEBUG) {
+        if (self::DEBUG)
+        {
             echo __FUNCTION__ . "\n";
         }
 
@@ -55,7 +57,8 @@ class SurfaceGmagick implements SurfaceInterface
 
     public function save()
     {
-        if (self::DEBUG) {
+        if (self::DEBUG)
+        {
             echo __FUNCTION__ . "\n";
         }
         $this->canvas->save();
@@ -132,9 +135,11 @@ class SurfaceGmagick implements SurfaceInterface
     {
         if (self::DEBUG) echo __FUNCTION__ . "\n";
 
-        if (strpos($image, "data:") === 0) {
+        if (strpos($image, "data:") === 0)
+        {
             $data = substr($image, strpos($image, ";") + 1);
-            if (strpos($data, "base64") === 0) {
+            if (strpos($data, "base64") === 0)
+            {
                 $data = base64_decode(substr($data, 7));
             }
 
@@ -256,24 +261,29 @@ class SurfaceGmagick implements SurfaceInterface
         $this->style = $style;
         $canvas = $this->canvas;
 
-        if (is_array($style->stroke) && $stroke = $style->stroke) {
+        if (is_array($style->stroke) && $stroke = $style->stroke)
+        {
             $canvas->setcolor("stroke", "rgb", $stroke[0] / 255, $stroke[1] / 255, $stroke[2] / 255, null);
         }
 
-        if (is_array($style->fill) && $fill = $style->fill) {
-           // $canvas->setcolor("fill", "rgb", $fill[0] / 255, $fill[1] / 255, $fill[2] / 255, null);
+        if (is_array($style->fill) && $fill = $style->fill)
+        {
+            // $canvas->setcolor("fill", "rgb", $fill[0] / 255, $fill[1] / 255, $fill[2] / 255, null);
         }
 
-        $opts = array();
-        if ($style->strokeWidth > 0.000001) {
+        $opts = [];
+        if ($style->strokeWidth > 0.000001)
+        {
             $opts[] = "linewidth=$style->strokeWidth";
         }
 
-        if (in_array($style->strokeLinecap, array("butt", "round", "projecting"))) {
+        if (in_array($style->strokeLinecap, ["butt", "round", "projecting"]))
+        {
             $opts[] = "linecap=$style->strokeLinecap";
         }
 
-        if (in_array($style->strokeLinejoin, array("miter", "round", "bevel"))) {
+        if (in_array($style->strokeLinejoin, ["miter", "round", "bevel"]))
+        {
             $opts[] = "linejoin=$style->strokeLinejoin";
         }
 
@@ -285,16 +295,17 @@ class SurfaceGmagick implements SurfaceInterface
 
     private function getFont($family, $style)
     {
-        $map = array(
+        $map = [
             "serif"      => "Times",
             "sans-serif" => "Helvetica",
             "fantasy"    => "Symbol",
             "cursive"    => "serif",
             "monospance" => "Courier",
-        );
+        ];
 
         $family = strtolower($family);
-        if (isset($map[$family])) {
+        if (isset($map[$family]))
+        {
             $family = $map[$family];
         }
 

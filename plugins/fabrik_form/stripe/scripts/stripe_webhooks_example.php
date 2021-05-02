@@ -14,7 +14,8 @@ defined('_JEXEC') or die('Restricted access');
 /*
  */
 
-class fabrikStripeWebHooks {
+class fabrikStripeWebHooks
+{
 
 
 }

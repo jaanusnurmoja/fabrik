@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 /**
@@ -51,4 +52,6 @@ interface ResultInterface extends \ArrayAccess, \IteratorAggregate, \Countable
      * @link http://jmespath.readthedocs.org/en/latest/ JMESPath documentation
      */
     public function search($expression);
-};
+}
+
+;

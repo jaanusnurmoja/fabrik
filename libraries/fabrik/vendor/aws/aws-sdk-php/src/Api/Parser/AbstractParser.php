@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Parser;
 
 use Aws\Api\Service;
@@ -13,7 +14,7 @@ use Psr\Http\Message\StreamInterface;
  */
 abstract class AbstractParser
 {
-    /** @var \Aws\Api\Service Representation of the service API*/
+    /** @var \Aws\Api\Service Representation of the service API */
     protected $api;
 
     /** @var callable */
@@ -28,7 +29,7 @@ abstract class AbstractParser
     }
 
     /**
-     * @param CommandInterface  $command  Command that was executed.
+     * @param CommandInterface $command Command that was executed.
      * @param ResponseInterface $response Response that was received.
      *
      * @return ResultInterface

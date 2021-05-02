@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Credentials;
 
 /**
@@ -16,10 +17,10 @@ class Credentials implements CredentialsInterface, \Serializable
      * Constructs a new BasicAWSCredentials object, with the specified AWS
      * access key and AWS secret key
      *
-     * @param string $key     AWS access key ID
-     * @param string $secret  AWS secret access key
-     * @param string $token   Security token to use
-     * @param int    $expires UNIX timestamp for when credentials expire
+     * @param string $key AWS access key ID
+     * @param string $secret AWS secret access key
+     * @param string $token Security token to use
+     * @param int $expires UNIX timestamp for when credentials expire
      */
     public function __construct($key, $secret, $token = null, $expires = null)
     {

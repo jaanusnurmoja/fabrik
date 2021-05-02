@@ -51,29 +51,29 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
         Implements: [Events, Options],
 
         options: {
-            id               : 'FabrikWindow',
-            data             : {},
-            title            : '&nbsp;',
-            container        : false,
-            loadMethod       : 'html',
-            contentURL       : '',
+            id: 'FabrikWindow',
+            data: {},
+            title: '&nbsp;',
+            container: false,
+            loadMethod: 'html',
+            contentURL: '',
             createShowOverLay: false,
-            width            : 300,
-            height           : 300,
-            loadHeight       : 100,
-            expandable       : true,
-            offset_x         : null,
-            offset_y         : null,
-            visible          : true,
-            modalId          : '',
-            onClose          : function () {
+            width: 300,
+            height: 300,
+            loadHeight: 100,
+            expandable: true,
+            offset_x: null,
+            offset_y: null,
+            visible: true,
+            modalId: '',
+            onClose: function () {
             },
-            onOpen           : function () {
+            onOpen: function () {
             },
-            onContentLoaded  : function () {
+            onContentLoaded: function () {
                 this.fitToContent(false);
             },
-            destroy          : true
+            destroy: true
         },
 
         modal: false,
@@ -140,7 +140,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
 
             yy = jQuery(window).height() / 2 - (h / 2);
 
-            if ( jQuery.inArray(jQuery(source).css('position'),['fixed','static']) === -1) {
+            if (jQuery.inArray(jQuery(source).css('position'), ['fixed', 'static']) === -1) {
                 yy += window.getScroll().y;
             }
             //yy = (window.getSize().y / 2) - (h / 2);
@@ -171,8 +171,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
                 // @TODO fix
                 if (dir === 'height') {
                     return Math.floor(jQuery(window).height() * (dim.toFloat() / 100));
-                }
-                else {
+                } else {
                     return Math.floor(jQuery(window).width() * (dim.toFloat() / 100));
                 }
             }
@@ -228,7 +227,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
                 source.draggable(
                     {
                         'handle': handle,
-                        drag    : function () {
+                        drag: function () {
                             Fabrik.fireEvent('fabrik.window.resized', self.window);
                             self.drawWindow();
                         }
@@ -237,11 +236,11 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
 
                 source.resizable({
                     containment: self.options.container ? jQuery('#' + self.options.container) : null,
-                    handles    : {
-                        'n' : '.ui-resizable-n',
-                        'e' : '.ui-resizable-e',
-                        's' : '.ui-resizable-s',
-                        'w' : '.ui-resizable-w',
+                    handles: {
+                        'n': '.ui-resizable-n',
+                        'e': '.ui-resizable-e',
+                        's': '.ui-resizable-s',
+                        'w': '.ui-resizable-w',
                         'ne': '.ui-resizable-ne',
                         'se': '.ui-resizable-se',
                         'sw': '.ui-resizable-sw',
@@ -258,12 +257,12 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
             // Rob - removed this caused any form with a file upload in it to be unscrollable - as we load the window
             // in the background.
             /* Prevent browser window from being scrolled */
-           /* jQuery('body').css({'height':'100%','overflow':'hidden'});
+            /* jQuery('body').css({'height':'100%','overflow':'hidden'});
 
-            /!* Allow browser window to be scrolled again when modal is released from DOM *!/
-            jQuery('div.modal').on('remove', function () {
-                jQuery('body').css({'height':'initial','overflow':'initial'});
-            });*/
+             /!* Allow browser window to be scrolled again when modal is released from DOM *!/
+             jQuery('div.modal').on('remove', function () {
+                 jQuery('body').css({'height':'initial','overflow':'initial'});
+             });*/
 
             /* Use form title if modal handlelabel is blank
             * $$$ Rob - this is not going to work with UIKit for example - try not to rely on the DOM classes/markup
@@ -312,7 +311,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
             var draggerC, dragger, expandButton, expandIcon, resizeIcon, label, handleParts = [], self = this,
                 directions, i;
             this.window = new Element('div', {
-                'id'   : this.options.id,
+                'id': this.options.id,
                 'class': 'fabrikWindow ' + this.classSuffix + ' modal'
             });
             var del = this.deleteButton();
@@ -367,7 +366,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
             } else {
                 this.window.append([this.handle, this.contentWrapperEl, draggerC]);
                 directions = ['n', 'e', 's', 'w', 'nw', 'ne', 'se', 'sw'];
-                for (i = 0; i < directions.length; i ++) {
+                for (i = 0; i < directions.length; i++) {
                     this.window.append(jQuery('<div class="ui-resizable-' + directions[i] + ' ui-resizable-handle"></div>'));
                 }
             }
@@ -389,7 +388,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
             } else {
                 this.window.css({
                     'left': this.unexpanded.left + 'px',
-                    'top' : this.unexpanded.top + 'px'
+                    'top': this.unexpanded.top + 'px'
                 });
                 this.window.css({'width': this.unexpanded.width, 'height': this.unexpanded.height});
                 this.expanded = false;
@@ -433,8 +432,8 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
                     self.onContentLoaded = self.options.onContentLoaded;
                     Fabrik.loader.start(self.contentEl);
                     new jQuery.ajax({
-                        'url'   : this.options.contentURL,
-                        'data'  : jQuery.extend(this.options.data, {'fabrik_window_id': this.options.id}),
+                        'url': this.options.contentURL,
+                        'data': jQuery.extend(this.options.data, {'fabrik_window_id': this.options.id}),
                         'method': 'post',
                     }).success(function (r) {
                         Fabrik.loader.stop(self.contentEl);
@@ -457,17 +456,17 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
                         this.iframeEl.remove();
                     }
                     this.iframeEl = jQuery('<iframe />').addClass('fabrikWindowIframe').attr({
-                        'id'          : this.options.id + '_iframe',
-                        'name'        : this.options.id + '_iframe',
-                        'class'       : 'fabrikWindowIframe',
-                        'src'         : this.options.contentURL,
-                        'marginwidth' : 0,
+                        'id': this.options.id + '_iframe',
+                        'name': this.options.id + '_iframe',
+                        'class': 'fabrikWindowIframe',
+                        'src': this.options.contentURL,
+                        'marginwidth': 0,
                         'marginheight': 0,
-                        'frameBorder' : 0,
-                        'scrolling'   : 'auto',
+                        'frameBorder': 0,
+                        'scrolling': 'auto',
                     }).css({
                         'height': h + 'px',
-                        'width' : w
+                        'width': w
                     }).appendTo(u);
                     this.iframeEl.hide();
                     this.iframeEl.on('load', function () {
@@ -585,7 +584,7 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
 
                 // However db join add (in repeating group) has a fit if we don't remove its content
                 this.window.remove();
-                delete(Fabrik.Windows[this.options.id]);
+                delete (Fabrik.Windows[this.options.id]);
             } else {
                 this.window.fadeOut({duration: 0});
             }
@@ -638,17 +637,17 @@ define(['jquery', 'fab/fabrik', 'jQueryUI', 'fab/utils'], function (jQuery, Fabr
     });
 
     Fabrik.RedirectWindow = new Class({
-        Extends   : Fabrik.Window,
+        Extends: Fabrik.Window,
         initialize: function (opts) {
             var opts2 = {
-                'id'         : 'redirect',
-                'title'      : opts.title ? opts.title : '',
-                loadMethod   : loadMethod,
-                'width'      : opts.width ? opts.width : 300,
-                'height'     : opts.height ? opts.height : 320,
+                'id': 'redirect',
+                'title': opts.title ? opts.title : '',
+                loadMethod: loadMethod,
+                'width': opts.width ? opts.width : 300,
+                'height': opts.height ? opts.height : 320,
                 'minimizable': false,
                 'collapsible': true,
-                'contentURL' : opts.contentURL ? opts.contentURL : ''
+                'contentURL': opts.contentURL ? opts.contentURL : ''
             };
             opts2.id = 'redirect';
             opts = jQuery.merge(opts2, opts);

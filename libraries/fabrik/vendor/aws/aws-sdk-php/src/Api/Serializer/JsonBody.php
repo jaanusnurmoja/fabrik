@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Serializer;
 
 use Aws\Api\Service;
@@ -35,7 +36,7 @@ class JsonBody
      * Builds the JSON body based on an array of arguments.
      *
      * @param Shape $shape Operation being constructed
-     * @param array $args  Associative array of arguments
+     * @param array $args Associative array of arguments
      *
      * @return string
      */
@@ -48,34 +49,41 @@ class JsonBody
 
     private function format(Shape $shape, $value)
     {
-        switch ($shape['type']) {
+        switch ($shape['type'])
+        {
             case 'structure':
                 $data = [];
-                foreach ($value as $k => $v) {
-                    if ($v !== null && $shape->hasMember($k)) {
+                foreach ($value as $k => $v)
+                {
+                    if ($v !== null && $shape->hasMember($k))
+                    {
                         $valueShape = $shape->getMember($k);
                         $data[$valueShape['locationName'] ?: $k]
                             = $this->format($valueShape, $v);
                     }
                 }
-                if (empty($data)) {
+                if (empty($data))
+                {
                     return new \stdClass;
                 }
                 return $data;
 
             case 'list':
                 $items = $shape->getMember();
-                foreach ($value as $k => $v) {
+                foreach ($value as $k => $v)
+                {
                     $value[$k] = $this->format($items, $v);
                 }
                 return $value;
 
             case 'map':
-                if (empty($value)) {
+                if (empty($value))
+                {
                     return new \stdClass;
                 }
                 $values = $shape->getValue();
-                foreach ($value as $k => $v) {
+                foreach ($value as $k => $v)
+                {
                     $value[$k] = $this->format($values, $v);
                 }
                 return $value;

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Organizations;
 
 use Aws\AwsClient;
@@ -90,4 +91,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updatePolicy(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updatePolicyAsync(array $args = [])
  */
-class OrganizationsClient extends AwsClient {}
+class OrganizationsClient extends AwsClient
+{
+}

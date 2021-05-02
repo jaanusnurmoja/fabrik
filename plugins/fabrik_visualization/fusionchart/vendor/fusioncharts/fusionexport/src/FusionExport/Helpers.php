@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace FusionExport;
 
@@ -14,11 +14,12 @@ class Helpers
         return substr($string, strlen($query) * -1) === $query;
     }
 
-    public static function findCommonPath($paths) 
+    public static function findCommonPath($paths)
     {
         sort($paths, SORT_STRING);
         if (count($paths) === 0) return '';
-        $paths = array_map(function ($pa) {
+        $paths = array_map(function ($pa)
+        {
             return explode(DIRECTORY_SEPARATOR, $pa);
         }, $paths);
         $p1 = $paths[0];
@@ -28,8 +29,8 @@ class Helpers
         while ($i < $l && @$p1[$i] === @$p2[$i]) $i += 1;
         return implode(DIRECTORY_SEPARATOR, array_slice($p1, 0, $i));
     }
-      
-    public static function removeCommonPath($path, $base) 
+
+    public static function removeCommonPath($path, $base)
     {
         $pathSpl = explode(DIRECTORY_SEPARATOR, $path);
         $baseSpl = explode(DIRECTORY_SEPARATOR, $base);
@@ -56,10 +57,11 @@ class Helpers
 
         $cwd = getcwd();
         $basePath = realpath($base);
-        
+
         chdir($basePath);
 
-        $resolvedPaths = array_map(function ($p) {
+        $resolvedPaths = array_map(function ($p)
+        {
             if (!isset($p)) return false;
             return realpath($p);
         }, $paths);
@@ -72,26 +74,29 @@ class Helpers
     public static function globResolve(&$outListResourcePaths, &$outBaseDirectoryPath, $resources)
     {
         $baseDirectoryPath = null;
-		$listResourcePaths = array();
-		$listResourceIncludePaths = array();
-		$listResourceExcludePaths = array();
-		$resourceFilePath = realpath($resource);
-		$resourceDirectoryPath = dirname($resourceFilePath);
-		$reources = json_decode(file_get_contents($resourceFilePath),true);
-		if($resources.resolvePaths != null){
-			$resourceDirectoryPath = realpath($resources.resolvePaths);
-		}
-		chdir($resourceDirectoryPath);
-		$includes = $resources['include'];
-		foreach(includes as $include){
-			array_push($listResourceIncludePaths,glob($include));
-		}
-		foreach($resources.exclude as $exclude){
-			array_push($listResourceExcludePaths,glob($exclude));
-		}
-		$outListResourcePaths = array_diff(listResourceIncludePaths,listResourceExcludePaths);
-		$outBaseDirectoryPath = $resources.basePath;
-		
+        $listResourcePaths = [];
+        $listResourceIncludePaths = [];
+        $listResourceExcludePaths = [];
+        $resourceFilePath = realpath($resource);
+        $resourceDirectoryPath = dirname($resourceFilePath);
+        $reources = json_decode(file_get_contents($resourceFilePath), true);
+        if ($resources . resolvePaths != null)
+        {
+            $resourceDirectoryPath = realpath($resources . resolvePaths);
+        }
+        chdir($resourceDirectoryPath);
+        $includes = $resources['include'];
+        foreach (includes as $include)
+        {
+            array_push($listResourceIncludePaths, glob($include));
+        }
+        foreach ($resources . exclude as $exclude)
+        {
+            array_push($listResourceExcludePaths, glob($exclude));
+        }
+        $outListResourcePaths = array_diff(listResourceIncludePaths, listResourceExcludePaths);
+        $outBaseDirectoryPath = $resources . basePath;
+
     }
 
     public static function convertFilePathToBase64($val)

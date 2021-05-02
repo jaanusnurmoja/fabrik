@@ -25,7 +25,8 @@ abstract class HttpClientPool implements HttpAsyncClient, HttpClient
      */
     public function addHttpClient($client)
     {
-        if (!$client instanceof HttpClientPoolItem) {
+        if (!$client instanceof HttpClientPoolItem)
+        {
             $client = new HttpClientPoolItem($client);
         }
 
@@ -35,9 +36,9 @@ abstract class HttpClientPool implements HttpAsyncClient, HttpClient
     /**
      * Return an http client given a specific strategy.
      *
+     * @return HttpClientPoolItem Return a http client that can do both sync or async
      * @throws HttpClientNotFoundException When no http client has been found into the pool
      *
-     * @return HttpClientPoolItem Return a http client that can do both sync or async
      */
     abstract protected function chooseHttpClient();
 

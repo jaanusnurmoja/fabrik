@@ -1,5 +1,4 @@
 module.exports = (grunt) ->
-
   banner = [
     '/**!'
     ' * <%= pkg.description %>'

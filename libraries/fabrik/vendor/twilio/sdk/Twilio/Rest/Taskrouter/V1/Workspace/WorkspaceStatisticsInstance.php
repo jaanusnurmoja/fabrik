@@ -22,38 +22,42 @@ use Twilio\Version;
  * @property string workspaceSid
  * @property string url
  */
-class WorkspaceStatisticsInstance extends InstanceResource {
+class WorkspaceStatisticsInstance extends InstanceResource
+{
     /**
      * Initialize the WorkspaceStatisticsInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $workspaceSid The workspace_sid
-     * @return \Twilio\Rest\Taskrouter\V1\Workspace\WorkspaceStatisticsInstance 
+     * @return \Twilio\Rest\Taskrouter\V1\Workspace\WorkspaceStatisticsInstance
      */
-    public function __construct(Version $version, array $payload, $workspaceSid) {
+    public function __construct(Version $version, array $payload, $workspaceSid)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'realtime' => Values::array_get($payload, 'realtime'),
-            'cumulative' => Values::array_get($payload, 'cumulative'),
-            'accountSid' => Values::array_get($payload, 'account_sid'),
+        $this->properties = [
+            'realtime'     => Values::array_get($payload, 'realtime'),
+            'cumulative'   => Values::array_get($payload, 'cumulative'),
+            'accountSid'   => Values::array_get($payload, 'account_sid'),
             'workspaceSid' => Values::array_get($payload, 'workspace_sid'),
-            'url' => Values::array_get($payload, 'url'),
-        );
+            'url'          => Values::array_get($payload, 'url'),
+        ];
 
-        $this->solution = array('workspaceSid' => $workspaceSid, );
+        $this->solution = ['workspaceSid' => $workspaceSid,];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Taskrouter\V1\Workspace\WorkspaceStatisticsContext Context for this WorkspaceStatisticsInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new WorkspaceStatisticsContext($this->version, $this->solution['workspaceSid']);
         }
 
@@ -62,28 +66,32 @@ class WorkspaceStatisticsInstance extends InstanceResource {
 
     /**
      * Fetch a WorkspaceStatisticsInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return WorkspaceStatisticsInstance Fetched WorkspaceStatisticsInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch($options = array()) {
+    public function fetch($options = [])
+    {
         return $this->proxy()->fetch($options);
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -93,12 +101,14 @@ class WorkspaceStatisticsInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Taskrouter.V1.WorkspaceStatisticsInstance ' . implode(' ', $context) . ']';

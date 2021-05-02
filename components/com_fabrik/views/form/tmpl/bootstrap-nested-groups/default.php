@@ -13,12 +13,13 @@
 defined('_JEXEC') or die('Restricted access');
 ?>
 <?php
-		$mediaFolder = FabrikHelperHTML::getMediaFolder();
-		$document = JFactory::getDocument();
+$mediaFolder = FabrikHelperHTML::getMediaFolder();
+$document = JFactory::getDocument();
 ?>
 
-<script type="text-javascript" src="<?php $mediaFolder;?>/lib/repeatable-fields/repeatable-fields.js">
-</script>
+    <script type="text-javascript" src="<?php
+    $mediaFolder; ?>/lib/repeatable-fields/repeatable-fields.js">
+    </script>
 
 <?php
 $form = $this->form;
@@ -27,94 +28,109 @@ $groupTmpl = $model->editable ? 'group' : 'group_details';
 $active = ($form->error != '') ? '' : ' fabrikHide';
 
 if ($this->params->get('show_page_heading', 1)) : ?>
-	<div class="componentheading<?php echo $this->params->get('pageclass_sfx')?>">
-		<?php echo $this->escape($this->params->get('page_heading')); ?>
-	</div>
+    <div class="componentheading<?php
+    echo $this->params->get('pageclass_sfx') ?>">
+        <?php
+        echo $this->escape($this->params->get('page_heading')); ?>
+    </div>
 <?php
 endif;
 
 if ($this->params->get('show-title', 1)) :?>
-<div class="page-header">
-	<h1><?php echo $form->label;?></h1>
-</div>
+    <div class="page-header">
+        <h1><?php
+            echo $form->label; ?></h1>
+    </div>
 <?php
 endif;
 
 echo $form->intro;
 ?>
-<form method="post" <?php echo $form->attribs?>>
-<?php
-echo $this->plugintop;
-?>
+    <form method="post" <?php
+    echo $form->attribs ?>>
+        <?php
+        echo $this->plugintop;
+        ?>
 
-<div class="fabrikMainError alert alert-error fabrikError<?php echo $active?>">
-	<button class="close" data-dismiss="alert">×</button>
-	<?php echo $form->error; ?>
-</div>
+        <div class="fabrikMainError alert alert-error fabrikError<?php
+        echo $active ?>">
+            <button class="close" data-dismiss="alert">×</button>
+            <?php
+            echo $form->error; ?>
+        </div>
 
-<div class="row-fluid nav">
-	<div class="<?php echo FabrikHelperHTML::getGridSpan(6); ?> pull-right">
-		<?php
-		echo $this->loadTemplate('buttons');
-		?>
-	</div>
-	<div class="<?php echo FabrikHelperHTML::getGridSpan(6); ?>">
-		<?php
-		echo $this->loadTemplate('relateddata');
-		?>
-	</div>
-</div>
+        <div class="row-fluid nav">
+            <div class="<?php
+            echo FabrikHelperHTML::getGridSpan(6); ?> pull-right">
+                <?php
+                echo $this->loadTemplate('buttons');
+                ?>
+            </div>
+            <div class="<?php
+            echo FabrikHelperHTML::getGridSpan(6); ?>">
+                <?php
+                echo $this->loadTemplate('relateddata');
+                ?>
+            </div>
+        </div>
 
-<?php
-foreach ($this->groups as $group) :
-	// todo: if no parent group
-	$this->group = $group;
-	
-	if ($group->isMain) :
-	?>
-	
-	<fieldset class="<?php echo $group->class; ?> repeat" id="group<?php echo $group->id;?>" style="<?php echo $group->css;?>">
-		<?php
-		if ($group->showLegend) :?>
-			<legend class="legend"><?php echo $group->title;?></legend>
-		<?php
-		endif;
+        <?php
+        foreach ($this->groups as $group) :
+            // todo: if no parent group
+            $this->group = $group;
 
-		if (!empty($group->intro)) : ?>
-			<div class="groupintro"><?php echo $group->intro ?></div>
-		<?php
-		endif;
+            if ($group->isMain) :
+                ?>
 
-		/* Load the group template - this can be :
-		 *  * default_group.php - standard group non-repeating rendered as an unordered list
-		 *  * default_repeatgroup.php - repeat group rendered as an unordered list
-		 *  * default_repeatgroup_table.php - repeat group rendered in a table.
-		 */
-		$this->elements = $group->elements;
-		echo $this->loadTemplate($group->tmpl);
+                <fieldset class="<?php
+                echo $group->class; ?> repeat" id="group<?php
+                echo $group->id; ?>" style="<?php
+                echo $group->css; ?>">
+                    <?php
+                    if ($group->showLegend) :?>
+                        <legend class="legend"><?php
+                            echo $group->title; ?></legend>
+                    <?php
+                    endif;
 
-		if (!empty($group->outro)) : ?>
-			<div class="groupoutro"><?php echo $group->outro ?></div>
-		<?php
-		endif;
-	?>
-	</fieldset>
-<?
-endif;
-endforeach;
-if ($model->editable) : ?>
-<div class="fabrikHiddenFields">
-	<?php echo $this->hiddenFields; ?>
-</div>
-<?php
-endif;
+                    if (!empty($group->intro)) : ?>
+                        <div class="groupintro"><?php
+                            echo $group->intro ?></div>
+                    <?php
+                    endif;
 
-echo $this->pluginbottom;
-echo $this->loadTemplate('actions');
-?>
-</form>
+                    /* Load the group template - this can be :
+                     *  * default_group.php - standard group non-repeating rendered as an unordered list
+                     *  * default_repeatgroup.php - repeat group rendered as an unordered list
+                     *  * default_repeatgroup_table.php - repeat group rendered in a table.
+                     */
+                    $this->elements = $group->elements;
+                    echo $this->loadTemplate($group->tmpl);
 
-<script type="text-javascript">
+                    if (!empty($group->outro)) : ?>
+                        <div class="groupoutro"><?php
+                            echo $group->outro ?></div>
+                    <?php
+                    endif;
+                    ?>
+                </fieldset>
+            <?
+            endif;
+        endforeach;
+        if ($model->editable) : ?>
+            <div class="fabrikHiddenFields">
+                <?php
+                echo $this->hiddenFields; ?>
+            </div>
+        <?php
+        endif;
+
+        echo $this->pluginbottom;
+        echo $this->loadTemplate('actions');
+        ?>
+    </form>
+
+    <script type="text-javascript">
 jQuery(function() {
 	jQuery('.repeat').each(function() {
 		jQuery(this).repeatable_fields({
@@ -123,7 +139,8 @@ jQuery(function() {
 		});
 	});
 });
-</script>
+
+    </script>
 <?php
 echo $form->outro;
 echo $this->pluginend;

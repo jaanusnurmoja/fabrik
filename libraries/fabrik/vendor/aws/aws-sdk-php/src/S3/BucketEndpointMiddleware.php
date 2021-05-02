@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\CommandInterface;
@@ -15,7 +16,7 @@ use Psr\Http\Message\RequestInterface;
 class BucketEndpointMiddleware
 {
     private static $exclusions = ['GetBucketLocation' => true];
-    private $nextHandler;
+    private        $nextHandler;
 
     /**
      * Create a middleware wrapper function.
@@ -24,7 +25,8 @@ class BucketEndpointMiddleware
      */
     public static function wrap()
     {
-        return function (callable $handler) {
+        return function (callable $handler)
+        {
             return new self($handler);
         };
     }
@@ -39,7 +41,8 @@ class BucketEndpointMiddleware
         $nextHandler = $this->nextHandler;
         $bucket = $command['Bucket'];
 
-        if ($bucket && !isset(self::$exclusions[$command->getName()])) {
+        if ($bucket && !isset(self::$exclusions[$command->getName()]))
+        {
             $request = $this->modifyRequest($request, $command);
         }
 
@@ -49,7 +52,8 @@ class BucketEndpointMiddleware
     private function removeBucketFromPath($path, $bucket)
     {
         $len = strlen($bucket) + 1;
-        if (substr($path, 0, $len) === "/{$bucket}") {
+        if (substr($path, 0, $len) === "/{$bucket}")
+        {
             $path = substr($path, $len);
         }
 
@@ -59,14 +63,16 @@ class BucketEndpointMiddleware
     private function modifyRequest(
         RequestInterface $request,
         CommandInterface $command
-    ) {
+    )
+    {
         $uri = $request->getUri();
         $path = $uri->getPath();
         $bucket = $command['Bucket'];
         $path = $this->removeBucketFromPath($path, $bucket);
 
         // Modify the Key to make sure the key is encoded, but slashes are not.
-        if ($command['Key']) {
+        if ($command['Key'])
+        {
             $path = S3Client::encodeKey(rawurldecode($path));
         }
 

@@ -38,7 +38,8 @@ final class RequestConditional implements Authentication
      */
     public function authenticate(RequestInterface $request)
     {
-        if ($this->requestMatcher->matches($request)) {
+        if ($this->requestMatcher->matches($request))
+        {
             return $this->authentication->authenticate($request);
         }
 

@@ -9,26 +9,29 @@ $d = $displayData;
  */
 ?>
 
-<audio src="<?php echo $d->file;?>"  controls>
-	<!--[if !ie]> -->
-	<object data="<?php echo $d->file;?>"
-		type="audio/x-mpeg">
-		<param name="autoplay"
-			value="false" />
-		<param name="width"
-			value="140" />
-		<param name="height"
-			value="40" />
-		<param name="controller"
-			value="true" />
-		<param name="autostart"
-			value="0" />
-		Oops!
-	</object>
-	<!--<![endif]-->
-	<!--[if ie]>
+<audio src="<?php
+echo $d->file; ?>" controls>
+    <!--[if !ie]> -->
+    <object data="<?php
+    echo $d->file; ?>"
+            type="audio/x-mpeg">
+        <param name="autoplay"
+               value="false"/>
+        <param name="width"
+               value="140"/>
+        <param name="height"
+               value="40"/>
+        <param name="controller"
+               value="true"/>
+        <param name="autostart"
+               value="0"/>
+        Oops!
+    </object>
+    <!--<![endif]-->
+    <!--[if ie]>
 	<embed
-		src="<?php echo $d->file;?>"
+		src="<?php
+    echo $d->file; ?>"
 		autostart="false"
 		playcount="true"
 		loop="false"

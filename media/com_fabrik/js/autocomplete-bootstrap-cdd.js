@@ -39,16 +39,16 @@ define(['jquery', 'fab/autocomplete-bootstrap', 'fab/fabrik'],
                             this.ajax.cancel();
                         }
                         this.ajax = new Request({
-                            url      : this.options.url,
-                            data     : {
-                                value                     : v,
+                            url: this.options.url,
+                            data: {
+                                value: v,
                                 fabrik_cascade_ajax_update: 1,
-                                v                         : observer.get('value')
+                                v: observer.get('value')
                             },
                             onRequest: function () {
                                 Fabrik.loader.start(this.getInputElement());
                             }.bind(this),
-                            onCancel : function () {
+                            onCancel: function () {
                                 Fabrik.loader.stop(this.getInputElement());
                             }.bind(this),
                             onSuccess: function (e) {

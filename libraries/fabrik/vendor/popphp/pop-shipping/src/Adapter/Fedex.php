@@ -11,6 +11,7 @@
 /**
  * @namespace
  */
+
 namespace Pop\Shipping\Adapter;
 
 /**
@@ -122,11 +123,11 @@ class Fedex extends AbstractAdapter
      *
      * Method to instantiate an FedEx shipping adapter object
      *
-     * @param  string $key
-     * @param  string $password
-     * @param  string $account
-     * @param  string $meter
-     * @param  string $wsdl
+     * @param string $key
+     * @param string $password
+     * @param string $account
+     * @param string $meter
+     * @param string $wsdl
      * @return Fedex
      */
     public function __construct($key, $password, $account, $meter, $wsdl)
@@ -137,7 +138,7 @@ class Fedex extends AbstractAdapter
         $this->client = new \SoapClient($this->wsdl, ['trace' => 1]);
 
         $this->request['WebAuthenticationDetail'] = [
-            'UserCredential' =>[
+            'UserCredential' => [
                 'Key'      => $key,
                 'Password' => $password
             ]
@@ -161,7 +162,7 @@ class Fedex extends AbstractAdapter
 
         $this->request['RequestedShipment']['RateRequestTypes'] = 'ACCOUNT';
         $this->request['RequestedShipment']['RateRequestTypes'] = 'LIST';
-        $this->request['RequestedShipment']['PackageCount']     = '1';
+        $this->request['RequestedShipment']['PackageCount'] = '1';
     }
 
     /**
@@ -177,29 +178,47 @@ class Fedex extends AbstractAdapter
     /**
      * Set ship to
      *
-     * @param  array  $shipTo
+     * @param array $shipTo
      * @return mixed
      */
     public function shipTo(array $shipTo)
     {
-        foreach ($shipTo as $key => $value) {
-            if (stripos($key, 'person') !== false) {
+        foreach ($shipTo as $key => $value)
+        {
+            if (stripos($key, 'person') !== false)
+            {
                 $this->shipTo['Contact']['PersonName'] = $value;
-            } else if (stripos($key, 'company') !== false) {
+            }
+            elseif (stripos($key, 'company') !== false)
+            {
                 $this->shipTo['Contact']['CompanyName'] = $value;
-            } else if (stripos($key, 'phone') !== false) {
+            }
+            elseif (stripos($key, 'phone') !== false)
+            {
                 $this->shipTo['Contact']['PhoneNumber'] = $value;
-            } else if (stripos($key, 'address') !== false) {
+            }
+            elseif (stripos($key, 'address') !== false)
+            {
                 $this->shipTo['Address']['StreetLines'][] = $value;
-            } else if (strtolower($key) == 'city') {
+            }
+            elseif (strtolower($key) == 'city')
+            {
                 $this->shipTo['Address']['City'] = $value;
-            } else if ((stripos($key, 'state') !== false) || (stripos($key, 'province') !== false)) {
+            }
+            elseif ((stripos($key, 'state') !== false) || (stripos($key, 'province') !== false))
+            {
                 $this->shipTo['Address']['StateOrProvinceCode'] = $value;
-            } else if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip')) {
+            }
+            elseif ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip'))
+            {
                 $this->shipTo['Address']['PostalCode'] = $value;
-            } else if ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country')) {
+            }
+            elseif ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country'))
+            {
                 $this->shipTo['Address']['CountryCode'] = $value;
-            } else if (strtolower($key) == 'residential') {
+            }
+            elseif (strtolower($key) == 'residential')
+            {
                 $this->shipTo['Address']['Residential'] = $value;
             }
         }
@@ -210,29 +229,47 @@ class Fedex extends AbstractAdapter
     /**
      * Set ship from
      *
-     * @param  array  $shipFrom
+     * @param array $shipFrom
      * @return mixed
      */
     public function shipFrom(array $shipFrom)
     {
-        foreach ($shipFrom as $key => $value) {
-            if (stripos($key, 'person') !== false) {
+        foreach ($shipFrom as $key => $value)
+        {
+            if (stripos($key, 'person') !== false)
+            {
                 $this->shipFrom['Contact']['PersonName'] = $value;
-            } else if (stripos($key, 'company') !== false) {
+            }
+            elseif (stripos($key, 'company') !== false)
+            {
                 $this->shipFrom['Contact']['CompanyName'] = $value;
-            } else if (stripos($key, 'phone') !== false) {
+            }
+            elseif (stripos($key, 'phone') !== false)
+            {
                 $this->shipFrom['Contact']['PhoneNumber'] = $value;
-            } else if (stripos($key, 'address') !== false) {
+            }
+            elseif (stripos($key, 'address') !== false)
+            {
                 $this->shipFrom['Address']['StreetLines'][] = $value;
-            } else if (strtolower($key) == 'city') {
+            }
+            elseif (strtolower($key) == 'city')
+            {
                 $this->shipFrom['Address']['City'] = $value;
-            } else if ((stripos($key, 'state') !== false) || (stripos($key, 'province') !== false)) {
+            }
+            elseif ((stripos($key, 'state') !== false) || (stripos($key, 'province') !== false))
+            {
                 $this->shipFrom['Address']['StateOrProvinceCode'] = $value;
-            } else if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip')) {
+            }
+            elseif ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip'))
+            {
                 $this->shipFrom['Address']['PostalCode'] = $value;
-            } else if ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country')) {
+            }
+            elseif ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country'))
+            {
                 $this->shipFrom['Address']['CountryCode'] = $value;
-            } else if (strtolower($key) == 'residential') {
+            }
+            elseif (strtolower($key) == 'residential')
+            {
                 $this->shipFrom['Address']['Residential'] = $value;
             }
         }
@@ -243,22 +280,29 @@ class Fedex extends AbstractAdapter
     /**
      * Set dimensions
      *
-     * @param  array  $dimensions
-     * @param  string $unit
+     * @param array $dimensions
+     * @param string $unit
      * @return mixed
      */
     public function setDimensions(array $dimensions, $unit = null)
     {
-        if ((null !== $unit) && (($unit == 'IN') || ($unit == 'CM'))) {
+        if ((null !== $unit) && (($unit == 'IN') || ($unit == 'CM')))
+        {
             $this->dimensions['Units'] = $unit;
         }
 
-        foreach ($dimensions as $key => $value) {
-            if (strtolower($key) == 'length') {
+        foreach ($dimensions as $key => $value)
+        {
+            if (strtolower($key) == 'length')
+            {
                 $this->dimensions['Length'] = $value;
-            } else if (strtolower($key) == 'width') {
+            }
+            elseif (strtolower($key) == 'width')
+            {
                 $this->dimensions['Width'] = $value;
-            } else if (strtolower($key) == 'height') {
+            }
+            elseif (strtolower($key) == 'height')
+            {
                 $this->dimensions['Height'] = $value;
             }
         }
@@ -267,13 +311,14 @@ class Fedex extends AbstractAdapter
     /**
      * Set dimensions
      *
-     * @param  string $weight
-     * @param  string $unit
+     * @param string $weight
+     * @param string $unit
      * @return mixed
      */
     public function setWeight($weight, $unit = null)
     {
-        if ((null !== $unit) && (($unit == 'LB') || ($unit == 'KG'))) {
+        if ((null !== $unit) && (($unit == 'LB') || ($unit == 'KG')))
+        {
             $this->weight['Units'] = $unit;
         }
 
@@ -293,9 +338,12 @@ class Fedex extends AbstractAdapter
             'Weight'            => $this->weight
         ];
 
-        if ((null !== $this->dimensions['Length']) &&
+        if (
+            (null !== $this->dimensions['Length']) &&
             (null !== $this->dimensions['Width']) &&
-            (null !== $this->dimensions['Height'])) {
+            (null !== $this->dimensions['Height'])
+        )
+        {
             $this->request['RequestedShipment']['RequestedPackageLineItems']['Dimensions'] = $this->dimensions;
         }
 
@@ -303,9 +351,12 @@ class Fedex extends AbstractAdapter
         $this->responseCode = (int)$this->response->Notifications->Code;
         $this->responseMessage = (string)$this->response->Notifications->Message;
 
-        if ($this->responseCode == 0) {
-            foreach ($this->response->RateReplyDetails as $rate) {
-                $this->rates[self::$services[(string)$rate->ServiceType]] = number_format((string)$rate->RatedShipmentDetails[0]->ShipmentRateDetail->TotalNetCharge->Amount, 2);
+        if ($this->responseCode == 0)
+        {
+            foreach ($this->response->RateReplyDetails as $rate)
+            {
+                $this->rates[self::$services[(string)$rate->ServiceType]] = number_format((string)$rate->RatedShipmentDetails[0]->ShipmentRateDetail->TotalNetCharge->Amount,
+                    2);
             }
             $this->rates = array_reverse($this->rates, true);
         }

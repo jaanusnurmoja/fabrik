@@ -29,53 +29,58 @@ use Twilio\Version;
  * @property boolean beta
  * @property string capabilities
  */
-class NationalInstance extends InstanceResource {
+class NationalInstance extends InstanceResource
+{
     /**
      * Initialize the NationalInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $accountSid The 34 character string that uniquely identifies
      *                           your account.
      * @param string $countryCode The ISO Country code to lookup phone numbers for.
-     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\NationalInstance 
+     * @return \Twilio\Rest\Api\V2010\Account\AvailablePhoneNumberCountry\NationalInstance
      */
-    public function __construct(Version $version, array $payload, $accountSid, $countryCode) {
+    public function __construct(Version $version, array $payload, $accountSid, $countryCode)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'friendlyName' => Values::array_get($payload, 'friendly_name'),
-            'phoneNumber' => Values::array_get($payload, 'phone_number'),
-            'lata' => Values::array_get($payload, 'lata'),
-            'locality' => Values::array_get($payload, 'locality'),
-            'rateCenter' => Values::array_get($payload, 'rate_center'),
-            'latitude' => Values::array_get($payload, 'latitude'),
-            'longitude' => Values::array_get($payload, 'longitude'),
-            'region' => Values::array_get($payload, 'region'),
-            'postalCode' => Values::array_get($payload, 'postal_code'),
-            'isoCountry' => Values::array_get($payload, 'iso_country'),
+        $this->properties = [
+            'friendlyName'        => Values::array_get($payload, 'friendly_name'),
+            'phoneNumber'         => Values::array_get($payload, 'phone_number'),
+            'lata'                => Values::array_get($payload, 'lata'),
+            'locality'            => Values::array_get($payload, 'locality'),
+            'rateCenter'          => Values::array_get($payload, 'rate_center'),
+            'latitude'            => Values::array_get($payload, 'latitude'),
+            'longitude'           => Values::array_get($payload, 'longitude'),
+            'region'              => Values::array_get($payload, 'region'),
+            'postalCode'          => Values::array_get($payload, 'postal_code'),
+            'isoCountry'          => Values::array_get($payload, 'iso_country'),
             'addressRequirements' => Values::array_get($payload, 'address_requirements'),
-            'beta' => Values::array_get($payload, 'beta'),
-            'capabilities' => Values::array_get($payload, 'capabilities'),
-        );
+            'beta'                => Values::array_get($payload, 'beta'),
+            'capabilities'        => Values::array_get($payload, 'capabilities'),
+        ];
 
-        $this->solution = array('accountSid' => $accountSid, 'countryCode' => $countryCode, );
+        $this->solution = ['accountSid' => $accountSid, 'countryCode' => $countryCode,];
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -85,10 +90,11 @@ class NationalInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Api.V2010.NationalInstance]';
     }
 }

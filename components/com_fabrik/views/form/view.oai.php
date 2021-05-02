@@ -23,54 +23,54 @@ require_once JPATH_SITE . '/components/com_fabrik/views/form/view.base.php';
  */
 class FabrikViewForm extends FabrikViewFormBase
 {
-	/**
-	 * Access value
-	 *
-	 * @var  int
-	 */
-	public $access = null;
+    /**
+     * Access value
+     *
+     * @var  int
+     */
+    public $access = null;
 
-	/**
-	 * @var FabrikFEModelOai
-	 */
-	private $oaiModel;
+    /**
+     * @var FabrikFEModelOai
+     */
+    private $oaiModel;
 
-	/**
-	 * Constructor
-	 *
-	 * @param   array $config A named configuration array for object construction.
-	 *
-	 */
-	public function __construct($config = array())
-	{
-		parent::__construct($config);
-		$this->oaiModel = JModelLegacy::getInstance('Oai', 'FabrikFEModel');
-	}
+    /**
+     * Constructor
+     *
+     * @param array $config A named configuration array for object construction.
+     *
+     */
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $this->oaiModel = JModelLegacy::getInstance('Oai', 'FabrikFEModel');
+    }
 
-	/**
-	 * Execute and display a template script.
-	 *
-	 * @param   string $tpl The name of the template file to parse; automatically searches through the template paths.
-	 *
-	 * @return  mixed  A string if successful, otherwise a JError object.
-	 */
-	public function display($tpl = null)
-	{
-		$this->doc->setMimeEncoding('application/xml');
-		$model = $this->getModel('form');
-		$model->render();
+    /**
+     * Execute and display a template script.
+     *
+     * @param string $tpl The name of the template file to parse; automatically searches through the template paths.
+     *
+     * @return  mixed  A string if successful, otherwise a JError object.
+     */
+    public function display($tpl = null)
+    {
+        $this->doc->setMimeEncoding('application/xml');
+        $model = $this->getModel('form');
+        $model->render();
 
-		// @TODO replace with OAI errors.
-		if (!$this->canAccess())
-		{
-			return false;
-		}
+        // @TODO replace with OAI errors.
+        if (!$this->canAccess())
+        {
+            return false;
+        }
 
-		$listModel = $model->getListModel();
-		$this->oaiModel->setListModel($listModel);
-		$this->oaiModel->setRecord($model->getData());
-		$dom = $this->oaiModel->getRecord();
-		echo $dom->saveXML();
-	}
+        $listModel = $model->getListModel();
+        $this->oaiModel->setListModel($listModel);
+        $this->oaiModel->setRecord($model->getData());
+        $dom = $this->oaiModel->getRecord();
+        echo $dom->saveXML();
+    }
 
 }

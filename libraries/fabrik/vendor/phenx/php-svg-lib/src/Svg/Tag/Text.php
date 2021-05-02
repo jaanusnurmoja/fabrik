@@ -10,8 +10,8 @@ namespace Svg\Tag;
 
 class Text extends Shape
 {
-    protected $x = 0;
-    protected $y = 0;
+    protected $x    = 0;
+    protected $y    = 0;
     protected $text = "";
 
     public function start($attributes)
@@ -20,10 +20,12 @@ class Text extends Shape
         $height = $this->document->getHeight();
         $this->y = $height;
 
-        if (isset($attributes['x'])) {
+        if (isset($attributes['x']))
+        {
             $this->x = $attributes['x'];
         }
-        if (isset($attributes['y'])) {
+        if (isset($attributes['y']))
+        {
             $this->y = $height - $attributes['y'];
         }
 
@@ -38,7 +40,8 @@ class Text extends Shape
         $style = $surface->getStyle();
         $surface->setFont($style->fontFamily, $style->fontStyle, $style->fontWeight);
 
-        switch ($style->textAnchor) {
+        switch ($style->textAnchor)
+        {
             case "middle":
                 $width = $surface->measureText($this->text);
                 $x -= $width / 2;

@@ -6,13 +6,18 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // decoding requires buffering in chunks of 4 bytes each
 $buffer = '';
-Clue\StreamFilter\append(STDIN, function ($chunk = null) use (&$buffer) {
-    if ($chunk === null) {
-        if (strlen($buffer) % 4 !== 0) {
+Clue\StreamFilter\append(STDIN, function ($chunk = null) use (&$buffer)
+{
+    if ($chunk === null)
+    {
+        if (strlen($buffer) % 4 !== 0)
+        {
             throw new \UnexpectedValueException('Invalid length');
         }
         $chunk = $buffer;
-    } else {
+    }
+    else
+    {
         $buffer .= $chunk;
         $len = strlen($buffer) - (strlen($buffer) % 4);
         $chunk = (string)substr($buffer, 0, $len);
@@ -20,7 +25,8 @@ Clue\StreamFilter\append(STDIN, function ($chunk = null) use (&$buffer) {
     }
 
     $ret = base64_decode($chunk, true);
-    if ($ret === false) {
+    if ($ret === false)
+    {
         throw new \UnexpectedValueException('Not a valid base64 encoded chunk');
     }
     return $ret;

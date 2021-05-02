@@ -39,56 +39,60 @@ use Twilio\Version;
  * @property string workspaceSid
  * @property string url
  */
-class TaskQueueCumulativeStatisticsInstance extends InstanceResource {
+class TaskQueueCumulativeStatisticsInstance extends InstanceResource
+{
     /**
      * Initialize the TaskQueueCumulativeStatisticsInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $workspaceSid The workspace_sid
      * @param string $taskQueueSid The task_queue_sid
-     * @return \Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueueCumulativeStatisticsInstance 
+     * @return \Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueueCumulativeStatisticsInstance
      */
-    public function __construct(Version $version, array $payload, $workspaceSid, $taskQueueSid) {
+    public function __construct(Version $version, array $payload, $workspaceSid, $taskQueueSid)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'avgTaskAcceptanceTime' => Values::array_get($payload, 'avg_task_acceptance_time'),
-            'startTime' => Deserialize::dateTime(Values::array_get($payload, 'start_time')),
-            'endTime' => Deserialize::dateTime(Values::array_get($payload, 'end_time')),
-            'reservationsCreated' => Values::array_get($payload, 'reservations_created'),
-            'reservationsAccepted' => Values::array_get($payload, 'reservations_accepted'),
-            'reservationsRejected' => Values::array_get($payload, 'reservations_rejected'),
-            'reservationsTimedOut' => Values::array_get($payload, 'reservations_timed_out'),
-            'reservationsCanceled' => Values::array_get($payload, 'reservations_canceled'),
-            'reservationsRescinded' => Values::array_get($payload, 'reservations_rescinded'),
-            'splitByWaitTime' => Values::array_get($payload, 'split_by_wait_time'),
-            'taskQueueSid' => Values::array_get($payload, 'task_queue_sid'),
+        $this->properties = [
+            'accountSid'                => Values::array_get($payload, 'account_sid'),
+            'avgTaskAcceptanceTime'     => Values::array_get($payload, 'avg_task_acceptance_time'),
+            'startTime'                 => Deserialize::dateTime(Values::array_get($payload, 'start_time')),
+            'endTime'                   => Deserialize::dateTime(Values::array_get($payload, 'end_time')),
+            'reservationsCreated'       => Values::array_get($payload, 'reservations_created'),
+            'reservationsAccepted'      => Values::array_get($payload, 'reservations_accepted'),
+            'reservationsRejected'      => Values::array_get($payload, 'reservations_rejected'),
+            'reservationsTimedOut'      => Values::array_get($payload, 'reservations_timed_out'),
+            'reservationsCanceled'      => Values::array_get($payload, 'reservations_canceled'),
+            'reservationsRescinded'     => Values::array_get($payload, 'reservations_rescinded'),
+            'splitByWaitTime'           => Values::array_get($payload, 'split_by_wait_time'),
+            'taskQueueSid'              => Values::array_get($payload, 'task_queue_sid'),
             'waitDurationUntilAccepted' => Values::array_get($payload, 'wait_duration_until_accepted'),
             'waitDurationUntilCanceled' => Values::array_get($payload, 'wait_duration_until_canceled'),
-            'tasksCanceled' => Values::array_get($payload, 'tasks_canceled'),
-            'tasksCompleted' => Values::array_get($payload, 'tasks_completed'),
-            'tasksDeleted' => Values::array_get($payload, 'tasks_deleted'),
-            'tasksEntered' => Values::array_get($payload, 'tasks_entered'),
-            'tasksMoved' => Values::array_get($payload, 'tasks_moved'),
-            'workspaceSid' => Values::array_get($payload, 'workspace_sid'),
-            'url' => Values::array_get($payload, 'url'),
-        );
+            'tasksCanceled'             => Values::array_get($payload, 'tasks_canceled'),
+            'tasksCompleted'            => Values::array_get($payload, 'tasks_completed'),
+            'tasksDeleted'              => Values::array_get($payload, 'tasks_deleted'),
+            'tasksEntered'              => Values::array_get($payload, 'tasks_entered'),
+            'tasksMoved'                => Values::array_get($payload, 'tasks_moved'),
+            'workspaceSid'              => Values::array_get($payload, 'workspace_sid'),
+            'url'                       => Values::array_get($payload, 'url'),
+        ];
 
-        $this->solution = array('workspaceSid' => $workspaceSid, 'taskQueueSid' => $taskQueueSid, );
+        $this->solution = ['workspaceSid' => $workspaceSid, 'taskQueueSid' => $taskQueueSid,];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueueCumulativeStatisticsContext Context for this
      *                                                                                             TaskQueueCumulativeStatisticsInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new TaskQueueCumulativeStatisticsContext(
                 $this->version,
                 $this->solution['workspaceSid'],
@@ -101,29 +105,33 @@ class TaskQueueCumulativeStatisticsInstance extends InstanceResource {
 
     /**
      * Fetch a TaskQueueCumulativeStatisticsInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return TaskQueueCumulativeStatisticsInstance Fetched
      *                                               TaskQueueCumulativeStatisticsInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch($options = array()) {
+    public function fetch($options = [])
+    {
         return $this->proxy()->fetch($options);
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -133,12 +141,14 @@ class TaskQueueCumulativeStatisticsInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Taskrouter.V1.TaskQueueCumulativeStatisticsInstance ' . implode(' ', $context) . ']';

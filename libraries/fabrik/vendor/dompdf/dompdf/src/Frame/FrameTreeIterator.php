@@ -1,4 +1,5 @@
 <?php
+
 namespace Dompdf\Frame;
 
 use Iterator;
@@ -22,7 +23,7 @@ class FrameTreeIterator implements Iterator
     /**
      * @var array
      */
-    protected $_stack = array();
+    protected $_stack = [];
 
     /**
      * @var int
@@ -43,7 +44,7 @@ class FrameTreeIterator implements Iterator
      */
     public function rewind()
     {
-        $this->_stack = array($this->_root);
+        $this->_stack = [$this->_root];
         $this->_num = 0;
     }
 
@@ -83,9 +84,11 @@ class FrameTreeIterator implements Iterator
         $this->_num++;
 
         // Push all children onto the stack in reverse order
-        if ($c = $b->get_last_child()) {
+        if ($c = $b->get_last_child())
+        {
             $this->_stack[] = $c;
-            while ($c = $c->get_prev_sibling()) {
+            while ($c = $c->get_prev_sibling())
+            {
                 $this->_stack[] = $c;
             }
         }

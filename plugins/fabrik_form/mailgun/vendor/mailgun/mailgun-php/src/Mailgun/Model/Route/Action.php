@@ -30,7 +30,8 @@ final class Action
     {
         $items = [];
 
-        foreach ($data as $action) {
+        foreach ($data as $action)
+        {
             $items[] = new self($action);
         }
 

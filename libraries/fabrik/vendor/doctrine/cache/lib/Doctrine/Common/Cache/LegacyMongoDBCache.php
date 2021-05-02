@@ -37,7 +37,8 @@ class LegacyMongoDBCache extends CacheProvider
      */
     public function __construct(MongoCollection $collection)
     {
-        @trigger_error('Using the legacy MongoDB cache provider is deprecated and will be removed in 2.0', E_USER_DEPRECATED);
+        @trigger_error('Using the legacy MongoDB cache provider is deprecated and will be removed in 2.0',
+            E_USER_DEPRECATED);
         $this->collection = $collection;
     }
 
@@ -46,13 +47,16 @@ class LegacyMongoDBCache extends CacheProvider
      */
     protected function doFetch($id)
     {
-        $document = $this->collection->findOne(['_id' => $id], [MongoDBCache::DATA_FIELD, MongoDBCache::EXPIRATION_FIELD]);
+        $document = $this->collection->findOne(['_id' => $id],
+            [MongoDBCache::DATA_FIELD, MongoDBCache::EXPIRATION_FIELD]);
 
-        if ($document === null) {
+        if ($document === null)
+        {
             return false;
         }
 
-        if ($this->isExpired($document)) {
+        if ($this->isExpired($document))
+        {
             $this->createExpirationIndex();
             $this->doDelete($id);
 
@@ -69,11 +73,13 @@ class LegacyMongoDBCache extends CacheProvider
     {
         $document = $this->collection->findOne(['_id' => $id], [MongoDBCache::EXPIRATION_FIELD]);
 
-        if ($document === null) {
+        if ($document === null)
+        {
             return false;
         }
 
-        if ($this->isExpired($document)) {
+        if ($this->isExpired($document))
+        {
             $this->createExpirationIndex();
             $this->doDelete($id);
 
@@ -88,18 +94,21 @@ class LegacyMongoDBCache extends CacheProvider
      */
     protected function doSave($id, $data, $lifeTime = 0)
     {
-        try {
+        try
+        {
             $result = $this->collection->update(
                 ['_id' => $id],
                 [
                     '$set' => [
                         MongoDBCache::EXPIRATION_FIELD => ($lifeTime > 0 ? new MongoDate(time() + $lifeTime) : null),
-                        MongoDBCache::DATA_FIELD => new MongoBinData(serialize($data), MongoBinData::BYTE_ARRAY),
+                        MongoDBCache::DATA_FIELD       => new MongoBinData(serialize($data), MongoBinData::BYTE_ARRAY),
                     ],
                 ],
                 ['upsert' => true, 'multiple' => false]
             );
-        } catch (MongoCursorException $e) {
+        }
+        catch (MongoCursorException $e)
+        {
             return false;
         }
 
@@ -134,20 +143,20 @@ class LegacyMongoDBCache extends CacheProvider
     {
         $serverStatus = $this->collection->db->command([
             'serverStatus' => 1,
-            'locks' => 0,
-            'metrics' => 0,
-            'recordStats' => 0,
-            'repl' => 0,
+            'locks'        => 0,
+            'metrics'      => 0,
+            'recordStats'  => 0,
+            'repl'         => 0,
         ]);
 
         $collStats = $this->collection->db->command(['collStats' => 1]);
 
         return [
-            Cache::STATS_HITS => null,
-            Cache::STATS_MISSES => null,
-            Cache::STATS_UPTIME => $serverStatus['uptime'] ?? null,
-            Cache::STATS_MEMORY_USAGE => $collStats['size'] ?? null,
-            Cache::STATS_MEMORY_AVAILABLE  => null,
+            Cache::STATS_HITS             => null,
+            Cache::STATS_MISSES           => null,
+            Cache::STATS_UPTIME           => $serverStatus['uptime'] ?? null,
+            Cache::STATS_MEMORY_USAGE     => $collStats['size'] ?? null,
+            Cache::STATS_MEMORY_AVAILABLE => null,
         ];
     }
 
@@ -156,20 +165,22 @@ class LegacyMongoDBCache extends CacheProvider
      *
      * @param array $document
      */
-    private function isExpired(array $document) : bool
+    private function isExpired(array $document): bool
     {
         return isset($document[MongoDBCache::EXPIRATION_FIELD]) &&
             $document[MongoDBCache::EXPIRATION_FIELD] instanceof MongoDate &&
             $document[MongoDBCache::EXPIRATION_FIELD]->sec < time();
     }
 
-    private function createExpirationIndex() : void
+    private function createExpirationIndex(): void
     {
-        if ($this->expirationIndexCreated) {
+        if ($this->expirationIndexCreated)
+        {
             return;
         }
 
         $this->expirationIndexCreated = true;
-        $this->collection->createIndex([MongoDBCache::EXPIRATION_FIELD => 1], ['background' => true, 'expireAfterSeconds' => 0]);
+        $this->collection->createIndex([MongoDBCache::EXPIRATION_FIELD => 1],
+            ['background' => true, 'expireAfterSeconds' => 0]);
     }
 }

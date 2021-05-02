@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Aws\Signature\SignatureV4;
@@ -28,7 +29,8 @@ class PresignUrlMiddleware
         callable $endpointProvider,
         AwsClientInterface $client,
         callable $nextHandler
-    ) {
+    )
+    {
         $this->endpointProvider = $endpointProvider;
         $this->client = $client;
         $this->nextHandler = $nextHandler;
@@ -42,8 +44,10 @@ class PresignUrlMiddleware
         AwsClientInterface $client,
         callable $endpointProvider,
         array $options = []
-    ) {
-        return function (callable $handler) use ($endpointProvider, $client, $options) {
+    )
+    {
+        return function (callable $handler) use ($endpointProvider, $client, $options)
+        {
             $f = new PresignUrlMiddleware($options, $endpointProvider, $client, $handler);
             return $f;
         };
@@ -51,14 +55,18 @@ class PresignUrlMiddleware
 
     public function __invoke(CommandInterface $cmd, RequestInterface $request = null)
     {
-        if (in_array($cmd->getName(), $this->commandPool)
+        if (
+            in_array($cmd->getName(), $this->commandPool)
             && (!isset($cmd->{'__skip' . $cmd->getName()}))
-        ) {
+        )
+        {
             $cmd['DestinationRegion'] = $this->client->getRegion();
-            if (!$this->requireDifferentRegion
+            if (
+                !$this->requireDifferentRegion
                 || (!empty($cmd['SourceRegion'])
                     && $cmd['SourceRegion'] !== $cmd['DestinationRegion'])
-            ) {
+            )
+            {
                 $cmd[$this->presignParam] = $this->createPresignedUrl($this->client, $cmd);
             }
         }
@@ -70,7 +78,8 @@ class PresignUrlMiddleware
     private function createPresignedUrl(
         AwsClientInterface $client,
         CommandInterface $cmd
-    ) {
+    )
+    {
         $cmdName = $cmd->getName();
         $newCmd = $client->getCommand($cmdName, $cmd->toArray());
         // Avoid infinite recursion by flagging the new command.
@@ -90,7 +99,7 @@ class PresignUrlMiddleware
         // Create a presigned URL for our generated request.
         $signer = new SignatureV4($this->serviceName, $cmd['SourceRegion']);
 
-        return (string) $signer->presign(
+        return (string)$signer->presign(
             SignatureV4::convertPostToGet($request),
             $client->getCredentials()->wait(),
             '+1 hour'

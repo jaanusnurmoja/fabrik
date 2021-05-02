@@ -18,26 +18,28 @@ use Twilio\Version;
 /**
  * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
  */
-class BindingList extends ListResource {
+class BindingList extends ListResource
+{
     /**
      * Construct the BindingList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $serviceSid The service_sid
-     * @return \Twilio\Rest\Notify\V1\Service\BindingList 
+     * @return \Twilio\Rest\Notify\V1\Service\BindingList
      */
-    public function __construct(Version $version, $serviceSid) {
+    public function __construct(Version $version, $serviceSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('serviceSid' => $serviceSid, );
+        $this->solution = ['serviceSid' => $serviceSid,];
 
         $this->uri = '/Services/' . rawurlencode($serviceSid) . '/Bindings';
     }
 
     /**
      * Create a new BindingInstance
-     * 
+     *
      * @param string $identity The Identity to which this Binding belongs to.
      * @param string $bindingType The type of the Binding.
      * @param string $address The address specific to the channel.
@@ -45,23 +47,27 @@ class BindingList extends ListResource {
      * @return BindingInstance Newly created BindingInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function create($identity, $bindingType, $address, $options = array()) {
+    public function create($identity, $bindingType, $address, $options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array(
-            'Identity' => $identity,
-            'BindingType' => $bindingType,
-            'Address' => $address,
-            'Tag' => Serialize::map($options['tag'], function($e) { return $e; }),
+        $data = Values::of([
+            'Identity'                    => $identity,
+            'BindingType'                 => $bindingType,
+            'Address'                     => $address,
+            'Tag'                         => Serialize::map($options['tag'], function ($e)
+            {
+                return $e;
+            }),
             'NotificationProtocolVersion' => $options['notificationProtocolVersion'],
-            'CredentialSid' => $options['credentialSid'],
-            'Endpoint' => $options['endpoint'],
-        ));
+            'CredentialSid'               => $options['credentialSid'],
+            'Endpoint'                    => $options['endpoint'],
+        ]);
 
         $payload = $this->version->create(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -75,7 +81,7 @@ class BindingList extends ListResource {
      * is reached.
      * The results are returned as a generator, so this operation is memory
      * efficient.
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param int $limit Upper limit for the number of records to return. stream()
      *                   guarantees to never return more than limit.  Default is no
@@ -87,7 +93,8 @@ class BindingList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return \Twilio\Stream stream of results
      */
-    public function stream($options = array(), $limit = null, $pageSize = null) {
+    public function stream($options = [], $limit = null, $pageSize = null)
+    {
         $limits = $this->version->readLimits($limit, $pageSize);
 
         $page = $this->page($options, $limits['pageSize']);
@@ -99,7 +106,7 @@ class BindingList extends ListResource {
      * Reads BindingInstance records from the API as a list.
      * Unlike stream(), this operation is eager and will load `limit` records into
      * memory before returning.
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param int $limit Upper limit for the number of records to return. read()
      *                   guarantees to never return more than limit.  Default is no
@@ -111,31 +118,39 @@ class BindingList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return BindingInstance[] Array of results
      */
-    public function read($options = array(), $limit = null, $pageSize = null) {
+    public function read($options = [], $limit = null, $pageSize = null)
+    {
         return iterator_to_array($this->stream($options, $limit, $pageSize), false);
     }
 
     /**
      * Retrieve a single page of BindingInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param mixed $pageSize Number of records to return, defaults to 50
      * @param string $pageToken PageToken provided by the API
      * @param mixed $pageNumber Page Number, this value is simply for client state
      * @return \Twilio\Page Page of BindingInstance
      */
-    public function page($options = array(), $pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE) {
+    public function page($options = [], $pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE)
+    {
         $options = new Values($options);
-        $params = Values::of(array(
+        $params = Values::of([
             'StartDate' => Serialize::iso8601Date($options['startDate']),
-            'EndDate' => Serialize::iso8601Date($options['endDate']),
-            'Identity' => Serialize::map($options['identity'], function($e) { return $e; }),
-            'Tag' => Serialize::map($options['tag'], function($e) { return $e; }),
+            'EndDate'   => Serialize::iso8601Date($options['endDate']),
+            'Identity'  => Serialize::map($options['identity'], function ($e)
+            {
+                return $e;
+            }),
+            'Tag'       => Serialize::map($options['tag'], function ($e)
+            {
+                return $e;
+            }),
             'PageToken' => $pageToken,
-            'Page' => $pageNumber,
-            'PageSize' => $pageSize,
-        ));
+            'Page'      => $pageNumber,
+            'PageSize'  => $pageSize,
+        ]);
 
         $response = $this->version->page(
             'GET',
@@ -149,11 +164,12 @@ class BindingList extends ListResource {
     /**
      * Retrieve a specific page of BindingInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param string $targetUrl API-generated URL for the requested results page
      * @return \Twilio\Page Page of BindingInstance
      */
-    public function getPage($targetUrl) {
+    public function getPage($targetUrl)
+    {
         $response = $this->version->getDomain()->getClient()->request(
             'GET',
             $targetUrl
@@ -164,20 +180,22 @@ class BindingList extends ListResource {
 
     /**
      * Constructs a BindingContext
-     * 
+     *
      * @param string $sid The sid
-     * @return \Twilio\Rest\Notify\V1\Service\BindingContext 
+     * @return \Twilio\Rest\Notify\V1\Service\BindingContext
      */
-    public function getContext($sid) {
+    public function getContext($sid)
+    {
         return new BindingContext($this->version, $this->solution['serviceSid'], $sid);
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Notify.V1.BindingList]';
     }
 }

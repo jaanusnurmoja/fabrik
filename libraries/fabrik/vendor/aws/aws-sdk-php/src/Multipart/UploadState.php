@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Multipart;
 
 /**
@@ -48,7 +49,7 @@ class UploadState
      * Set's the "upload_id", or 3rd part of the upload's ID. This typically
      * only needs to be done after initiating an upload.
      *
-     * @param string $key   The param key of the upload_id.
+     * @param string $key The param key of the upload_id.
      * @param string $value The param value of the upload_id.
      */
     public function setUploadId($key, $value)
@@ -79,8 +80,8 @@ class UploadState
     /**
      * Marks a part as being uploaded.
      *
-     * @param int   $partNumber The part number.
-     * @param array $partData   Data from the upload operation that needs to be
+     * @param int $partNumber The part number.
+     * @param array $partData Data from the upload operation that needs to be
      *                          recalled during the complete operation.
      */
     public function markPartAsUploaded($partNumber, array $partData = [])

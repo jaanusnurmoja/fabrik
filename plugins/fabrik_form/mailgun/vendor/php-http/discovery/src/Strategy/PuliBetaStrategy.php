@@ -34,14 +34,17 @@ class PuliBetaStrategy implements DiscoveryStrategy
      */
     private static function getPuliFactory()
     {
-        if (null === self::$puliFactory) {
-            if (!defined('PULI_FACTORY_CLASS')) {
+        if (null === self::$puliFactory)
+        {
+            if (!defined('PULI_FACTORY_CLASS'))
+            {
                 throw new PuliUnavailableException('Puli Factory is not available');
             }
 
             $puliFactoryClass = PULI_FACTORY_CLASS;
 
-            if (!class_exists($puliFactoryClass)) {
+            if (!class_exists($puliFactoryClass))
+            {
                 throw new PuliUnavailableException('Puli Factory class does not exist');
             }
 
@@ -60,7 +63,8 @@ class PuliBetaStrategy implements DiscoveryStrategy
      */
     private static function getPuliDiscovery()
     {
-        if (!isset(self::$puliDiscovery)) {
+        if (!isset(self::$puliDiscovery))
+        {
             $factory = self::getPuliFactory();
             $repository = $factory->createRepository();
 
@@ -78,9 +82,11 @@ class PuliBetaStrategy implements DiscoveryStrategy
         $returnData = [];
         $bindings = self::getPuliDiscovery()->findBindings($type);
 
-        foreach ($bindings as $binding) {
+        foreach ($bindings as $binding)
+        {
             $condition = true;
-            if ($binding->hasParameterValue('depends')) {
+            if ($binding->hasParameterValue('depends'))
+            {
                 $condition = $binding->getParameterValue('depends');
             }
             $returnData[] = ['class' => $binding->getClassName(), 'condition' => $condition];

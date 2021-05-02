@@ -15,6 +15,7 @@ $mg->message()->send('example.com', [
   ]
 ]);
 ```
+
 ## From memory
 
 ```php

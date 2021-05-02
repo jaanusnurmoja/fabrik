@@ -60,18 +60,21 @@ class RedisCache extends CacheProvider
         $fetchedItems = array_combine($keys, $this->redis->mget($keys));
 
         // Redis mget returns false for keys that do not exist. So we need to filter those out unless it's the real data.
-        $keysToFilter = array_keys(array_filter($fetchedItems, static function ($item) : bool {
+        $keysToFilter = array_keys(array_filter($fetchedItems, static function ($item): bool
+        {
             return $item === false;
         }));
 
-        if ($keysToFilter) {
+        if ($keysToFilter)
+        {
             $multi = $this->redis->multi(Redis::PIPELINE);
-            foreach ($keysToFilter as $key) {
+            foreach ($keysToFilter as $key)
+            {
                 $multi->exists($key);
             }
-            $existItems     = array_filter($multi->exec());
+            $existItems = array_filter($multi->exec());
             $missedItemKeys = array_diff_key($keysToFilter, $existItems);
-            $fetchedItems   = array_diff_key($fetchedItems, array_fill_keys($missedItemKeys, true));
+            $fetchedItems = array_diff_key($fetchedItems, array_fill_keys($missedItemKeys, true));
         }
 
         return $fetchedItems;
@@ -82,10 +85,12 @@ class RedisCache extends CacheProvider
      */
     protected function doSaveMultiple(array $keysAndValues, $lifetime = 0)
     {
-        if ($lifetime) {
+        if ($lifetime)
+        {
             // Keys have lifetime, use SETEX for each of them
             $multi = $this->redis->multi(Redis::PIPELINE);
-            foreach ($keysAndValues as $key => $value) {
+            foreach ($keysAndValues as $key => $value)
+            {
                 $multi->setex($key, $lifetime, $value);
             }
             $succeeded = array_filter($multi->exec());
@@ -94,7 +99,7 @@ class RedisCache extends CacheProvider
         }
 
         // No lifetime, use MSET
-        return (bool) $this->redis->mset($keysAndValues);
+        return (bool)$this->redis->mset($keysAndValues);
     }
 
     /**
@@ -104,7 +109,8 @@ class RedisCache extends CacheProvider
     {
         $exists = $this->redis->exists($id);
 
-        if (is_bool($exists)) {
+        if (is_bool($exists))
+        {
             return $exists;
         }
 
@@ -116,7 +122,8 @@ class RedisCache extends CacheProvider
      */
     protected function doSave($id, $data, $lifeTime = 0)
     {
-        if ($lifeTime > 0) {
+        if ($lifeTime > 0)
+        {
             return $this->redis->setex($id, $lifeTime, $data);
         }
 
@@ -155,11 +162,11 @@ class RedisCache extends CacheProvider
         $info = $this->redis->info();
 
         return [
-            Cache::STATS_HITS   => $info['keyspace_hits'],
-            Cache::STATS_MISSES => $info['keyspace_misses'],
-            Cache::STATS_UPTIME => $info['uptime_in_seconds'],
-            Cache::STATS_MEMORY_USAGE      => $info['used_memory'],
-            Cache::STATS_MEMORY_AVAILABLE  => false,
+            Cache::STATS_HITS             => $info['keyspace_hits'],
+            Cache::STATS_MISSES           => $info['keyspace_misses'],
+            Cache::STATS_UPTIME           => $info['uptime_in_seconds'],
+            Cache::STATS_MEMORY_USAGE     => $info['used_memory'],
+            Cache::STATS_MEMORY_AVAILABLE => false,
         ];
     }
 
@@ -172,7 +179,8 @@ class RedisCache extends CacheProvider
      */
     protected function getSerializerValue()
     {
-        if (defined('Redis::SERIALIZER_IGBINARY') && extension_loaded('igbinary')) {
+        if (defined('Redis::SERIALIZER_IGBINARY') && extension_loaded('igbinary'))
+        {
             return Redis::SERIALIZER_IGBINARY;
         }
 

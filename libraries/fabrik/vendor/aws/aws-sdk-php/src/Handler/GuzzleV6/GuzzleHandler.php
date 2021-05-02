@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Handler\GuzzleV6;
 
 use Exception;
@@ -28,7 +29,7 @@ class GuzzleHandler
 
     /**
      * @param Psr7Request $request
-     * @param array       $options
+     * @param array $options
      *
      * @return Promise\Promise
      */
@@ -37,19 +38,21 @@ class GuzzleHandler
         $request = $request->withHeader(
             'User-Agent',
             $request->getHeaderLine('User-Agent')
-                . ' ' . \GuzzleHttp\default_user_agent()
+            . ' ' . \GuzzleHttp\default_user_agent()
         );
 
         return $this->client->sendAsync($request, $this->parseOptions($options))
             ->otherwise(
-                static function (\Exception $e) {
+                static function (\Exception $e)
+                {
                     $error = [
                         'exception'        => $e,
                         'connection_error' => $e instanceof ConnectException,
                         'response'         => null,
                     ];
 
-                    if ($e instanceof RequestException && $e->getResponse()) {
+                    if ($e instanceof RequestException && $e->getResponse())
+                    {
                         $error['response'] = $e->getResponse();
                     }
 
@@ -60,7 +63,8 @@ class GuzzleHandler
 
     private function parseOptions(array $options)
     {
-        if (isset($options['http_stats_receiver'])) {
+        if (isset($options['http_stats_receiver']))
+        {
             $fn = $options['http_stats_receiver'];
             unset($options['http_stats_receiver']);
 
@@ -70,8 +74,10 @@ class GuzzleHandler
 
             $options['on_stats'] = static function (
                 TransferStats $stats
-            ) use ($fn, $prev) {
-                if (is_callable($prev)) {
+            ) use ($fn, $prev)
+            {
+                if (is_callable($prev))
+                {
                     $prev($stats);
                 }
                 $transferStats = ['total_time' => $stats->getTransferTime()];

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Polly;
 
 use Aws\Api\Serializer\JsonBody;
@@ -38,9 +39,9 @@ class PollyClient extends AwsClient
      * Create a pre-signed URL for Polly operation `SynthesizeSpeech`
      *
      * @param array $args parameters array for `SynthesizeSpeech`
-     *                    More information @see Aws\Polly\PollyClient::SynthesizeSpeech
+     *                    More information @return string
+     * @see Aws\Polly\PollyClient::SynthesizeSpeech
      *
-     * @return string
      */
     public function createSynthesizeSpeechPreSignedUrl(array $args)
     {
@@ -64,7 +65,7 @@ class PollyClient extends AwsClient
         $request = new Request('GET', $uri);
         $request = $request->withBody(Psr7\stream_for(''));
         $signer = new SignatureV4('polly', $this->getRegion());
-        return (string) $signer->presign(
+        return (string)$signer->presign(
             $request,
             $this->getCredentials()->wait(),
             '+15 minutes'

@@ -33,7 +33,8 @@ class BuiltInZlibTest extends PHPUnit_Framework_TestCase
         $expected = str_repeat('hello', $n);
 
         $bytes = '';
-        for ($i = 0; $i < $n; ++$i) {
+        for ($i = 0; $i < $n; ++$i)
+        {
             $bytes .= $deflate('hello');
         }
         $bytes .= $deflate();
@@ -69,7 +70,8 @@ class BuiltInZlibTest extends PHPUnit_Framework_TestCase
         $bytes = gzdeflate($expected);
 
         $ret = '';
-        foreach (str_split($bytes, 2) as $chunk) {
+        foreach (str_split($bytes, 2) as $chunk)
+        {
             $ret .= $inflate($chunk);
         }
         $ret .= $inflate();

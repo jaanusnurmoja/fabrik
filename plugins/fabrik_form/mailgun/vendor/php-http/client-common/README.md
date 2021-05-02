@@ -9,7 +9,6 @@
 
 **Common HTTP Client implementations and tools for HTTPlug.**
 
-
 ## Install
 
 Via Composer
@@ -17,7 +16,6 @@ Via Composer
 ``` bash
 $ composer require php-http/client-common
 ```
-
 
 ## Usage
 
@@ -27,11 +25,9 @@ This package provides common tools for HTTP Clients:
 - A convenience client with HTTP method names as class methods
 - Emulator, decorator layers for sync/async clients
 
-
 ## Documentation
 
 Please see the [official documentation](http://docs.php-http.org/en/latest/components/client-common.html).
-
 
 ## Testing
 
@@ -39,16 +35,13 @@ Please see the [official documentation](http://docs.php-http.org/en/latest/compo
 $ composer test
 ```
 
-
 ## Contributing
 
 Please see our [contributing guide](http://docs.php-http.org/en/latest/development/contributing.html).
 
-
 ## Security
 
 If you discover any security related issues, please contact us at [security@php-http.org](mailto:security@php-http.org).
-
 
 ## License
 

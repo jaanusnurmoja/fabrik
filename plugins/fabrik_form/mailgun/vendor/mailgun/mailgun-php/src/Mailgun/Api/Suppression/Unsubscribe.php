@@ -28,7 +28,7 @@ class Unsubscribe extends HttpApi
 
     /**
      * @param string $domain Domain to get unsubscribes for
-     * @param int    $limit  optional
+     * @param int $limit optional
      *
      * @return IndexResponse
      */
@@ -47,7 +47,7 @@ class Unsubscribe extends HttpApi
     }
 
     /**
-     * @param string $domain  Domain to show unsubscribe for
+     * @param string $domain Domain to show unsubscribe for
      * @param string $address Unsubscribe address
      *
      * @return ShowResponse
@@ -63,9 +63,9 @@ class Unsubscribe extends HttpApi
     }
 
     /**
-     * @param string $domain  Domain to create unsubscribe for
+     * @param string $domain Domain to create unsubscribe for
      * @param string $address Unsubscribe address
-     * @param array  $params  optional
+     * @param array $params optional
      *
      * @return CreateResponse
      */
@@ -82,7 +82,7 @@ class Unsubscribe extends HttpApi
     }
 
     /**
-     * @param string $domain  Domain to delete unsubscribe for
+     * @param string $domain Domain to delete unsubscribe for
      * @param string $address Unsubscribe address
      *
      * @return DeleteResponse

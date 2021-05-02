@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\MachineLearning;
 
 use Aws\AwsClient;
@@ -82,12 +83,15 @@ class MachineLearningClient extends AwsClient
      */
     private function predictEndpoint()
     {
-        return static function (callable $handler) {
+        return static function (callable $handler)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler) {
-                if ($command->getName() === 'Predict') {
+            ) use ($handler)
+            {
+                if ($command->getName() === 'Predict')
+                {
                     $request = $request->withUri(new Uri($command['PredictEndpoint']));
                 }
                 return $handler($command, $request);

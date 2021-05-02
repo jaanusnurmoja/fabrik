@@ -33,13 +33,15 @@ final class QueryDefaultsPlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        foreach ($this->queryParams as $name => $value) {
+        foreach ($this->queryParams as $name => $value)
+        {
             $uri = $request->getUri();
             $array = [];
             parse_str($uri->getQuery(), $array);
 
             // If query value is not found
-            if (!isset($array[$name])) {
+            if (!isset($array[$name]))
+            {
                 $array[$name] = $value;
 
                 // Create a new request with the new URI with the added query param

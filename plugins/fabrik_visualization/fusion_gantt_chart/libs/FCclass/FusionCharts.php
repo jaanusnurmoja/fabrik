@@ -8,37 +8,45 @@
 // If you've parameters in your dataURL, you necessarily need to encode it.
 // Param: $strDataURL - dataURL to be fed to chart
 // Param: $addNoCacheStr - Whether to add aditional string to URL to disable caching of data
-function encodeDataURL($strDataURL, $addNoCacheStr=false) {
+function encodeDataURL($strDataURL, $addNoCacheStr = false)
+{
     //Add the no-cache string if required
-    if ($addNoCacheStr==true) {
+    if ($addNoCacheStr == true)
+    {
         // We add ?FCCurrTime=xxyyzz
         // If the dataURL already contains a ?, we add &FCCurrTime=xxyyzz
         // We replace : with _, as FusionCharts cannot handle : in URLs
-		if (strpos(strDataURL,"?")<>0)
-			$strDataURL .= "&FCCurrTime=" . Date("H_i_s");
-		else
-			$strDataURL .= "?FCCurrTime=" . Date("H_i_s");
+        if (strpos(strDataURL, "?") <> 0)
+            $strDataURL .= "&FCCurrTime=" . Date("H_i_s");
+        else
+            $strDataURL .= "?FCCurrTime=" . Date("H_i_s");
     }
-	// URL Encode it
-	return urlencode($strDataURL);
+    // URL Encode it
+    return urlencode($strDataURL);
 }
 
 
 // datePart function converts MySQL database based on requested mask
 // Param: $mask - what part of the date to return "m' for month,"d" for day, and "y" for year
 // Param: $dateTimeStr - MySQL date/time format (yyyy-mm-dd HH:ii:ss)
-function datePart($mask, $dateTimeStr) {
+function datePart($mask, $dateTimeStr)
+{
     @list($datePt, $timePt) = explode(" ", $dateTimeStr);
     $arDatePt = explode("-", $datePt);
     $dataStr = "";
     // Ensure we have 3 parameters for the date
-    if (count($arDatePt) == 3) {
+    if (count($arDatePt) == 3)
+    {
         list($year, $month, $day) = $arDatePt;
         // determine the request
-        switch ($mask) {
-        case "m": return (int) $month;
-        case "d": return (int) $day;
-        case "y": return (int) $year;
+        switch ($mask)
+        {
+            case "m":
+                return (int)$month;
+            case "d":
+                return (int)$day;
+            case "y":
+                return (int)$year;
         }
         // default to mm/dd/yyyy
         return (trim($month . "/" . $day . "/" . $year));
@@ -57,9 +65,10 @@ function datePart($mask, $dateTimeStr) {
 // $chartId - Id for the chart, using which it will be recognized in the HTML page. Each chart on the page needs to have a unique Id.
 // $chartWidth - Intended width for the chart (in pixels)
 // $chartHeight - Intended height for the chart (in pixels)
-function renderChart($chartSWF, $strURL, $strXML, $chartId, $chartWidth, $chartHeight) {
-	//First we create a new DIV for each chart. We specify the name of DIV as "chartId"Div.			
-	//DIV names are case-sensitive.
+function renderChart($chartSWF, $strURL, $strXML, $chartId, $chartWidth, $chartHeight)
+{
+    //First we create a new DIV for each chart. We specify the name of DIV as "chartId"Div.
+    //DIV names are case-sensitive.
 
     // The Steps in the script block below are:
     //
@@ -72,7 +81,7 @@ function renderChart($chartSWF, $strURL, $strXML, $chartId, $chartWidth, $chartH
     //
     //  3) Check whether we've to provide data using dataXML method or dataURL method
     //     save the data for usage below 
-	if ($strXML=="")
+    if ($strXML == "")
         $tempData = "//Set the dataURL of the chart\n\t\tchart_$chartId.setDataURL(\"$strURL\")";
     else
         $tempData = "//Provide entire XML data using dataXML method\n\t\tchart_$chartId.setDataXML(\"$strXML\")";
@@ -81,7 +90,7 @@ function renderChart($chartSWF, $strURL, $strXML, $chartId, $chartWidth, $chartH
     $chartIdDiv = $chartId . "Div";
 
     // create a string for outputting by the caller
-	$render_chart = <<<RENDERCHART
+    $render_chart = <<<RENDERCHART
 	<!-- START Script Block for Chart $chartId -->
 	<div id="$chartIdDiv" align="center">
 		Chart.
@@ -96,7 +105,7 @@ function renderChart($chartSWF, $strURL, $strXML, $chartId, $chartWidth, $chartH
 	<!-- END Script Block for Chart $chartId -->
 RENDERCHART;
 
-  return $render_chart;
+    return $render_chart;
 }
 
 
@@ -110,18 +119,19 @@ RENDERCHART;
 // $chartId - Id for the chart, using which it will be recognized in the HTML page. Each chart on the page needs to have a unique Id.
 // $chartWidth - Intended width for the chart (in pixels)
 // $chartHeight - Intended height for the chart (in pixels)
-function renderChartHTML($chartSWF, $strURL, $strXML, $chartId, $chartWidth, $chartHeight) {
+function renderChartHTML($chartSWF, $strURL, $strXML, $chartId, $chartWidth, $chartHeight)
+{
     // Generate the FlashVars string based on whether dataURL has been provided
     // or dataXML.
     $strFlashVars = "&chartWidth=" . $chartWidth . "&chartHeight=" . $chartHeight;
-    if ($strXML=="")
+    if ($strXML == "")
         // DataURL Mode
         $strFlashVars .= "&dataURL=" . $strURL;
     else
         //DataXML Mode
         $strFlashVars .= "&dataXML=" . $strXML;
 
-$HTML_chart = <<<HTMLCHART
+    $HTML_chart = <<<HTMLCHART
 	<!-- START Code Block for Chart $chartId -->
 	<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase=http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0"  width="$chartWidth" height="$chartHeight" id="$chartId">
 		<param name="allowScriptAccess" value="always" />
@@ -133,12 +143,13 @@ $HTML_chart = <<<HTMLCHART
 	<!-- END Code Block for Chart $chartId -->
 HTMLCHART;
 
-  return $HTML_chart;
+    return $HTML_chart;
 }
 
 // boolToNum function converts boolean values to numeric (1/0)
-function boolToNum($bVal) {
-    return (($bVal==true) ? 1 : 0);
+function boolToNum($bVal)
+{
+    return (($bVal == true) ? 1 : 0);
 }
 
 ?>

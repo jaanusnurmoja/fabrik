@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DynamoDb;
 
 use Psr\Http\Message\StreamInterface;
@@ -95,7 +96,8 @@ class Marshaler
     public function marshalJson($json)
     {
         $data = json_decode($json);
-        if (!($data instanceof \stdClass)) {
+        if (!($data instanceof \stdClass))
+        {
             throw new \InvalidArgumentException(
                 'The JSON document must be valid and be an object at its root.'
             );
@@ -135,8 +137,10 @@ class Marshaler
         $type = gettype($value);
 
         // Handle string values.
-        if ($type === 'string') {
-            if ($value === '') {
+        if ($type === 'string')
+        {
+            if ($value === '')
+            {
                 return $this->handleInvalid('empty strings are invalid');
             }
 
@@ -144,36 +148,46 @@ class Marshaler
         }
 
         // Handle number values.
-        if ($type === 'integer'
+        if (
+            $type === 'integer'
             || $type === 'double'
             || $value instanceof NumberValue
-        ) {
-            return ['N' => (string) $value];
+        )
+        {
+            return ['N' => (string)$value];
         }
 
         // Handle boolean values.
-        if ($type === 'boolean') {
+        if ($type === 'boolean')
+        {
             return ['BOOL' => $value];
         }
 
         // Handle null values.
-        if ($type === 'NULL') {
+        if ($type === 'NULL')
+        {
             return ['NULL' => true];
         }
 
         // Handle set values.
-        if ($value instanceof SetValue) {
-            if (count($value) === 0) {
+        if ($value instanceof SetValue)
+        {
+            if (count($value) === 0)
+            {
                 return $this->handleInvalid('empty sets are invalid');
             }
             $previousType = null;
             $data = [];
-            foreach ($value as $v) {
+            foreach ($value as $v)
+            {
                 $marshaled = $this->marshalValue($v);
                 $setType = key($marshaled);
-                if (!$previousType) {
+                if (!$previousType)
+                {
                     $previousType = $setType;
-                } elseif ($setType !== $previousType) {
+                }
+                elseif ($setType !== $previousType)
+                {
                     return $this->handleInvalid('sets must be uniform in type');
                 }
                 $data[] = current($marshaled);
@@ -184,17 +198,22 @@ class Marshaler
 
         // Handle list and map values.
         $dbType = 'L';
-        if ($value instanceof \stdClass) {
+        if ($value instanceof \stdClass)
+        {
             $type = 'array';
             $dbType = 'M';
         }
-        if ($type === 'array' || $value instanceof \Traversable) {
+        if ($type === 'array' || $value instanceof \Traversable)
+        {
             $data = [];
             $index = 0;
-            foreach ($value as $k => $v) {
-                if ($v = $this->marshalValue($v)) {
+            foreach ($value as $k => $v)
+            {
+                if ($v = $this->marshalValue($v))
+                {
                     $data[$k] = $v;
-                    if ($dbType === 'L' && (!is_int($k) || $k != $index++)) {
+                    if ($dbType === 'L' && (!is_int($k) || $k != $index++))
+                    {
                         $dbType = 'M';
                     }
                 }
@@ -203,11 +222,13 @@ class Marshaler
         }
 
         // Handle binary values.
-        if (is_resource($value) || $value instanceof StreamInterface) {
+        if (is_resource($value) || $value instanceof StreamInterface)
+        {
             $value = $this->binary($value);
         }
-        if ($value instanceof BinaryValue) {
-            return ['B' => (string) $value];
+        if ($value instanceof BinaryValue)
+        {
+            return ['B' => (string)$value];
         }
 
         // Handle invalid values.
@@ -218,8 +239,8 @@ class Marshaler
      * Unmarshal a document (item) from a DynamoDB operation result into a JSON
      * document string.
      *
-     * @param array $data            Item/document from a DynamoDB result.
-     * @param int   $jsonEncodeFlags Flags to use with `json_encode()`.
+     * @param array $data Item/document from a DynamoDB result.
+     * @param int $jsonEncodeFlags Flags to use with `json_encode()`.
      *
      * @return string
      */
@@ -237,7 +258,7 @@ class Marshaler
      * returned instead.
      *
      * @param array $data Item from a DynamoDB result.
-     * @param bool  $mapAsObject Whether maps should be represented as stdClass.
+     * @param bool $mapAsObject Whether maps should be represented as stdClass.
      *
      * @return array|\stdClass
      */
@@ -251,8 +272,8 @@ class Marshaler
      * value. Will return a scalar, array, or (if you set $mapAsObject to true)
      * stdClass value.
      *
-     * @param array $value       Value from a DynamoDB result.
-     * @param bool  $mapAsObject Whether maps should be represented as stdClass.
+     * @param array $value Value from a DynamoDB result.
+     * @param bool $mapAsObject Whether maps should be represented as stdClass.
      *
      * @return mixed
      * @throws \UnexpectedValueException
@@ -261,30 +282,35 @@ class Marshaler
     {
         $type = key($value);
         $value = $value[$type];
-        switch ($type) {
+        switch ($type)
+        {
             case 'S':
             case 'BOOL':
                 return $value;
             case 'NULL':
                 return null;
             case 'N':
-                if ($this->options['wrap_numbers']) {
+                if ($this->options['wrap_numbers'])
+                {
                     return new NumberValue($value);
                 }
 
                 // Use type coercion to unmarshal numbers to int/float.
                 return $value + 0;
             case 'M':
-                if ($mapAsObject) {
+                if ($mapAsObject)
+                {
                     $data = new \stdClass;
-                    foreach ($value as $k => $v) {
+                    foreach ($value as $k => $v)
+                    {
                         $data->$k = $this->unmarshalValue($v, $mapAsObject);
                     }
                     return $data;
                 }
-                // NOBREAK: Unmarshal M the same way as L, for arrays.
+            // NOBREAK: Unmarshal M the same way as L, for arrays.
             case 'L':
-                foreach ($value as $k => $v) {
+                foreach ($value as $k => $v)
+                {
                     $value[$k] = $this->unmarshalValue($v, $mapAsObject);
                 }
                 return $value;
@@ -293,7 +319,8 @@ class Marshaler
             case 'SS':
             case 'NS':
             case 'BS':
-                foreach ($value as $k => $v) {
+                foreach ($value as $k => $v)
+                {
                     $value[$k] = $this->unmarshalValue([$type[0] => $v]);
                 }
                 return new SetValue($value);
@@ -311,11 +338,13 @@ class Marshaler
      */
     private function handleInvalid($message)
     {
-        if ($this->options['ignore_invalid']) {
+        if ($this->options['ignore_invalid'])
+        {
             return null;
         }
 
-        if ($this->options['nullify_invalid']) {
+        if ($this->options['nullify_invalid'])
+        {
             return ['NULL' => true];
         }
 

@@ -34,7 +34,7 @@ class FrameTree
      *
      * @var array
      */
-    protected static $HIDDEN_TAGS = array(
+    protected static $HIDDEN_TAGS = [
         "area",
         "base",
         "basefont",
@@ -46,7 +46,7 @@ class FrameTree
         "noembed",
         "param",
         "#comment"
-    );
+    ];
 
     /**
      * The main DomDocument
@@ -86,7 +86,7 @@ class FrameTree
     {
         $this->_dom = $dom;
         $this->_root = null;
-        $this->_registry = array();
+        $this->_registry = [];
     }
 
     /**
@@ -137,11 +137,13 @@ class FrameTree
     public function build_tree()
     {
         $html = $this->_dom->getElementsByTagName("html")->item(0);
-        if (is_null($html)) {
+        if (is_null($html))
+        {
             $html = $this->_dom->firstChild;
         }
 
-        if (is_null($html)) {
+        if (is_null($html))
+        {
             throw new Exception("Requested HTML document contains no data.");
         }
 
@@ -160,37 +162,46 @@ class FrameTree
         // Move table caption before the table
         // FIXME find a better way to deal with it...
         $captions = $xp->query('//table/caption');
-        foreach ($captions as $caption) {
+        foreach ($captions as $caption)
+        {
             $table = $caption->parentNode;
             $table->parentNode->insertBefore($caption, $table);
         }
 
         $firstRows = $xp->query('//table/tr[1]');
         /** @var DOMElement $tableChild */
-        foreach ($firstRows as $tableChild) {
+        foreach ($firstRows as $tableChild)
+        {
             $tbody = $this->_dom->createElement('tbody');
             $tableNode = $tableChild->parentNode;
-            do {
-                if ($tableChild->nodeName === 'tr') {
+            do
+            {
+                if ($tableChild->nodeName === 'tr')
+                {
                     $tmpNode = $tableChild;
                     $tableChild = $tableChild->nextSibling;
                     $tableNode->removeChild($tmpNode);
                     $tbody->appendChild($tmpNode);
-                } else {
-                    if ($tbody->hasChildNodes() === true) {
+                }
+                else
+                {
+                    if ($tbody->hasChildNodes() === true)
+                    {
                         $tableNode->insertBefore($tbody, $tableChild);
                         $tbody = $this->_dom->createElement('tbody');
                     }
                     $tableChild = $tableChild->nextSibling;
                 }
             } while ($tableChild);
-            if ($tbody->hasChildNodes() === true) {
+            if ($tbody->hasChildNodes() === true)
+            {
                 $tableNode->appendChild($tbody);
             }
         }
     }
 
     // FIXME: temporary hack, preferably we will improve rendering of sequential #text nodes
+
     /**
      * Remove a child from a node
      *
@@ -207,10 +218,12 @@ class FrameTree
         $previousChild = $child->previousSibling;
         $nextChild = $child->nextSibling;
         $node->removeChild($child);
-        if (isset($previousChild, $nextChild)) {
-            if ($previousChild->nodeName === "#text" && $nextChild->nodeName === "#text") {
+        if (isset($previousChild, $nextChild))
+        {
+            if ($previousChild->nodeName === "#text" && $nextChild->nodeName === "#text")
+            {
                 $previousChild->nodeValue .= $nextChild->nodeValue;
-                $this->_remove_node($node, $children, $index+1);
+                $this->_remove_node($node, $children, $index + 1);
             }
         }
         array_splice($children, $index, 1);
@@ -234,43 +247,53 @@ class FrameTree
         $id = $frame->get_id();
         $this->_registry[$id] = $frame;
 
-        if (!$node->hasChildNodes()) {
+        if (!$node->hasChildNodes())
+        {
             return $frame;
         }
 
         // Store the children in an array so that the tree can be modified
-        $children = array();
+        $children = [];
         $length = $node->childNodes->length;
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < $length; $i++)
+        {
             $children[] = $node->childNodes->item($i);
         }
         $index = 0;
         // INFO: We don't advance $index if a node is removed to avoid skipping nodes
-        while ($index < count($children)) {
+        while ($index < count($children))
+        {
             $child = $children[$index];
             $nodeName = strtolower($child->nodeName);
 
             // Skip non-displaying nodes
-            if (in_array($nodeName, self::$HIDDEN_TAGS)) {
-                if ($nodeName !== "head" && $nodeName !== "style") {
+            if (in_array($nodeName, self::$HIDDEN_TAGS))
+            {
+                if ($nodeName !== "head" && $nodeName !== "style")
+                {
                     $this->_remove_node($node, $children, $index);
-                } else {
+                }
+                else
+                {
                     $index++;
                 }
                 continue;
             }
             // Skip empty text nodes
-            if ($nodeName === "#text" && $child->nodeValue === "") {
+            if ($nodeName === "#text" && $child->nodeValue === "")
+            {
                 $this->_remove_node($node, $children, $index);
                 continue;
             }
             // Skip empty image nodes
-            if ($nodeName === "img" && $child->getAttribute("src") === "") {
+            if ($nodeName === "img" && $child->getAttribute("src") === "")
+            {
                 $this->_remove_node($node, $children, $index);
                 continue;
             }
 
-            if (is_object($child)) {
+            if (is_object($child))
+            {
                 $frame->append_child($this->_build_tree_r($child), false);
             }
             $index++;
@@ -288,9 +311,12 @@ class FrameTree
      */
     public function insert_node(DOMElement $node, DOMElement $new_node, $pos)
     {
-        if ($pos === "after" || !$node->firstChild) {
+        if ($pos === "after" || !$node->firstChild)
+        {
             $node->appendChild($new_node);
-        } else {
+        }
+        else
+        {
             $node->insertBefore($new_node, $node->firstChild);
         }
 
@@ -302,10 +328,14 @@ class FrameTree
         $parent_id = $node->getAttribute("frame_id");
         $parent = $this->get_frame($parent_id);
 
-        if ($parent) {
-            if ($pos === "before") {
+        if ($parent)
+        {
+            if ($pos === "before")
+            {
                 $parent->prepend_child($frame, false);
-            } else {
+            }
+            else
+            {
                 $parent->append_child($frame, false);
             }
         }

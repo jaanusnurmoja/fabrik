@@ -31,28 +31,32 @@ class FilesystemCache extends FileCache
      */
     protected function doFetch($id)
     {
-        $data     = '';
+        $data = '';
         $lifetime = -1;
         $filename = $this->getFilename($id);
 
-        if (! is_file($filename)) {
+        if (!is_file($filename))
+        {
             return false;
         }
 
         $resource = fopen($filename, 'r');
-        $line     = fgets($resource);
+        $line = fgets($resource);
 
-        if ($line !== false) {
-            $lifetime = (int) $line;
+        if ($line !== false)
+        {
+            $lifetime = (int)$line;
         }
 
-        if ($lifetime !== 0 && $lifetime < time()) {
+        if ($lifetime !== 0 && $lifetime < time())
+        {
             fclose($resource);
 
             return false;
         }
 
-        while (($line = fgets($resource)) !== false) {
+        while (($line = fgets($resource)) !== false)
+        {
             $data .= $line;
         }
 
@@ -69,15 +73,17 @@ class FilesystemCache extends FileCache
         $lifetime = -1;
         $filename = $this->getFilename($id);
 
-        if (! is_file($filename)) {
+        if (!is_file($filename))
+        {
             return false;
         }
 
         $resource = fopen($filename, 'r');
-        $line     = fgets($resource);
+        $line = fgets($resource);
 
-        if ($line !== false) {
-            $lifetime = (int) $line;
+        if ($line !== false)
+        {
+            $lifetime = (int)$line;
         }
 
         fclose($resource);
@@ -90,11 +96,12 @@ class FilesystemCache extends FileCache
      */
     protected function doSave($id, $data, $lifeTime = 0)
     {
-        if ($lifeTime > 0) {
+        if ($lifeTime > 0)
+        {
             $lifeTime = time() + $lifeTime;
         }
 
-        $data     = serialize($data);
+        $data = serialize($data);
         $filename = $this->getFilename($id);
 
         return $this->writeFile($filename, $lifeTime . PHP_EOL . $data);

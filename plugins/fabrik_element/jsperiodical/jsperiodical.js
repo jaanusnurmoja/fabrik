@@ -9,7 +9,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbJSPeriodical = new Class({
         Extends: FbElement,
         options: {
-            code  : '',
+            code: '',
             period: 1000
         },
 

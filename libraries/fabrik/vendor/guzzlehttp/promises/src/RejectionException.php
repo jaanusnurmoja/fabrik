@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Promise;
 
 /**
@@ -12,7 +13,7 @@ class RejectionException extends \RuntimeException
     private $reason;
 
     /**
-     * @param mixed $reason       Rejection reason.
+     * @param mixed $reason Rejection reason.
      * @param string $description Optional description
      */
     public function __construct($reason, $description = null)
@@ -21,13 +22,19 @@ class RejectionException extends \RuntimeException
 
         $message = 'The promise was rejected';
 
-        if ($description) {
+        if ($description)
+        {
             $message .= ' with reason: ' . $description;
-        } elseif (is_string($reason)
+        }
+        elseif (
+            is_string($reason)
             || (is_object($reason) && method_exists($reason, '__toString'))
-        ) {
+        )
+        {
             $message .= ' with reason: ' . $this->reason;
-        } elseif ($reason instanceof \JsonSerializable) {
+        }
+        elseif ($reason instanceof \JsonSerializable)
+        {
             $message .= ' with reason: '
                 . json_encode($this->reason, JSON_PRETTY_PRINT);
         }

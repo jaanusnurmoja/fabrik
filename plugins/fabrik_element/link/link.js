@@ -8,7 +8,7 @@
 define(['jquery', 'fab/elementlist'], function (jQuery, FbElementList) {
     window.FbLink = new Class({
 
-        Extends   : FbElementList,
+        Extends: FbElementList,
         initialize: function (element, options) {
             this.setPlugin('fabrikLink');
             this.parent(element, options);

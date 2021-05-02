@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Acm;
 
 use Aws\AwsClient;
@@ -31,4 +32,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateCertificateOptions(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateCertificateOptionsAsync(array $args = [])
  */
-class AcmClient extends AwsClient {}
+class AcmClient extends AwsClient
+{
+}

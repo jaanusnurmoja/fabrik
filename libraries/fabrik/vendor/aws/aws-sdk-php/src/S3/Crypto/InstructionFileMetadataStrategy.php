@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3\Crypto;
 
 use \Aws\Crypto\MetadataStrategyInterface;
@@ -51,8 +52,8 @@ class InstructionFileMetadataStrategy implements MetadataStrategyInterface
     {
         $this->client->putObject([
             'Bucket' => $args['Bucket'],
-            'Key' => $args['Key'] . $this->suffix,
-            'Body' => json_encode($envelope)
+            'Key'    => $args['Key'] . $this->suffix,
+            'Body'   => json_encode($envelope)
         ]);
 
         return $args;
@@ -72,15 +73,17 @@ class InstructionFileMetadataStrategy implements MetadataStrategyInterface
     {
         $result = $this->client->getObject([
             'Bucket' => $args['Bucket'],
-            'Key' => $args['Key'] . $this->suffix
+            'Key'    => $args['Key'] . $this->suffix
         ]);
 
         $metadataHeaders = json_decode($result['Body'], true);
         $envelope = new MetadataEnvelope();
         $constantValues = MetadataEnvelope::getConstantValues();
 
-        foreach ($constantValues as $constant) {
-            if (!empty($metadataHeaders[$constant])) {
+        foreach ($constantValues as $constant)
+        {
+            if (!empty($metadataHeaders[$constant]))
+            {
                 $envelope[$constant] = $metadataHeaders[$constant];
             }
         }

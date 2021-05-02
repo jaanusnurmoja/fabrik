@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Credentials\CredentialsInterface;
@@ -18,11 +19,11 @@ class PostObject
     /**
      * Constructs the PostObject.
      *
-     * @param S3ClientInterface $client     Client used with the POST object
-     * @param string            $bucket     Bucket to use
-     * @param array             $formInputs Associative array of form input
+     * @param S3ClientInterface $client Client used with the POST object
+     * @param string $bucket Bucket to use
+     * @param array $formInputs Associative array of form input
      *                                      fields.
-     * @param string|array      $jsonPolicy JSON encoded POST policy document.
+     * @param string|array $jsonPolicy JSON encoded POST policy document.
      *                                      The policy will be base64 encoded
      *                                      and applied to the form on your
      *                                      behalf.
@@ -32,11 +33,13 @@ class PostObject
         $bucket,
         array $formInputs,
         $jsonPolicy
-    ) {
+    )
+    {
         $this->client = $client;
         $this->bucket = $bucket;
 
-        if (is_array($jsonPolicy)) {
+        if (is_array($jsonPolicy))
+        {
             $jsonPolicy = json_encode($jsonPolicy);
         }
 
@@ -86,7 +89,7 @@ class PostObject
      * Set a form attribute.
      *
      * @param string $attribute Form attribute to set.
-     * @param string $value     Value to set.
+     * @param string $value Value to set.
      */
     public function setFormAttribute($attribute, $value)
     {
@@ -128,18 +131,22 @@ class PostObject
     {
         $uri = new Uri($this->client->getEndpoint());
 
-        if ($this->client->getConfig('use_path_style_endpoint') === true
+        if (
+            $this->client->getConfig('use_path_style_endpoint') === true
             || ($uri->getScheme() === 'https'
-            && strpos($this->bucket, '.') !== false)
-        ) {
+                && strpos($this->bucket, '.') !== false)
+        )
+        {
             // Use path-style URLs
             $uri = $uri->withPath("/{$this->bucket}");
-        } else {
+        }
+        else
+        {
             // Use virtual-style URLs
             $uri = $uri->withHost($this->bucket . '.' . $uri->getHost());
         }
 
-        return (string) $uri;
+        return (string)$uri;
     }
 
     protected function getPolicyAndSignature(CredentialsInterface $creds)
@@ -148,8 +155,8 @@ class PostObject
 
         return [
             'AWSAccessKeyId' => $creds->getAccessKeyId(),
-            'policy'    => $jsonPolicy64,
-            'signature' => base64_encode(hash_hmac(
+            'policy'         => $jsonPolicy64,
+            'signature'      => base64_encode(hash_hmac(
                 'sha1',
                 $jsonPolicy64,
                 $creds->getSecretKey(),

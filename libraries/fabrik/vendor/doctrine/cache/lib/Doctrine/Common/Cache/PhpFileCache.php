@@ -32,7 +32,8 @@ class PhpFileCache extends FileCache
     {
         parent::__construct($directory, $extension, $umask);
 
-        self::$emptyErrorHandler = static function () {
+        self::$emptyErrorHandler = static function ()
+        {
         };
     }
 
@@ -43,11 +44,13 @@ class PhpFileCache extends FileCache
     {
         $value = $this->includeFileForId($id);
 
-        if ($value === null) {
+        if ($value === null)
+        {
             return false;
         }
 
-        if ($value['lifetime'] !== 0 && $value['lifetime'] < time()) {
+        if ($value['lifetime'] !== 0 && $value['lifetime'] < time())
+        {
             return false;
         }
 
@@ -61,7 +64,8 @@ class PhpFileCache extends FileCache
     {
         $value = $this->includeFileForId($id);
 
-        if ($value === null) {
+        if ($value === null)
+        {
             return false;
         }
 
@@ -73,23 +77,27 @@ class PhpFileCache extends FileCache
      */
     protected function doSave($id, $data, $lifeTime = 0)
     {
-        if ($lifeTime > 0) {
+        if ($lifeTime > 0)
+        {
             $lifeTime = time() + $lifeTime;
         }
 
         $filename = $this->getFilename($id);
 
         $value = [
-            'lifetime'  => $lifeTime,
-            'data'      => $data,
+            'lifetime' => $lifeTime,
+            'data'     => $data,
         ];
 
-        if (is_object($data) && method_exists($data, '__set_state')) {
+        if (is_object($data) && method_exists($data, '__set_state'))
+        {
             $value = var_export($value, true);
-            $code  = sprintf('<?php return %s;', $value);
-        } else {
+            $code = sprintf('<?php return %s;', $value);
+        }
+        else
+        {
             $value = var_export(serialize($value), true);
-            $code  = sprintf('<?php return unserialize(%s);', $value);
+            $code = sprintf('<?php return unserialize(%s);', $value);
         }
 
         return $this->writeFile($filename, $code);
@@ -98,7 +106,7 @@ class PhpFileCache extends FileCache
     /**
      * @return array|null
      */
-    private function includeFileForId(string $id) : ?array
+    private function includeFileForId(string $id): ?array
     {
         $fileName = $this->getFilename($id);
 
@@ -109,7 +117,8 @@ class PhpFileCache extends FileCache
 
         restore_error_handler();
 
-        if (! isset($value['lifetime'])) {
+        if (!isset($value['lifetime']))
+        {
             return null;
         }
 

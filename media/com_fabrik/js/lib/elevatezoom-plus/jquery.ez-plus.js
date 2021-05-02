@@ -32,7 +32,7 @@ if (typeof Object.create !== 'function') {
 
             self.options = $.extend({}, $.fn.ezPlus.options, self.responsiveConfig(options || {}));
 
-            self.imageSrc = self.$elem.attr('data-'+self.options.attrImageZoomSrc) ? self.$elem.attr('data-'+self.options.attrImageZoomSrc) : self.$elem.attr('src');
+            self.imageSrc = self.$elem.attr('data-' + self.options.attrImageZoomSrc) ? self.$elem.attr('data-' + self.options.attrImageZoomSrc) : self.$elem.attr('src');
 
             if (!self.options.enabled) {
                 return;
@@ -85,8 +85,7 @@ if (typeof Object.create !== 'function') {
                 //call the swap image function
                 if ($(this).data(self.options.attrImageZoomSrc)) {
                     self.zoomImagePre = $(this).data(self.options.attrImageZoomSrc);
-                }
-                else {
+                } else {
                     self.zoomImagePre = $(this).data('image');
                 }
                 self.swaptheimage($(this).data('image'), self.zoomImagePre);
@@ -94,6 +93,7 @@ if (typeof Object.create !== 'function') {
                     return false;
                 }
             });
+
             function generateUUID() {
                 var d = new Date().getTime();
                 var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -161,7 +161,7 @@ if (typeof Object.create !== 'function') {
                         height: self.nzHeight,
                         width: self.nzWidth
                     });
-                if(self.$elem.parent().hasClass('zoomWrapper')){
+                if (self.$elem.parent().hasClass('zoomWrapper')) {
                     self.$elem.unwrap();
                 }
                 self.zoomWrap = self.$elem.wrap(elementZoomWrapper);
@@ -208,7 +208,7 @@ if (typeof Object.create !== 'function') {
 
                 if (self.options.scrollZoom)
                     self.zoomLens = $('<div class="zoomLens"/>');
-                
+
                 return {
                     display: 'none',
                     position: 'absolute',
@@ -235,14 +235,12 @@ if (typeof Object.create !== 'function') {
 
                 if (self.nzHeight < self.options.zoomWindowHeight / self.heightRatio) {
                     self.lensHeight = self.nzHeight;
-                }
-                else {
+                } else {
                     self.lensHeight = self.options.zoomWindowHeight / self.heightRatio;
                 }
                 if (self.largeWidth < self.options.zoomWindowWidth) {
                     self.lensWidth = self.nzWidth;
-                }
-                else {
+                } else {
                     self.lensWidth = self.options.zoomWindowWidth / self.widthRatio;
                 }
 
@@ -515,8 +513,7 @@ if (typeof Object.create !== 'function') {
             //set the min zoomlevel
             if (self.options.minZoomLevel) {
                 self.minZoomLevel = self.options.minZoomLevel;
-            }
-            else {
+            } else {
                 self.minZoomLevel = self.options.scrollZoomIncrement * 2;
             }
 
@@ -552,8 +549,7 @@ if (typeof Object.create !== 'function') {
                         if (nextZoomLevel >= parseFloat(self.minZoomLevel)) {
                             self.changeZoomLevel(nextZoomLevel);
                         }
-                    }
-                    else {
+                    } else {
                         //scrolling down
 
                         //Check if it has to maintain original zoom window aspect ratio or not
@@ -564,8 +560,7 @@ if (typeof Object.create !== 'function') {
                                 if (nextZoomLevel <= self.options.maxZoomLevel) {
                                     self.changeZoomLevel(nextZoomLevel);
                                 }
-                            }
-                            else {
+                            } else {
                                 //andy
                                 self.changeZoomLevel(nextZoomLevel);
                             }
@@ -655,14 +650,12 @@ if (typeof Object.create !== 'function') {
                     var lensHeight, lensWidth;
                     if (self.nzHeight < self.options.zoomWindowWidth / self.widthRatio) {
                         self.lensHeight = self.nzHeight;
-                    }
-                    else {
+                    } else {
                         self.lensHeight = self.options.zoomWindowHeight / self.heightRatio;
                     }
                     if (self.largeWidth < self.options.zoomWindowWidth) {
                         self.lensWidth = self.nzWidth;
-                    }
-                    else {
+                    } else {
                         self.lensWidth = (self.options.zoomWindowWidth / self.widthRatio);
                     }
                     self.widthRatio = self.largeWidth / self.nzWidth;
@@ -673,15 +666,13 @@ if (typeof Object.create !== 'function') {
                         if (self.nzHeight < self.options.zoomWindowWidth / self.widthRatio) {
                             self.lensHeight = self.nzHeight;
 
-                        }
-                        else {
+                        } else {
                             self.lensHeight = self.options.zoomWindowHeight / self.heightRatio;
                         }
 
                         if (self.nzWidth < self.options.zoomWindowHeight / self.heightRatio) {
                             self.lensWidth = self.nzWidth;
-                        }
-                        else {
+                        } else {
                             self.lensWidth = self.options.zoomWindowWidth / self.widthRatio;
                         }
 
@@ -794,29 +785,28 @@ if (typeof Object.create !== 'function') {
                             if (self.options.zoomType === 'lens') {
                                 self.zoomLens.css({
                                     backgroundSize: '' +
-                                    (self.largeWidth / self.newvalueheight) + 'px ' +
-                                    (self.largeHeight / self.newvalueheight) + 'px'
+                                        (self.largeWidth / self.newvalueheight) + 'px ' +
+                                        (self.largeHeight / self.newvalueheight) + 'px'
                                 });
                             }
 
                             self.zoomWindow.css({
                                 backgroundSize: '' +
-                                (self.largeWidth / self.newvalueheight) + 'px ' +
-                                (self.largeHeight / self.newvalueheight) + 'px'
+                                    (self.largeWidth / self.newvalueheight) + 'px ' +
+                                    (self.largeHeight / self.newvalueheight) + 'px'
                             });
-                        }
-                        else {
+                        } else {
                             if (self.options.zoomType === 'lens') {
                                 self.zoomLens.css({
                                     backgroundSize: '' +
-                                    (self.largeWidth / self.newvaluewidth) + 'px ' +
-                                    (self.largeHeight / self.newvaluewidth) + 'px'
+                                        (self.largeWidth / self.newvaluewidth) + 'px ' +
+                                        (self.largeHeight / self.newvaluewidth) + 'px'
                                 });
                             }
                             self.zoomWindow.css({
                                 backgroundSize: '' +
-                                (self.largeWidth / self.newvaluewidth) + 'px ' +
-                                (self.largeHeight / self.newvaluewidth) + 'px'
+                                    (self.largeWidth / self.newvaluewidth) + 'px ' +
+                                    (self.largeHeight / self.newvaluewidth) + 'px'
                             });
                         }
                         self.changeBgSize = false;
@@ -867,8 +857,7 @@ if (typeof Object.create !== 'function') {
                     self.options.onShow(self);
                     if (self.options.zoomWindowFadeIn) {
                         self.zoomWindow.stop(true, true, false).fadeIn(self.options.zoomWindowFadeIn);
-                    }
-                    else {
+                    } else {
                         self.zoomWindow.show();
                     }
                     self.isWindowActive = true;
@@ -884,8 +873,7 @@ if (typeof Object.create !== 'function') {
                                 self.loop = false;
                             }
                         });
-                    }
-                    else {
+                    } else {
                         self.zoomWindow.hide();
                     }
                     self.options.onHide(self);
@@ -900,8 +888,7 @@ if (typeof Object.create !== 'function') {
                     if (self.zoomLens) {
                         if (self.options.lensFadeIn) {
                             self.zoomLens.stop(true, true, false).fadeIn(self.options.lensFadeIn);
-                        }
-                        else {
+                        } else {
                             self.zoomLens.show();
                         }
                     }
@@ -913,8 +900,7 @@ if (typeof Object.create !== 'function') {
                     if (self.zoomLens) {
                         if (self.options.lensFadeOut) {
                             self.zoomLens.stop(true, true).fadeOut(self.options.lensFadeOut);
-                        }
-                        else {
+                        } else {
                             self.zoomLens.hide();
                         }
                     }
@@ -929,8 +915,7 @@ if (typeof Object.create !== 'function') {
 
                     if (self.options.zoomTintFadeIn) {
                         self.zoomTint.css('opacity', self.options.tintOpacity).animate().stop(true, true).fadeIn('slow');
-                    }
-                    else {
+                    } else {
                         self.zoomTint.css('opacity', self.options.tintOpacity).animate();
                         self.zoomTint.show();
                     }
@@ -942,8 +927,7 @@ if (typeof Object.create !== 'function') {
 
                     if (self.options.zoomTintFadeOut) {
                         self.zoomTint.stop(true, true).fadeOut(self.options.zoomTintFadeOut);
-                    }
-                    else {
+                    } else {
                         self.zoomTint.hide();
                     }
                     self.isTintActive = false;
@@ -970,8 +954,7 @@ if (typeof Object.create !== 'function') {
 
                             self.windowOffsetTop = ((self.options.zoomWindowHeight / 2) - (self.nzHeight / 2)) * (-1);
                             self.windowOffsetLeft = (self.nzWidth); //DONE 1, 2, 3, 4, 16
-                        }
-                        else { //negative margin
+                        } else { //negative margin
                             $.noop();
                         }
                         break;
@@ -992,8 +975,7 @@ if (typeof Object.create !== 'function') {
                             self.windowOffsetTop = (self.nzHeight);  //DONE - 4,5,6,7,8
 
                             self.windowOffsetLeft = ((self.options.zoomWindowWidth / 2) - (self.nzWidth / 2) + (self.options.borderSize * 2)) * (-1);
-                        }
-                        else { //negative margin
+                        } else { //negative margin
                             $.noop();
                         }
 
@@ -1015,8 +997,7 @@ if (typeof Object.create !== 'function') {
 
                             self.windowOffsetTop = ((self.options.zoomWindowHeight / 2) - (self.nzHeight / 2)) * (-1);
                             self.windowOffsetLeft = (self.zoomWindow.width() + (self.options.borderSize * 2)) * (-1);  //DONE 8,9,10,11,12
-                        }
-                        else { //negative margin
+                        } else { //negative margin
                             $.noop();
                         }
                         break;
@@ -1037,8 +1018,7 @@ if (typeof Object.create !== 'function') {
                             self.windowOffsetTop = (self.zoomWindow.height() + (self.options.borderSize * 2)) * (-1); //DONE 12,13,14,15,16
 
                             self.windowOffsetLeft = ((self.options.zoomWindowWidth / 2) - (self.nzWidth / 2) + (self.options.borderSize * 2)) * (-1);
-                        }
-                        else { //negative margin
+                        } else { //negative margin
                             $.noop();
                         }
                         break;
@@ -1183,8 +1163,7 @@ if (typeof Object.create !== 'function') {
                                                 (self.largeWidth / self.newvalueheight) + 'px ' +
                                                 (self.largeHeight / self.newvalueheight) + 'px'
                                         });
-                                    }
-                                    else {
+                                    } else {
                                         if (self.options.zoomType !== 'lens') {
                                             self.zoomLens.css({
                                                 backgroundSize: '' +
@@ -1224,43 +1203,40 @@ if (typeof Object.create !== 'function') {
                                 self.scrollingLock = false;
                                 self.loop = false;
 
-                            }
-                            else if (Math.round(Math.abs(self.xp - self.windowLeftPos) + Math.abs(self.yp - self.windowTopPos)) < 1) {
+                            } else if (Math.round(Math.abs(self.xp - self.windowLeftPos) + Math.abs(self.yp - self.windowTopPos)) < 1) {
                                 //stops micro movements
                                 clearInterval(self.loop);
                                 self.zoomWindow.css({
                                     backgroundPosition: '' + self.windowLeftPos + 'px ' + self.windowTopPos + 'px'
                                 });
                                 self.loop = false;
-                            }
-                            else {
+                            } else {
                                 if (self.changeBgSize) {
                                     if (self.nzHeight > self.nzWidth) {
                                         if (self.options.zoomType === 'lens') {
                                             self.zoomLens.css({
                                                 backgroundSize: '' +
-                                                (self.largeWidth / self.newvalueheight) + 'px ' +
-                                                (self.largeHeight / self.newvalueheight) + 'px'
+                                                    (self.largeWidth / self.newvalueheight) + 'px ' +
+                                                    (self.largeHeight / self.newvalueheight) + 'px'
                                             });
                                         }
                                         self.zoomWindow.css({
                                             backgroundSize: '' +
-                                            (self.largeWidth / self.newvalueheight) + 'px ' +
-                                            (self.largeHeight / self.newvalueheight) + 'px'
+                                                (self.largeWidth / self.newvalueheight) + 'px ' +
+                                                (self.largeHeight / self.newvalueheight) + 'px'
                                         });
-                                    }
-                                    else {
+                                    } else {
                                         if (self.options.zoomType !== 'lens') {
                                             self.zoomLens.css({
                                                 backgroundSize: '' +
-                                                (self.largeWidth / self.newvaluewidth) + 'px ' +
-                                                (self.largeHeight / self.newvaluewidth) + 'px'
+                                                    (self.largeWidth / self.newvaluewidth) + 'px ' +
+                                                    (self.largeHeight / self.newvaluewidth) + 'px'
                                             });
                                         }
                                         self.zoomWindow.css({
                                             backgroundSize: '' +
-                                            (self.largeWidth / self.newvaluewidth) + 'px ' +
-                                            (self.largeHeight / self.newvaluewidth) + 'px'
+                                                (self.largeWidth / self.newvaluewidth) + 'px ' +
+                                                (self.largeHeight / self.newvaluewidth) + 'px'
                                         });
                                     }
                                     self.changeBgSize = false;
@@ -1272,46 +1248,43 @@ if (typeof Object.create !== 'function') {
                             }
                         }, interval);
                     }
-                }
-                else {
+                } else {
                     if (self.changeBgSize) {
                         if (self.nzHeight > self.nzWidth) {
                             if (self.options.zoomType === 'lens') {
                                 self.zoomLens.css({
                                     backgroundSize: '' +
-                                    (self.largeWidth / self.newvalueheight) + 'px ' +
-                                    (self.largeHeight / self.newvalueheight) + 'px'
+                                        (self.largeWidth / self.newvalueheight) + 'px ' +
+                                        (self.largeHeight / self.newvalueheight) + 'px'
                                 });
                             }
 
                             self.zoomWindow.css({
                                 backgroundSize: '' +
-                                (self.largeWidth / self.newvalueheight) + 'px ' +
-                                (self.largeHeight / self.newvalueheight) + 'px'
+                                    (self.largeWidth / self.newvalueheight) + 'px ' +
+                                    (self.largeHeight / self.newvalueheight) + 'px'
                             });
-                        }
-                        else {
+                        } else {
                             if (self.options.zoomType === 'lens') {
                                 self.zoomLens.css({
                                     backgroundSize: '' +
-                                    (self.largeWidth / self.newvaluewidth) + 'px ' +
-                                    (self.largeHeight / self.newvaluewidth) + 'px'
+                                        (self.largeWidth / self.newvaluewidth) + 'px ' +
+                                        (self.largeHeight / self.newvaluewidth) + 'px'
                                 });
                             }
                             if ((self.largeHeight / self.newvaluewidth) < self.options.zoomWindowHeight) {
 
                                 self.zoomWindow.css({
                                     backgroundSize: '' +
-                                    (self.largeWidth / self.newvaluewidth) + 'px ' +
-                                    (self.largeHeight / self.newvaluewidth) + 'px'
+                                        (self.largeWidth / self.newvaluewidth) + 'px ' +
+                                        (self.largeHeight / self.newvaluewidth) + 'px'
                                 });
-                            }
-                            else {
+                            } else {
 
                                 self.zoomWindow.css({
                                     backgroundSize: '' +
-                                    (self.largeWidth / self.newvalueheight) + 'px ' +
-                                    (self.largeHeight / self.newvalueheight) + 'px'
+                                        (self.largeWidth / self.newvalueheight) + 'px ' +
+                                        (self.largeHeight / self.newvalueheight) + 'px'
                                 });
                             }
 
@@ -1321,8 +1294,8 @@ if (typeof Object.create !== 'function') {
 
                     self.zoomWindow.css({
                         backgroundPosition: '' +
-                        self.windowLeftPos + 'px ' +
-                        self.windowTopPos + 'px'
+                            self.windowLeftPos + 'px ' +
+                            self.windowTopPos + 'px'
                     });
                 }
             }
@@ -1381,7 +1354,7 @@ if (typeof Object.create !== 'function') {
                     styleAttr.setProperty('top', 0);
                 }
                 self.spinner = $('<div class="ezp-spinner"></div>')
-                  .css(styleAttr);
+                    .css(styleAttr);
                 self.$elem.after(self.spinner);
             } else if (self.spinner) {
                 self.spinner.show();
@@ -1501,8 +1474,7 @@ if (typeof Object.create !== 'function') {
                         'width': elemWidth
                     });
                 }
-            }
-            else {
+            } else {
                 self.$elem.attr('src', smallimage);
                 if (self.options.tint) {
                     self.zoomTintImage.attr('src', largeimage);
@@ -1539,8 +1511,7 @@ if (typeof Object.create !== 'function') {
                     if (self.options.imageCrossfade) {
                         self.zoomWrap.css(autoWDimension);
                         self.constwidth = self.zoomWrap.width();
-                    }
-                    else {
+                    } else {
                         self.$elem.css(autoWDimension);
                         self.constwidth = elemWidth;
                     }
@@ -1571,8 +1542,7 @@ if (typeof Object.create !== 'function') {
                     if (self.options.imageCrossfade) {
                         self.zoomWrap.css(autoHDimension);
                         self.constheight = self.zoomWrap.height();
-                    }
-                    else {
+                    } else {
                         self.$elem.css(autoHDimension);
                         self.constheight = elemHeight;
                     }
@@ -1618,15 +1588,13 @@ if (typeof Object.create !== 'function') {
                 if (self.nzHeight < self.options.zoomWindowHeight / self.heightRatio) {
                     self.lensHeight = self.nzHeight;
 
-                }
-                else {
+                } else {
                     self.lensHeight = self.options.zoomWindowHeight / self.heightRatio;
                 }
 
                 if (self.nzWidth < self.options.zoomWindowWidth) {
                     self.lensWidth = self.nzWidth;
-                }
-                else {
+                } else {
                     self.lensWidth = self.options.zoomWindowWidth / self.widthRatio;
                 }
 
@@ -1654,8 +1622,7 @@ if (typeof Object.create !== 'function') {
                     var imgSrc = '';
                     if ($(this).data(self.options.attrImageZoomSrc)) {
                         imgSrc = $(this).data(self.options.attrImageZoomSrc);
-                    }
-                    else if ($(this).data('image')) {
+                    } else if ($(this).data('image')) {
                         imgSrc = $(this).data('image');
                     }
                     //put the current image at the start
@@ -1664,8 +1631,7 @@ if (typeof Object.create !== 'function') {
                             href: '' + imgSrc + '',
                             title: $(this).find('img').attr('title')
                         });
-                    }
-                    else {
+                    } else {
                         self.gallerylist.push({
                             href: '' + imgSrc + '',
                             title: $(this).find('img').attr('title')
@@ -1703,8 +1669,7 @@ if (typeof Object.create !== 'function') {
                     self.heightRatio = (self.largeHeight / maxheightnewvalue) / self.nzHeight;
                     self.newvalueheight = maxheightnewvalue;
                     self.fullheight = true;
-                }
-                else {
+                } else {
                     self.heightRatio = (self.largeHeight / newvalue) / self.nzHeight;
                     self.newvalueheight = newvalue;
                     self.fullheight = false;
@@ -1716,8 +1681,7 @@ if (typeof Object.create !== 'function') {
                     self.widthRatio = (self.largeWidth / maxwidthtnewvalue) / self.nzWidth;
                     self.newvaluewidth = maxwidthtnewvalue;
                     self.fullwidth = true;
-                }
-                else {
+                } else {
                     self.widthRatio = (self.largeWidth / newvalue) / self.nzWidth;
                     self.newvaluewidth = newvalue;
                     self.fullwidth = false;
@@ -1753,8 +1717,7 @@ if (typeof Object.create !== 'function') {
                         self.newvalueheight = newvalue;
                     }
                     self.fullheight = true;
-                }
-                else {
+                } else {
                     self.heightRatio = (self.largeHeight / newvalue) / self.nzHeight;
 
                     if (newvalue > maxheightnewvalue) {
@@ -1777,8 +1740,7 @@ if (typeof Object.create !== 'function') {
                     }
 
                     self.fullwidth = true;
-                }
-                else {
+                } else {
                     self.widthRatio = (self.largeWidth / newvalue) / self.nzWidth;
                     self.newvaluewidth = newvalue;
                     self.fullwidth = false;
@@ -1790,8 +1752,7 @@ if (typeof Object.create !== 'function') {
                 if (self.nzWidth >= self.nzHeight) {
                     if (self.newvaluewidth <= maxwidthtnewvalue) {
                         scrcontinue = true;
-                    }
-                    else {
+                    } else {
                         scrcontinue = false;
                         self.fullheight = true;
                         self.fullwidth = true;
@@ -1800,8 +1761,7 @@ if (typeof Object.create !== 'function') {
                 if (self.nzHeight > self.nzWidth) {
                     if (self.newvaluewidth <= maxwidthtnewvalue) {
                         scrcontinue = true;
-                    }
-                    else {
+                    } else {
                         scrcontinue = false;
                         self.fullheight = true;
                         self.fullwidth = true;
@@ -1855,8 +1815,7 @@ if (typeof Object.create !== 'function') {
 
                     if (self.nzWidth > self.nzHeight) {
                         self.currentZoomLevel = self.newvaluewidth;
-                    }
-                    else if (self.nzHeight >= self.nzWidth) {
+                    } else if (self.nzHeight >= self.nzWidth) {
                         self.currentZoomLevel = self.newvaluewidth;
                     }
                 }

@@ -15,20 +15,22 @@ use Twilio\Serialize;
 use Twilio\Values;
 use Twilio\Version;
 
-class UsageRecordList extends ListResource {
+class UsageRecordList extends ListResource
+{
     /**
      * Construct the UsageRecordList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $simSid The unique id of the SIM resource that this Usage
      *                       Record is for.
-     * @return \Twilio\Rest\Wireless\V1\Sim\UsageRecordList 
+     * @return \Twilio\Rest\Wireless\V1\Sim\UsageRecordList
      */
-    public function __construct(Version $version, $simSid) {
+    public function __construct(Version $version, $simSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('simSid' => $simSid, );
+        $this->solution = ['simSid' => $simSid,];
 
         $this->uri = '/Sims/' . rawurlencode($simSid) . '/UsageRecords';
     }
@@ -40,7 +42,7 @@ class UsageRecordList extends ListResource {
      * is reached.
      * The results are returned as a generator, so this operation is memory
      * efficient.
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param int $limit Upper limit for the number of records to return. stream()
      *                   guarantees to never return more than limit.  Default is no
@@ -52,7 +54,8 @@ class UsageRecordList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return \Twilio\Stream stream of results
      */
-    public function stream($options = array(), $limit = null, $pageSize = null) {
+    public function stream($options = [], $limit = null, $pageSize = null)
+    {
         $limits = $this->version->readLimits($limit, $pageSize);
 
         $page = $this->page($options, $limits['pageSize']);
@@ -64,7 +67,7 @@ class UsageRecordList extends ListResource {
      * Reads UsageRecordInstance records from the API as a list.
      * Unlike stream(), this operation is eager and will load `limit` records into
      * memory before returning.
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param int $limit Upper limit for the number of records to return. read()
      *                   guarantees to never return more than limit.  Default is no
@@ -76,30 +79,32 @@ class UsageRecordList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return UsageRecordInstance[] Array of results
      */
-    public function read($options = array(), $limit = null, $pageSize = null) {
+    public function read($options = [], $limit = null, $pageSize = null)
+    {
         return iterator_to_array($this->stream($options, $limit, $pageSize), false);
     }
 
     /**
      * Retrieve a single page of UsageRecordInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @param mixed $pageSize Number of records to return, defaults to 50
      * @param string $pageToken PageToken provided by the API
      * @param mixed $pageNumber Page Number, this value is simply for client state
      * @return \Twilio\Page Page of UsageRecordInstance
      */
-    public function page($options = array(), $pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE) {
+    public function page($options = [], $pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE)
+    {
         $options = new Values($options);
-        $params = Values::of(array(
-            'End' => Serialize::iso8601DateTime($options['end']),
-            'Start' => Serialize::iso8601DateTime($options['start']),
+        $params = Values::of([
+            'End'         => Serialize::iso8601DateTime($options['end']),
+            'Start'       => Serialize::iso8601DateTime($options['start']),
             'Granularity' => $options['granularity'],
-            'PageToken' => $pageToken,
-            'Page' => $pageNumber,
-            'PageSize' => $pageSize,
-        ));
+            'PageToken'   => $pageToken,
+            'Page'        => $pageNumber,
+            'PageSize'    => $pageSize,
+        ]);
 
         $response = $this->version->page(
             'GET',
@@ -113,11 +118,12 @@ class UsageRecordList extends ListResource {
     /**
      * Retrieve a specific page of UsageRecordInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param string $targetUrl API-generated URL for the requested results page
      * @return \Twilio\Page Page of UsageRecordInstance
      */
-    public function getPage($targetUrl) {
+    public function getPage($targetUrl)
+    {
         $response = $this->version->getDomain()->getClient()->request(
             'GET',
             $targetUrl
@@ -128,10 +134,11 @@ class UsageRecordList extends ListResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Wireless.V1.UsageRecordList]';
     }
 }

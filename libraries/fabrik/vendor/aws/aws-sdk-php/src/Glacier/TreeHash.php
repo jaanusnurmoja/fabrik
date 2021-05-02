@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Glacier;
 
 use Aws\HashInterface;
@@ -36,7 +37,8 @@ class TreeHash implements HashInterface
     public function update($data)
     {
         // Error if hash is already calculated.
-        if ($this->hash) {
+        if ($this->hash)
+        {
             throw new \LogicException('You may not add more data to a '
                 . 'complete tree hash.');
         }
@@ -45,7 +47,8 @@ class TreeHash implements HashInterface
         $this->buffer .= $data;
 
         // When there is more than a MB of data, create a checksum.
-        while (strlen($this->buffer) >= self::MB) {
+        while (strlen($this->buffer) >= self::MB)
+        {
             $data = substr($this->buffer, 0, self::MB);
             $this->buffer = substr($this->buffer, self::MB) ?: '';
             $this->checksums[] = hash($this->algorithm, $data, true);
@@ -57,7 +60,7 @@ class TreeHash implements HashInterface
     /**
      * Add a checksum to the tree hash directly
      *
-     * @param string $checksum   The checksum to add
+     * @param string $checksum The checksum to add
      * @param bool $inBinaryForm TRUE if checksum is in binary form
      *
      * @return self
@@ -66,7 +69,8 @@ class TreeHash implements HashInterface
     public function addChecksum($checksum, $inBinaryForm = false)
     {
         // Error if hash is already calculated
-        if ($this->hash) {
+        if ($this->hash)
+        {
             throw new \LogicException('You may not add more checksums to a '
                 . 'complete tree hash.');
         }
@@ -79,24 +83,29 @@ class TreeHash implements HashInterface
 
     public function complete()
     {
-        if (!$this->hash) {
+        if (!$this->hash)
+        {
             // Clear out the remaining buffer.
-            if (strlen($this->buffer) > 0) {
+            if (strlen($this->buffer) > 0)
+            {
                 $this->checksums[] = hash($this->algorithm, $this->buffer, true);
                 $this->buffer = '';
             }
 
             // If no hashes, add the EMPTY_HASH.
-            if (!$this->checksums) {
+            if (!$this->checksums)
+            {
                 $this->checksums[] = hex2bin(self::EMPTY_HASH);
             }
 
             // Perform hashes up the tree to arrive at the root checksum.
             $hashes = $this->checksums;
-            while (count($hashes) > 1) {
+            while (count($hashes) > 1)
+            {
                 $sets = array_chunk($hashes, 2);
-                $hashes = array();
-                foreach ($sets as $set) {
+                $hashes = [];
+                foreach ($sets as $set)
+                {
                     $hashes[] = (count($set) === 1)
                         ? $set[0]
                         : hash($this->algorithm, $set[0] . $set[1], true);

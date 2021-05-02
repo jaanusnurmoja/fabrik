@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\WorkSpaces;
 
 use Aws\AwsClient;
@@ -71,4 +72,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateRulesOfIpGroup(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateRulesOfIpGroupAsync(array $args = [])
  */
-class WorkSpacesClient extends AwsClient {}
+class WorkSpacesClient extends AwsClient
+{
+}

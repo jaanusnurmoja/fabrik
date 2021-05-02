@@ -23,34 +23,34 @@ use Fabrik\Helpers\Sms;
  */
 class Textopoly extends JObject
 {
-	/**
-	 * URL To Post SMS to
-	 *
-	 * @var string
-	 */
-	protected $url = 'http://sms.mxtelecom.com/SMSSend?user=%s&pass=%s&smsfrom=%s&smsto=%s&smsmsg=%s';
+    /**
+     * URL To Post SMS to
+     *
+     * @var string
+     */
+    protected $url = 'http://sms.mxtelecom.com/SMSSend?user=%s&pass=%s&smsfrom=%s&smsto=%s&smsmsg=%s';
 
-	/**
-	 * Send SMS
-	 *
-	 * @param   string  $message  sms message
-	 * @param   array   $opts     Options
-	 *
-	 * @return  void
-	 */
+    /**
+     * Send SMS
+     *
+     * @param string $message sms message
+     * @param array $opts Options
+     *
+     * @return  void
+     */
 
-	public function process($message, $opts)
-	{
-		$username = ArrayHelper::getValue($opts, 'sms-username');
-		$password = ArrayHelper::getValue($opts, 'sms-password');
-		$smsfrom = ArrayHelper::getValue($opts, 'sms-from');
-		$smsto = ArrayHelper::getValue($opts, 'sms-to');
-		$smstos = explode(',', $smsto);
+    public function process($message, $opts)
+    {
+        $username = ArrayHelper::getValue($opts, 'sms-username');
+        $password = ArrayHelper::getValue($opts, 'sms-password');
+        $smsfrom = ArrayHelper::getValue($opts, 'sms-from');
+        $smsto = ArrayHelper::getValue($opts, 'sms-to');
+        $smstos = explode(',', $smsto);
 
-		foreach ($smstos as $smsto)
-		{
-			$url = sprintf($this->url, $username, $password, $smsfrom, $smsto, $message);
-			$response = Sms::doRequest('GET', $url, '');
-		}
-	}
+        foreach ($smstos as $smsto)
+        {
+            $url = sprintf($this->url, $username, $password, $smsfrom, $smsto, $message);
+            $response = Sms::doRequest('GET', $url, '');
+        }
+    }
 }

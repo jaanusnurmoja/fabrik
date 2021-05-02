@@ -1,4 +1,5 @@
 <?php
+
 namespace Http\Client\Curl;
 
 use Http\Message\Builder\ResponseBuilder as OriginalResponseBuilder;

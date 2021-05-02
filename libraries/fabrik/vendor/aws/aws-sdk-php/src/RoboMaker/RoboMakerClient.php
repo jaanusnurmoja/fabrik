@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\RoboMaker;
 
 use Aws\AwsClient;
@@ -70,4 +71,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateSimulationApplication(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateSimulationApplicationAsync(array $args = [])
  */
-class RoboMakerClient extends AwsClient {}
+class RoboMakerClient extends AwsClient
+{
+}

@@ -22,42 +22,45 @@
 #################################################
 
 namespace PHPLicengine\Cache;
+
 use PHPLicengine\Exception\CacheException;
 
-class Cache {
- 
-      private $config;
-      
-      public function __construct (array $config)
-      {
-             $this->config = $config;       
-      }
+class Cache
+{
 
-      /*
-      This class uses Doctrine Cache. You can look at its doc to add more cache type.
-      Whatever option you need to setup the cache type, must be passed as array to constructor.
-      https://www.doctrine-project.org/projects/doctrine-cache/en/1.8/index.html
-      */
-      public function getCache ()
-      {
-             switch ($this->config['type']) {
-                     case 'apc':
-                          $cache = new \Doctrine\Common\Cache\ApcCache();
-                     break;
-                     case 'file':
-                          $cache = new \Doctrine\Common\Cache\FilesystemCache($this->config['path']);
-                     break;
-                     case 'sqlite3':
-                          $db = new \SQLite3($this->config['sqlite3_db']);
-                          $cache = new \SQLite3Cache($db, $this->config['sqlite3_table']);
-                     break;
-                     case 'xcache':
-                          $cache = new \Doctrine\Common\Cache\XcacheCache();
-                      break;
-                      default:
-                          throw new CacheException('Invalid cache system');
-                      break;
-             } 
-             return $cache;
-      }
+    private $config;
+
+    public function __construct(array $config)
+    {
+        $this->config = $config;
+    }
+
+    /*
+    This class uses Doctrine Cache. You can look at its doc to add more cache type.
+    Whatever option you need to setup the cache type, must be passed as array to constructor.
+    https://www.doctrine-project.org/projects/doctrine-cache/en/1.8/index.html
+    */
+    public function getCache()
+    {
+        switch ($this->config['type'])
+        {
+            case 'apc':
+                $cache = new \Doctrine\Common\Cache\ApcCache();
+                break;
+            case 'file':
+                $cache = new \Doctrine\Common\Cache\FilesystemCache($this->config['path']);
+                break;
+            case 'sqlite3':
+                $db = new \SQLite3($this->config['sqlite3_db']);
+                $cache = new \SQLite3Cache($db, $this->config['sqlite3_table']);
+                break;
+            case 'xcache':
+                $cache = new \Doctrine\Common\Cache\XcacheCache();
+                break;
+            default:
+                throw new CacheException('Invalid cache system');
+                break;
+        }
+        return $cache;
+    }
 }

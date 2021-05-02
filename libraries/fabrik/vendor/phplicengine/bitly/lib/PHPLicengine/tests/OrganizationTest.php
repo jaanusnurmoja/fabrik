@@ -35,12 +35,12 @@ class OrganizationTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/organizations')                    
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/organizations')
+            );
         $bitlink = new Organization($mock);
         $bitlink->getOrganizations('test');
-    } 
-    
+    }
+
     public function testGetOrganizationShortenCounts()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -48,12 +48,12 @@ class OrganizationTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/organizations/test/shorten_counts')                    
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/organizations/test/shorten_counts')
+            );
         $bitlink = new Organization($mock);
         $bitlink->getOrganizationShortenCounts('test');
-    }     
-    
+    }
+
     public function testGetOrganization()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -61,10 +61,10 @@ class OrganizationTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/organizations/test')                    
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/organizations/test')
+            );
         $bitlink = new Organization($mock);
         $bitlink->getOrganization('test');
-    }         
+    }
 
 }

@@ -27,9 +27,9 @@ use Clickatell\Response;
  */
 abstract class Clickatell implements TransportInterface
 {
-    const HTTP_GET      = "GET";
-    const HTTP_POST     = "POST";
-    const HTTP_DELETE   = "DELETE";
+    const HTTP_GET = "GET";
+    const HTTP_POST = "POST";
+    const HTTP_DELETE = "DELETE";
 
     private $secure = false;
 
@@ -38,8 +38,8 @@ abstract class Clickatell implements TransportInterface
      * call the API or whatever resource is required to complete the task. Each adapter
      * should overwrite this function with the appropriate logic.
      *
-     * @param string $uri    The uri (endpoint)
-     * @param array  $args   The arguments
+     * @param string $uri The uri (endpoint)
+     * @param array $args The arguments
      * @param string $method The desired HTTP method
      *
      * @return array
@@ -57,10 +57,10 @@ abstract class Clickatell implements TransportInterface
     protected function getSendDefaults($parameters)
     {
         return array_merge(
-            array(
-                'mo'        => 1,
-                'callback'  => 7
-            ),
+            [
+                'mo'       => 1,
+                'callback' => 7
+            ],
             $parameters
         );
     }
@@ -69,14 +69,14 @@ abstract class Clickatell implements TransportInterface
      * Abstract CURL usage. This helps with testing and extendibility
      * accross multiple API types.
      *
-     * @param string $uri     The endpoint
-     * @param strong $data    POST data or query string
-     * @param array  $headers Header array
-     * @param string $method  HTTP method
+     * @param string $uri The endpoint
+     * @param strong $data POST data or query string
+     * @param array $headers Header array
+     * @param string $method HTTP method
      *
      * @return Decoder
      */
-    protected function curl($uri, $data, $headers = array(), $method = self::HTTP_GET)
+    protected function curl($uri, $data, $headers = [], $method = self::HTTP_GET)
     {
         // This is the clickatell endpoint. It doesn't really change so
         // it's safe for us to "hardcode" it here.
@@ -84,7 +84,7 @@ abstract class Clickatell implements TransportInterface
 
         $uri = ltrim($uri, "/");
         $uri = ($this->secure ? 'https' : 'http') . '://' . $host . "/" . $uri;
-        $method == "GET" && $uri = $uri . "?"  . $data;
+        $method == "GET" && $uri = $uri . "?" . $data;
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $uri);

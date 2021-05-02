@@ -78,13 +78,15 @@ class RequestParameters
      */
     public function toArray()
     {
-        $params = array('secret' => $this->secret, 'response' => $this->response);
+        $params = ['secret' => $this->secret, 'response' => $this->response];
 
-        if (!is_null($this->remoteIp)) {
+        if (!is_null($this->remoteIp))
+        {
             $params['remoteip'] = $this->remoteIp;
         }
 
-        if (!is_null($this->version)) {
+        if (!is_null($this->version))
+        {
             $params['version'] = $this->version;
         }
 

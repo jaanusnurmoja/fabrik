@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Endpoint;
 
 /**
@@ -28,15 +29,15 @@ interface PartitionInterface
     /**
      * Return the endpoints supported by a given service.
      *
-     * @param string    $service                    Identifier of the service
+     * @param string $service Identifier of the service
      *                                              whose endpoints should be
      *                                              listed (e.g., 's3' or 'ses')
-     * @param bool      $allowNonRegionalEndpoints  Set to `true` to include
+     * @param bool $allowNonRegionalEndpoints Set to `true` to include
      *                                              endpoints that are not AWS
      *                                              regions (e.g., 'local' for
      *                                              DynamoDB or
      *                                              'fips-us-gov-west-1' for S3)
-     * 
+     *
      * @return string[]
      */
     public function getAvailableEndpoints(
@@ -47,10 +48,10 @@ interface PartitionInterface
     /**
      * A partition must be invokable as an endpoint provider.
      *
-     * @see EndpointProvider
-     * 
      * @param array $args
      * @return array
+     * @see EndpointProvider
+     *
      */
     public function __invoke(array $args = []);
 }

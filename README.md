@@ -1,12 +1,13 @@
-Fabrik is the Joomla application builder. This fork has some enhancements that are not yet implemented in original code (7 July 2016)
+Fabrik is the Joomla application builder. This fork has some enhancements that are not yet implemented in original
+code (7 July 2016)
 
 - elements can be made hidden also in form view only or details view only
 - tags element is displayed correctly also in joined group (however, only in non repeating one)
 - ordered numbering can be added to the list view
 - list plugin buttons can be shown above the list view's table
 
-This code is updated quite frequently (changed in original code are merged also here). 
-However, there is no guarantee that this version of code works without issues.
+This code is updated quite frequently (changed in original code are merged also here). However, there is no guarantee
+that this version of code works without issues.
 
 Enjoy!
 
@@ -21,20 +22,21 @@ Installation
 - Log into your Joomla administration control panel
 - Go to Extensions > Extension Manager
 - Click the 'Discover' link
-- Click the 'Purge Cache' icon 
+- Click the 'Purge Cache' icon
 - Click the 'Discover' icon
 - Select the Fabrik package and click the 'Install' icon
 
 Enabling Plugins
 ================
 
-Fabrik ships with several of the most common element and validation plugins, however to reduce installation package size not all available plugins are pre-installed.
+Fabrik ships with several of the most common element and validation plugins, however to reduce installation package size
+not all available plugins are pre-installed.
 
 All other element and validation plugins can be found by following these steps:
 
 - Go to Extensions > Extension Manager
 - Click the 'Discover' link
-- Click the 'Purge Cache' icon 
+- Click the 'Purge Cache' icon
 - Click the 'Discover' icon
 - Find the element or validation plugin you want to install
 - Select it
@@ -46,22 +48,26 @@ The element or validation plugin will then appear as an option when creating an 
 Updating
 ================
 
-Once you have installed Fabrik 3.x, if you want to stay up to date with the latest code updates between official releases, you can 'update from GitHub'.
+Once you have installed Fabrik 3.x, if you want to stay up to date with the latest code updates between official
+releases, you can 'update from GitHub'.
 
-Please see here for instructions on how to update from GitHub - [http://fabrikar.com/forums/index.php?wiki/update-from-github/](http://fabrikar.com/forums/index.php?wiki/update-from-github/).
+Please see here for instructions on how to update from GitHub
+- [http://fabrikar.com/forums/index.php?wiki/update-from-github/](http://fabrikar.com/forums/index.php?wiki/update-from-github/)
+.
 
 Upgrading
 ================
 
-At the time of an official release, please follow the steps here - [http://fabrikar.com/forums/index.php?wiki/upgrade-instructions/](http://fabrikar.com/forums/index.php?wiki/upgrade-instructions/)
+At the time of an official release, please follow the steps here
+- [http://fabrikar.com/forums/index.php?wiki/upgrade-instructions/](http://fabrikar.com/forums/index.php?wiki/upgrade-instructions/)
 
 Building
 ========
 
-We have a Grunt build file which will create the Fabrik package for you, and place it in a folder /fabrik_build
-The build relies on node-gpy, which depending on your operating system may require additional installations beyond node itself.
-Please follow the instructions @ https://github.com/nodejs/node-gyp
- 
+We have a Grunt build file which will create the Fabrik package for you, and place it in a folder /fabrik_build The
+build relies on node-gpy, which depending on your operating system may require additional installations beyond node
+itself. Please follow the instructions @ https://github.com/nodejs/node-gyp
+
 Once done you should be able open a command prompt (best to run as administrator in Windows) and then do
 
 > npm install

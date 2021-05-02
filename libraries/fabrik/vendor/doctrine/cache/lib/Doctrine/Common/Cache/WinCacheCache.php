@@ -92,7 +92,7 @@ class WinCacheCache extends CacheProvider
      */
     protected function doGetStats()
     {
-        $info    = wincache_ucache_info();
+        $info = wincache_ucache_info();
         $meminfo = wincache_ucache_meminfo();
 
         return [

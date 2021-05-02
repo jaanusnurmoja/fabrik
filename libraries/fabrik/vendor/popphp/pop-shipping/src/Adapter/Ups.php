@@ -11,6 +11,7 @@
 /**
  * @namespace
  */
+
 namespace Pop\Shipping\Adapter;
 
 /**
@@ -172,14 +173,14 @@ class Ups extends AbstractAdapter
      *
      * Method to instantiate an UPS shipping adapter object
      *
-     * @param  string  $accessKey
-     * @param  string  $userId
-     * @param  string  $password
+     * @param string $accessKey
+     * @param string $userId
+     * @param string $password
      * @return Ups
      */
     public function __construct($accessKey, $userId, $password)
     {
-        $this->userId        = $userId;
+        $this->userId = $userId;
         $this->accessRequest .= PHP_EOL . '    <AccessLicenseNumber>' . $accessKey . '</AccessLicenseNumber>';
         $this->accessRequest .= PHP_EOL . '    <UserId>' . $userId . '</UserId>';
         $this->accessRequest .= PHP_EOL . '    <Password>' . $password . '</Password>';
@@ -219,13 +220,14 @@ class Ups extends AbstractAdapter
     /**
      * Set pickup type
      *
-     * @param  string $code
-     * @throws Exception
+     * @param string $code
      * @return void
+     * @throws Exception
      */
     public function setPickup($code)
     {
-        if (!array_key_exists($code, self::$pickupTypes)) {
+        if (!array_key_exists($code, self::$pickupTypes))
+        {
             throw new Exception('Error: That pickup code does not exist.');
         }
 
@@ -235,13 +237,14 @@ class Ups extends AbstractAdapter
     /**
      * Set package type
      *
-     * @param  string $code
-     * @throws Exception
+     * @param string $code
      * @return void
+     * @throws Exception
      */
     public function setPackage($code)
     {
-        if (!array_key_exists($code, self::$packagingTypes)) {
+        if (!array_key_exists($code, self::$packagingTypes))
+        {
             throw new Exception('Error: That package code does not exist.');
         }
 
@@ -251,13 +254,14 @@ class Ups extends AbstractAdapter
     /**
      * Set service
      *
-     * @param  string $code
-     * @throws Exception
+     * @param string $code
      * @return void
+     * @throws Exception
      */
     public function setService($code)
     {
-        if (!array_key_exists($code, self::$services)) {
+        if (!array_key_exists($code, self::$services))
+        {
             throw new Exception('Error: That service code does not exist.');
         }
 
@@ -267,25 +271,39 @@ class Ups extends AbstractAdapter
     /**
      * Set ship to
      *
-     * @param  array $shipTo
+     * @param array $shipTo
      * @return void
      */
     public function shipTo(array $shipTo)
     {
-        foreach ($shipTo as $key => $value) {
-            if (stripos($key, 'company') !== false) {
+        foreach ($shipTo as $key => $value)
+        {
+            if (stripos($key, 'company') !== false)
+            {
                 $this->shipTo['CompanyName'] = $value;
-            } else if ((strtolower($key) == 'addressline1') || (strtolower($key) == 'address1') || (strtolower($key) == 'address')) {
+            }
+            elseif ((strtolower($key) == 'addressline1') || (strtolower($key) == 'address1') || (strtolower($key) == 'address'))
+            {
                 $this->shipTo['AddressLine1'] = $value;
-            } else if ((strtolower($key) == 'addressline2') || (strtolower($key) == 'address2')) {
+            }
+            elseif ((strtolower($key) == 'addressline2') || (strtolower($key) == 'address2'))
+            {
                 $this->shipTo['AddressLine2'] = $value;
-            } else if ((strtolower($key) == 'addressline3') || (strtolower($key) == 'address3')) {
+            }
+            elseif ((strtolower($key) == 'addressline3') || (strtolower($key) == 'address3'))
+            {
                 $this->shipTo['AddressLine3'] = $value;
-            } else if (strtolower($key) == 'city') {
+            }
+            elseif (strtolower($key) == 'city')
+            {
                 $this->shipTo['City'] = $value;
-            } else if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip')) {
+            }
+            elseif ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip'))
+            {
                 $this->shipTo['PostalCode'] = $value;
-            } else if ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country')) {
+            }
+            elseif ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country'))
+            {
                 $this->shipTo['CountryCode'] = $value;
             }
         }
@@ -294,25 +312,39 @@ class Ups extends AbstractAdapter
     /**
      * Set ship from
      *
-     * @param  array $shipFrom
+     * @param array $shipFrom
      * @return void
      */
     public function shipFrom(array $shipFrom)
     {
-        foreach ($shipFrom as $key => $value) {
-            if (stripos($key, 'company') !== false) {
+        foreach ($shipFrom as $key => $value)
+        {
+            if (stripos($key, 'company') !== false)
+            {
                 $this->shipFrom['CompanyName'] = $value;
-            } else if ((strtolower($key) == 'addressline1') || (strtolower($key) == 'address1') || (strtolower($key) == 'address')) {
+            }
+            elseif ((strtolower($key) == 'addressline1') || (strtolower($key) == 'address1') || (strtolower($key) == 'address'))
+            {
                 $this->shipFrom['AddressLine1'] = $value;
-            } else if ((strtolower($key) == 'addressline2') || (strtolower($key) == 'address2')) {
+            }
+            elseif ((strtolower($key) == 'addressline2') || (strtolower($key) == 'address2'))
+            {
                 $this->shipFrom['AddressLine2'] = $value;
-            } else if ((strtolower($key) == 'addressline3') || (strtolower($key) == 'address3')) {
+            }
+            elseif ((strtolower($key) == 'addressline3') || (strtolower($key) == 'address3'))
+            {
                 $this->shipFrom['AddressLine3'] = $value;
-            } else if (strtolower($key) == 'city') {
+            }
+            elseif (strtolower($key) == 'city')
+            {
                 $this->shipFrom['City'] = $value;
-            } else if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip')) {
+            }
+            elseif ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip'))
+            {
                 $this->shipFrom['PostalCode'] = $value;
-            } else if ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country')) {
+            }
+            elseif ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country'))
+            {
                 $this->shipFrom['CountryCode'] = $value;
             }
         }
@@ -321,22 +353,29 @@ class Ups extends AbstractAdapter
     /**
      * Set dimensions
      *
-     * @param  array  $dimensions
-     * @param  string $unit
+     * @param array $dimensions
+     * @param string $unit
      * @return void
      */
     public function setDimensions(array $dimensions, $unit = null)
     {
-        if ((null !== $unit) && (($unit == 'IN') || ($unit == 'CM'))) {
+        if ((null !== $unit) && (($unit == 'IN') || ($unit == 'CM')))
+        {
             $this->dimensions['UnitOfMeasurement'] = $unit;
         }
 
-        foreach ($dimensions as $key => $value) {
-            if (strtolower($key) == 'length') {
+        foreach ($dimensions as $key => $value)
+        {
+            if (strtolower($key) == 'length')
+            {
                 $this->dimensions['Length'] = $value;
-            } else if (strtolower($key) == 'width') {
+            }
+            elseif (strtolower($key) == 'width')
+            {
                 $this->dimensions['Width'] = $value;
-            } else if (strtolower($key) == 'height') {
+            }
+            elseif (strtolower($key) == 'height')
+            {
                 $this->dimensions['Height'] = $value;
             }
         }
@@ -345,13 +384,14 @@ class Ups extends AbstractAdapter
     /**
      * Set dimensions
      *
-     * @param  string $weight
-     * @param  string $unit
+     * @param string $weight
+     * @param string $unit
      * @return void
      */
     public function setWeight($weight, $unit = null)
     {
-        if ((null !== $unit) && (($unit == 'LBS') || ($unit == 'KGS'))) {
+        if ((null !== $unit) && (($unit == 'LBS') || ($unit == 'KGS')))
+        {
             $this->weight['UnitOfMeasurement'] = $unit;
         }
 
@@ -361,7 +401,7 @@ class Ups extends AbstractAdapter
     /**
      * Send transaction
      *
-     * @param  boolean $verifyPeer
+     * @param boolean $verifyPeer
      * @return void
      */
     public function send($verifyPeer = true)
@@ -376,24 +416,29 @@ class Ups extends AbstractAdapter
             CURLOPT_RETURNTRANSFER => true
         ];
 
-        if (!$verifyPeer) {
+        if (!$verifyPeer)
+        {
             $options[CURLOPT_SSL_VERIFYPEER] = false;
         }
 
         $curl = curl_init();
         curl_setopt_array($curl, $options);
 
-        $this->response     = simplexml_load_string($this->parseResponse($curl));
+        $this->response = simplexml_load_string($this->parseResponse($curl));
         $this->responseCode = (int)$this->response->Response->ResponseStatusCode;
 
-        if ($this->responseCode == 1) {
+        if ($this->responseCode == 1)
+        {
             $this->responseMessage = (string)$this->response->Response->ResponseStatusDescription;
 
-            foreach ($this->response->RatedShipment as $rate) {
+            foreach ($this->response->RatedShipment as $rate)
+            {
                 $this->rates[self::$services[(string)$rate->Service->Code]] = (string)$rate->TotalCharges->MonetaryValue;
             }
-        } else {
-            $this->responseCode    = (string)$this->response->Response->Error->ErrorCode;
+        }
+        else
+        {
+            $this->responseCode = (string)$this->response->Response->Error->ErrorCode;
             $this->responseMessage = (string)$this->response->Response->Error->ErrorDescription;
         }
     }
@@ -443,11 +488,16 @@ class Ups extends AbstractAdapter
         $this->rateRequest .= PHP_EOL . '            <ShipperNumber>' . $this->userId . '</ShipperNumber>';
         $this->rateRequest .= PHP_EOL . '            <Address>';
 
-        foreach ($this->shipFrom as $key => $value) {
-            if ($key !== 'CompanyName') {
-                if (null !== $value) {
+        foreach ($this->shipFrom as $key => $value)
+        {
+            if ($key !== 'CompanyName')
+            {
+                if (null !== $value)
+                {
                     $this->rateRequest .= PHP_EOL . '                <' . $key . '>' . $value . '</' . $key . '>';
-                } else {
+                }
+                else
+                {
                     $this->rateRequest .= PHP_EOL . '                <' . $key . ' />';
                 }
             }
@@ -457,17 +507,23 @@ class Ups extends AbstractAdapter
         $this->rateRequest .= PHP_EOL . '        </Shipper>';
         $this->rateRequest .= PHP_EOL . '        <ShipTo>';
 
-        if (null !== $this->shipTo['CompanyName']) {
+        if (null !== $this->shipTo['CompanyName'])
+        {
             $this->rateRequest .= PHP_EOL . '            <CompanyName>' . $this->shipTo['CompanyName'] . '</CompanyName>';
         }
 
         $this->rateRequest .= PHP_EOL . '            <Address>';
 
-        foreach ($this->shipTo as $key => $value) {
-            if ($key !== 'CompanyName') {
-                if (null !== $value) {
+        foreach ($this->shipTo as $key => $value)
+        {
+            if ($key !== 'CompanyName')
+            {
+                if (null !== $value)
+                {
                     $this->rateRequest .= PHP_EOL . '                <' . $key . '>' . $value . '</' . $key . '>';
-                } else {
+                }
+                else
+                {
                     $this->rateRequest .= PHP_EOL . '                <' . $key . ' />';
                 }
             }
@@ -477,17 +533,23 @@ class Ups extends AbstractAdapter
         $this->rateRequest .= PHP_EOL . '        </ShipTo>';
         $this->rateRequest .= PHP_EOL . '        <ShipFrom>';
 
-        if (null !== $this->shipFrom['CompanyName']) {
+        if (null !== $this->shipFrom['CompanyName'])
+        {
             $this->rateRequest .= PHP_EOL . '            <CompanyName>' . $this->shipFrom['CompanyName'] . '</CompanyName>';
         }
 
         $this->rateRequest .= PHP_EOL . '            <Address>';
 
-        foreach ($this->shipFrom as $key => $value) {
-            if ($key !== 'CompanyName') {
-                if (null !== $value) {
+        foreach ($this->shipFrom as $key => $value)
+        {
+            if ($key !== 'CompanyName')
+            {
+                if (null !== $value)
+                {
                     $this->rateRequest .= PHP_EOL . '                <' . $key . '>' . $value . '</' . $key . '>';
-                } else {
+                }
+                else
+                {
                     $this->rateRequest .= PHP_EOL . '                <' . $key . ' />';
                 }
             }
@@ -506,9 +568,12 @@ class Ups extends AbstractAdapter
         $this->rateRequest .= PHP_EOL . '            </PackagingType>';
         $this->rateRequest .= PHP_EOL . '            <Description>Rate</Description>';
 
-        if ((null !== $this->dimensions['Length']) &&
+        if (
+            (null !== $this->dimensions['Length']) &&
             (null !== $this->dimensions['Width']) &&
-            (null !== $this->dimensions['Height'])) {
+            (null !== $this->dimensions['Height'])
+        )
+        {
             $this->rateRequest .= PHP_EOL . '            <Dimensions>';
             $this->rateRequest .= PHP_EOL . '                <UnitOfMeasurement>';
             $this->rateRequest .= PHP_EOL . '                    <Code>' . $this->dimensions['UnitOfMeasurement'] . '</Code>';

@@ -1,4 +1,5 @@
 <?php
+
 namespace JmesPath;
 
 /**
@@ -42,12 +43,16 @@ class TreeInterpreter
     {
         $dispatcher = $this->fnDispatcher;
 
-        switch ($node['type']) {
+        switch ($node['type'])
+        {
 
             case 'field':
-                if (is_array($value) || $value instanceof \ArrayAccess) {
+                if (is_array($value) || $value instanceof \ArrayAccess)
+                {
                     return isset($value[$node['value']]) ? $value[$node['value']] : null;
-                } elseif ($value instanceof \stdClass) {
+                }
+                elseif ($value instanceof \stdClass)
+                {
                     return isset($value->{$node['value']}) ? $value->{$node['value']} : null;
                 }
                 return null;
@@ -59,7 +64,8 @@ class TreeInterpreter
                 );
 
             case 'index':
-                if (!Utils::isArray($value)) {
+                if (!Utils::isArray($value))
+                {
                     return null;
                 }
                 $idx = $node['value'] >= 0
@@ -69,27 +75,33 @@ class TreeInterpreter
 
             case 'projection':
                 $left = $this->dispatch($node['children'][0], $value);
-                switch ($node['from']) {
+                switch ($node['from'])
+                {
                     case 'object':
-                        if (!Utils::isObject($left)) {
+                        if (!Utils::isObject($left))
+                        {
                             return null;
                         }
                         break;
                     case 'array':
-                        if (!Utils::isArray($left)) {
+                        if (!Utils::isArray($left))
+                        {
                             return null;
                         }
                         break;
                     default:
-                        if (!is_array($left) || !($left instanceof \stdClass)) {
+                        if (!is_array($left) || !($left instanceof \stdClass))
+                        {
                             return null;
                         }
                 }
 
                 $collected = [];
-                foreach ((array) $left as $val) {
+                foreach ((array)$left as $val)
+                {
                     $result = $this->dispatch($node['children'][1], $val);
-                    if ($result !== null) {
+                    if ($result !== null)
+                    {
                         $collected[] = $result;
                     }
                 }
@@ -100,16 +112,21 @@ class TreeInterpreter
                 static $skipElement = [];
                 $value = $this->dispatch($node['children'][0], $value);
 
-                if (!Utils::isArray($value)) {
+                if (!Utils::isArray($value))
+                {
                     return null;
                 }
 
                 $merged = [];
-                foreach ($value as $values) {
+                foreach ($value as $values)
+                {
                     // Only merge up arrays lists and not hashes
-                    if (is_array($values) && isset($values[0])) {
+                    if (is_array($values) && isset($values[0]))
+                    {
                         $merged = array_merge($merged, $values);
-                    } elseif ($values !== $skipElement) {
+                    }
+                    elseif ($values !== $skipElement)
+                    {
                         $merged[] = $values;
                     }
                 }
@@ -146,24 +163,28 @@ class TreeInterpreter
                 );
 
             case 'multi_select_list':
-                if ($value === null) {
+                if ($value === null)
+                {
                     return null;
                 }
 
                 $collected = [];
-                foreach ($node['children'] as $node) {
+                foreach ($node['children'] as $node)
+                {
                     $collected[] = $this->dispatch($node, $value);
                 }
 
                 return $collected;
 
             case 'multi_select_hash':
-                if ($value === null) {
+                if ($value === null)
+                {
                     return null;
                 }
 
                 $collected = [];
-                foreach ($node['children'] as $node) {
+                foreach ($node['children'] as $node)
+                {
                     $collected[$node['value']] = $this->dispatch(
                         $node['children'][0],
                         $value
@@ -175,11 +196,16 @@ class TreeInterpreter
             case 'comparator':
                 $left = $this->dispatch($node['children'][0], $value);
                 $right = $this->dispatch($node['children'][1], $value);
-                if ($node['value'] == '==') {
+                if ($node['value'] == '==')
+                {
                     return Utils::isEqual($left, $right);
-                } elseif ($node['value'] == '!=') {
+                }
+                elseif ($node['value'] == '!=')
+                {
                     return !Utils::isEqual($left, $right);
-                } else {
+                }
+                else
+                {
                     return self::relativeCmp($left, $right, $node['value']);
                 }
 
@@ -190,7 +216,8 @@ class TreeInterpreter
 
             case 'function':
                 $args = [];
-                foreach ($node['children'] as $arg) {
+                foreach ($node['children'] as $arg)
+                {
                     $args[] = $this->dispatch($arg, $value);
                 }
                 return $dispatcher($node['value'], $args);
@@ -206,7 +233,8 @@ class TreeInterpreter
 
             case 'expref':
                 $apply = $node['children'][0];
-                return function ($value) use ($apply) {
+                return function ($value) use ($apply)
+                {
                     return $this->visit($apply, $value);
                 };
 
@@ -220,16 +248,23 @@ class TreeInterpreter
      */
     private static function relativeCmp($left, $right, $cmp)
     {
-        if (!(is_int($left) || is_float($left)) || !(is_int($right) || is_float($right))) {
+        if (!(is_int($left) || is_float($left)) || !(is_int($right) || is_float($right)))
+        {
             return false;
         }
 
-        switch ($cmp) {
-            case '>': return $left > $right;
-            case '>=': return $left >= $right;
-            case '<': return $left < $right;
-            case '<=': return $left <= $right;
-            default: throw new \RuntimeException("Invalid comparison: $cmp");
+        switch ($cmp)
+        {
+            case '>':
+                return $left > $right;
+            case '>=':
+                return $left >= $right;
+            case '<':
+                return $left < $right;
+            case '<=':
+                return $left <= $right;
+            default:
+                throw new \RuntimeException("Invalid comparison: $cmp");
         }
     }
 }

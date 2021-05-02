@@ -33,9 +33,12 @@ class PropertyTypeMatcher implements Matcher
      */
     public function matches($object, $property)
     {
-        try {
+        try
+        {
             $reflectionProperty = ReflectionHelper::getProperty($object, $property);
-        } catch (ReflectionException $exception) {
+        }
+        catch (ReflectionException $exception)
+        {
             return false;
         }
 

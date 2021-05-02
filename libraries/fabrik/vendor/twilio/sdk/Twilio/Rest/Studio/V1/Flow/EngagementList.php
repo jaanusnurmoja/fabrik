@@ -15,19 +15,21 @@ use Twilio\Serialize;
 use Twilio\Values;
 use Twilio\Version;
 
-class EngagementList extends ListResource {
+class EngagementList extends ListResource
+{
     /**
      * Construct the EngagementList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $flowSid Flow Sid.
-     * @return \Twilio\Rest\Studio\V1\Flow\EngagementList 
+     * @return \Twilio\Rest\Studio\V1\Flow\EngagementList
      */
-    public function __construct(Version $version, $flowSid) {
+    public function __construct(Version $version, $flowSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('flowSid' => $flowSid, );
+        $this->solution = ['flowSid' => $flowSid,];
 
         $this->uri = '/Flows/' . rawurlencode($flowSid) . '/Engagements';
     }
@@ -39,7 +41,7 @@ class EngagementList extends ListResource {
      * is reached.
      * The results are returned as a generator, so this operation is memory
      * efficient.
-     * 
+     *
      * @param int $limit Upper limit for the number of records to return. stream()
      *                   guarantees to never return more than limit.  Default is no
      *                   limit
@@ -50,7 +52,8 @@ class EngagementList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return \Twilio\Stream stream of results
      */
-    public function stream($limit = null, $pageSize = null) {
+    public function stream($limit = null, $pageSize = null)
+    {
         $limits = $this->version->readLimits($limit, $pageSize);
 
         $page = $this->page($limits['pageSize']);
@@ -62,7 +65,7 @@ class EngagementList extends ListResource {
      * Reads EngagementInstance records from the API as a list.
      * Unlike stream(), this operation is eager and will load `limit` records into
      * memory before returning.
-     * 
+     *
      * @param int $limit Upper limit for the number of records to return. read()
      *                   guarantees to never return more than limit.  Default is no
      *                   limit
@@ -73,25 +76,27 @@ class EngagementList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return EngagementInstance[] Array of results
      */
-    public function read($limit = null, $pageSize = null) {
+    public function read($limit = null, $pageSize = null)
+    {
         return iterator_to_array($this->stream($limit, $pageSize), false);
     }
 
     /**
      * Retrieve a single page of EngagementInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param mixed $pageSize Number of records to return, defaults to 50
      * @param string $pageToken PageToken provided by the API
      * @param mixed $pageNumber Page Number, this value is simply for client state
      * @return \Twilio\Page Page of EngagementInstance
      */
-    public function page($pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE) {
-        $params = Values::of(array(
+    public function page($pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE)
+    {
+        $params = Values::of([
             'PageToken' => $pageToken,
-            'Page' => $pageNumber,
-            'PageSize' => $pageSize,
-        ));
+            'Page'      => $pageNumber,
+            'PageSize'  => $pageSize,
+        ]);
 
         $response = $this->version->page(
             'GET',
@@ -105,11 +110,12 @@ class EngagementList extends ListResource {
     /**
      * Retrieve a specific page of EngagementInstance records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param string $targetUrl API-generated URL for the requested results page
      * @return \Twilio\Page Page of EngagementInstance
      */
-    public function getPage($targetUrl) {
+    public function getPage($targetUrl)
+    {
         $response = $this->version->getDomain()->getClient()->request(
             'GET',
             $targetUrl
@@ -120,7 +126,7 @@ class EngagementList extends ListResource {
 
     /**
      * Create a new EngagementInstance
-     * 
+     *
      * @param string $to The Contact phone number to start a Studio Flow Engagement.
      * @param string $from The Twilio phone number to send messages or initiate
      *                     calls from during the Flow Engagement.
@@ -128,19 +134,20 @@ class EngagementList extends ListResource {
      * @return EngagementInstance Newly created EngagementInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function create($to, $from, $options = array()) {
+    public function create($to, $from, $options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array(
-            'To' => $to,
-            'From' => $from,
+        $data = Values::of([
+            'To'         => $to,
+            'From'       => $from,
             'Parameters' => Serialize::jsonObject($options['parameters']),
-        ));
+        ]);
 
         $payload = $this->version->create(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -149,20 +156,22 @@ class EngagementList extends ListResource {
 
     /**
      * Constructs a EngagementContext
-     * 
+     *
      * @param string $sid Engagement Sid.
-     * @return \Twilio\Rest\Studio\V1\Flow\EngagementContext 
+     * @return \Twilio\Rest\Studio\V1\Flow\EngagementContext
      */
-    public function getContext($sid) {
+    public function getContext($sid)
+    {
         return new EngagementContext($this->version, $this->solution['flowSid'], $sid);
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Studio.V1.EngagementList]';
     }
 }

@@ -23,84 +23,84 @@ require_once COM_FABRIK_FRONTEND . '/models/validation_rule.php';
  */
 class PlgFabrik_ValidationruleSpecialChars extends PlgFabrik_Validationrule
 {
-	/**
-	 * Plugin name
-	 *
-	 * @var string
-	 */
-	protected $pluginName = 'specialchars';
+    /**
+     * Plugin name
+     *
+     * @var string
+     */
+    protected $pluginName = 'specialchars';
 
-	/**
-	 * Validate the elements data against the rule
-	 *
-	 * @param   string  $data           To check
-	 * @param   int     $repeatCounter  Repeat group counter
-	 *
-	 * @return  bool  true if validation passes, false if fails
-	 */
-	public function validate($data, $repeatCounter)
-	{
-		// For multi-select elements
-		if (is_array($data))
-		{
-			$data = implode('', $data);
-		}
+    /**
+     * Validate the elements data against the rule
+     *
+     * @param string $data To check
+     * @param int $repeatCounter Repeat group counter
+     *
+     * @return  bool  true if validation passes, false if fails
+     */
+    public function validate($data, $repeatCounter)
+    {
+        // For multi-select elements
+        if (is_array($data))
+        {
+            $data = implode('', $data);
+        }
 
-		$params = $this->getParams();
-		$doMatch = $params->get('specialchars-match');
+        $params = $this->getParams();
+        $doMatch = $params->get('specialchars-match');
 
-		if ($doMatch)
-		{
-			$v = $params->get('specalchars');
-			$v = explode(',', $v);
+        if ($doMatch)
+        {
+            $v = $params->get('specalchars');
+            $v = explode(',', $v);
 
-			foreach ($v as $c)
-			{
-				if (!empty($c) && strstr($data, $c))
-				{
-					return false;
-				}
-			}
-		}
+            foreach ($v as $c)
+            {
+                if (!empty($c) && strstr($data, $c))
+                {
+                    return false;
+                }
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Checks if the validation should replace the submitted element data
-	 * if so then the replaced data is returned otherwise original data returned
-	 *
-	 * @param   string  $data           Original data
-	 * @param   int     $repeatCounter  Repeat group counter
-	 *
-	 * @return  string	original or replaced data
-	 */
-	public function replace($data, $repeatCounter)
-	{
-		$params = $this->getParams();
-		$doMatch = $params->get('specialchars-match');
+    /**
+     * Checks if the validation should replace the submitted element data
+     * if so then the replaced data is returned otherwise original data returned
+     *
+     * @param string $data Original data
+     * @param int $repeatCounter Repeat group counter
+     *
+     * @return  string    original or replaced data
+     */
+    public function replace($data, $repeatCounter)
+    {
+        $params = $this->getParams();
+        $doMatch = $params->get('specialchars-match');
 
-		if (!$doMatch)
-		{
-			$replace = $params->get('specialchars-replacestring');
+        if (!$doMatch)
+        {
+            $replace = $params->get('specialchars-replacestring');
 
-			if ($replace === '_default')
-			{
-				$replace = '';
-			}
+            if ($replace === '_default')
+            {
+                $replace = '';
+            }
 
-			$v = $params->get('specalchars');
-			$v = explode(',', $v);
+            $v = $params->get('specalchars');
+            $v = explode(',', $v);
 
-			foreach ($v as $c)
-			{
-				if (!empty($c))
-				{
-					$data = str_replace($c, $replace, $data);
-				}
-			}
-		}
+            foreach ($v as $c)
+            {
+                if (!empty($c))
+                {
+                    $data = str_replace($c, $replace, $data);
+                }
+            }
+        }
 
-		return $data;
-	}
+        return $data;
+    }
 }

@@ -66,11 +66,11 @@ final class Route
     /**
      * Route Private Constructor.
      *
-     * @param string    $id
-     * @param int       $priority
-     * @param string    $expression
-     * @param array     $actions
-     * @param string    $description
+     * @param string $id
+     * @param int $priority
+     * @param string $expression
+     * @param array $actions
+     * @param string $description
      * @param \DateTime $createdAt
      */
     private function __construct($id, $priority, $expression, $actions, $description, \DateTime $createdAt = null)

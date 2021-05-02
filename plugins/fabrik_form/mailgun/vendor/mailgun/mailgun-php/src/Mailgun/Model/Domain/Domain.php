@@ -70,12 +70,12 @@ final class Domain
     }
 
     /**
-     * @param string    $name
-     * @param string    $smtpLogin
-     * @param string    $smtpPassword
-     * @param bool      $wildcard
-     * @param string    $spamAction
-     * @param string    $state
+     * @param string $name
+     * @param string $smtpLogin
+     * @param string $smtpPassword
+     * @param bool $wildcard
+     * @param string $spamAction
+     * @param string $state
      * @param \DateTime $createdAt
      */
     private function __construct($name, $smtpLogin, $smtpPassword, $wildcard, $spamAction, $state, \DateTime $createdAt)

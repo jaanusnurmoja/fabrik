@@ -17,46 +17,53 @@ $d = $displayData;
 
 if (class_exists('NumberFormatter'))
 {
-	$formatter = new NumberFormatter($d->langTag, NumberFormatter::CURRENCY);
-	$d->amount = $formatter->formatCurrency($d->amount, $d->currencyCode);
+    $formatter = new NumberFormatter($d->langTag, NumberFormatter::CURRENCY);
+    $d->amount = $formatter->formatCurrency($d->amount, $d->currencyCode);
 }
 else
 {
-	$d->amount = number_format((float)$d->amount, 2) . ' ' . $d->currencyCode;
+    $d->amount = number_format((float)$d->amount, 2) . ' ' . $d->currencyCode;
 }
 
-$d->bottomText = str_ireplace('{stripe_last4}', '<span class="fabrikStripeLast4">' . $d->card->last4 . '</span>', $d->bottomText);
-$d->bottomText = str_ireplace('{stripe_amount}', '<span class="fabrikStripePrice">' . $d->amount . '</span>', $d->bottomText);
-$d->bottomText = str_ireplace('{stripe_item}', '<span class="fabrikStripeItem">' . $d->item . '</span>', $d->bottomText);
+$d->bottomText = str_ireplace('{stripe_last4}', '<span class="fabrikStripeLast4">' . $d->card->last4 . '</span>',
+    $d->bottomText);
+$d->bottomText = str_ireplace('{stripe_amount}', '<span class="fabrikStripePrice">' . $d->amount . '</span>',
+    $d->bottomText);
+$d->bottomText = str_ireplace('{stripe_item}', '<span class="fabrikStripeItem">' . $d->item . '</span>',
+    $d->bottomText);
 
 
 if ($d->testMode) :
-	?>
+    ?>
     <div class="fabriStripeTestMode">
-		<?php echo FText::_('PLG_FORM_STRIPE_TEST_MODE_TEXT'); ?>
+        <?php
+        echo FText::_('PLG_FORM_STRIPE_TEST_MODE_TEXT'); ?>
     </div>
 <?php
 endif;
 
 if ($d->showCoupon) :
-	?>
+    ?>
     <div class="fabrikStripeCouponText">
-		<?php echo $d->couponMsg; ?>
+        <?php
+        echo $d->couponMsg; ?>
     </div>
 <?php
 endif;
 ?>
 
     <div class="fabrikStripeBottomText">
-		<?php echo $d->bottomText; ?>
+        <?php
+        echo $d->bottomText; ?>
     </div>
 
 <?php
 if ($d->useUpdateButton) :
-	?>
+    ?>
     <div class="fabrikStripeButtonContainer">
         <button class="fabrikStripeChange">
-            <span><?php echo $d->updateButtonName; ?></span>
+            <span><?php
+                echo $d->updateButtonName; ?></span>
         </button>
     </div>
 <?php

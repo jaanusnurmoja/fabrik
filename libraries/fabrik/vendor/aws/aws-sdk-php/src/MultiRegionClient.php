@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Aws\Endpoint\PartitionEndpointProvider;
@@ -30,58 +31,65 @@ class MultiRegionClient implements AwsClientInterface
         $args['region']['required'] = false;
 
         return $args + [
-            'client_factory' => [
-                'type' => 'config',
-                'valid' => ['callable'],
-                'doc' => 'A callable that takes an array of client'
-                    . ' configuration arguments and returns a regionalized'
-                    . ' client.',
-                'required' => true,
-                'internal' => true,
-                'default' => function (array $args) {
-                    $namespace = manifest($args['service'])['namespace'];
-                    $klass = "Aws\\{$namespace}\\{$namespace}Client";
-                    $region = isset($args['region']) ? $args['region'] : null;
+                'client_factory' => [
+                    'type'     => 'config',
+                    'valid'    => ['callable'],
+                    'doc'      => 'A callable that takes an array of client'
+                        . ' configuration arguments and returns a regionalized'
+                        . ' client.',
+                    'required' => true,
+                    'internal' => true,
+                    'default'  => function (array $args)
+                    {
+                        $namespace = manifest($args['service'])['namespace'];
+                        $klass = "Aws\\{$namespace}\\{$namespace}Client";
+                        $region = isset($args['region']) ? $args['region'] : null;
 
-                    return function (array $args) use ($klass, $region) {
-                        if ($region && empty($args['region'])) {
-                            $args['region'] = $region;
+                        return function (array $args) use ($klass, $region)
+                        {
+                            if ($region && empty($args['region']))
+                            {
+                                $args['region'] = $region;
+                            }
+
+                            return new $klass($args);
+                        };
+                    },
+                ],
+                'partition'      => [
+                    'type'    => 'config',
+                    'valid'   => ['string', PartitionInterface::class],
+                    'doc'     => 'AWS partition to connect to. Valid partitions'
+                        . ' include "aws," "aws-cn," and "aws-us-gov." Used to'
+                        . ' restrict the scope of the mapRegions method.',
+                    'default' => function (array $args)
+                    {
+                        $region = isset($args['region']) ? $args['region'] : '';
+                        return PartitionEndpointProvider::defaultProvider()
+                            ->getPartition($region, $args['service']);
+                    },
+                    'fn'      => function ($value, array &$args)
+                    {
+                        if (is_string($value))
+                        {
+                            $value = PartitionEndpointProvider::defaultProvider()
+                                ->getPartitionByName($value);
                         }
 
-                        return new $klass($args);
-                    };
-                },
-            ],
-            'partition' => [
-                'type'    => 'config',
-                'valid'   => ['string', PartitionInterface::class],
-                'doc'     => 'AWS partition to connect to. Valid partitions'
-                    . ' include "aws," "aws-cn," and "aws-us-gov." Used to'
-                    . ' restrict the scope of the mapRegions method.',
-                'default' => function (array $args) {
-                    $region = isset($args['region']) ? $args['region'] : '';
-                    return PartitionEndpointProvider::defaultProvider()
-                        ->getPartition($region, $args['service']);
-                },
-                'fn'      => function ($value, array &$args) {
-                    if (is_string($value)) {
-                        $value = PartitionEndpointProvider::defaultProvider()
-                            ->getPartitionByName($value);
-                    }
+                        if (!$value instanceof PartitionInterface)
+                        {
+                            throw new \InvalidArgumentException('No valid partition'
+                                . ' was provided. Provide a concrete partition or'
+                                . ' the name of a partition (e.g., "aws," "aws-cn,"'
+                                . ' or "aws-us-gov").'
+                            );
+                        }
 
-                    if (!$value instanceof PartitionInterface) {
-                        throw new \InvalidArgumentException('No valid partition'
-                            . ' was provided. Provide a concrete partition or'
-                            . ' the name of a partition (e.g., "aws," "aws-cn,"'
-                            . ' or "aws-us-gov").'
-                        );
+                        $args['partition'] = $value;
+                        $args['endpoint_provider'] = $value;
                     }
-
-                    $args['partition'] = $value;
-                    $args['endpoint_provider'] = $value;
-                }
-            ],
-        ];
+                ],
+            ];
     }
 
     /**
@@ -100,13 +108,15 @@ class MultiRegionClient implements AwsClientInterface
      */
     public function __construct(array $args = [])
     {
-        if (!isset($args['service'])) {
+        if (!isset($args['service']))
+        {
             $args['service'] = $this->parseClass();
         }
 
         $this->handlerList = new HandlerList(function (
             CommandInterface $command
-        ) {
+        )
+        {
             list($region, $args) = $this->getRegionFromArgs($command->toArray());
             $command = $this->getClientFromPool($region)
                 ->getCommand($command->getName(), $args);
@@ -146,7 +156,7 @@ class MultiRegionClient implements AwsClientInterface
      * - @region: The region to which the command should be sent.
      *
      * @param string $name Name of the operation to use in the command
-     * @param array  $args Arguments to pass to the command
+     * @param array $args Arguments to pass to the command
      *
      * @return CommandInterface
      * @throws \InvalidArgumentException if no command can be found by name
@@ -158,11 +168,13 @@ class MultiRegionClient implements AwsClientInterface
 
     public function getConfig($option = null)
     {
-        if (null === $option) {
+        if (null === $option)
+        {
             return $this->config;
         }
 
-        if (isset($this->config[$option])) {
+        if (isset($this->config[$option]))
+        {
             return $this->config[$option];
         }
 
@@ -190,7 +202,7 @@ class MultiRegionClient implements AwsClientInterface
     }
 
     /**
-     * @param string $region    Omit this argument or pass in an empty string to
+     * @param string $region Omit this argument or pass in an empty string to
      *                          allow the configured client factory to apply the
      *                          region.
      *
@@ -198,7 +210,8 @@ class MultiRegionClient implements AwsClientInterface
      */
     protected function getClientFromPool($region = '')
     {
-        if (empty($this->clientPool[$region])) {
+        if (empty($this->clientPool[$region]))
+        {
             $factory = $this->factory;
             $this->clientPool[$region] = $factory(
                 array_replace($this->args, array_filter(['region' => $region]))
@@ -217,7 +230,8 @@ class MultiRegionClient implements AwsClientInterface
     {
         $klass = get_class($this);
 
-        if ($klass === __CLASS__) {
+        if ($klass === __CLASS__)
+        {
             return '';
         }
 

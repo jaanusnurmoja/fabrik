@@ -62,8 +62,8 @@ class RestClient
     protected $sslEnabled = true;
 
     /**
-     * @param string     $apiKey
-     * @param string     $apiHost
+     * @param string $apiKey
+     * @param string $apiHost
      * @param HttpClient $httpClient
      */
     public function __construct($apiKey, $apiHost, HttpClient $httpClient = null)
@@ -76,30 +76,34 @@ class RestClient
     /**
      * @param string $method
      * @param string $uri
-     * @param mixed  $body
-     * @param array  $files
-     * @param array  $headers
+     * @param mixed $body
+     * @param array $files
+     * @param array $headers
      *
+     * @return \stdClass
      * @throws GenericHTTPError
      * @throws InvalidCredentials
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      *
-     * @return \stdClass
      */
     protected function send($method, $uri, $body = null, $files = [], array $headers = [])
     {
-        $headers['User-Agent'] = Api::SDK_USER_AGENT.'/'.Api::SDK_VERSION;
-        $headers['Authorization'] = 'Basic '.base64_encode(sprintf('%s:%s', Api::API_USER, $this->apiKey));
+        $headers['User-Agent'] = Api::SDK_USER_AGENT . '/' . Api::SDK_VERSION;
+        $headers['Authorization'] = 'Basic ' . base64_encode(sprintf('%s:%s', Api::API_USER, $this->apiKey));
 
-        if (!empty($files)) {
+        if (!empty($files))
+        {
             $builder = new MultipartStreamBuilder();
-            foreach ($files as $file) {
+            foreach ($files as $file)
+            {
                 $builder->addResource($file['name'], $file['contents'], $file);
             }
             $body = $builder->build();
-            $headers['Content-Type'] = 'multipart/form-data; boundary="'.$builder->getBoundary().'"';
-        } elseif (is_array($body)) {
+            $headers['Content-Type'] = 'multipart/form-data; boundary="' . $builder->getBoundary() . '"';
+        }
+        elseif (is_array($body))
+        {
             $body = http_build_query($body);
             $headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
@@ -113,17 +117,17 @@ class RestClient
     /**
      * @param string $url
      *
-     * @throws GenericHTTPError
+     * @return \stdClass
      * @throws InvalidCredentials
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      *
-     * @return \stdClass
+     * @throws GenericHTTPError
      */
     public function getAttachment($url)
     {
-        $headers['User-Agent'] = Api::SDK_USER_AGENT.'/'.Api::SDK_VERSION;
-        $headers['Authorization'] = 'Basic '.base64_encode(sprintf('%s:%s', Api::API_USER, $this->apiKey));
+        $headers['User-Agent'] = Api::SDK_USER_AGENT . '/' . Api::SDK_VERSION;
+        $headers['Authorization'] = 'Basic ' . base64_encode(sprintf('%s:%s', Api::API_USER, $this->apiKey));
         $request = MessageFactoryDiscovery::find()->createRequest('get', $url, $headers);
         $response = HttpClientDiscovery::find()->sendRequest($request);
 
@@ -132,45 +136,56 @@ class RestClient
 
     /**
      * @param string $endpointUrl
-     * @param array  $postData
-     * @param array  $files
+     * @param array $postData
+     * @param array $files
      *
-     * @throws GenericHTTPError
+     * @return \stdClass
      * @throws InvalidCredentials
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      *
-     * @return \stdClass
+     * @throws GenericHTTPError
      */
     public function post($endpointUrl, array $postData = [], $files = [])
     {
         $postFiles = [];
 
         $fields = ['message', 'attachment', 'inline'];
-        foreach ($fields as $fieldName) {
-            if (isset($files[$fieldName])) {
-                if (is_array($files[$fieldName])) {
-                    foreach ($files[$fieldName] as $file) {
+        foreach ($fields as $fieldName)
+        {
+            if (isset($files[$fieldName]))
+            {
+                if (is_array($files[$fieldName]))
+                {
+                    foreach ($files[$fieldName] as $file)
+                    {
                         $postFiles[] = $this->prepareFile($fieldName, $file);
                     }
-                } else {
+                }
+                else
+                {
                     $postFiles[] = $this->prepareFile($fieldName, $files[$fieldName]);
                 }
             }
         }
 
         $postDataMultipart = [];
-        foreach ($postData as $key => $value) {
-            if (is_array($value)) {
-                foreach ($value as $subValue) {
+        foreach ($postData as $key => $value)
+        {
+            if (is_array($value))
+            {
+                foreach ($value as $subValue)
+                {
                     $postDataMultipart[] = [
-                        'name' => $key,
+                        'name'     => $key,
                         'contents' => $subValue,
                     ];
                 }
-            } else {
+            }
+            else
+            {
                 $postDataMultipart[] = [
-                    'name' => $key,
+                    'name'     => $key,
                     'contents' => $value,
                 ];
             }
@@ -181,29 +196,29 @@ class RestClient
 
     /**
      * @param string $endpointUrl
-     * @param array  $queryString
+     * @param array $queryString
      *
-     * @throws GenericHTTPError
+     * @return \stdClass
      * @throws InvalidCredentials
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      *
-     * @return \stdClass
+     * @throws GenericHTTPError
      */
     public function get($endpointUrl, $queryString = [])
     {
-        return $this->send('GET', $endpointUrl.'?'.http_build_query($queryString));
+        return $this->send('GET', $endpointUrl . '?' . http_build_query($queryString));
     }
 
     /**
      * @param string $endpointUrl
      *
-     * @throws GenericHTTPError
+     * @return \stdClass
      * @throws InvalidCredentials
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      *
-     * @return \stdClass
+     * @throws GenericHTTPError
      */
     public function delete($endpointUrl)
     {
@@ -212,14 +227,14 @@ class RestClient
 
     /**
      * @param string $endpointUrl
-     * @param mixed  $putData
+     * @param mixed $putData
      *
-     * @throws GenericHTTPError
+     * @return \stdClass
      * @throws InvalidCredentials
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      *
-     * @return \stdClass
+     * @throws GenericHTTPError
      */
     public function put($endpointUrl, $putData)
     {
@@ -229,35 +244,37 @@ class RestClient
     /**
      * @param ResponseInterface $responseObj
      *
-     * @throws GenericHTTPError
+     * @return \stdClass
      * @throws InvalidCredentials
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      *
-     * @return \stdClass
+     * @throws GenericHTTPError
      */
     public function responseHandler(ResponseInterface $responseObj)
     {
-        $httpResponseCode = (int) $responseObj->getStatusCode();
+        $httpResponseCode = (int)$responseObj->getStatusCode();
 
-        switch ($httpResponseCode) {
-        case 200:
-            $data = (string) $responseObj->getBody();
-            $jsonResponseData = json_decode($data, false);
-            $result = new \stdClass();
-            // return response data as json if possible, raw if not
-            $result->http_response_body = $data && null === $jsonResponseData ? $data : $jsonResponseData;
-            $result->http_response_code = $httpResponseCode;
+        switch ($httpResponseCode)
+        {
+            case 200:
+                $data = (string)$responseObj->getBody();
+                $jsonResponseData = json_decode($data, false);
+                $result = new \stdClass();
+                // return response data as json if possible, raw if not
+                $result->http_response_body = $data && null === $jsonResponseData ? $data : $jsonResponseData;
+                $result->http_response_code = $httpResponseCode;
 
-            return $result;
-        case 400:
-            throw new MissingRequiredParameters(ExceptionMessages::EXCEPTION_MISSING_REQUIRED_PARAMETERS.$this->getResponseExceptionMessage($responseObj));
-        case 401:
-            throw new InvalidCredentials(ExceptionMessages::EXCEPTION_INVALID_CREDENTIALS);
-        case 404:
-            throw new MissingEndpoint(ExceptionMessages::EXCEPTION_MISSING_ENDPOINT.$this->getResponseExceptionMessage($responseObj));
-        default:
-            throw new GenericHTTPError(ExceptionMessages::EXCEPTION_GENERIC_HTTP_ERROR, $httpResponseCode, $responseObj->getBody());
+                return $result;
+            case 400:
+                throw new MissingRequiredParameters(ExceptionMessages::EXCEPTION_MISSING_REQUIRED_PARAMETERS . $this->getResponseExceptionMessage($responseObj));
+            case 401:
+                throw new InvalidCredentials(ExceptionMessages::EXCEPTION_INVALID_CREDENTIALS);
+            case 404:
+                throw new MissingEndpoint(ExceptionMessages::EXCEPTION_MISSING_ENDPOINT . $this->getResponseExceptionMessage($responseObj));
+            default:
+                throw new GenericHTTPError(ExceptionMessages::EXCEPTION_GENERIC_HTTP_ERROR, $httpResponseCode,
+                    $responseObj->getBody());
         }
     }
 
@@ -268,10 +285,11 @@ class RestClient
      */
     protected function getResponseExceptionMessage(ResponseInterface $responseObj)
     {
-        $body = (string) $responseObj->getBody();
+        $body = (string)$responseObj->getBody();
         $response = json_decode($body);
-        if (JSON_ERROR_NONE == json_last_error() && isset($response->message)) {
-            return ' '.$response->message;
+        if (JSON_ERROR_NONE == json_last_error() && isset($response->message))
+        {
+            return ' ' . $response->message;
         }
 
         return '';
@@ -280,7 +298,7 @@ class RestClient
     /**
      * Prepare a file for the postBody.
      *
-     * @param string       $fieldName
+     * @param string $fieldName
      * @param string|array $filePath
      *
      * @return array
@@ -289,21 +307,26 @@ class RestClient
     {
         $filename = null;
 
-        if (is_array($filePath) && isset($filePath['fileContent'])) {
+        if (is_array($filePath) && isset($filePath['fileContent']))
+        {
             // File from memory
             $filename = $filePath['filename'];
             $resource = fopen('php://temp', 'r+');
             fwrite($resource, $filePath['fileContent']);
             rewind($resource);
-        } else {
+        }
+        else
+        {
             // Backward compatibility code
-            if (is_array($filePath) && isset($filePath['filePath'])) {
+            if (is_array($filePath) && isset($filePath['filePath']))
+            {
                 $filename = $filePath['remoteName'];
                 $filePath = $filePath['filePath'];
             }
 
             // Remove leading @ symbol
-            if (0 === strpos($filePath, '@')) {
+            if (0 === strpos($filePath, '@'))
+            {
                 $filePath = substr($filePath, 1);
             }
 
@@ -311,7 +334,7 @@ class RestClient
         }
 
         return [
-            'name' => $fieldName,
+            'name'     => $fieldName,
             'contents' => $resource,
             'filename' => $filename,
         ];
@@ -322,7 +345,8 @@ class RestClient
      */
     protected function getHttpClient()
     {
-        if (null === $this->httpClient) {
+        if (null === $this->httpClient)
+        {
             $this->httpClient = HttpClientDiscovery::find();
         }
 
@@ -336,19 +360,19 @@ class RestClient
      */
     private function getApiUrl($uri)
     {
-        return $this->generateEndpoint($this->apiHost, $this->apiVersion, $this->sslEnabled).$uri;
+        return $this->generateEndpoint($this->apiHost, $this->apiVersion, $this->sslEnabled) . $uri;
     }
 
     /**
      * @param string $apiEndpoint
      * @param string $apiVersion
-     * @param bool   $ssl
+     * @param bool $ssl
      *
      * @return string
      */
     private function generateEndpoint($apiEndpoint, $apiVersion, $ssl)
     {
-        return ($ssl ? 'https://' : 'http://').$apiEndpoint.'/'.$apiVersion.'/';
+        return ($ssl ? 'https://' : 'http://') . $apiEndpoint . '/' . $apiVersion . '/';
     }
 
     /**

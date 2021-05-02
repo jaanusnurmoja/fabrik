@@ -18,7 +18,7 @@ use Twilio\Version;
 
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- * 
+ *
  * @property string accountSid
  * @property \DateTime dateCreated
  * @property \DateTime dateUpdated
@@ -30,46 +30,50 @@ use Twilio\Version;
  * @property integer buildDuration
  * @property integer errorCode
  */
-class ModelBuildInstance extends InstanceResource {
+class ModelBuildInstance extends InstanceResource
+{
     /**
      * Initialize the ModelBuildInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $assistantSid The unique ID of the parent Assistant.
      * @param string $sid The sid
-     * @return \Twilio\Rest\Preview\Understand\Assistant\ModelBuildInstance 
+     * @return \Twilio\Rest\Preview\Understand\Assistant\ModelBuildInstance
      */
-    public function __construct(Version $version, array $payload, $assistantSid, $sid = null) {
+    public function __construct(Version $version, array $payload, $assistantSid, $sid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'dateCreated' => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
-            'dateUpdated' => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
-            'assistantSid' => Values::array_get($payload, 'assistant_sid'),
-            'sid' => Values::array_get($payload, 'sid'),
-            'status' => Values::array_get($payload, 'status'),
-            'uniqueName' => Values::array_get($payload, 'unique_name'),
-            'url' => Values::array_get($payload, 'url'),
+        $this->properties = [
+            'accountSid'    => Values::array_get($payload, 'account_sid'),
+            'dateCreated'   => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
+            'dateUpdated'   => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
+            'assistantSid'  => Values::array_get($payload, 'assistant_sid'),
+            'sid'           => Values::array_get($payload, 'sid'),
+            'status'        => Values::array_get($payload, 'status'),
+            'uniqueName'    => Values::array_get($payload, 'unique_name'),
+            'url'           => Values::array_get($payload, 'url'),
             'buildDuration' => Values::array_get($payload, 'build_duration'),
-            'errorCode' => Values::array_get($payload, 'error_code'),
-        );
+            'errorCode'     => Values::array_get($payload, 'error_code'),
+        ];
 
-        $this->solution = array('assistantSid' => $assistantSid, 'sid' => $sid ?: $this->properties['sid'], );
+        $this->solution = ['assistantSid' => $assistantSid, 'sid' => $sid ?: $this->properties['sid'],];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Preview\Understand\Assistant\ModelBuildContext Context
      *                                                                     for this
      *                                                                     ModelBuildInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new ModelBuildContext(
                 $this->version,
                 $this->solution['assistantSid'],
@@ -82,48 +86,54 @@ class ModelBuildInstance extends InstanceResource {
 
     /**
      * Fetch a ModelBuildInstance
-     * 
+     *
      * @return ModelBuildInstance Fetched ModelBuildInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Update the ModelBuildInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return ModelBuildInstance Updated ModelBuildInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         return $this->proxy()->update($options);
     }
 
     /**
      * Deletes the ModelBuildInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->proxy()->delete();
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -133,12 +143,14 @@ class ModelBuildInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Preview.Understand.ModelBuildInstance ' . implode(' ', $context) . ']';

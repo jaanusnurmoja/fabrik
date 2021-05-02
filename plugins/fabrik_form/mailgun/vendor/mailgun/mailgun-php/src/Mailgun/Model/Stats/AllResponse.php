@@ -27,7 +27,7 @@ final class AllResponse implements ApiResponse
     private $items;
 
     /**
-     * @param int               $totalCount
+     * @param int $totalCount
      * @param AllResponseItem[] $items
      */
     private function __construct($totalCount, array $items)
@@ -44,15 +44,20 @@ final class AllResponse implements ApiResponse
     public static function create(array $data)
     {
         $items = [];
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $i) {
+        if (isset($data['items']))
+        {
+            foreach ($data['items'] as $i)
+            {
                 $items[] = AllResponseItem::create($i);
             }
         }
 
-        if (isset($data['total_count'])) {
+        if (isset($data['total_count']))
+        {
             $count = $data['total_count'];
-        } else {
+        }
+        else
+        {
             $count = count($items);
         }
 

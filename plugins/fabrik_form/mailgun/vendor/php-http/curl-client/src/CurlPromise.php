@@ -1,4 +1,5 @@
 <?php
+
 namespace Http\Client\Curl;
 
 use Http\Promise\Promise;
@@ -34,7 +35,7 @@ class CurlPromise implements Promise
     /**
      * Create new promise.
      *
-     * @param PromiseCore $core   Shared promise core
+     * @param PromiseCore $core Shared promise core
      * @param MultiRunner $runner Simultaneous requests runner
      */
     public function __construct(PromiseCore $core, MultiRunner $runner)
@@ -50,7 +51,7 @@ class CurlPromise implements Promise
      * The callback will be called when the response or exception arrived and never more than once.
      *
      * @param callable $onFulfilled Called when a response will be available.
-     * @param callable $onRejected  Called when an error happens.
+     * @param callable $onRejected Called when an error happens.
      *
      * You must always return the Response in the interface or throw an Exception.
      *
@@ -59,10 +60,12 @@ class CurlPromise implements Promise
      */
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        if ($onFulfilled) {
+        if ($onFulfilled)
+        {
             $this->core->addOnFulfilled($onFulfilled);
         }
-        if ($onRejected) {
+        if ($onRejected)
+        {
             $this->core->addOnRejected($onRejected);
         }
 
@@ -96,8 +99,10 @@ class CurlPromise implements Promise
     {
         $this->runner->wait($this->core);
 
-        if ($unwrap) {
-            if ($this->core->getState() === self::REJECTED) {
+        if ($unwrap)
+        {
+            if ($this->core->getState() === self::REJECTED)
+            {
                 throw $this->core->getException();
             }
 

@@ -42,7 +42,7 @@ final class UpdateResponse implements ApiResponse
 
     /**
      * @param string|null $message
-     * @param Route|null  $route
+     * @param Route|null $route
      */
     private function __construct($message = null, Route $route = null)
     {

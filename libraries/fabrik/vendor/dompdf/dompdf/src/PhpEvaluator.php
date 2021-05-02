@@ -5,6 +5,7 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
+
 namespace Dompdf;
 
 /**
@@ -33,9 +34,10 @@ class PhpEvaluator
      * @param $code
      * @param array $vars
      */
-    public function evaluate($code, $vars = array())
+    public function evaluate($code, $vars = [])
     {
-        if (!$this->_canvas->get_dompdf()->getOptions()->getIsPhpEnabled()) {
+        if (!$this->_canvas->get_dompdf()->getOptions()->getIsPhpEnabled())
+        {
             return;
         }
 
@@ -46,7 +48,8 @@ class PhpEvaluator
         $PAGE_COUNT = $pdf->get_page_count();
 
         // Override those variables if passed in
-        foreach ($vars as $k => $v) {
+        foreach ($vars as $k => $v)
+        {
             $$k = $v;
         }
 

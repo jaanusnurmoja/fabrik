@@ -17,18 +17,18 @@ $labels = array_combine($sub_values, $sub_labels);
 $query->clear();
 $query->select('COUNT( * ) AS value, `doelgroep_student` AS label')->from('fab_userinfo')->group('doelgroep_student');
 $db->setQuery($query);
-$data = array();
+$data = [];
 $rows = $db->loadObjectList();
 $total = 0;
 foreach ($rows as $row)
 {
-	$total += $row->value;
+    $total += $row->value;
 }
 
 foreach ($rows as $row)
 {
-	$row->value = ($row->value / $total) * 100;
-	$row->label = strip_tags($labels[$row->label]);
+    $row->value = ($row->value / $total) * 100;
+    $row->label = strip_tags($labels[$row->label]);
 }
 
 $this->data = new stdClass;
@@ -39,4 +39,4 @@ $this->data->values = $rows;
 {
 	$this->data->values[] = $data;
 } */
-$this->data = array($this->data);
+$this->data = [$this->data];

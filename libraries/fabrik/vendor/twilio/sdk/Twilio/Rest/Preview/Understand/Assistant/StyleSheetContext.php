@@ -18,31 +18,34 @@ use Twilio\Version;
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
  */
-class StyleSheetContext extends InstanceContext {
+class StyleSheetContext extends InstanceContext
+{
     /**
      * Initialize the StyleSheetContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $assistantSid The unique ID of the Assistant
-     * @return \Twilio\Rest\Preview\Understand\Assistant\StyleSheetContext 
+     * @return \Twilio\Rest\Preview\Understand\Assistant\StyleSheetContext
      */
-    public function __construct(Version $version, $assistantSid) {
+    public function __construct(Version $version, $assistantSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('assistantSid' => $assistantSid, );
+        $this->solution = ['assistantSid' => $assistantSid,];
 
         $this->uri = '/Assistants/' . rawurlencode($assistantSid) . '/StyleSheet';
     }
 
     /**
      * Fetch a StyleSheetInstance
-     * 
+     *
      * @return StyleSheetInstance Fetched StyleSheetInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -55,20 +58,21 @@ class StyleSheetContext extends InstanceContext {
 
     /**
      * Update the StyleSheetInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return StyleSheetInstance Updated StyleSheetInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array('StyleSheet' => Serialize::jsonObject($options['styleSheet']), ));
+        $data = Values::of(['StyleSheet' => Serialize::jsonObject($options['styleSheet']),]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -77,12 +81,14 @@ class StyleSheetContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Preview.Understand.StyleSheetContext ' . implode(' ', $context) . ']';

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\CommandInterface;
@@ -12,7 +13,7 @@ use Psr\Http\Message\RequestInterface;
  */
 class PutObjectUrlMiddleware
 {
-    /** @var callable  */
+    /** @var callable */
     private $nextHandler;
 
     /**
@@ -22,7 +23,8 @@ class PutObjectUrlMiddleware
      */
     public static function wrap()
     {
-        return function (callable $handler) {
+        return function (callable $handler)
+        {
             return new self($handler);
         };
     }
@@ -39,9 +41,11 @@ class PutObjectUrlMiddleware
     {
         $next = $this->nextHandler;
         return $next($command, $request)->then(
-            function (ResultInterface $result) use ($command) {
+            function (ResultInterface $result) use ($command)
+            {
                 $name = $command->getName();
-                switch ($name) {
+                switch ($name)
+                {
                     case 'PutObject':
                     case 'CopyObject':
                         $result['ObjectURL'] = $result['@metadata']['effectiveUri'];

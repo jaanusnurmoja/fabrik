@@ -12,7 +12,8 @@ namespace Twilio\Rest\Chat\V2\Service\Channel;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class MessageOptions {
+abstract class MessageOptions
+{
     /**
      * @param string $from The identity of the message's author. Defaults to system
      *                     if not specified.
@@ -29,8 +30,10 @@ abstract class MessageOptions {
      * @param string $mediaSid The Media Sid to be attached to this Message.
      * @return CreateMessageOptions Options builder
      */
-    public static function create($from = Values::NONE, $attributes = Values::NONE, $dateCreated = Values::NONE, $dateUpdated = Values::NONE, $lastUpdatedBy = Values::NONE, $body = Values::NONE, $mediaSid = Values::NONE) {
-        return new CreateMessageOptions($from, $attributes, $dateCreated, $dateUpdated, $lastUpdatedBy, $body, $mediaSid);
+    public static function create($from = Values::NONE, $attributes = Values::NONE, $dateCreated = Values::NONE, $dateUpdated = Values::NONE, $lastUpdatedBy = Values::NONE, $body = Values::NONE, $mediaSid = Values::NONE)
+    {
+        return new CreateMessageOptions($from, $attributes, $dateCreated, $dateUpdated, $lastUpdatedBy, $body,
+            $mediaSid);
     }
 
     /**
@@ -38,7 +41,8 @@ abstract class MessageOptions {
      *                      values are: `asc` or `desc`.
      * @return ReadMessageOptions Options builder
      */
-    public static function read($order = Values::NONE) {
+    public static function read($order = Values::NONE)
+    {
         return new ReadMessageOptions($order);
     }
 
@@ -56,12 +60,14 @@ abstract class MessageOptions {
      * @param string $from The identity of the message's author.
      * @return UpdateMessageOptions Options builder
      */
-    public static function update($body = Values::NONE, $attributes = Values::NONE, $dateCreated = Values::NONE, $dateUpdated = Values::NONE, $lastUpdatedBy = Values::NONE, $from = Values::NONE) {
+    public static function update($body = Values::NONE, $attributes = Values::NONE, $dateCreated = Values::NONE, $dateUpdated = Values::NONE, $lastUpdatedBy = Values::NONE, $from = Values::NONE)
+    {
         return new UpdateMessageOptions($body, $attributes, $dateCreated, $dateUpdated, $lastUpdatedBy, $from);
     }
 }
 
-class CreateMessageOptions extends Options {
+class CreateMessageOptions extends Options
+{
     /**
      * @param string $from The identity of the message's author. Defaults to system
      *                     if not specified.
@@ -77,7 +83,8 @@ class CreateMessageOptions extends Options {
      * @param string $body The message body string.
      * @param string $mediaSid The Media Sid to be attached to this Message.
      */
-    public function __construct($from = Values::NONE, $attributes = Values::NONE, $dateCreated = Values::NONE, $dateUpdated = Values::NONE, $lastUpdatedBy = Values::NONE, $body = Values::NONE, $mediaSid = Values::NONE) {
+    public function __construct($from = Values::NONE, $attributes = Values::NONE, $dateCreated = Values::NONE, $dateUpdated = Values::NONE, $lastUpdatedBy = Values::NONE, $body = Values::NONE, $mediaSid = Values::NONE)
+    {
         $this->options['from'] = $from;
         $this->options['attributes'] = $attributes;
         $this->options['dateCreated'] = $dateCreated;
@@ -89,96 +96,106 @@ class CreateMessageOptions extends Options {
 
     /**
      * The [identity](https://www.twilio.com/docs/api/chat/guides/identity) of the message's author. Defaults to `system`.
-     * 
+     *
      * @param string $from The identity of the message's author. Defaults to system
      *                     if not specified.
      * @return $this Fluent Builder
      */
-    public function setFrom($from) {
+    public function setFrom($from)
+    {
         $this->options['from'] = $from;
         return $this;
     }
 
     /**
      * An string metadata field you can use to store any data you wish. The string value must contain structurally valid JSON if specified. **Note** that this will always be null for resources returned via LIST GET operations, but will be present for single GET operations.
-     * 
+     *
      * @param string $attributes The attributes metadata field you can use to store
      *                           any data you wish.
      * @return $this Fluent Builder
      */
-    public function setAttributes($attributes) {
+    public function setAttributes($attributes)
+    {
         $this->options['attributes'] = $attributes;
         return $this;
     }
 
     /**
      * The ISO8601 time specifying the datetime the Message should be set as being created. Will be set to the current time by the Chat service if not specified.  Note that this should only be used in cases where a Chat's history is being recreated from a backup/separate source.
-     * 
+     *
      * @param \DateTime $dateCreated The ISO8601 time specifying the datetime the
      *                               Message should be set as being created.
      * @return $this Fluent Builder
      */
-    public function setDateCreated($dateCreated) {
+    public function setDateCreated($dateCreated)
+    {
         $this->options['dateCreated'] = $dateCreated;
         return $this;
     }
 
     /**
      * The ISO8601 time specifying the datetime the Message should be set as having been last updated. Will be set to the `null` by the Chat service if not specified.  Note that this should only be used in cases where a Chat's history is being recreated from a backup/separate source  and where a Message was previously updated.
-     * 
+     *
      * @param \DateTime $dateUpdated The ISO8601 time specifying the datetime the
      *                               Message should be set as having been last
      *                               updated.
      * @return $this Fluent Builder
      */
-    public function setDateUpdated($dateUpdated) {
+    public function setDateUpdated($dateUpdated)
+    {
         $this->options['dateUpdated'] = $dateUpdated;
         return $this;
     }
 
     /**
      * Specify the Identity of the User that last updated the Message (if relevant)
-     * 
+     *
      * @param string $lastUpdatedBy Specify the Identity of the User that last
      *                              updated the Message
      * @return $this Fluent Builder
      */
-    public function setLastUpdatedBy($lastUpdatedBy) {
+    public function setLastUpdatedBy($lastUpdatedBy)
+    {
         $this->options['lastUpdatedBy'] = $lastUpdatedBy;
         return $this;
     }
 
     /**
      * A string message to send to this channel. You can also send structured data by serializing it into a string. May be empty string or `null`, will be set as empty string as a result in this cases.
-     * 
+     *
      * @param string $body The message body string.
      * @return $this Fluent Builder
      */
-    public function setBody($body) {
+    public function setBody($body)
+    {
         $this->options['body'] = $body;
         return $this;
     }
 
     /**
      * The [Media](https://www.twilio.com/docs/api/chat/rest/media) Sid to be attached to this Message.
-     * 
+     *
      * @param string $mediaSid The Media Sid to be attached to this Message.
      * @return $this Fluent Builder
      */
-    public function setMediaSid($mediaSid) {
+    public function setMediaSid($mediaSid)
+    {
         $this->options['mediaSid'] = $mediaSid;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -186,36 +203,42 @@ class CreateMessageOptions extends Options {
     }
 }
 
-class ReadMessageOptions extends Options {
+class ReadMessageOptions extends Options
+{
     /**
      * @param string $order Specifies sorting order for messages list, possible
      *                      values are: `asc` or `desc`.
      */
-    public function __construct($order = Values::NONE) {
+    public function __construct($order = Values::NONE)
+    {
         $this->options['order'] = $order;
     }
 
     /**
      * Specifies sorting order for messages list, possible values are: `asc` or `desc`. If no value is specified, then `asc` is used as the default.
-     * 
+     *
      * @param string $order Specifies sorting order for messages list, possible
      *                      values are: `asc` or `desc`.
      * @return $this Fluent Builder
      */
-    public function setOrder($order) {
+    public function setOrder($order)
+    {
         $this->options['order'] = $order;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -223,7 +246,8 @@ class ReadMessageOptions extends Options {
     }
 }
 
-class UpdateMessageOptions extends Options {
+class UpdateMessageOptions extends Options
+{
     /**
      * @param string $body The message body string.
      * @param string $attributes The attributes metadata field you can use to store
@@ -237,7 +261,8 @@ class UpdateMessageOptions extends Options {
      *                              updated the Message
      * @param string $from The identity of the message's author.
      */
-    public function __construct($body = Values::NONE, $attributes = Values::NONE, $dateCreated = Values::NONE, $dateUpdated = Values::NONE, $lastUpdatedBy = Values::NONE, $from = Values::NONE) {
+    public function __construct($body = Values::NONE, $attributes = Values::NONE, $dateCreated = Values::NONE, $dateUpdated = Values::NONE, $lastUpdatedBy = Values::NONE, $from = Values::NONE)
+    {
         $this->options['body'] = $body;
         $this->options['attributes'] = $attributes;
         $this->options['dateCreated'] = $dateCreated;
@@ -248,84 +273,93 @@ class UpdateMessageOptions extends Options {
 
     /**
      * The message body string. You can also send structured data by serializing it into a string. May be updated to empty string or `null`, will be set as empty string as a result in this cases.
-     * 
+     *
      * @param string $body The message body string.
      * @return $this Fluent Builder
      */
-    public function setBody($body) {
+    public function setBody($body)
+    {
         $this->options['body'] = $body;
         return $this;
     }
 
     /**
      * A string metadata field you can use to store any data you wish. The string value must contain structurally valid JSON if specified. **Note** that this will always be null for resources returned via LIST GET operations, but will be present for single GET operations.
-     * 
+     *
      * @param string $attributes The attributes metadata field you can use to store
      *                           any data you wish.
      * @return $this Fluent Builder
      */
-    public function setAttributes($attributes) {
+    public function setAttributes($attributes)
+    {
         $this->options['attributes'] = $attributes;
         return $this;
     }
 
     /**
      * The ISO8601 time specifying the datetime the Message should be set as being created.
-     * 
+     *
      * @param \DateTime $dateCreated The ISO8601 time specifying the datetime the
      *                               Message should be set as being created.
      * @return $this Fluent Builder
      */
-    public function setDateCreated($dateCreated) {
+    public function setDateCreated($dateCreated)
+    {
         $this->options['dateCreated'] = $dateCreated;
         return $this;
     }
 
     /**
      * The ISO8601 time specifying the datetime the Message should be set as having been last updated.
-     * 
+     *
      * @param \DateTime $dateUpdated The ISO8601 time specifying the datetime the
      *                               Message should be set as having been last
      *                               updated.
      * @return $this Fluent Builder
      */
-    public function setDateUpdated($dateUpdated) {
+    public function setDateUpdated($dateUpdated)
+    {
         $this->options['dateUpdated'] = $dateUpdated;
         return $this;
     }
 
     /**
      * Specify the Identity of the User that last updated the Message (if relevant)
-     * 
+     *
      * @param string $lastUpdatedBy Specify the Identity of the User that last
      *                              updated the Message
      * @return $this Fluent Builder
      */
-    public function setLastUpdatedBy($lastUpdatedBy) {
+    public function setLastUpdatedBy($lastUpdatedBy)
+    {
         $this->options['lastUpdatedBy'] = $lastUpdatedBy;
         return $this;
     }
 
     /**
      * The [identity](https://www.twilio.com/docs/api/chat/guides/identity) of the message's author.
-     * 
+     *
      * @param string $from The identity of the message's author.
      * @return $this Fluent Builder
      */
-    public function setFrom($from) {
+    public function setFrom($from)
+    {
         $this->options['from'] = $from;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

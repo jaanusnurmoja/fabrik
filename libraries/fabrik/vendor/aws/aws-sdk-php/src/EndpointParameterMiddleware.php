@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Aws\Api\Service;
@@ -24,7 +25,8 @@ class EndpointParameterMiddleware
      */
     public static function wrap(Service $service)
     {
-        return function (callable $handler) use ($service) {
+        return function (callable $handler) use ($service)
+        {
             return new self($handler, $service);
         };
     }
@@ -41,19 +43,23 @@ class EndpointParameterMiddleware
 
         $operation = $this->service->getOperation($command->getName());
 
-        if (!empty($operation['endpoint']['hostPrefix'])) {
+        if (!empty($operation['endpoint']['hostPrefix']))
+        {
             $prefix = $operation['endpoint']['hostPrefix'];
 
             // Captures endpoint parameters stored in the modeled host.
             // These are denoted by enclosure in braces, i.e. '{param}'
             preg_match_all("/\{([a-zA-Z0-9]+)}/", $prefix, $parameters);
 
-            if (!empty($parameters[1])) {
+            if (!empty($parameters[1]))
+            {
 
                 // Captured parameters without braces stored in $parameters[1],
                 // which should correspond to members in the Command object
-                foreach ($parameters[1] as $index => $parameter) {
-                    if (empty($command[$parameter])) {
+                foreach ($parameters[1] as $index => $parameter)
+                {
+                    if (empty($command[$parameter]))
+                    {
                         throw new \InvalidArgumentException(
                             "The parameter '{$parameter}' must be set and not empty."
                         );
@@ -71,7 +77,8 @@ class EndpointParameterMiddleware
 
             $uri = $request->getUri();
             $host = $prefix . $uri->getHost();
-            if (!\Aws\is_valid_hostname($host)) {
+            if (!\Aws\is_valid_hostname($host))
+            {
                 throw new \InvalidArgumentException(
                     "The supplied parameters result in an invalid hostname: '{$host}'."
                 );

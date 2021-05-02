@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DynamoDb;
 
 /**
@@ -14,7 +15,7 @@ class NumberValue implements \JsonSerializable
      */
     public function __construct($value)
     {
-        $this->value = (string) $value;
+        $this->value = (string)$value;
     }
 
     public function jsonSerialize()

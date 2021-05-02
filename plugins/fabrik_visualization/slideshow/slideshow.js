@@ -7,14 +7,14 @@
 
 var FbSlideshowViz = new Class({
 
-	Implements: [Options],
-	
-	options: {},
-	
-	initialize: function (element, options) {
-		this.setOptions(options);
+    Implements: [Options],
 
-		var slickOptions = {
+    options: {},
+
+    initialize: function (element, options) {
+        this.setOptions(options);
+
+        var slickOptions = {
             slidesToShow: 1,
             slidesToScroll: 1,
             autoplay: this.options.slideshow_delay === 0 ? false : true,
@@ -25,20 +25,19 @@ var FbSlideshowViz = new Class({
             cssEase: 'linear',
             infinite: true,
             speed: this.options.slideshow_duration
-		};
+        };
 
-		var slickJSON = JSON.parse(this.options.slideshow_options);
-		jQuery.extend(slickOptions, slickJSON);
+        var slickJSON = JSON.parse(this.options.slideshow_options);
+        jQuery.extend(slickOptions, slickJSON);
 
         var $slider = jQuery('.slider');
 
-		if (this.options.slideshow_thumbnails)
-		{
-		    var thumbOptions = {
-		        asNavFor: '.slider-nav'
+        if (this.options.slideshow_thumbnails) {
+            var thumbOptions = {
+                asNavFor: '.slider-nav'
             };
 
-		    jQuery.extend(slickOptions, thumbOptions);
+            jQuery.extend(slickOptions, thumbOptions);
 
             $slider.slick(slickOptions);
 
@@ -53,17 +52,15 @@ var FbSlideshowViz = new Class({
                 asNavFor: '.slider'
             });
 
-		}
-		else {
-            var noThumbOptions = {
-            };
+        } else {
+            var noThumbOptions = {};
 
             jQuery.extend(slickOptions, noThumbOptions);
 
             $slider.slick(slickOptions);
         }
 
-        $slider.on('wheel', function(e) {
+        $slider.on('wheel', function (e) {
             e.preventDefault();
 
             if (e.originalEvent.deltaY < 0) {
@@ -82,17 +79,17 @@ var FbSlideshowViz = new Class({
         $slider.slick('setPosition');
 
         this.mediaScan();
-	},
+    },
 
-	mediaScan: function () {
-		if (typeof(Slimbox) !== 'undefined') {
-			Slimbox.scanPage();
-		}
-		if (typeof(Lightbox) !== 'undefined') {
-			Lightbox.init();
-		}
-		if (typeof(Mediabox) !== 'undefined') {
-			Mediabox.scanPage();
-		}
-	}
+    mediaScan: function () {
+        if (typeof (Slimbox) !== 'undefined') {
+            Slimbox.scanPage();
+        }
+        if (typeof (Lightbox) !== 'undefined') {
+            Lightbox.init();
+        }
+        if (typeof (Mediabox) !== 'undefined') {
+            Mediabox.scanPage();
+        }
+    }
 });

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Sts;
 
 use Aws\AwsClient;
@@ -35,7 +36,8 @@ class StsClient extends AwsClient
      */
     public function createCredentials(Result $result)
     {
-        if (!$result->hasKey('Credentials')) {
+        if (!$result->hasKey('Credentials'))
+        {
             throw new \InvalidArgumentException('Result contains no credentials');
         }
 
@@ -46,7 +48,7 @@ class StsClient extends AwsClient
             $c['SecretAccessKey'],
             isset($c['SessionToken']) ? $c['SessionToken'] : null,
             isset($c['Expiration']) && $c['Expiration'] instanceof \DateTimeInterface
-                ? (int) $c['Expiration']->format('U')
+                ? (int)$c['Expiration']->format('U')
                 : null
         );
     }

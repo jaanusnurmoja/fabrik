@@ -52,7 +52,7 @@ class DeepCopy
     private $useCloneMethod;
 
     /**
-     * @param bool $useCloneMethod   If set to true, when an object implements the __clone() function, it will be used
+     * @param bool $useCloneMethod If set to true, when an object implements the __clone() function, it will be used
      *                               instead of the regular deep cloning.
      */
     public function __construct($useCloneMethod = false)
@@ -110,22 +110,26 @@ class DeepCopy
     private function recursiveCopy($var)
     {
         // Matches Type Filter
-        if ($filter = $this->getFirstMatchedTypeFilter($this->typeFilters, $var)) {
+        if ($filter = $this->getFirstMatchedTypeFilter($this->typeFilters, $var))
+        {
             return $filter->apply($var);
         }
 
         // Resource
-        if (is_resource($var)) {
+        if (is_resource($var))
+        {
             return $var;
         }
 
         // Array
-        if (is_array($var)) {
+        if (is_array($var))
+        {
             return $this->copyArray($var);
         }
 
         // Scalar
-        if (! is_object($var)) {
+        if (!is_object($var))
+        {
             return $var;
         }
 
@@ -140,7 +144,8 @@ class DeepCopy
      */
     private function copyArray(array $array)
     {
-        foreach ($array as $key => $value) {
+        foreach ($array as $key => $value)
+        {
             $array[$key] = $this->recursiveCopy($value);
         }
 
@@ -152,23 +157,26 @@ class DeepCopy
      *
      * @param object $object
      *
+     * @return object
      * @throws CloneException
      *
-     * @return object
      */
     private function copyObject($object)
     {
         $objectHash = spl_object_hash($object);
 
-        if (isset($this->hashMap[$objectHash])) {
+        if (isset($this->hashMap[$objectHash]))
+        {
             return $this->hashMap[$objectHash];
         }
 
         $reflectedObject = new ReflectionObject($object);
         $isCloneable = $reflectedObject->isCloneable();
 
-        if (false === $isCloneable) {
-            if ($this->skipUncloneable) {
+        if (false === $isCloneable)
+        {
+            if ($this->skipUncloneable)
+            {
                 $this->hashMap[$objectHash] = $object;
 
                 return $object;
@@ -185,15 +193,18 @@ class DeepCopy
         $newObject = clone $object;
         $this->hashMap[$objectHash] = $newObject;
 
-        if ($this->useCloneMethod && $reflectedObject->hasMethod('__clone')) {
+        if ($this->useCloneMethod && $reflectedObject->hasMethod('__clone'))
+        {
             return $newObject;
         }
 
-        if ($newObject instanceof DateTimeInterface || $newObject instanceof DateTimeZone) {
+        if ($newObject instanceof DateTimeInterface || $newObject instanceof DateTimeZone)
+        {
             return $newObject;
         }
 
-        foreach (ReflectionHelper::getProperties($reflectedObject) as $property) {
+        foreach (ReflectionHelper::getProperties($reflectedObject) as $property)
+        {
             $this->copyObjectProperty($newObject, $property);
         }
 
@@ -203,22 +214,26 @@ class DeepCopy
     private function copyObjectProperty($object, ReflectionProperty $property)
     {
         // Ignore static properties
-        if ($property->isStatic()) {
+        if ($property->isStatic())
+        {
             return;
         }
 
         // Apply the filters
-        foreach ($this->filters as $item) {
+        foreach ($this->filters as $item)
+        {
             /** @var Matcher $matcher */
             $matcher = $item['matcher'];
             /** @var Filter $filter */
             $filter = $item['filter'];
 
-            if ($matcher->matches($object, $property->getName())) {
+            if ($matcher->matches($object, $property->getName()))
+            {
                 $filter->apply(
                     $object,
                     $property->getName(),
-                    function ($object) {
+                    function ($object)
+                    {
                         return $this->recursiveCopy($object);
                     }
                 );
@@ -248,7 +263,8 @@ class DeepCopy
     {
         $matched = $this->first(
             $filterRecords,
-            function (array $record) use ($var) {
+            function (array $record) use ($var)
+            {
                 /* @var TypeMatcher $matcher */
                 $matcher = $record['matcher'];
 
@@ -262,7 +278,7 @@ class DeepCopy
     /**
      * Returns first element that matches predicate, `null` if no such element found.
      *
-     * @param array    $elements Array of ['filter' => Filter, 'matcher' => Matcher] pairs.
+     * @param array $elements Array of ['filter' => Filter, 'matcher' => Matcher] pairs.
      * @param callable $predicate Predicate arguments are: element.
      *
      * @return array|null Associative array with 2 members: 'filter' with value of type {@see TypeFilter} and 'matcher'
@@ -270,8 +286,10 @@ class DeepCopy
      */
     private function first(array $elements, callable $predicate)
     {
-        foreach ($elements as $element) {
-            if (call_user_func($predicate, $element)) {
+        foreach ($elements as $element)
+        {
+            if (call_user_func($predicate, $element))
+            {
                 return $element;
             }
         }

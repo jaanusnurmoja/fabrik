@@ -6,23 +6,24 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit87f051b7c7baf609b29e5e7f79ec515a
 {
-    public static $prefixLengthsPsr4 = array (
-        'R' => 
-        array (
-            'ReCaptcha\\' => 10,
-        ),
-    );
+    public static $prefixLengthsPsr4 = [
+        'R' =>
+            [
+                'ReCaptcha\\' => 10,
+            ],
+    ];
 
-    public static $prefixDirsPsr4 = array (
-        'ReCaptcha\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha',
-        ),
-    );
+    public static $prefixDirsPsr4 = [
+        'ReCaptcha\\' =>
+            [
+                0 => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha',
+            ],
+    ];
 
     public static function getInitializer(ClassLoader $loader)
     {
-        return \Closure::bind(function () use ($loader) {
+        return \Closure::bind(function () use ($loader)
+        {
             $loader->prefixLengthsPsr4 = ComposerStaticInit87f051b7c7baf609b29e5e7f79ec515a::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit87f051b7c7baf609b29e5e7f79ec515a::$prefixDirsPsr4;
 

@@ -1,6 +1,6 @@
 # Pagination
 
-Some API endpoints do support pagination. 
+Some API endpoints do support pagination.
 
 ```php
 

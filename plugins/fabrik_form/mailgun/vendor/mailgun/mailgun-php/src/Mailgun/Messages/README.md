@@ -1,22 +1,20 @@
 Mailgun - Messages
 ====================
 
-This is the Mailgun PHP *Message* utilities. 
+This is the Mailgun PHP *Message* utilities.
 
-The below assumes you've already installed the Mailgun PHP SDK in to your 
-project. If not, go back to the master README for instructions.
+The below assumes you've already installed the Mailgun PHP SDK in to your project. If not, go back to the master README
+for instructions.
 
-There are two utilities included, Message Builder and Batch Message. 
+There are two utilities included, Message Builder and Batch Message.
 
-Message Builder: Allows you to build a message object by calling methods for 
-each MIME attribute. 
-Batch Message: Inherits Message Builder and allows you to iterate through 
-recipients from a list. Messages will fire after the 1,000th recipient has been 
-added. 
+Message Builder: Allows you to build a message object by calling methods for each MIME attribute. Batch Message:
+Inherits Message Builder and allows you to iterate through recipients from a list. Messages will fire after the 1,000th
+recipient has been added.
 
 Usage - Message Builder
 -----------------------
-Here's how to use Message Builder to build your Message. 
+Here's how to use Message Builder to build your Message.
 
 ```php
 # First, instantiate the SDK with your API credentials and define your domain. 
@@ -51,48 +49,48 @@ $mg->post("{$domain}/messages", $messageBldr->getMessage(), $messageBldr->getFil
 Available Functions
 -----------------------------------------------------
 
-`string addToRecipient(string $address, array $attributes)` 
+`string addToRecipient(string $address, array $attributes)`
 
-`string addCcRecipient(string $address, array $attributes)`  
+`string addCcRecipient(string $address, array $attributes)`
 
-`string addBccRecipient(string $address, array $attributes)`  
+`string addBccRecipient(string $address, array $attributes)`
 
-`string setFromAddress(string $address, array $attributes)`  
+`string setFromAddress(string $address, array $attributes)`
 
-`string setSubject(string $subject)`  
+`string setSubject(string $subject)`
 
-`string setTextBody(string $textBody)`  
+`string setTextBody(string $textBody)`
 
-`string setHtmlBody(string $htmlBody)`  
+`string setHtmlBody(string $htmlBody)`
 
-`bool addAttachment(string $attachmentPath, $attachmentName = null)`  
+`bool addAttachment(string $attachmentPath, $attachmentName = null)`
 
-`bool addInlineImage(string $inlineImagePath)`  
+`bool addInlineImage(string $inlineImagePath)`
 
-`string setTestMode(bool $testMode)`  
+`string setTestMode(bool $testMode)`
 
-`string addCampaignId(string $campaignId)`  
+`string addCampaignId(string $campaignId)`
 
-`string setDkim(bool $enabled)`  
+`string setDkim(bool $enabled)`
 
-`string setOpenTracking($enabled)`  
+`string setOpenTracking($enabled)`
 
-`string setClickTracking($enabled)`  
+`string setClickTracking($enabled)`
 
-`string setDeliveryTime(string $timeDate, string $timeZone)`  
+`string setDeliveryTime(string $timeDate, string $timeZone)`
 
-`string addCustomData(string $optionName, string $data)`  
+`string addCustomData(string $optionName, string $data)`
 
 `string addCustomParameter(string $parameterName, string $data)`
 
-`array getMessage()`  
+`array getMessage()`
 
-`array getFiles()`  
+`array getFiles()`
 
 
 Usage - Batch Message
 ---------------------
-Here's how to use Batch Message to easily handle batch sending jobs. 
+Here's how to use Batch Message to easily handle batch sending jobs.
 
 ```php
 # First, instantiate the SDK with your API credentials and define your domain. 
@@ -124,13 +122,13 @@ $batchMsg->finalize();
 Available Functions (Inherits all Batch Message and Messages Functions)
 -----------------------------------------------------------------------
 
-`addToRecipient(string $address, string $attributes)`  
+`addToRecipient(string $address, string $attributes)`
 
-`sendMessage(array $message, array $files)` 
- 
-`array finalize()`  
+`sendMessage(array $message, array $files)`
+
+`array finalize()`
 
 More Documentation
 ------------------
-See the official [Mailgun Docs](http://documentation.mailgun.com/api-sending.html) 
+See the official [Mailgun Docs](http://documentation.mailgun.com/api-sending.html)
 for more information.

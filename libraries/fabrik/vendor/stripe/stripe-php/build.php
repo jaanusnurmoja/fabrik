@@ -5,7 +5,8 @@ chdir(dirname(__FILE__));
 $autoload = (int)$argv[1];
 $returnStatus = null;
 
-if (!$autoload) {
+if (!$autoload)
+{
     // Modify composer to not autoload Stripe
     $composer = json_decode(file_get_contents('composer.json'), true);
     unset($composer['autoload']);
@@ -14,23 +15,27 @@ if (!$autoload) {
 }
 
 passthru('composer update', $returnStatus);
-if ($returnStatus !== 0) {
+if ($returnStatus !== 0)
+{
     exit(1);
 }
 
-if ($autoload) {
+if ($autoload)
+{
     // Only run CS on 1 of the 2 environments
     passthru(
         './vendor/bin/phpcs --standard=PSR2 -n lib tests *.php',
         $returnStatus
     );
-    if ($returnStatus !== 0) {
+    if ($returnStatus !== 0)
+    {
         exit(1);
     }
 }
 
 $config = $autoload ? 'phpunit.xml' : 'phpunit.no_autoload.xml';
 passthru("./vendor/bin/phpunit -c $config", $returnStatus);
-if ($returnStatus !== 0) {
+if ($returnStatus !== 0)
+{
     exit(1);
 }

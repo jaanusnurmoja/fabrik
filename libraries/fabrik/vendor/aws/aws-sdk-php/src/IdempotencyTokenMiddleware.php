@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Aws\Api\Service;
@@ -23,7 +24,7 @@ class IdempotencyTokenMiddleware
      * One of following functions needs to be available
      * in order to generate random bytes used for UUID
      * (SDK will attempt to utilize function in following order):
-     *  - random_bytes (requires PHP 7.0 or above) 
+     *  - random_bytes (requires PHP 7.0 or above)
      *  - openssl_random_pseudo_bytes (requires 'openssl' module enabled)
      *  - mcrypt_create_iv (requires 'mcrypt' module enabled)
      *
@@ -38,8 +39,10 @@ class IdempotencyTokenMiddleware
     public static function wrap(
         Service $service,
         callable $bytesGenerator = null
-    ) {
-        return function (callable $handler) use ($service, $bytesGenerator) {
+    )
+    {
+        return function (callable $handler) use ($service, $bytesGenerator)
+        {
             return new self($handler, $service, $bytesGenerator);
         };
     }
@@ -48,7 +51,8 @@ class IdempotencyTokenMiddleware
         callable $nextHandler,
         Service $service,
         callable $bytesGenerator = null
-    ) {
+    )
+    {
         $this->bytesGenerator = $bytesGenerator
             ?: $this->findCompatibleRandomSource();
         $this->service = $service;
@@ -58,13 +62,17 @@ class IdempotencyTokenMiddleware
     public function __invoke(
         CommandInterface $command,
         RequestInterface $request = null
-    ) {
+    )
+    {
         $handler = $this->nextHandler;
-        if ($this->bytesGenerator) {
+        if ($this->bytesGenerator)
+        {
             $operation = $this->service->getOperation($command->getName());
             $members = $operation->getInput()->getMembers();
-            foreach ($members as $member => $value) {
-                if ($value['idempotencyToken']) {
+            foreach ($members as $member => $value)
+            {
+                if ($value['idempotencyToken'])
+                {
                     $bytes = call_user_func($this->bytesGenerator, 16);
                     // populating UUIDv4 only when the parameter is not set
                     $command[$member] = $command[$member]
@@ -103,15 +111,18 @@ class IdempotencyTokenMiddleware
      */
     private function findCompatibleRandomSource()
     {
-        if (function_exists('random_bytes')) {
+        if (function_exists('random_bytes'))
+        {
             return 'random_bytes';
         }
 
-        if (function_exists('openssl_random_pseudo_bytes')) {
+        if (function_exists('openssl_random_pseudo_bytes'))
+        {
             return 'openssl_random_pseudo_bytes';
         }
 
-        if (function_exists('mcrypt_create_iv')) {
+        if (function_exists('mcrypt_create_iv'))
+        {
             return 'mcrypt_create_iv';
         }
     }

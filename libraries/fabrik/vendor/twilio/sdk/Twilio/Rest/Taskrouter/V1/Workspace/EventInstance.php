@@ -32,50 +32,54 @@ use Twilio\Version;
  * @property string sourceIpAddress
  * @property string url
  */
-class EventInstance extends InstanceResource {
+class EventInstance extends InstanceResource
+{
     /**
      * Initialize the EventInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $workspaceSid The unique ID of the Workspace
      * @param string $sid The sid
-     * @return \Twilio\Rest\Taskrouter\V1\Workspace\EventInstance 
+     * @return \Twilio\Rest\Taskrouter\V1\Workspace\EventInstance
      */
-    public function __construct(Version $version, array $payload, $workspaceSid, $sid = null) {
+    public function __construct(Version $version, array $payload, $workspaceSid, $sid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'actorSid' => Values::array_get($payload, 'actor_sid'),
-            'actorType' => Values::array_get($payload, 'actor_type'),
-            'actorUrl' => Values::array_get($payload, 'actor_url'),
-            'description' => Values::array_get($payload, 'description'),
-            'eventData' => Values::array_get($payload, 'event_data'),
-            'eventDate' => Deserialize::dateTime(Values::array_get($payload, 'event_date')),
-            'eventType' => Values::array_get($payload, 'event_type'),
-            'resourceSid' => Values::array_get($payload, 'resource_sid'),
-            'resourceType' => Values::array_get($payload, 'resource_type'),
-            'resourceUrl' => Values::array_get($payload, 'resource_url'),
-            'sid' => Values::array_get($payload, 'sid'),
-            'source' => Values::array_get($payload, 'source'),
+        $this->properties = [
+            'accountSid'      => Values::array_get($payload, 'account_sid'),
+            'actorSid'        => Values::array_get($payload, 'actor_sid'),
+            'actorType'       => Values::array_get($payload, 'actor_type'),
+            'actorUrl'        => Values::array_get($payload, 'actor_url'),
+            'description'     => Values::array_get($payload, 'description'),
+            'eventData'       => Values::array_get($payload, 'event_data'),
+            'eventDate'       => Deserialize::dateTime(Values::array_get($payload, 'event_date')),
+            'eventType'       => Values::array_get($payload, 'event_type'),
+            'resourceSid'     => Values::array_get($payload, 'resource_sid'),
+            'resourceType'    => Values::array_get($payload, 'resource_type'),
+            'resourceUrl'     => Values::array_get($payload, 'resource_url'),
+            'sid'             => Values::array_get($payload, 'sid'),
+            'source'          => Values::array_get($payload, 'source'),
             'sourceIpAddress' => Values::array_get($payload, 'source_ip_address'),
-            'url' => Values::array_get($payload, 'url'),
-        );
+            'url'             => Values::array_get($payload, 'url'),
+        ];
 
-        $this->solution = array('workspaceSid' => $workspaceSid, 'sid' => $sid ?: $this->properties['sid'], );
+        $this->solution = ['workspaceSid' => $workspaceSid, 'sid' => $sid ?: $this->properties['sid'],];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Taskrouter\V1\Workspace\EventContext Context for this
      *                                                           EventInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new EventContext(
                 $this->version,
                 $this->solution['workspaceSid'],
@@ -88,27 +92,31 @@ class EventInstance extends InstanceResource {
 
     /**
      * Fetch a EventInstance
-     * 
+     *
      * @return EventInstance Fetched EventInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -118,12 +126,14 @@ class EventInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Taskrouter.V1.EventInstance ' . implode(' ', $context) . ']';

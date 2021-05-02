@@ -40,10 +40,10 @@ final class IndexResponse implements ApiResponse, PagingProvider
     private $totalCount;
 
     /**
+     * @param Unsubscribe[] $items
+     * @param array $paging
      * @see Mailgun/Model/Suppression/Unsubscribe/Unsubscribe
      *
-     * @param Unsubscribe[] $items
-     * @param array         $paging
      */
     private function __construct(array $items, array $paging)
     {
@@ -61,8 +61,10 @@ final class IndexResponse implements ApiResponse, PagingProvider
     public static function create(array $data)
     {
         $unsubscribes = [];
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $item) {
+        if (isset($data['items']))
+        {
+            foreach ($data['items'] as $item)
+            {
                 $unsubscribes[] = Unsubscribe::create($item);
             }
         }
@@ -73,9 +75,9 @@ final class IndexResponse implements ApiResponse, PagingProvider
     /**
      * Get the Unsusbscribe item models from the response.
      *
+     * @return Unsubscribe[]
      * @see Mailgun/Model/Suppression/Unsubscribe/Unsubscribe
      *
-     * @return Unsubscribe[]
      */
     public function getItems()
     {
@@ -85,13 +87,14 @@ final class IndexResponse implements ApiResponse, PagingProvider
     /**
      * Get the total count of Unsusbscribe in index response.
      *
+     * @return int
      * @see Mailgun/Model/Suppression/Unsubscribe/Unsubscribe
      *
-     * @return int
      */
     public function getTotalCount()
     {
-        if (null === $this->totalCount) {
+        if (null === $this->totalCount)
+        {
             $this->totalCount = count($this->items);
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto;
 
 use GuzzleHttp\Psr7;
@@ -44,8 +45,10 @@ class AesGcmDecryptingStream implements AesStreamInterface
         $aad = '',
         $tagLength = 128,
         $keySize = 256
-    ) {
-        if (version_compare(PHP_VERSION, '7.1', '<')) {
+    )
+    {
+        if (version_compare(PHP_VERSION, '7.1', '<'))
+        {
             throw new RuntimeException(
                 'AES-GCM decryption is only supported in PHP 7.1 or greater'
             );
@@ -78,7 +81,7 @@ class AesGcmDecryptingStream implements AesStreamInterface
     public function createStream()
     {
         return Psr7\stream_for(openssl_decrypt(
-            (string) $this->cipherText,
+            (string)$this->cipherText,
             $this->getOpenSslName(),
             $this->key,
             OPENSSL_RAW_DATA,

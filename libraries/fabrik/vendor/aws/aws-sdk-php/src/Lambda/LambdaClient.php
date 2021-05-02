@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Lambda;
 
 use Aws\AwsClient;
@@ -94,7 +95,8 @@ class LambdaClient extends AwsClient
     {
         parent::__construct($args);
         $list = $this->getHandlerList();
-        if (extension_loaded('curl')) {
+        if (extension_loaded('curl'))
+        {
             $list->appendInit($this->getDefaultCurlOptionsMiddleware());
         }
     }
@@ -106,13 +108,17 @@ class LambdaClient extends AwsClient
      */
     public function getDefaultCurlOptionsMiddleware()
     {
-        return Middleware::mapCommand(function (CommandInterface $cmd) {
+        return Middleware::mapCommand(function (CommandInterface $cmd)
+        {
             $defaultCurlOptions = [
                 CURLOPT_TCP_KEEPALIVE => 1,
             ];
-            if (!isset($cmd['@http']['curl'])) {
+            if (!isset($cmd['@http']['curl']))
+            {
                 $cmd['@http']['curl'] = $defaultCurlOptions;
-            } else {
+            }
+            else
+            {
                 $cmd['@http']['curl'] += $defaultCurlOptions;
             }
             return $cmd;

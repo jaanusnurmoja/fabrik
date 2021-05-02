@@ -18,9 +18,12 @@ final class DiactorosUriFactory implements UriFactory
      */
     public function createUri($uri)
     {
-        if ($uri instanceof UriInterface) {
+        if ($uri instanceof UriInterface)
+        {
             return $uri;
-        } elseif (is_string($uri)) {
+        }
+        elseif (is_string($uri))
+        {
             return new Uri($uri);
         }
 

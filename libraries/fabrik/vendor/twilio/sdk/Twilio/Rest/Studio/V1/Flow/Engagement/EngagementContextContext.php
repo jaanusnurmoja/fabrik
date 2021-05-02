@@ -13,32 +13,35 @@ use Twilio\InstanceContext;
 use Twilio\Values;
 use Twilio\Version;
 
-class EngagementContextContext extends InstanceContext {
+class EngagementContextContext extends InstanceContext
+{
     /**
      * Initialize the EngagementContextContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $flowSid Flow Sid.
      * @param string $engagementSid Engagement Sid.
-     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\EngagementContextContext 
+     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\EngagementContextContext
      */
-    public function __construct(Version $version, $flowSid, $engagementSid) {
+    public function __construct(Version $version, $flowSid, $engagementSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('flowSid' => $flowSid, 'engagementSid' => $engagementSid, );
+        $this->solution = ['flowSid' => $flowSid, 'engagementSid' => $engagementSid,];
 
         $this->uri = '/Flows/' . rawurlencode($flowSid) . '/Engagements/' . rawurlencode($engagementSid) . '/Context';
     }
 
     /**
      * Fetch a EngagementContextInstance
-     * 
+     *
      * @return EngagementContextInstance Fetched EngagementContextInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -56,12 +59,14 @@ class EngagementContextContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Studio.V1.EngagementContextContext ' . implode(' ', $context) . ']';

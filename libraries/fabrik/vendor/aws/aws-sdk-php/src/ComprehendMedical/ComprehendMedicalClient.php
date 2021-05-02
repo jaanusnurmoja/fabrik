@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\ComprehendMedical;
 
 use Aws\AwsClient;
@@ -10,4 +11,6 @@ use Aws\AwsClient;
  * @method \Aws\Result detectPHI(array $args = [])
  * @method \GuzzleHttp\Promise\Promise detectPHIAsync(array $args = [])
  */
-class ComprehendMedicalClient extends AwsClient {}
+class ComprehendMedicalClient extends AwsClient
+{
+}

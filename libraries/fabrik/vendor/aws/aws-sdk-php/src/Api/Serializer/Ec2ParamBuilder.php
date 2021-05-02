@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Serializer;
 
 use Aws\Api\Shape;
@@ -13,7 +14,7 @@ class Ec2ParamBuilder extends QueryParamBuilder
     {
         return ($shape['queryName']
             ?: ucfirst($shape['locationName']))
-                ?: $default;
+            ?: $default;
     }
 
     protected function isFlat(Shape $shape)
@@ -26,13 +27,18 @@ class Ec2ParamBuilder extends QueryParamBuilder
         array $value,
         $prefix,
         &$query
-    ) {
+    )
+    {
         // Handle empty list serialization
-        if (!$value) {
+        if (!$value)
+        {
             $query[$prefix] = false;
-        } else {
+        }
+        else
+        {
             $items = $shape->getMember();
-            foreach ($value as $k => $v) {
+            foreach ($value as $k => $v)
+            {
                 $this->format($items, $v, $prefix . '.' . ($k + 1), $query);
             }
         }

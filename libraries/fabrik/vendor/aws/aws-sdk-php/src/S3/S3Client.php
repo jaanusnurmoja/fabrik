@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Api\ApiProvider;
@@ -207,44 +208,44 @@ class S3Client extends AwsClient implements S3ClientInterface
         $args['api_provider']['fn'] = [__CLASS__, '_applyApiProvider'];
 
         return $args + [
-            'bucket_endpoint' => [
-                'type'    => 'config',
-                'valid'   => ['bool'],
-                'doc'     => 'Set to true to send requests to a hardcoded '
-                    . 'bucket endpoint rather than create an endpoint as a '
-                    . 'result of injecting the bucket into the URL. This '
-                    . 'option is useful for interacting with CNAME endpoints.',
-            ],
-            'use_accelerate_endpoint' => [
-                'type' => 'config',
-                'valid' => ['bool'],
-                'doc' => 'Set to true to send requests to an S3 Accelerate'
-                    . ' endpoint by default. Can be enabled or disabled on'
-                    . ' individual operations by setting'
-                    . ' \'@use_accelerate_endpoint\' to true or false. Note:'
-                    . ' you must enable S3 Accelerate on a bucket before it can'
-                    . ' be accessed via an Accelerate endpoint.',
-                'default' => false,
-            ],
-            'use_dual_stack_endpoint' => [
-                'type' => 'config',
-                'valid' => ['bool'],
-                'doc' => 'Set to true to send requests to an S3 Dual Stack'
-                    . ' endpoint by default, which enables IPv6 Protocol.'
-                    . ' Can be enabled or disabled on individual operations by setting'
-                    . ' \'@use_dual_stack_endpoint\' to true or false.',
-                'default' => false,
-            ],
-            'use_path_style_endpoint' => [
-                'type' => 'config',
-                'valid' => ['bool'],
-                'doc' => 'Set to true to send requests to an S3 path style'
-                    . ' endpoint by default.'
-                    . ' Can be enabled or disabled on individual operations by setting'
-                    . ' \'@use_path_style_endpoint\' to true or false.',
-                'default' => false,
-            ],
-        ];
+                'bucket_endpoint'         => [
+                    'type'  => 'config',
+                    'valid' => ['bool'],
+                    'doc'   => 'Set to true to send requests to a hardcoded '
+                        . 'bucket endpoint rather than create an endpoint as a '
+                        . 'result of injecting the bucket into the URL. This '
+                        . 'option is useful for interacting with CNAME endpoints.',
+                ],
+                'use_accelerate_endpoint' => [
+                    'type'    => 'config',
+                    'valid'   => ['bool'],
+                    'doc'     => 'Set to true to send requests to an S3 Accelerate'
+                        . ' endpoint by default. Can be enabled or disabled on'
+                        . ' individual operations by setting'
+                        . ' \'@use_accelerate_endpoint\' to true or false. Note:'
+                        . ' you must enable S3 Accelerate on a bucket before it can'
+                        . ' be accessed via an Accelerate endpoint.',
+                    'default' => false,
+                ],
+                'use_dual_stack_endpoint' => [
+                    'type'    => 'config',
+                    'valid'   => ['bool'],
+                    'doc'     => 'Set to true to send requests to an S3 Dual Stack'
+                        . ' endpoint by default, which enables IPv6 Protocol.'
+                        . ' Can be enabled or disabled on individual operations by setting'
+                        . ' \'@use_dual_stack_endpoint\' to true or false.',
+                    'default' => false,
+                ],
+                'use_path_style_endpoint' => [
+                    'type'    => 'config',
+                    'valid'   => ['bool'],
+                    'doc'     => 'Set to true to send requests to an S3 path style'
+                        . ' endpoint by default.'
+                        . ' Can be enabled or disabled on individual operations by setting'
+                        . ' \'@use_path_style_endpoint\' to true or false.',
+                    'default' => false,
+                ],
+            ];
     }
 
     /**
@@ -291,9 +292,12 @@ class S3Client extends AwsClient implements S3ClientInterface
 
 
         // Use the bucket style middleware when using a "bucket_endpoint" (for cnames)
-        if ($this->getConfig('bucket_endpoint')) {
+        if ($this->getConfig('bucket_endpoint'))
+        {
             $stack->appendBuild(BucketEndpointMiddleware::wrap(), 's3.bucket_endpoint');
-        } else {
+        }
+        else
+        {
             $stack->appendBuild(
                 S3EndpointMiddleware::wrap(
                     $this->getRegion(),
@@ -364,7 +368,7 @@ class S3Client extends AwsClient implements S3ClientInterface
             'Key'    => $key
         ]);
 
-        return (string) \Aws\serialize($command)->getUri();
+        return (string)\Aws\serialize($command)->getUri();
     }
 
     /**
@@ -387,16 +391,22 @@ class S3Client extends AwsClient implements S3ClientInterface
     private function getLocationConstraintMiddleware()
     {
         $region = $this->getRegion();
-        return static function (callable $handler) use ($region) {
-            return function (Command $command, $request = null) use ($handler, $region) {
-                if ($command->getName() === 'CreateBucket') {
+        return static function (callable $handler) use ($region)
+        {
+            return function (Command $command, $request = null) use ($handler, $region)
+            {
+                if ($command->getName() === 'CreateBucket')
+                {
                     $locationConstraint = isset($command['CreateBucketConfiguration']['LocationConstraint'])
                         ? $command['CreateBucketConfiguration']['LocationConstraint']
                         : null;
 
-                    if ($locationConstraint === 'us-east-1') {
+                    if ($locationConstraint === 'us-east-1')
+                    {
                         unset($command['CreateBucketConfiguration']);
-                    } elseif ('us-east-1' !== $region && empty($locationConstraint)) {
+                    }
+                    elseif ('us-east-1' !== $region && empty($locationConstraint))
+                    {
                         $command['CreateBucketConfiguration'] = ['LocationConstraint' => $region];
                     }
                 }
@@ -413,9 +423,12 @@ class S3Client extends AwsClient implements S3ClientInterface
      */
     private function getSaveAsParameter()
     {
-        return static function (callable $handler) {
-            return function (Command $command, $request = null) use ($handler) {
-                if ($command->getName() === 'GetObject' && isset($command['SaveAs'])) {
+        return static function (callable $handler)
+        {
+            return function (Command $command, $request = null) use ($handler)
+            {
+                if ($command->getName() === 'GetObject' && isset($command['SaveAs']))
+                {
                     $command['@http']['sink'] = $command['SaveAs'];
                     unset($command['SaveAs']);
                 }
@@ -433,14 +446,18 @@ class S3Client extends AwsClient implements S3ClientInterface
      */
     private function getHeadObjectMiddleware()
     {
-        return static function (callable $handler) {
+        return static function (callable $handler)
+        {
             return function (
                 CommandInterface $command,
                 RequestInterface $request = null
-            ) use ($handler) {
-                if ($command->getName() === 'HeadObject'
+            ) use ($handler)
+            {
+                if (
+                    $command->getName() === 'HeadObject'
                     && !isset($command['@http']['decode_content'])
-                ) {
+                )
+                {
                     $command['@http']['decode_content'] = false;
                 }
 
@@ -457,19 +474,25 @@ class S3Client extends AwsClient implements S3ClientInterface
      */
     private function getEncodingTypeMiddleware()
     {
-        return static function (callable $handler) {
-            return function (Command $command, $request = null) use ($handler) {
+        return static function (callable $handler)
+        {
+            return function (Command $command, $request = null) use ($handler)
+            {
                 $autoSet = false;
-                if ($command->getName() === 'ListObjects'
+                if (
+                    $command->getName() === 'ListObjects'
                     && empty($command['EncodingType'])
-                ) {
+                )
+                {
                     $command['EncodingType'] = 'url';
                     $autoSet = true;
                 }
 
                 return $handler($command, $request)
-                    ->then(function (ResultInterface $result) use ($autoSet) {
-                        if ($result['EncodingType'] === 'url' && $autoSet) {
+                    ->then(function (ResultInterface $result) use ($autoSet)
+                    {
+                        if ($result['EncodingType'] === 'url' && $autoSet)
+                        {
                             static $topLevel = [
                                 'Delimiter',
                                 'Marker',
@@ -481,15 +504,21 @@ class S3Client extends AwsClient implements S3ClientInterface
                                 ['CommonPrefixes', 'Prefix'],
                             ];
 
-                            foreach ($topLevel as $key) {
-                                if (isset($result[$key])) {
+                            foreach ($topLevel as $key)
+                            {
+                                if (isset($result[$key]))
+                                {
                                     $result[$key] = urldecode($result[$key]);
                                 }
                             }
-                            foreach ($nested as $steps) {
-                                if (isset($result[$steps[0]])) {
-                                    foreach ($result[$steps[0]] as $key => $part) {
-                                        if (isset($part[$steps[1]])) {
+                            foreach ($nested as $steps)
+                            {
+                                if (isset($result[$steps[0]]))
+                                {
+                                    foreach ($result[$steps[0]] as $key => $part)
+                                    {
+                                        if (isset($part[$steps[1]]))
+                                        {
                                             $result[$steps[0]][$key][$steps[1]]
                                                 = urldecode($part[$steps[1]]);
                                         }
@@ -508,33 +537,41 @@ class S3Client extends AwsClient implements S3ClientInterface
     /** @internal */
     public static function _applyRetryConfig($value, $_, HandlerList $list)
     {
-        if (!$value) {
+        if (!$value)
+        {
             return;
         }
 
         $decider = RetryMiddleware::createDefaultDecider($value);
-        $decider = function ($retries, $command, $request, $result, $error) use ($decider, $value) {
+        $decider = function ($retries, $command, $request, $result, $error) use ($decider, $value)
+        {
             $maxRetries = null !== $command['@retries']
                 ? $command['@retries']
                 : $value;
 
-            if ($decider($retries, $command, $request, $result, $error)) {
+            if ($decider($retries, $command, $request, $result, $error))
+            {
                 return true;
             }
 
-            if ($error instanceof AwsException
+            if (
+                $error instanceof AwsException
                 && $retries < $maxRetries
-            ) {
-                if ($error->getResponse()
+            )
+            {
+                if (
+                    $error->getResponse()
                     && $error->getResponse()->getStatusCode() >= 400
-                ) {
+                )
+                {
                     return strpos(
                             $error->getResponse()->getBody(),
                             'Your socket connection to the server'
                         ) !== false;
                 }
 
-                if ($error->getPrevious() instanceof RequestException) {
+                if ($error->getPrevious() instanceof RequestException)
+                {
                     // All commands except CompleteMultipartUpload are
                     // idempotent and may be retried without worry if a
                     // networking error has occurred.

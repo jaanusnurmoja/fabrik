@@ -5,6 +5,7 @@
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
+
 namespace Dompdf;
 
 /**
@@ -43,7 +44,8 @@ class JavascriptEmbedder
      */
     public function render(Frame $frame)
     {
-        if (!$this->_dompdf->getOptions()->getIsJavascriptEnabled()) {
+        if (!$this->_dompdf->getOptions()->getIsJavascriptEnabled())
+        {
             return;
         }
 

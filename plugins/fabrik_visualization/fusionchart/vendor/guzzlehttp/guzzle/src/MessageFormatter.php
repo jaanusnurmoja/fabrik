@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp;
 
 use Psr\Http\Message\MessageInterface;
@@ -57,9 +58,9 @@ class MessageFormatter
     /**
      * Returns a formatted message string.
      *
-     * @param RequestInterface  $request  Request that was sent
+     * @param RequestInterface $request Request that was sent
      * @param ResponseInterface $response Response that was received
-     * @param \Exception        $error    Exception that was received
+     * @param \Exception $error Exception that was received
      *
      * @return string
      */
@@ -67,18 +68,22 @@ class MessageFormatter
         RequestInterface $request,
         ResponseInterface $response = null,
         \Exception $error = null
-    ) {
+    )
+    {
         $cache = [];
 
         return preg_replace_callback(
             '/{\s*([A-Za-z_\-\.0-9]+)\s*}/',
-            function (array $matches) use ($request, $response, $error, &$cache) {
-                if (isset($cache[$matches[1]])) {
+            function (array $matches) use ($request, $response, $error, &$cache)
+            {
+                if (isset($cache[$matches[1]]))
+                {
                     return $cache[$matches[1]];
                 }
 
                 $result = '';
-                switch ($matches[1]) {
+                switch ($matches[1])
+                {
                     case 'request':
                         $result = Psr7\str($request);
                         break;
@@ -152,9 +157,12 @@ class MessageFormatter
                         break;
                     default:
                         // handle prefixed dynamic headers
-                        if (strpos($matches[1], 'req_header_') === 0) {
+                        if (strpos($matches[1], 'req_header_') === 0)
+                        {
                             $result = $request->getHeaderLine(substr($matches[1], 11));
-                        } elseif (strpos($matches[1], 'res_header_') === 0) {
+                        }
+                        elseif (strpos($matches[1], 'res_header_') === 0)
+                        {
                             $result = $response
                                 ? $response->getHeaderLine(substr($matches[1], 11))
                                 : 'NULL';
@@ -171,7 +179,8 @@ class MessageFormatter
     private function headers(MessageInterface $message)
     {
         $result = '';
-        foreach ($message->getHeaders() as $name => $values) {
+        foreach ($message->getHeaders() as $name => $values)
+        {
             $result .= $name . ': ' . implode(', ', $values) . "\r\n";
         }
 

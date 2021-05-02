@@ -62,11 +62,12 @@ class MemcacheCache extends CacheProvider
      */
     protected function doSave($id, $data, $lifeTime = 0)
     {
-        if ($lifeTime > 30 * 24 * 3600) {
+        if ($lifeTime > 30 * 24 * 3600)
+        {
             $lifeTime = time() + $lifeTime;
         }
 
-        return $this->memcache->set($id, $data, 0, (int) $lifeTime);
+        return $this->memcache->set($id, $data, 0, (int)$lifeTime);
     }
 
     /**
@@ -75,7 +76,7 @@ class MemcacheCache extends CacheProvider
     protected function doDelete($id)
     {
         // Memcache::delete() returns false if entry does not exist
-        return $this->memcache->delete($id) || ! $this->doContains($id);
+        return $this->memcache->delete($id) || !$this->doContains($id);
     }
 
     /**
@@ -94,9 +95,9 @@ class MemcacheCache extends CacheProvider
         $stats = $this->memcache->getStats();
 
         return [
-            Cache::STATS_HITS   => $stats['get_hits'],
-            Cache::STATS_MISSES => $stats['get_misses'],
-            Cache::STATS_UPTIME => $stats['uptime'],
+            Cache::STATS_HITS             => $stats['get_hits'],
+            Cache::STATS_MISSES           => $stats['get_misses'],
+            Cache::STATS_UPTIME           => $stats['uptime'],
             Cache::STATS_MEMORY_USAGE     => $stats['bytes'],
             Cache::STATS_MEMORY_AVAILABLE => $stats['limit_maxbytes'],
         ];

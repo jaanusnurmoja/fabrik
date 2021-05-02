@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Parser;
 
 use Aws\Api\Service;
@@ -14,7 +15,7 @@ class RestJsonParser extends AbstractRestParser
     use PayloadParserTrait;
 
     /**
-     * @param Service    $api    Service description
+     * @param Service $api Service description
      * @param JsonParser $parser JSON body builder
      */
     public function __construct(Service $api, JsonParser $parser = null)
@@ -27,10 +28,12 @@ class RestJsonParser extends AbstractRestParser
         ResponseInterface $response,
         StructureShape $member,
         array &$result
-    ) {
+    )
+    {
         $jsonBody = $this->parseJson($response->getBody(), $response);
 
-        if ($jsonBody) {
+        if ($jsonBody)
+        {
             $result += $this->parser->parse($member, $jsonBody);
         }
     }
@@ -39,9 +42,11 @@ class RestJsonParser extends AbstractRestParser
         StreamInterface $stream,
         StructureShape $member,
         $response
-    ) {
+    )
+    {
         $jsonBody = $this->parseJson($stream, $response);
-        if ($jsonBody) {
+        if ($jsonBody)
+        {
             return $this->parser->parse($member, $jsonBody);
         }
         return [];

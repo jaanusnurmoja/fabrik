@@ -17,33 +17,36 @@ use Twilio\Version;
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
  */
-class QueryContext extends InstanceContext {
+class QueryContext extends InstanceContext
+{
     /**
      * Initialize the QueryContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $assistantSid The unique ID of the Assistant.
      * @param string $sid A 34-character string that uniquely identifies this
      *                    resource.
-     * @return \Twilio\Rest\Autopilot\V1\Assistant\QueryContext 
+     * @return \Twilio\Rest\Autopilot\V1\Assistant\QueryContext
      */
-    public function __construct(Version $version, $assistantSid, $sid) {
+    public function __construct(Version $version, $assistantSid, $sid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('assistantSid' => $assistantSid, 'sid' => $sid, );
+        $this->solution = ['assistantSid' => $assistantSid, 'sid' => $sid,];
 
         $this->uri = '/Assistants/' . rawurlencode($assistantSid) . '/Queries/' . rawurlencode($sid) . '';
     }
 
     /**
      * Fetch a QueryInstance
-     * 
+     *
      * @return QueryInstance Fetched QueryInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -61,20 +64,21 @@ class QueryContext extends InstanceContext {
 
     /**
      * Update the QueryInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return QueryInstance Updated QueryInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array('SampleSid' => $options['sampleSid'], 'Status' => $options['status'], ));
+        $data = Values::of(['SampleSid' => $options['sampleSid'], 'Status' => $options['status'],]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -88,22 +92,25 @@ class QueryContext extends InstanceContext {
 
     /**
      * Deletes the QueryInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->version->delete('delete', $this->uri);
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Autopilot.V1.QueryContext ' . implode(' ', $context) . ']';

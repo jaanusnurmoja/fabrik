@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\AppMesh;
 
 use Aws\AwsClient;
@@ -44,4 +45,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateVirtualRouter(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateVirtualRouterAsync(array $args = [])
  */
-class AppMeshClient extends AwsClient {}
+class AppMeshClient extends AwsClient
+{
+}

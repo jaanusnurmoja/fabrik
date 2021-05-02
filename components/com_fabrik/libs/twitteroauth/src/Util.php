@@ -3,6 +3,7 @@
  * The MIT License
  * Copyright (c) 2007 Andy Smith
  */
+
 namespace Abraham\TwitterOAuth;
 
 class Util
@@ -15,9 +16,12 @@ class Util
     public static function urlencodeRfc3986($input)
     {
         $output = '';
-        if (is_array($input)) {
+        if (is_array($input))
+        {
             $output = array_map([__NAMESPACE__ . '\Util', 'urlencodeRfc3986'], $input);
-        } elseif (is_scalar($input)) {
+        }
+        elseif (is_scalar($input))
+        {
             $output = rawurlencode($input);
         }
         return $output;
@@ -44,30 +48,36 @@ class Util
      */
     public static function parseParameters($input)
     {
-        if (!isset($input) || !$input) {
+        if (!isset($input) || !$input)
+        {
             return [];
         }
 
         $pairs = explode('&', $input);
 
         $parameters = [];
-        foreach ($pairs as $pair) {
+        foreach ($pairs as $pair)
+        {
             $split = explode('=', $pair, 2);
             $parameter = Util::urldecodeRfc3986($split[0]);
             $value = isset($split[1]) ? Util::urldecodeRfc3986($split[1]) : '';
 
-            if (isset($parameters[$parameter])) {
+            if (isset($parameters[$parameter]))
+            {
                 // We have already recieved parameter(s) with this name, so add to the list
                 // of parameters with this name
 
-                if (is_scalar($parameters[$parameter])) {
+                if (is_scalar($parameters[$parameter]))
+                {
                     // This is the first duplicate, so transform scalar (string) into an array
                     // so we can add the duplicates
                     $parameters[$parameter] = [$parameters[$parameter]];
                 }
 
                 $parameters[$parameter][] = $value;
-            } else {
+            }
+            else
+            {
                 $parameters[$parameter] = $value;
             }
         }
@@ -81,7 +91,8 @@ class Util
      */
     public static function buildHttpQuery($params)
     {
-        if (!$params) {
+        if (!$params)
+        {
             return '';
         }
 
@@ -95,16 +106,21 @@ class Util
         uksort($params, 'strcmp');
 
         $pairs = [];
-        foreach ($params as $parameter => $value) {
-            if (is_array($value)) {
+        foreach ($params as $parameter => $value)
+        {
+            if (is_array($value))
+            {
                 // If two or more parameters share the same name, they are sorted by their value
                 // Ref: Spec: 9.1.1 (1)
                 // June 12th, 2010 - changed to sort because of issue 164 by hidetaka
                 sort($value, SORT_STRING);
-                foreach ($value as $duplicateValue) {
+                foreach ($value as $duplicateValue)
+                {
                     $pairs[] = $parameter . '=' . $duplicateValue;
                 }
-            } else {
+            }
+            else
+            {
                 $pairs[] = $parameter . '=' . $value;
             }
         }

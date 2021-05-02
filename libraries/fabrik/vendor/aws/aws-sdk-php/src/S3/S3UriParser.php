@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use GuzzleHttp\Psr7;
@@ -9,7 +10,7 @@ use Psr\Http\Message\UriInterface;
  */
 class S3UriParser
 {
-    private $pattern = '/^(.+\\.)?s3[.-]([A-Za-z0-9-]+)\\./';
+    private $pattern             = '/^(.+\\.)?s3[.-]([A-Za-z0-9-]+)\\./';
     private $streamWrapperScheme = 's3';
 
     private static $defaultResult = [
@@ -37,16 +38,19 @@ class S3UriParser
     {
         $url = Psr7\uri_for($uri);
 
-        if ($url->getScheme() == $this->streamWrapperScheme) {
+        if ($url->getScheme() == $this->streamWrapperScheme)
+        {
             return $this->parseStreamWrapper($url);
         }
 
-        if (!$url->getHost()) {
+        if (!$url->getHost())
+        {
             throw new \InvalidArgumentException('No hostname found in URI: '
                 . $uri);
         }
 
-        if (!preg_match($this->pattern, $url->getHost(), $matches)) {
+        if (!preg_match($this->pattern, $url->getHost(), $matches))
+        {
             return $this->parseCustomEndpoint($url);
         }
 
@@ -67,9 +71,11 @@ class S3UriParser
         $result['path_style'] = false;
 
         $result['bucket'] = $url->getHost();
-        if ($url->getPath()) {
+        if ($url->getPath())
+        {
             $key = ltrim($url->getPath(), '/ ');
-            if (!empty($key)) {
+            if (!empty($key))
+            {
                 $result['key'] = $key;
             }
         }
@@ -83,9 +89,11 @@ class S3UriParser
         $path = ltrim($url->getPath(), '/ ');
         $segments = explode('/', $path, 2);
 
-        if (isset($segments[0])) {
+        if (isset($segments[0]))
+        {
             $result['bucket'] = $segments[0];
-            if (isset($segments[1])) {
+            if (isset($segments[1]))
+            {
                 $result['key'] = $segments[1];
             }
         }
@@ -97,17 +105,24 @@ class S3UriParser
     {
         $result = self::$defaultResult;
 
-        if ($url->getPath() != '/') {
+        if ($url->getPath() != '/')
+        {
             $path = ltrim($url->getPath(), '/');
-            if ($path) {
+            if ($path)
+            {
                 $pathPos = strpos($path, '/');
-                if ($pathPos === false) {
+                if ($pathPos === false)
+                {
                     // https://s3.amazonaws.com/bucket
                     $result['bucket'] = $path;
-                } elseif ($pathPos == strlen($path) - 1) {
+                }
+                elseif ($pathPos == strlen($path) - 1)
+                {
                     // https://s3.amazonaws.com/bucket/
                     $result['bucket'] = substr($path, 0, -1);
-                } else {
+                }
+                else
+                {
                     // https://s3.amazonaws.com/bucket/key
                     $result['bucket'] = substr($path, 0, $pathPos);
                     $result['key'] = substr($path, $pathPos + 1) ?: null;

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DynamoDb;
 
 use Aws\CommandInterface;
@@ -29,7 +30,7 @@ class WriteRequestBatch
      * DynamoDB BatchWriteItem requests from queued up Put and Delete requests.
      *
      * @param DynamoDbClient $client DynamoDB client used to send batches.
-     * @param array          $config Batch configuration options.
+     * @param array $config Batch configuration options.
      *     - table: (string) DynamoDB table used by the batch, this can be
      *       overridden for each individual put() or delete() call.
      *     - batch_size: (int) The size of each batch (default: 25). The batch
@@ -66,20 +67,24 @@ class WriteRequestBatch
         ];
 
         // Ensure the batch size is valid
-        if ($config['batch_size'] > 25 || $config['batch_size'] < 2) {
+        if ($config['batch_size'] > 25 || $config['batch_size'] < 2)
+        {
             throw new \InvalidArgumentException('"batch_size" must be between 2 and 25.');
         }
 
         // Ensure the callbacks are valid
-        if ($config['before'] && !is_callable($config['before'])) {
+        if ($config['before'] && !is_callable($config['before']))
+        {
             throw new \InvalidArgumentException('"before" must be callable.');
         }
-        if ($config['error'] && !is_callable($config['error'])) {
+        if ($config['error'] && !is_callable($config['error']))
+        {
             throw new \InvalidArgumentException('"error" must be callable.');
         }
 
         // If autoflush is enabled, set the threshold
-        if ($config['autoflush']) {
+        if ($config['autoflush'])
+        {
             $config['threshold'] = $config['batch_size'] * $config['pool_size'];
         }
 
@@ -91,7 +96,7 @@ class WriteRequestBatch
     /**
      * Adds a put item request to the batch.
      *
-     * @param array       $item  Data for an item to put. Format:
+     * @param array $item Data for an item to put. Format:
      *     [
      *         'attribute1' => ['type' => 'value'],
      *         'attribute2' => ['type' => 'value'],
@@ -118,7 +123,7 @@ class WriteRequestBatch
     /**
      * Adds a delete item request to the batch.
      *
-     * @param array       $key   Key of an item to delete. Format:
+     * @param array $key Key of an item to delete. Format:
      *     [
      *         'key1' => ['type' => 'value'],
      *         ...
@@ -156,30 +161,38 @@ class WriteRequestBatch
     {
         // Send BatchWriteItem requests until the queue is empty
         $keepFlushing = true;
-        while ($this->queue && $keepFlushing) {
+        while ($this->queue && $keepFlushing)
+        {
             $commands = $this->prepareCommands();
             $pool = new CommandPool($this->client, $commands, [
-                'before' => $this->config['before'],
+                'before'      => $this->config['before'],
                 'concurrency' => $this->config['pool_size'],
-                'fulfilled'   => function (ResultInterface $result) {
+                'fulfilled'   => function (ResultInterface $result)
+                {
                     // Re-queue any unprocessed items
-                    if ($result->hasKey('UnprocessedItems')) {
+                    if ($result->hasKey('UnprocessedItems'))
+                    {
                         $this->retryUnprocessed($result['UnprocessedItems']);
                     }
                 },
-                'rejected' => function ($reason) {
-                    if ($reason instanceof AwsException) {
+                'rejected'    => function ($reason)
+                {
+                    if ($reason instanceof AwsException)
+                    {
                         $code = $reason->getAwsErrorCode();
-                        if ($code === 'ProvisionedThroughputExceededException') {
+                        if ($code === 'ProvisionedThroughputExceededException')
+                        {
                             $this->retryUnprocessed($reason->getCommand()['RequestItems']);
-                        } elseif (is_callable($this->config['error'])) {
+                        }
+                        elseif (is_callable($this->config['error']))
+                        {
                             $this->config['error']($reason);
                         }
                     }
                 }
             ]);
             $pool->promise()->wait();
-            $keepFlushing = (bool) $untilEmpty;
+            $keepFlushing = (bool)$untilEmpty;
         }
 
         return $this;
@@ -198,10 +211,13 @@ class WriteRequestBatch
 
         // Create BatchWriteItem commands for each batch
         $commands = [];
-        foreach ($batches as $batch) {
+        foreach ($batches as $batch)
+        {
             $requests = [];
-            foreach ($batch as $item) {
-                if (!isset($requests[$item['table']])) {
+            foreach ($batch as $item)
+            {
+                if (!isset($requests[$item['table']]))
+                {
                     $requests[$item['table']] = [];
                 }
                 $requests[$item['table']][] = $item['data'];
@@ -222,8 +238,10 @@ class WriteRequestBatch
      */
     private function retryUnprocessed(array $unprocessed)
     {
-        foreach ($unprocessed as $table => $requests) {
-            foreach ($requests as $request) {
+        foreach ($unprocessed as $table => $requests)
+        {
+            foreach ($requests as $request)
+            {
                 $this->queue[] = [
                     'table' => $table,
                     'data'  => $request,
@@ -237,9 +255,11 @@ class WriteRequestBatch
      */
     private function autoFlush()
     {
-        if ($this->config['autoflush']
+        if (
+            $this->config['autoflush']
             && count($this->queue) >= $this->config['threshold']
-        ) {
+        )
+        {
             // Flush only once. Unprocessed items are handled in a later flush.
             $this->flush(false);
         }
@@ -257,7 +277,8 @@ class WriteRequestBatch
     private function determineTable($table)
     {
         $table = $table ?: $this->config['table'];
-        if (!$table) {
+        if (!$table)
+        {
             throw new \RuntimeException('There was no table specified.');
         }
 

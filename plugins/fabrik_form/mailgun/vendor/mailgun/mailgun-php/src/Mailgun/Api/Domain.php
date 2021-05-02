@@ -45,7 +45,7 @@ class Domain extends HttpApi
 
         $params = [
             'limit' => $limit,
-            'skip' => $skip,
+            'skip'  => $skip,
         ];
 
         $response = $this->httpGet('/v3/domains', $params);
@@ -76,10 +76,10 @@ class Domain extends HttpApi
      *
      * @see https://documentation.mailgun.com/en/latest/api-domains.html#domains
      *
-     * @param string $domain     Name of the domain.
-     * @param string $smtpPass   Password for SMTP authentication.
+     * @param string $domain Name of the domain.
+     * @param string $smtpPass Password for SMTP authentication.
      * @param string $spamAction `disable` or `tag` - inbound spam filtering.
-     * @param bool   $wildcard   Domain will accept email for subdomains.
+     * @param bool $wildcard Domain will accept email for subdomains.
      *
      * @return CreateResponse|array|ResponseInterface
      */
@@ -90,7 +90,8 @@ class Domain extends HttpApi
         $params['name'] = $domain;
 
         // If at least smtpPass available, check for the fields spamAction wildcard
-        if (!empty($smtpPass)) {
+        if (!empty($smtpPass))
+        {
             // TODO(sean.johnson): Extended spam filter input validation.
             Assert::stringNotEmpty($spamAction);
             Assert::boolean($wildcard);
@@ -125,8 +126,8 @@ class Domain extends HttpApi
      * Returns a list of SMTP credentials for the specified domain.
      *
      * @param string $domain Name of the domain.
-     * @param int    $limit  Number of credentials to return
-     * @param int    $skip   Number of credentials to omit from the list
+     * @param int $limit Number of credentials to return
+     * @param int $skip Number of credentials to omit from the list
      *
      * @return CredentialResponse
      */
@@ -138,7 +139,7 @@ class Domain extends HttpApi
 
         $params = [
             'limit' => $limit,
-            'skip' => $skip,
+            'skip'  => $skip,
         ];
 
         $response = $this->httpGet(sprintf('/v3/domains/%s/credentials', $domain), $params);
@@ -149,8 +150,8 @@ class Domain extends HttpApi
     /**
      * Create a new SMTP credential pair for the specified domain.
      *
-     * @param string $domain   Name of the domain.
-     * @param string $login    SMTP Username.
+     * @param string $domain Name of the domain.
+     * @param string $login SMTP Username.
      * @param string $password SMTP Password. Length min 5, max 32.
      *
      * @return CreateCredentialResponse|array|ResponseInterface
@@ -163,7 +164,7 @@ class Domain extends HttpApi
         Assert::lengthBetween($password, 5, 32, 'SMTP password must be between 5 and 32 characters.');
 
         $params = [
-            'login' => $login,
+            'login'    => $login,
             'password' => $password,
         ];
 
@@ -176,8 +177,8 @@ class Domain extends HttpApi
      * Update a set of SMTP credentials for the specified domain.
      *
      * @param string $domain Name of the domain.
-     * @param string $login  SMTP Username.
-     * @param string $pass   New SMTP Password. Length min 5, max 32.
+     * @param string $login SMTP Username.
+     * @param string $pass New SMTP Password. Length min 5, max 32.
      *
      * @return UpdateCredentialResponse|array|ResponseInterface
      */
@@ -201,7 +202,7 @@ class Domain extends HttpApi
      * Remove a set of SMTP credentials from the specified domain.
      *
      * @param string $domain Name of the domain.
-     * @param string $login  SMTP Username.
+     * @param string $login SMTP Username.
      *
      * @return DeleteCredentialResponse|array|ResponseInterface
      */
@@ -241,9 +242,9 @@ class Domain extends HttpApi
      * Updates the specified delivery connection settings for the specified domain.
      * If a parameter is passed in as null, it will not be updated.
      *
-     * @param string    $domain     Name of the domain.
+     * @param string $domain Name of the domain.
      * @param bool|null $requireTLS Enforces that messages are sent only over a TLS connection.
-     * @param bool|null $noVerify   Disables TLS certificate and hostname verification.
+     * @param bool|null $noVerify Disables TLS certificate and hostname verification.
      *
      * @return UpdateConnectionResponse|array|ResponseInterface
      */
@@ -255,11 +256,13 @@ class Domain extends HttpApi
 
         $params = [];
 
-        if (null !== $requireTLS) {
+        if (null !== $requireTLS)
+        {
             $params['require_tls'] = $requireTLS ? 'true' : 'false';
         }
 
-        if (null !== $noVerify) {
+        if (null !== $noVerify)
+        {
             $params['skip_verification'] = $noVerify ? 'true' : 'false';
         }
 

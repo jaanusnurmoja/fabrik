@@ -6,79 +6,94 @@ namespace Twilio\Http;
 
 use Twilio\Exceptions\EnvironmentException;
 
-class CurlClient implements Client {
+class CurlClient implements Client
+{
     const DEFAULT_TIMEOUT = 60;
-    protected $curlOptions = array();
-    protected $debugHttp = false;
+    protected $curlOptions = [];
+    protected $debugHttp   = false;
 
-    public $lastRequest = null;
+    public $lastRequest  = null;
     public $lastResponse = null;
 
-    public function __construct(array $options = array()) {
+    public function __construct(array $options = [])
+    {
         $this->curlOptions = $options;
         $this->debugHttp = getenv('DEBUG_HTTP_TRAFFIC') === 'true';
     }
 
-    public function request($method, $url, $params = array(), $data = array(),
-                            $headers = array(), $user = null, $password = null,
-                            $timeout = null) {
+    public function request($method, $url, $params = [], $data = [],
+                            $headers = [], $user = null, $password = null,
+                            $timeout = null)
+    {
         $options = $this->options($method, $url, $params, $data, $headers,
-                                  $user, $password, $timeout);
+            $user, $password, $timeout);
 
         $this->lastRequest = $options;
         $this->lastResponse = null;
 
-        try {
-            if (!$curl = curl_init()) {
+        try
+        {
+            if (!$curl = curl_init())
+            {
                 throw new EnvironmentException('Unable to initialize cURL');
             }
 
-            if (!curl_setopt_array($curl, $options)) {
+            if (!curl_setopt_array($curl, $options))
+            {
                 throw new EnvironmentException(curl_error($curl));
             }
 
-            if (!$response = curl_exec($curl)) {
+            if (!$response = curl_exec($curl))
+            {
                 throw new EnvironmentException(curl_error($curl));
             }
 
             $parts = explode("\r\n\r\n", $response, 3);
             list($head, $body) = ($parts[0] == 'HTTP/1.1 100 Continue')
-                               ? array($parts[1], $parts[2])
-                               : array($parts[0], $parts[1]);
+                ? [$parts[1], $parts[2]]
+                : [$parts[0], $parts[1]];
 
-            if ($this->debugHttp) {
+            if ($this->debugHttp)
+            {
                 $u = parse_url($url);
                 $hdrLine = $method . ' ' . $u['path'];
-                if (isset($u['query']) && strlen($u['query']) > 0 ) {
+                if (isset($u['query']) && strlen($u['query']) > 0)
+                {
                     $hdrLine = $hdrLine . '?' . $u['query'];
                 }
                 error_log($hdrLine);
-                foreach ($headers as $key => $value) {
+                foreach ($headers as $key => $value)
+                {
                     error_log("$key: $value");
                 }
-                if ($method === 'POST') {
+                if ($method === 'POST')
+                {
                     error_log("\n" . $options[CURLOPT_POSTFIELDS] . "\n");
                 }
             }
             $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-            $responseHeaders = array();
+            $responseHeaders = [];
             $headerLines = explode("\r\n", $head);
             array_shift($headerLines);
-            foreach ($headerLines as $line) {
+            foreach ($headerLines as $line)
+            {
                 list($key, $value) = explode(':', $line, 2);
                 $responseHeaders[$key] = $value;
             }
 
             curl_close($curl);
 
-            if (isset($buffer) && is_resource($buffer)) {
+            if (isset($buffer) && is_resource($buffer))
+            {
                 fclose($buffer);
             }
 
-            if ($this->debugHttp) {
+            if ($this->debugHttp)
+            {
                 error_log("HTTP/1.1 $statusCode");
-                foreach ($responseHeaders as $key => $value) {
+                foreach ($responseHeaders as $key => $value)
+                {
                     error_log("$key: $value");
                 }
                 error_log("\n$body");
@@ -87,12 +102,16 @@ class CurlClient implements Client {
             $this->lastResponse = new Response($statusCode, $body, $responseHeaders);
 
             return $this->lastResponse;
-        } catch (\ErrorException $e) {
-            if (isset($curl) && is_resource($curl)) {
+        }
+        catch (\ErrorException $e)
+        {
+            if (isset($curl) && is_resource($curl))
+            {
                 curl_close($curl);
             }
 
-            if (isset($buffer) && is_resource($buffer)) {
+            if (isset($buffer) && is_resource($buffer))
+            {
                 fclose($buffer);
             }
 
@@ -100,36 +119,41 @@ class CurlClient implements Client {
         }
     }
 
-    public function options($method, $url, $params = array(), $data = array(),
-                            $headers = array(), $user = null, $password = null,
-                            $timeout = null) {
+    public function options($method, $url, $params = [], $data = [],
+                            $headers = [], $user = null, $password = null,
+                            $timeout = null)
+    {
 
         $timeout = is_null($timeout)
             ? self::DEFAULT_TIMEOUT
             : $timeout;
-        $options = $this->curlOptions + array(
-            CURLOPT_URL => $url,
-            CURLOPT_HEADER => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_INFILESIZE => Null,
-            CURLOPT_HTTPHEADER => array(),
-            CURLOPT_TIMEOUT => $timeout,
-        );
+        $options = $this->curlOptions + [
+                CURLOPT_URL            => $url,
+                CURLOPT_HEADER         => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_INFILESIZE     => null,
+                CURLOPT_HTTPHEADER     => [],
+                CURLOPT_TIMEOUT        => $timeout,
+            ];
 
-        foreach ($headers as $key => $value) {
+        foreach ($headers as $key => $value)
+        {
             $options[CURLOPT_HTTPHEADER][] = "$key: $value";
         }
 
-        if ($user && $password) {
+        if ($user && $password)
+        {
             $options[CURLOPT_HTTPHEADER][] = 'Authorization: Basic ' . base64_encode("$user:$password");
         }
 
         $body = $this->buildQuery($params);
-        if ($body) {
+        if ($body)
+        {
             $options[CURLOPT_URL] .= '?' . $body;
         }
 
-        switch (strtolower(trim($method))) {
+        switch (strtolower(trim($method)))
+        {
             case 'get':
                 $options[CURLOPT_HTTPGET] = true;
                 break;
@@ -140,14 +164,18 @@ class CurlClient implements Client {
                 break;
             case 'put':
                 $options[CURLOPT_PUT] = true;
-                if ($data) {
-                    if ($buffer = fopen('php://memory', 'w+')) {
+                if ($data)
+                {
+                    if ($buffer = fopen('php://memory', 'w+'))
+                    {
                         $dataString = $this->buildQuery($data);
                         fwrite($buffer, $dataString);
                         fseek($buffer, 0);
                         $options[CURLOPT_INFILE] = $buffer;
                         $options[CURLOPT_INFILESIZE] = strlen($dataString);
-                    } else {
+                    }
+                    else
+                    {
                         throw new EnvironmentException('Unable to open a temporary file');
                     }
                 }
@@ -162,21 +190,28 @@ class CurlClient implements Client {
         return $options;
     }
 
-    public function buildQuery($params) {
-        $parts = array();
+    public function buildQuery($params)
+    {
+        $parts = [];
 
-        if (is_string($params)) {
+        if (is_string($params))
+        {
             return $params;
         }
 
-        $params = $params ?: array();
+        $params = $params ?: [];
 
-        foreach ($params as $key => $value) {
-            if (is_array($value)) {
-                foreach ($value as $item) {
+        foreach ($params as $key => $value)
+        {
+            if (is_array($value))
+            {
+                foreach ($value as $item)
+                {
                     $parts[] = urlencode((string)$key) . '=' . urlencode((string)$item);
                 }
-            } else {
+            }
+            else
+            {
                 $parts[] = urlencode((string)$key) . '=' . urlencode((string)$value);
             }
         }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Rds;
 
 use Aws\AwsClient;
@@ -229,20 +230,21 @@ class RdsClient extends AwsClient
 {
     public function __construct(array $args)
     {
-        $args['with_resolved'] = function (array $args) {
+        $args['with_resolved'] = function (array $args)
+        {
             $this->getHandlerList()->appendInit(
                 PresignUrlMiddleware::wrap(
                     $this,
                     $args['endpoint_provider'],
                     [
-                        'operations' => [
+                        'operations'               => [
                             'CopyDBSnapshot',
                             'CreateDBInstanceReadReplica',
                             'CopyDBClusterSnapshot',
                             'CreateDBCluster'
                         ],
-                        'service' => 'rds',
-                        'presign_param' => 'PreSignedUrl',
+                        'service'                  => 'rds',
+                        'presign_param'            => 'PreSignedUrl',
                         'require_different_region' => true,
                     ]
                 ),
@@ -293,7 +295,8 @@ class RdsClient extends AwsClient
             . 'parameter on your behalf using the configured region value of '
             . 'the client.</div>';
 
-        if ($api['metadata']['apiVersion'] != '2014-09-01') {
+        if ($api['metadata']['apiVersion'] != '2014-09-01')
+        {
             $api['shapes']['CopyDBClusterSnapshotMessage']['members']['SourceRegion'] = ['shape' => 'SourceRegion'];
             $api['shapes']['CreateDBClusterMessage']['members']['SourceRegion'] = ['shape' => 'SourceRegion'];
 

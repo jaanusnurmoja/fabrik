@@ -3,15 +3,16 @@
  * The MIT License
  * Copyright (c) 2007 Andy Smith
  */
+
 namespace Abraham\TwitterOAuth;
 
 class Consumer
 {
-    /** @var string  */
+    /** @var string */
     public $key;
-    /** @var string  */
+    /** @var string */
     public $secret;
-    /** @var string|null  */
+    /** @var string|null */
     public $callbackUrl;
 
     /**

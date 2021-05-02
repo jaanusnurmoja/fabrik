@@ -70,13 +70,14 @@ final class HttpClientConfigurator
         $plugins = [
             new Plugin\AddHostPlugin($this->getUriFactory()->createUri($this->endpoint)),
             new Plugin\HeaderDefaultsPlugin([
-                'User-Agent' => 'mailgun-sdk-php/v2 (https://github.com/mailgun/mailgun-php)',
-                'Authorization' => 'Basic '.base64_encode(sprintf('api:%s', $this->getApiKey())),
+                'User-Agent'    => 'mailgun-sdk-php/v2 (https://github.com/mailgun/mailgun-php)',
+                'Authorization' => 'Basic ' . base64_encode(sprintf('api:%s', $this->getApiKey())),
             ]),
             new Plugin\HistoryPlugin($this->responseHistory),
         ];
 
-        if ($this->debug) {
+        if ($this->debug)
+        {
             $plugins[] = new ReplaceUriPlugin($this->getUriFactory()->createUri($this->endpoint));
         }
 
@@ -132,7 +133,8 @@ final class HttpClientConfigurator
      */
     private function getUriFactory()
     {
-        if (null === $this->uriFactory) {
+        if (null === $this->uriFactory)
+        {
             $this->uriFactory = UriFactoryDiscovery::find();
         }
 
@@ -156,7 +158,8 @@ final class HttpClientConfigurator
      */
     private function getHttpClient()
     {
-        if (null === $this->httpClient) {
+        if (null === $this->httpClient)
+        {
             $this->httpClient = HttpClientDiscovery::find();
         }
 

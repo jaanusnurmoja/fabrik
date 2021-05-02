@@ -28,7 +28,8 @@ class UsageRecord extends ApiResource
     public static function create($params = null, $options = null)
     {
         self::_validateParams($params);
-        if (!array_key_exists('subscription_item', $params)) {
+        if (!array_key_exists('subscription_item', $params))
+        {
             throw new Error\InvalidRequest("Missing subscription_item param in request", null);
         }
         $subscription_item = $params['subscription_item'];

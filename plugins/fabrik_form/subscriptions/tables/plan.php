@@ -20,17 +20,16 @@ require_once JPATH_ADMINISTRATOR . '/components/com_fabrik/tables/fabtable.php';
  * @subpackage  Fabrik.form.subscriptions
  * @since       3.0.7
  */
-
 class FabrikTablePlan extends JTable
 {
-	/**
-	 * Constructor
-	 *
-	 * @param   object  &$db  database object
-	 */
+    /**
+     * Constructor
+     *
+     * @param object  &$db database object
+     */
 
-	public function __construct(&$db)
-	{
-		parent::__construct('#__fabrik_subs_plans', 'id', $db);
-	}
+    public function __construct(&$db)
+    {
+        parent::__construct('#__fabrik_subs_plans', 'id', $db);
+    }
 }

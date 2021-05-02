@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3\Crypto;
 
 use Aws\HashingStream;
@@ -36,7 +37,8 @@ class S3EncryptionClient extends AbstractCryptoClient
     public function __construct(
         S3Client $client,
         $instructionFileSuffix = null
-    ) {
+    )
+    {
         $this->client = $client;
         $this->instructionFileSuffix = $instructionFileSuffix;
     }
@@ -101,7 +103,8 @@ class S3EncryptionClient extends AbstractCryptoClient
             $provider,
             $envelope
         ))->then(
-            function ($encryptedBodyStream) use ($args) {
+            function ($encryptedBodyStream) use ($args)
+            {
                 $hash = new PhpHash('sha256');
                 $hashingEncryptedBodyStream = new HashingStream(
                     $encryptedBodyStream,
@@ -111,9 +114,11 @@ class S3EncryptionClient extends AbstractCryptoClient
                 return [$hashingEncryptedBodyStream, $args];
             }
         )->then(
-            function ($putObjectContents) use ($strategy, $envelope) {
+            function ($putObjectContents) use ($strategy, $envelope)
+            {
                 list($bodyStream, $args) = $putObjectContents;
-                if ($strategy === null) {
+                if ($strategy === null)
+                {
                     $strategy = self::getDefaultStrategy();
                 }
 
@@ -122,7 +127,8 @@ class S3EncryptionClient extends AbstractCryptoClient
                 return $updatedArgs;
             }
         )->then(
-            function ($args) {
+            function ($args)
+            {
                 unset($args['@CipherOptions']);
                 return $this->client->putObjectAsync($args);
             }
@@ -131,7 +137,8 @@ class S3EncryptionClient extends AbstractCryptoClient
 
     private static function getContentShaDecorator(&$args)
     {
-        return function ($hash) use (&$args) {
+        return function ($hash) use (&$args)
+        {
             $args['ContentSHA256'] = bin2hex($hash);
         };
     }
@@ -227,7 +234,8 @@ class S3EncryptionClient extends AbstractCryptoClient
         unset($args['@MetadataStrategy']);
 
         $saveAs = null;
-        if (!empty($args['SaveAs'])) {
+        if (!empty($args['SaveAs']))
+        {
             $saveAs = $args['SaveAs'];
         }
 
@@ -238,8 +246,10 @@ class S3EncryptionClient extends AbstractCryptoClient
                     $instructionFileSuffix,
                     $strategy,
                     $args
-                ) {
-                    if ($strategy === null) {
+                )
+                {
+                    if ($strategy === null)
+                    {
                         $strategy = $this->determineGetObjectStrategy(
                             $result,
                             $instructionFileSuffix
@@ -247,8 +257,8 @@ class S3EncryptionClient extends AbstractCryptoClient
                     }
 
                     $envelope = $strategy->load($args + [
-                        'Metadata' => $result['Metadata']
-                    ]);
+                            'Metadata' => $result['Metadata']
+                        ]);
 
                     $provider = $provider->fromDecryptionEnvelope($envelope);
 
@@ -263,8 +273,10 @@ class S3EncryptionClient extends AbstractCryptoClient
                     return $result;
                 }
             )->then(
-                function ($result) use ($saveAs) {
-                    if (!empty($saveAs)) {
+                function ($result) use ($saveAs)
+                {
+                    if (!empty($saveAs))
+                    {
                         file_put_contents(
                             $saveAs,
                             (string)$result['Body'],

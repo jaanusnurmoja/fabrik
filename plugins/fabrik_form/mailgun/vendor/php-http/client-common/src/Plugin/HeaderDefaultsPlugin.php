@@ -32,8 +32,10 @@ final class HeaderDefaultsPlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        foreach ($this->headers as $header => $headerValue) {
-            if (!$request->hasHeader($header)) {
+        foreach ($this->headers as $header => $headerValue)
+        {
+            if (!$request->hasHeader($header))
+            {
                 $request = $request->withHeader($header, $headerValue);
             }
         }

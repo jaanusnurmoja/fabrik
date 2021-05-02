@@ -36,7 +36,8 @@ final class HeaderAppendPlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        foreach ($this->headers as $header => $headerValue) {
+        foreach ($this->headers as $header => $headerValue)
+        {
             $request = $request->withAddedHeader($header, $headerValue);
         }
 

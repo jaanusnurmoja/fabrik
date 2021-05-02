@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3\Crypto;
 
 use Aws\Crypto\AbstractCryptoClient;
@@ -88,20 +89,23 @@ class S3EncryptionMultipartUploader extends MultipartUploader
      *   options are ignored.
      *
      * @param S3ClientInterface $client Client used for the upload.
-     * @param mixed             $source Source of the data to upload.
-     * @param array             $config Configuration used to perform the upload.
+     * @param mixed $source Source of the data to upload.
+     * @param array $config Configuration used to perform the upload.
      */
     public function __construct(
         S3ClientInterface $client,
         $source,
         array $config = []
-    ) {
+    )
+    {
         $this->client = $client;
         $config['params'] = [];
-        if (!empty($config['bucket'])) {
+        if (!empty($config['bucket']))
+        {
             $config['params']['Bucket'] = $config['bucket'];
         }
-        if (!empty($config['key'])) {
+        if (!empty($config['key']))
+        {
             $config['params']['Key'] = $config['key'];
         }
 
@@ -114,7 +118,8 @@ class S3EncryptionMultipartUploader extends MultipartUploader
             $config,
             $this->instructionFileSuffix
         );
-        if ($this->strategy === null) {
+        if ($this->strategy === null)
+        {
             $this->strategy = self::getDefaultStrategy();
         }
         unset($config['@MetadataStrategy']);
@@ -131,7 +136,8 @@ class S3EncryptionMultipartUploader extends MultipartUploader
 
     private function getEncryptingDataPreparer()
     {
-        return function() {
+        return function ()
+        {
             // Defer encryption work until promise is executed
             $envelope = new MetadataEnvelope();
 
@@ -141,7 +147,8 @@ class S3EncryptionMultipartUploader extends MultipartUploader
                 $this->provider,
                 $envelope
             ))->then(
-                function ($bodyStream) use ($envelope) {
+                function ($bodyStream) use ($envelope)
+                {
                     $params = $this->strategy->save(
                         $envelope,
                         $this->config['params']

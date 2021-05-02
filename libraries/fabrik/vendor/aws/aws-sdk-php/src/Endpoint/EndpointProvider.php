@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Endpoint;
 
 use Aws\Exception\UnresolvedEndpointException;
@@ -50,7 +51,7 @@ class EndpointProvider
      * Resolves and endpoint provider and ensures a non-null return value.
      *
      * @param callable $provider Provider function to invoke.
-     * @param array    $args     Endpoint arguments to pass to the provider.
+     * @param array $args Endpoint arguments to pass to the provider.
      *
      * @return array
      * @throws UnresolvedEndpointException
@@ -58,7 +59,8 @@ class EndpointProvider
     public static function resolve(callable $provider, array $args = [])
     {
         $result = $provider($args);
-        if (is_array($result)) {
+        if (is_array($result))
+        {
             return $result;
         }
 
@@ -72,9 +74,9 @@ class EndpointProvider
     /**
      * Creates and returns the default SDK endpoint provider.
      *
+     * @return callable
      * @deprecated Use an instance of \Aws\Endpoint\Partition instead.
      *
-     * @return callable
      */
     public static function defaultProvider()
     {

@@ -17,38 +17,41 @@ use Twilio\Version;
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
  */
-class SyncListPermissionContext extends InstanceContext {
+class SyncListPermissionContext extends InstanceContext
+{
     /**
      * Initialize the SyncListPermissionContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $serviceSid The service_sid
      * @param string $listSid Sync List SID or unique name.
      * @param string $identity Identity of the user to whom the Sync List
      *                         Permission applies.
-     * @return \Twilio\Rest\Preview\Sync\Service\SyncList\SyncListPermissionContext 
+     * @return \Twilio\Rest\Preview\Sync\Service\SyncList\SyncListPermissionContext
      */
-    public function __construct(Version $version, $serviceSid, $listSid, $identity) {
+    public function __construct(Version $version, $serviceSid, $listSid, $identity)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array(
+        $this->solution = [
             'serviceSid' => $serviceSid,
-            'listSid' => $listSid,
-            'identity' => $identity,
-        );
+            'listSid'    => $listSid,
+            'identity'   => $identity,
+        ];
 
         $this->uri = '/Services/' . rawurlencode($serviceSid) . '/Lists/' . rawurlencode($listSid) . '/Permissions/' . rawurlencode($identity) . '';
     }
 
     /**
      * Fetch a SyncListPermissionInstance
-     * 
+     *
      * @return SyncListPermissionInstance Fetched SyncListPermissionInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -67,34 +70,36 @@ class SyncListPermissionContext extends InstanceContext {
 
     /**
      * Deletes the SyncListPermissionInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->version->delete('delete', $this->uri);
     }
 
     /**
      * Update the SyncListPermissionInstance
-     * 
+     *
      * @param boolean $read Read access.
      * @param boolean $write Write access.
      * @param boolean $manage Manage access.
      * @return SyncListPermissionInstance Updated SyncListPermissionInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($read, $write, $manage) {
-        $data = Values::of(array(
-            'Read' => Serialize::booleanToString($read),
-            'Write' => Serialize::booleanToString($write),
+    public function update($read, $write, $manage)
+    {
+        $data = Values::of([
+            'Read'   => Serialize::booleanToString($read),
+            'Write'  => Serialize::booleanToString($write),
             'Manage' => Serialize::booleanToString($manage),
-        ));
+        ]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -109,12 +114,14 @@ class SyncListPermissionContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Preview.Sync.SyncListPermissionContext ' . implode(' ', $context) . ']';

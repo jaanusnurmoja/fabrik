@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudFront;
 
 class CookieSigner
@@ -7,7 +8,7 @@ class CookieSigner
     private $signer;
 
     private static $schemes = [
-        'http' => true,
+        'http'  => true,
         'https' => true,
     ];
 
@@ -26,13 +27,13 @@ class CookieSigner
     /**
      * Create a signed Amazon CloudFront Cookie.
      *
-     * @param string              $url     URL to sign (can include query string
+     * @param string $url URL to sign (can include query string
      *                                     and wildcards). Not required
      *                                     when passing a custom $policy.
      * @param string|integer|null $expires UTC Unix timestamp used when signing
      *                                     with a canned policy. Not required
      *                                     when passing a custom $policy.
-     * @param string              $policy  JSON policy. Use this option when
+     * @param string $policy JSON policy. Use this option when
      *                                     creating a signed cookie for a custom
      *                                     policy.
      *
@@ -42,13 +43,15 @@ class CookieSigner
      */
     public function getSignedCookie($url = null, $expires = null, $policy = null)
     {
-        if ($url) {
+        if ($url)
+        {
             $this->validateUrl($url);
         }
 
         $cookieParameters = [];
         $signature = $this->signer->getSignature($url, $expires, $policy);
-        foreach ($signature as $key => $value) {
+        foreach ($signature as $key => $value)
+        {
             $cookieParameters["CloudFront-$key"] = $value;
         }
 
@@ -58,7 +61,8 @@ class CookieSigner
     private function validateUrl($url)
     {
         $scheme = str_replace('*', '', explode('://', $url)[0]);
-        if (empty(self::$schemes[strtolower($scheme)])) {
+        if (empty(self::$schemes[strtolower($scheme)]))
+        {
             throw new \InvalidArgumentException('Invalid or missing URI scheme');
         }
     }

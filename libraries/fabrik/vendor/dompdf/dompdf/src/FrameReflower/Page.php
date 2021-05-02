@@ -6,6 +6,7 @@
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
+
 namespace Dompdf\FrameReflower;
 
 use Dompdf\Frame;
@@ -53,31 +54,37 @@ class Page extends AbstractFrameReflower
         $page_styles = $style->get_stylesheet()->get_page_styles();
 
         // http://www.w3.org/TR/CSS21/page.html#page-selectors
-        if (count($page_styles) > 1) {
+        if (count($page_styles) > 1)
+        {
             $odd = $page_number % 2 == 1;
             $first = $page_number == 1;
 
             $style = clone $page_styles["base"];
 
             // FIXME RTL
-            if ($odd && isset($page_styles[":right"])) {
+            if ($odd && isset($page_styles[":right"]))
+            {
                 $style->merge($page_styles[":right"]);
             }
 
-            if ($odd && isset($page_styles[":odd"])) {
+            if ($odd && isset($page_styles[":odd"]))
+            {
                 $style->merge($page_styles[":odd"]);
             }
 
             // FIXME RTL
-            if (!$odd && isset($page_styles[":left"])) {
+            if (!$odd && isset($page_styles[":left"]))
+            {
                 $style->merge($page_styles[":left"]);
             }
 
-            if (!$odd && isset($page_styles[":even"])) {
+            if (!$odd && isset($page_styles[":even"]))
+            {
                 $style->merge($page_styles[":even"]);
             }
 
-            if ($first && isset($page_styles[":first"])) {
+            if ($first && isset($page_styles[":first"]))
+            {
                 $style->merge($page_styles[":first"]);
             }
 
@@ -93,12 +100,13 @@ class Page extends AbstractFrameReflower
      */
     function reflow(BlockFrameDecorator $block = null)
     {
-        $fixed_children = array();
+        $fixed_children = [];
         $prev_child = null;
         $child = $this->_frame->get_first_child();
         $current_page = 0;
 
-        while ($child) {
+        while ($child)
+        {
             $this->apply_page_style($this->_frame, $current_page + 1);
 
             $style = $this->_frame->get_style();
@@ -116,10 +124,13 @@ class Page extends AbstractFrameReflower
             $content_height = $cb["h"] - $top - $bottom;
 
             // Only if it's the first page, we save the nodes with a fixed position
-            if ($current_page == 0) {
+            if ($current_page == 0)
+            {
                 $children = $child->get_children();
-                foreach ($children as $onechild) {
-                    if ($onechild->get_style()->position === "fixed") {
+                foreach ($children as $onechild)
+                {
+                    if ($onechild->get_style()->position === "fixed")
+                    {
                         $fixed_children[] = $onechild->deep_copy();
                     }
                 }
@@ -132,8 +143,10 @@ class Page extends AbstractFrameReflower
             $this->_check_callbacks("begin_page_reflow", $child);
 
             //Insert a copy of each node which have a fixed position
-            if ($current_page >= 1) {
-                foreach ($fixed_children as $fixed_child) {
+            if ($current_page >= 1)
+            {
+                foreach ($fixed_children as $fixed_child)
+                {
                     $child->insert_child_before($fixed_child->deep_copy(), $child->get_first_child());
                 }
             }
@@ -150,13 +163,15 @@ class Page extends AbstractFrameReflower
             // Check for end render callback
             $this->_check_callbacks("end_page_render", $child);
 
-            if ($next_child) {
+            if ($next_child)
+            {
                 $this->_frame->next_page();
             }
 
             // Wait to dispose of all frames on the previous page
             // so callback will have access to them
-            if ($prev_child) {
+            if ($prev_child)
+            {
                 $prev_child->dispose(true);
             }
             $prev_child = $child;
@@ -165,7 +180,8 @@ class Page extends AbstractFrameReflower
         }
 
         // Dispose of previous page if it still exists
-        if ($prev_child) {
+        if ($prev_child)
+        {
             $prev_child->dispose(true);
         }
     }
@@ -175,27 +191,34 @@ class Page extends AbstractFrameReflower
      * gets triggered on a page
      *
      * @param string $event the type of event
-     * @param Frame $frame  the frame that event is triggered on
+     * @param Frame $frame the frame that event is triggered on
      */
     protected function _check_callbacks($event, $frame)
     {
-        if (!isset($this->_callbacks)) {
+        if (!isset($this->_callbacks))
+        {
             $dompdf = $this->_frame->get_dompdf();
             $this->_callbacks = $dompdf->get_callbacks();
             $this->_canvas = $dompdf->get_canvas();
         }
 
-        if (is_array($this->_callbacks) && isset($this->_callbacks[$event])) {
-            $info = array(
+        if (is_array($this->_callbacks) && isset($this->_callbacks[$event]))
+        {
+            $info = [
                 0 => $this->_canvas, "canvas" => $this->_canvas,
-                1 => $frame,         "frame"  => $frame,
-            );
+                1 => $frame, "frame" => $frame,
+            ];
             $fs = $this->_callbacks[$event];
-            foreach ($fs as $f) {
-                if (is_callable($f)) {
-                    if (is_array($f)) {
+            foreach ($fs as $f)
+            {
+                if (is_callable($f))
+                {
+                    if (is_array($f))
+                    {
                         $f[0]->{$f[1]}($info);
-                    } else {
+                    }
+                    else
+                    {
                         $f($info);
                     }
                 }

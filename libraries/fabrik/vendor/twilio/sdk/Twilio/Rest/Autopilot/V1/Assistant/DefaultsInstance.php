@@ -17,44 +17,48 @@ use Twilio\Version;
 
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- * 
+ *
  * @property string accountSid
  * @property string assistantSid
  * @property string url
  * @property array data
  */
-class DefaultsInstance extends InstanceResource {
+class DefaultsInstance extends InstanceResource
+{
     /**
      * Initialize the DefaultsInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $assistantSid The assistant_sid
-     * @return \Twilio\Rest\Autopilot\V1\Assistant\DefaultsInstance 
+     * @return \Twilio\Rest\Autopilot\V1\Assistant\DefaultsInstance
      */
-    public function __construct(Version $version, array $payload, $assistantSid) {
+    public function __construct(Version $version, array $payload, $assistantSid)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
+        $this->properties = [
+            'accountSid'   => Values::array_get($payload, 'account_sid'),
             'assistantSid' => Values::array_get($payload, 'assistant_sid'),
-            'url' => Values::array_get($payload, 'url'),
-            'data' => Values::array_get($payload, 'data'),
-        );
+            'url'          => Values::array_get($payload, 'url'),
+            'data'         => Values::array_get($payload, 'data'),
+        ];
 
-        $this->solution = array('assistantSid' => $assistantSid, );
+        $this->solution = ['assistantSid' => $assistantSid,];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Autopilot\V1\Assistant\DefaultsContext Context for this
      *                                                             DefaultsInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new DefaultsContext($this->version, $this->solution['assistantSid']);
         }
 
@@ -63,38 +67,43 @@ class DefaultsInstance extends InstanceResource {
 
     /**
      * Fetch a DefaultsInstance
-     * 
+     *
      * @return DefaultsInstance Fetched DefaultsInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Update the DefaultsInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return DefaultsInstance Updated DefaultsInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         return $this->proxy()->update($options);
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -104,12 +113,14 @@ class DefaultsInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Autopilot.V1.DefaultsInstance ' . implode(' ', $context) . ']';

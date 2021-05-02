@@ -21,121 +21,120 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-list.php';
  * @subpackage  Fabrik.list.js
  * @since       3.0
  */
-
 class PlgFabrik_ListJs extends PlgFabrik_List
 {
-	/**
-	 * Button prefix
-	 * @var  string
-	 */
-	protected $buttonPrefix = 'js';
+    /**
+     * Button prefix
+     * @var  string
+     */
+    protected $buttonPrefix = 'js';
 
-	/**
-	 * Prep the button if needed
-	 *
-	 * @param   array  &$args  Arguments
-	 *
-	 * @return  bool;
-	 */
+    /**
+     * Prep the button if needed
+     *
+     * @param array  &$args Arguments
+     *
+     * @return  bool;
+     */
 
-	public function button(&$args)
-	{
-		parent::button($args);
+    public function button(&$args)
+    {
+        parent::button($args);
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Get button image
-	 *
-	 * @since   3.1b
-	 *
-	 * @return   string  image
-	 */
+    /**
+     * Get button image
+     *
+     * @return   string  image
+     * @since   3.1b
+     *
+     */
 
-	protected function getImageName()
-	{
-		$img = parent::getImageName();
+    protected function getImageName()
+    {
+        $img = parent::getImageName();
 
-		if (FabrikWorker::j3() && $img === 'php.png')
-		{
-			$img = 'lightning';
-		}
+        if (FabrikWorker::j3() && $img === 'php.png')
+        {
+            $img = 'lightning';
+        }
 
-		return $img;
-	}
+        return $img;
+    }
 
-	/**
-	 * Get the button label
-	 *
-	 * @return  string
-	 */
+    /**
+     * Get the button label
+     *
+     * @return  string
+     */
 
-	protected function buttonLabel()
-	{
-		return FText::_($this->getParams()->get('button_label', parent::buttonLabel()));
-	}
+    protected function buttonLabel()
+    {
+        return FText::_($this->getParams()->get('button_label', parent::buttonLabel()));
+    }
 
-	/**
-	 * Get the parameter name that defines the plugins acl access
-	 *
-	 * @return  string
-	 */
+    /**
+     * Get the parameter name that defines the plugins acl access
+     *
+     * @return  string
+     */
 
-	protected function getAclParam()
-	{
-		return 'access';
-	}
+    protected function getAclParam()
+    {
+        return 'access';
+    }
 
-	/**
-	 * Can the plug-in select list rows
-	 *
-	 * @return  bool
-	 */
+    /**
+     * Can the plug-in select list rows
+     *
+     * @return  bool
+     */
 
-	public function canSelectRows()
-	{
-		return true;
-	}
+    public function canSelectRows()
+    {
+        return true;
+    }
 
-	/**
-	 * Return the javascript to create an instance of the class defined in formJavascriptClass
-	 *
-	 * @param   array  $args  Array [0] => string table's form id to contain plugin
-	 *
-	 * @return bool
-	 */
+    /**
+     * Return the javascript to create an instance of the class defined in formJavascriptClass
+     *
+     * @param array $args Array [0] => string table's form id to contain plugin
+     *
+     * @return bool
+     */
 
-	public function onLoadJavascriptInstance($args)
-	{
-		parent::onLoadJavascriptInstance($args);
-		$params = $this->getParams();
-		$opts = $this->getElementJSOptions();
-		$file = $params->get('js_file', '');
+    public function onLoadJavascriptInstance($args)
+    {
+        parent::onLoadJavascriptInstance($args);
+        $params = $this->getParams();
+        $opts = $this->getElementJSOptions();
+        $file = $params->get('js_file', '');
 
-		if ($file !== '' && $file !== '-1')
-		{
-			$opts->js_code = file_get_contents(JPATH_ROOT . '/plugins/fabrik_list/js/scripts/' . $file);
-		}
-		else
-		{
-			$opts->js_code = $params->get('js_code', '');
-		}
+        if ($file !== '' && $file !== '-1')
+        {
+            $opts->js_code = file_get_contents(JPATH_ROOT . '/plugins/fabrik_list/js/scripts/' . $file);
+        }
+        else
+        {
+            $opts->js_code = $params->get('js_code', '');
+        }
 
-		$opts->statusMsg = $params->get('msg', '');
-		$opts = json_encode($opts);
-		$this->jsInstance = "new FbListJs($opts)";
+        $opts->statusMsg = $params->get('msg', '');
+        $opts = json_encode($opts);
+        $this->jsInstance = "new FbListJs($opts)";
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Load the AMD module class name
-	 *
-	 * @return string
-	 */
-	public function loadJavascriptClassName_result()
-	{
-		return 'FbListJs';
-	}
+    /**
+     * Load the AMD module class name
+     *
+     * @return string
+     */
+    public function loadJavascriptClassName_result()
+    {
+        return 'FbListJs';
+    }
 }

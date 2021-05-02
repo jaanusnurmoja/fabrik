@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3\Crypto;
 
 use \Aws\Crypto\MetadataStrategyInterface;
@@ -19,7 +20,8 @@ class HeadersMetadataStrategy implements MetadataStrategyInterface
      */
     public function save(MetadataEnvelope $envelope, array $args)
     {
-        foreach ($envelope as $header=>$value) {
+        foreach ($envelope as $header => $value)
+        {
             $args['Metadata'][$header] = $value;
         }
 
@@ -41,8 +43,10 @@ class HeadersMetadataStrategy implements MetadataStrategyInterface
         $envelope = new MetadataEnvelope();
         $constantValues = MetadataEnvelope::getConstantValues();
 
-        foreach ($constantValues as $constant) {
-            if (!empty($args['Metadata'][$constant])) {
+        foreach ($constantValues as $constant)
+        {
+            if (!empty($args['Metadata'][$constant]))
+            {
                 $envelope[$constant] = $args['Metadata'][$constant];
             }
         }

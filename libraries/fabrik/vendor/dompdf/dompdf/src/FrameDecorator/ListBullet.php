@@ -6,6 +6,7 @@
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
+
 namespace Dompdf\FrameDecorator;
 
 use Dompdf\Dompdf;
@@ -25,7 +26,7 @@ class ListBullet extends AbstractFrameDecorator
     const BULLET_DESCENT = 0.3; //descent of font below baseline. Todo: Guessed for now.
     const BULLET_SIZE = 0.35; // bullet diameter. For now 0.5 of font_size without descent.
 
-    static $BULLET_TYPES = array("disc", "circle", "square");
+    static $BULLET_TYPES = ["disc", "circle", "square"];
 
     /**
      * ListBullet constructor.
@@ -44,7 +45,8 @@ class ListBullet extends AbstractFrameDecorator
     {
         $style = $this->_frame->get_style();
 
-        if ($style->list_style_type === "none") {
+        if ($style->list_style_type === "none")
+        {
             return 0;
         }
 
@@ -60,7 +62,8 @@ class ListBullet extends AbstractFrameDecorator
     {
         $style = $this->_frame->get_style();
 
-        if ($style->list_style_type === "none") {
+        if ($style->list_style_type === "none")
+        {
             return 0;
         }
 

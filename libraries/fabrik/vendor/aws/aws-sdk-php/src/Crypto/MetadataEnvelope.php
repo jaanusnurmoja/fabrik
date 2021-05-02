@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto;
 
 use Aws\HasDataTrait;
@@ -29,9 +30,11 @@ class MetadataEnvelope implements ArrayAccess, IteratorAggregate, JsonSerializab
 
     public static function getConstantValues()
     {
-        if (empty(self::$constants)) {
+        if (empty(self::$constants))
+        {
             $reflection = new \ReflectionClass(static::class);
-            foreach (array_values($reflection->getConstants()) as $constant) {
+            foreach (array_values($reflection->getConstants()) as $constant)
+            {
                 self::$constants[$constant] = true;
             }
         }
@@ -42,7 +45,8 @@ class MetadataEnvelope implements ArrayAccess, IteratorAggregate, JsonSerializab
     public function offsetSet($name, $value)
     {
         $constants = self::getConstantValues();
-        if (is_null($name) || !in_array($name, $constants)) {
+        if (is_null($name) || !in_array($name, $constants))
+        {
             throw new InvalidArgumentException('MetadataEnvelope fields must'
                 . ' must match a predefined offset; use the header constants.');
         }

@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser\Dom;
 
 /**
@@ -44,7 +45,7 @@ class TextNode extends LeafNode
         $text = str_replace('&#10;', "\n", $text);
 
         $this->text = $text;
-        $this->tag  = new Tag('text');
+        $this->tag = new Tag('text');
         parent::__construct();
     }
 
@@ -56,8 +57,10 @@ class TextNode extends LeafNode
     public function text()
     {
         // convert charset
-        if ( ! is_null($this->encode)) {
-            if ( ! is_null($this->convertedText)) {
+        if (!is_null($this->encode))
+        {
+            if (!is_null($this->convertedText))
+            {
                 // we already know the converted value
                 return $this->convertedText;
             }
@@ -67,7 +70,9 @@ class TextNode extends LeafNode
             $this->convertedText = $text;
 
             return $text;
-        } else {
+        }
+        else
+        {
             return $this->text;
         }
     }

@@ -37,8 +37,8 @@ final class RequestMatcher implements RequestMatcherInterface
      * The regular expressions used for path or host must be specified without delimiter.
      * You do not need to escape the forward slash / to match it.
      *
-     * @param string|null          $path    Regular expression for the path
-     * @param string|null          $host    Regular expression for the hostname
+     * @param string|null $path Regular expression for the path
+     * @param string|null $host Regular expression for the hostname
      * @param string|string[]|null $methods Method or list of methods to match
      * @param string|string[]|null $schemes Scheme or list of schemes to match (e.g. http or https)
      */
@@ -46,8 +46,8 @@ final class RequestMatcher implements RequestMatcherInterface
     {
         $this->path = $path;
         $this->host = $host;
-        $this->methods = array_map('strtoupper', (array) $methods);
-        $this->schemes = array_map('strtolower', (array) $schemes);
+        $this->methods = array_map('strtoupper', (array)$methods);
+        $this->schemes = array_map('strtolower', (array)$schemes);
     }
 
     /**
@@ -57,19 +57,23 @@ final class RequestMatcher implements RequestMatcherInterface
      */
     public function matches(RequestInterface $request)
     {
-        if ($this->schemes && !in_array($request->getUri()->getScheme(), $this->schemes)) {
+        if ($this->schemes && !in_array($request->getUri()->getScheme(), $this->schemes))
+        {
             return false;
         }
 
-        if ($this->methods && !in_array($request->getMethod(), $this->methods)) {
+        if ($this->methods && !in_array($request->getMethod(), $this->methods))
+        {
             return false;
         }
 
-        if (null !== $this->path && !preg_match('{'.$this->path.'}', rawurldecode($request->getUri()->getPath()))) {
+        if (null !== $this->path && !preg_match('{' . $this->path . '}', rawurldecode($request->getUri()->getPath())))
+        {
             return false;
         }
 
-        if (null !== $this->host && !preg_match('{'.$this->host.'}i', $request->getUri()->getHost())) {
+        if (null !== $this->host && !preg_match('{' . $this->host . '}i', $request->getUri()->getHost()))
+        {
             return false;
         }
 

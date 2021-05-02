@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\GameLift;
 
 use Aws\AwsClient;
@@ -141,4 +142,6 @@ use Aws\AwsClient;
  * @method \Aws\Result validateMatchmakingRuleSet(array $args = [])
  * @method \GuzzleHttp\Promise\Promise validateMatchmakingRuleSetAsync(array $args = [])
  */
-class GameLiftClient extends AwsClient {}
+class GameLiftClient extends AwsClient
+{
+}

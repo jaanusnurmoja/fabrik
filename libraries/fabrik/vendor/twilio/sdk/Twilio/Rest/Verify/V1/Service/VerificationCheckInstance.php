@@ -17,7 +17,7 @@ use Twilio\Version;
 
 /**
  * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
- * 
+ *
  * @property string sid
  * @property string serviceSid
  * @property string accountSid
@@ -28,47 +28,52 @@ use Twilio\Version;
  * @property \DateTime dateCreated
  * @property \DateTime dateUpdated
  */
-class VerificationCheckInstance extends InstanceResource {
+class VerificationCheckInstance extends InstanceResource
+{
     /**
      * Initialize the VerificationCheckInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $serviceSid Service Sid.
-     * @return \Twilio\Rest\Verify\V1\Service\VerificationCheckInstance 
+     * @return \Twilio\Rest\Verify\V1\Service\VerificationCheckInstance
      */
-    public function __construct(Version $version, array $payload, $serviceSid) {
+    public function __construct(Version $version, array $payload, $serviceSid)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'sid' => Values::array_get($payload, 'sid'),
-            'serviceSid' => Values::array_get($payload, 'service_sid'),
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'to' => Values::array_get($payload, 'to'),
-            'channel' => Values::array_get($payload, 'channel'),
-            'status' => Values::array_get($payload, 'status'),
-            'valid' => Values::array_get($payload, 'valid'),
+        $this->properties = [
+            'sid'         => Values::array_get($payload, 'sid'),
+            'serviceSid'  => Values::array_get($payload, 'service_sid'),
+            'accountSid'  => Values::array_get($payload, 'account_sid'),
+            'to'          => Values::array_get($payload, 'to'),
+            'channel'     => Values::array_get($payload, 'channel'),
+            'status'      => Values::array_get($payload, 'status'),
+            'valid'       => Values::array_get($payload, 'valid'),
             'dateCreated' => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
             'dateUpdated' => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
-        );
+        ];
 
-        $this->solution = array('serviceSid' => $serviceSid, );
+        $this->solution = ['serviceSid' => $serviceSid,];
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -78,10 +83,11 @@ class VerificationCheckInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Verify.V1.VerificationCheckInstance]';
     }
 }

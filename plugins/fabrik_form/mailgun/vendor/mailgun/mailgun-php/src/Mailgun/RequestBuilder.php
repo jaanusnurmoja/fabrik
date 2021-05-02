@@ -32,10 +32,10 @@ class RequestBuilder
     /**
      * Creates a new PSR-7 request.
      *
-     * @param string            $method
-     * @param string            $uri
-     * @param array             $headers
-     * @param array|string|null $body    Request body. If body is an array we will send a as multipart stream request.
+     * @param string $method
+     * @param string $uri
+     * @param array $headers
+     * @param array|string|null $body Request body. If body is an array we will send a as multipart stream request.
      *                                   If array, each array *item* MUST look like:
      *                                   array (
      *                                   'content' => string|resource|StreamInterface,
@@ -48,12 +48,14 @@ class RequestBuilder
      */
     public function create($method, $uri, array $headers = [], $body = null)
     {
-        if (!is_array($body)) {
+        if (!is_array($body))
+        {
             return $this->getRequestFactory()->createRequest($method, $uri, $headers, $body);
         }
 
         $builder = $this->getMultipartStreamBuilder();
-        foreach ($body as $item) {
+        foreach ($body as $item)
+        {
             $name = $item['name'];
             $content = $item['content'];
             unset($item['name']);
@@ -66,7 +68,7 @@ class RequestBuilder
         $boundary = $builder->getBoundary();
         $builder->reset();
 
-        $headers['Content-Type'] = 'multipart/form-data; boundary="'.$boundary.'"';
+        $headers['Content-Type'] = 'multipart/form-data; boundary="' . $boundary . '"';
 
         return $this->getRequestFactory()->createRequest($method, $uri, $headers, $multipartStream);
     }
@@ -76,7 +78,8 @@ class RequestBuilder
      */
     private function getRequestFactory()
     {
-        if (null === $this->requestFactory) {
+        if (null === $this->requestFactory)
+        {
             $this->requestFactory = MessageFactoryDiscovery::find();
         }
 
@@ -100,7 +103,8 @@ class RequestBuilder
      */
     private function getMultipartStreamBuilder()
     {
-        if (null === $this->multipartStreamBuilder) {
+        if (null === $this->multipartStreamBuilder)
+        {
             $this->multipartStreamBuilder = new MultipartStreamBuilder();
         }
 

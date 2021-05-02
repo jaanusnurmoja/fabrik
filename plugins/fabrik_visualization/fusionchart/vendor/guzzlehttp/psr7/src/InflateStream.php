@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Psr7;
 
 use Psr\Http\Message\StreamInterface;
@@ -39,10 +40,12 @@ class InflateStream implements StreamInterface
     {
         $filename_header_length = 0;
 
-        if (substr(bin2hex($header), 6, 2) === '08') {
+        if (substr(bin2hex($header), 6, 2) === '08')
+        {
             // we have a filename, read until nil
             $filename_header_length = 1;
-            while ($stream->read(1) !== chr(0)) {
+            while ($stream->read(1) !== chr(0))
+            {
                 $filename_header_length++;
             }
         }

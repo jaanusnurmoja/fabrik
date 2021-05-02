@@ -11,24 +11,27 @@ namespace Twilio\TwiML\Messaging;
 
 use Twilio\TwiML\TwiML;
 
-class Redirect extends TwiML {
+class Redirect extends TwiML
+{
     /**
      * Redirect constructor.
-     * 
+     *
      * @param url $url Redirect URL
      * @param array $attributes Optional attributes
      */
-    public function __construct($url, $attributes = array()) {
+    public function __construct($url, $attributes = [])
+    {
         parent::__construct('Redirect', $url, $attributes);
     }
 
     /**
      * Add Method attribute.
-     * 
+     *
      * @param httpMethod $method Redirect URL method
      * @return $this
      */
-    public function setMethod($method) {
+    public function setMethod($method)
+    {
         return $this->setAttribute('method', $method);
     }
 }

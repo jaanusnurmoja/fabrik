@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Handler;
 
 use GuzzleHttp\Promise as P;
@@ -22,7 +23,7 @@ class CurlMultiHandler
     private $selectTimeout;
     private $active;
     private $handles = [];
-    private $delays = [];
+    private $delays  = [];
 
     /**
      * This handler accepts the following options:
@@ -43,7 +44,8 @@ class CurlMultiHandler
 
     public function __get($name)
     {
-        if ($name === '_mh') {
+        if ($name === '_mh')
+        {
             return $this->_mh = curl_multi_init();
         }
 
@@ -52,7 +54,8 @@ class CurlMultiHandler
 
     public function __destruct()
     {
-        if (isset($this->_mh)) {
+        if (isset($this->_mh))
+        {
             curl_multi_close($this->_mh);
             unset($this->_mh);
         }
@@ -61,11 +64,12 @@ class CurlMultiHandler
     public function __invoke(RequestInterface $request, array $options)
     {
         $easy = $this->factory->create($request, $options);
-        $id = (int) $easy->handle;
+        $id = (int)$easy->handle;
 
         $promise = new Promise(
             [$this, 'execute'],
-            function () use ($id) {
+            function () use ($id)
+            {
                 return $this->cancel($id);
             }
         );
@@ -81,10 +85,13 @@ class CurlMultiHandler
     public function tick()
     {
         // Add any delayed handles if needed.
-        if ($this->delays) {
+        if ($this->delays)
+        {
             $currentTime = microtime(true);
-            foreach ($this->delays as $id => $delay) {
-                if ($currentTime >= $delay) {
+            foreach ($this->delays as $id => $delay)
+            {
+                if ($currentTime >= $delay)
+                {
                     unset($this->delays[$id]);
                     curl_multi_add_handle(
                         $this->_mh,
@@ -97,15 +104,17 @@ class CurlMultiHandler
         // Step through the task queue which may add additional requests.
         P\queue()->run();
 
-        if ($this->active &&
+        if (
+            $this->active &&
             curl_multi_select($this->_mh, $this->selectTimeout) === -1
-        ) {
+        )
+        {
             // Perform a usleep if a select returns -1.
             // See: https://bugs.php.net/bug.php?id=61141
             usleep(250);
         }
 
-        while (curl_multi_exec($this->_mh, $this->active) === CURLM_CALL_MULTI_PERFORM);
+        while (curl_multi_exec($this->_mh, $this->active) === CURLM_CALL_MULTI_PERFORM) ;
 
         $this->processMessages();
     }
@@ -117,9 +126,11 @@ class CurlMultiHandler
     {
         $queue = P\queue();
 
-        while ($this->handles || !$queue->isEmpty()) {
+        while ($this->handles || !$queue->isEmpty())
+        {
             // If there are no transfers, then sleep for the next delay
-            if (!$this->active && $this->delays) {
+            if (!$this->active && $this->delays)
+            {
                 usleep($this->timeToNext());
             }
             $this->tick();
@@ -129,11 +140,14 @@ class CurlMultiHandler
     private function addRequest(array $entry)
     {
         $easy = $entry['easy'];
-        $id = (int) $easy->handle;
+        $id = (int)$easy->handle;
         $this->handles[$id] = $entry;
-        if (empty($easy->options['delay'])) {
+        if (empty($easy->options['delay']))
+        {
             curl_multi_add_handle($this->_mh, $easy->handle);
-        } else {
+        }
+        else
+        {
             $this->delays[$id] = microtime(true) + ($easy->options['delay'] / 1000);
         }
     }
@@ -148,7 +162,8 @@ class CurlMultiHandler
     private function cancel($id)
     {
         // Cannot cancel if it has been processed.
-        if (!isset($this->handles[$id])) {
+        if (!isset($this->handles[$id]))
+        {
             return false;
         }
 
@@ -162,11 +177,13 @@ class CurlMultiHandler
 
     private function processMessages()
     {
-        while ($done = curl_multi_info_read($this->_mh)) {
-            $id = (int) $done['handle'];
+        while ($done = curl_multi_info_read($this->_mh))
+        {
+            $id = (int)$done['handle'];
             curl_multi_remove_handle($this->_mh, $done['handle']);
 
-            if (!isset($this->handles[$id])) {
+            if (!isset($this->handles[$id]))
+            {
                 // Probably was cancelled.
                 continue;
             }
@@ -188,8 +205,10 @@ class CurlMultiHandler
     {
         $currentTime = microtime(true);
         $nextTime = PHP_INT_MAX;
-        foreach ($this->delays as $time) {
-            if ($time < $nextTime) {
+        foreach ($this->delays as $time)
+        {
+            if ($time < $nextTime)
+            {
                 $nextTime = $time;
             }
         }

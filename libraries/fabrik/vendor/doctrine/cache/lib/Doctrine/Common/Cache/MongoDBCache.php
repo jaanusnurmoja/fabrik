@@ -52,12 +52,18 @@ class MongoDBCache extends CacheProvider
      */
     public function __construct($collection)
     {
-        if ($collection instanceof MongoCollection) {
-            @trigger_error('Using a MongoCollection instance for creating a cache adapter is deprecated and will be removed in 2.0', E_USER_DEPRECATED);
+        if ($collection instanceof MongoCollection)
+        {
+            @trigger_error('Using a MongoCollection instance for creating a cache adapter is deprecated and will be removed in 2.0',
+                E_USER_DEPRECATED);
             $this->provider = new LegacyMongoDBCache($collection);
-        } elseif ($collection instanceof Collection) {
+        }
+        elseif ($collection instanceof Collection)
+        {
             $this->provider = new ExtMongoDBCache($collection);
-        } else {
+        }
+        else
+        {
             throw new InvalidArgumentException('Invalid collection given - expected a MongoCollection or MongoDB\Collection instance');
         }
     }

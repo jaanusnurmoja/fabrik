@@ -4,7 +4,7 @@ namespace DeepCopy\f006;
 
 class B
 {
-    public $cloned = false;
+    public  $cloned = false;
     private $bProp;
 
     public function getBProp()

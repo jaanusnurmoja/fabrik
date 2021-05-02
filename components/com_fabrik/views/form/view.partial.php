@@ -23,44 +23,44 @@ require_once JPATH_SITE . '/components/com_fabrik/views/form/view.base.php';
  */
 class FabrikViewForm extends FabrikViewFormBase
 {
-	/**
-	 * Main setup routine for displaying the form/detail view
-	 *
-	 * @param   string $tpl template
-	 *
-	 * @return  void
-	 */
-	public function display($tpl = null)
-	{
-		if (parent::display($tpl) !== false)
-		{
-			$this->output();
+    /**
+     * Main setup routine for displaying the form/detail view
+     *
+     * @param string $tpl template
+     *
+     * @return  void
+     */
+    public function display($tpl = null)
+    {
+        if (parent::display($tpl) !== false)
+        {
+            $this->output();
 
-			if (!$this->app->isAdmin())
-			{
-				$this->state  = $this->get('State');
-				$model        = $this->getModel();
-				$this->params = $this->state->get('params');
-				$row          = $model->getData();
-				$w            = new FabrikWorker;
+            if (!$this->app->isAdmin())
+            {
+                $this->state = $this->get('State');
+                $model = $this->getModel();
+                $this->params = $this->state->get('params');
+                $row = $model->getData();
+                $w = new FabrikWorker;
 
-				if ($this->params->get('menu-meta_description'))
-				{
-					$desc = $w->parseMessageForPlaceHolder($this->params->get('menu-meta_description'), $row);
-					$this->doc->setDescription($desc);
-				}
+                if ($this->params->get('menu-meta_description'))
+                {
+                    $desc = $w->parseMessageForPlaceHolder($this->params->get('menu-meta_description'), $row);
+                    $this->doc->setDescription($desc);
+                }
 
-				if ($this->params->get('menu-meta_keywords'))
-				{
-					$keywords = $w->parseMessageForPlaceHolder($this->params->get('menu-meta_keywords'), $row);
-					$this->doc->setMetadata('keywords', $keywords);
-				}
+                if ($this->params->get('menu-meta_keywords'))
+                {
+                    $keywords = $w->parseMessageForPlaceHolder($this->params->get('menu-meta_keywords'), $row);
+                    $this->doc->setMetadata('keywords', $keywords);
+                }
 
-				if ($this->params->get('robots'))
-				{
-					$this->doc->setMetadata('robots', $this->params->get('robots'));
-				}
-			}
-		}
-	}
+                if ($this->params->get('robots'))
+                {
+                    $this->doc->setMetadata('robots', $this->params->get('robots'));
+                }
+            }
+        }
+    }
 }

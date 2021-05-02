@@ -27,7 +27,8 @@ class EventParsingIterator implements Iterator
         StreamInterface $stream,
         StructureShape $shape,
         AbstractParser $parser
-    ) {
+    )
+    {
         $this->decodingIterator = new DecodingEventStreamIterator($stream);
         $this->shape = $shape;
         $this->parser = $parser;
@@ -60,34 +61,45 @@ class EventParsingIterator implements Iterator
 
     private function parseEvent(array $event)
     {
-        if (!empty($event['headers'][':message-type'])) {
-            if ($event['headers'][':message-type'] === 'error') {
+        if (!empty($event['headers'][':message-type']))
+        {
+            if ($event['headers'][':message-type'] === 'error')
+            {
                 return $this->parseError($event);
             }
-            if ($event['headers'][':message-type'] !== 'event') {
+            if ($event['headers'][':message-type'] !== 'event')
+            {
                 throw new ParserException('Failed to parse unknown message type.');
             }
         }
 
-        if (empty($event['headers'][':event-type'])) {
+        if (empty($event['headers'][':event-type']))
+        {
             throw new ParserException('Failed to parse without event type.');
         }
         $eventShape = $this->shape->getMember($event['headers'][':event-type']);
 
         $parsedEvent = [];
-        foreach ($eventShape['members'] as $shape => $details) {
-            if (!empty($details['eventpayload'])) {
+        foreach ($eventShape['members'] as $shape => $details)
+        {
+            if (!empty($details['eventpayload']))
+            {
                 $payloadShape = $eventShape->getMember($shape);
-                if ($payloadShape['type'] === 'blob') {
+                if ($payloadShape['type'] === 'blob')
+                {
                     $parsedEvent[$shape] = $event['payload'];
-                } else {
+                }
+                else
+                {
                     $parsedEvent[$shape] = $this->parser->parseMemberFromStream(
                         $event['payload'],
                         $payloadShape,
                         null
                     );
                 }
-            } else {
+            }
+            else
+            {
                 $parsedEvent[$shape] = $event['headers'][$shape];
             }
         }

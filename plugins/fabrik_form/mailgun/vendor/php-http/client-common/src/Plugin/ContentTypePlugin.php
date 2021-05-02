@@ -34,8 +34,8 @@ final class ContentTypePlugin implements Plugin
     /**
      * @param array $config {
      *
-     *     @var bool $skip_detection True skip detection if stream size is bigger than $size_limit.
-     *     @var int $size_limit size stream limit for which the detection as to be skipped.
+     * @var bool $skip_detection True skip detection if stream size is bigger than $size_limit.
+     * @var int $size_limit size stream limit for which the detection as to be skipped.
      * }
      */
     public function __construct(array $config = [])
@@ -43,7 +43,7 @@ final class ContentTypePlugin implements Plugin
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
             'skip_detection' => false,
-            'size_limit' => 16000000,
+            'size_limit'     => 16000000,
         ]);
         $resolver->setAllowedTypes('skip_detection', 'bool');
         $resolver->setAllowedTypes('size_limit', 'int');
@@ -59,29 +59,35 @@ final class ContentTypePlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        if (!$request->hasHeader('Content-Type')) {
+        if (!$request->hasHeader('Content-Type'))
+        {
             $stream = $request->getBody();
             $streamSize = $stream->getSize();
 
-            if (!$stream->isSeekable()) {
+            if (!$stream->isSeekable())
+            {
                 return $next($request);
             }
 
-            if (0 === $streamSize) {
+            if (0 === $streamSize)
+            {
                 return $next($request);
             }
 
-            if ($this->skipDetection && (null === $streamSize || $streamSize >= $this->sizeLimit)) {
+            if ($this->skipDetection && (null === $streamSize || $streamSize >= $this->sizeLimit))
+            {
                 return $next($request);
             }
 
-            if ($this->isJson($stream)) {
+            if ($this->isJson($stream))
+            {
                 $request = $request->withHeader('Content-Type', 'application/json');
 
                 return $next($request);
             }
 
-            if ($this->isXml($stream)) {
+            if ($this->isXml($stream))
+            {
                 $request = $request->withHeader('Content-Type', 'application/xml');
 
                 return $next($request);

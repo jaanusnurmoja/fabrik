@@ -3,6 +3,7 @@
  * The MIT License
  * Copyright (c) 2007 Andy Smith
  */
+
 namespace Abraham\TwitterOAuth;
 
 class Token
@@ -13,7 +14,7 @@ class Token
     public $secret;
 
     /**
-     * @param string $key    The OAuth Token
+     * @param string $key The OAuth Token
      * @param string $secret The OAuth Token Secret
      */
     public function __construct($key, $secret)

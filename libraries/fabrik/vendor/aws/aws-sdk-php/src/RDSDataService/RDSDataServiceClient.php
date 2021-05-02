@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\RDSDataService;
 
 use Aws\AwsClient;
@@ -8,4 +9,6 @@ use Aws\AwsClient;
  * @method \Aws\Result executeSql(array $args = [])
  * @method \GuzzleHttp\Promise\Promise executeSqlAsync(array $args = [])
  */
-class RDSDataServiceClient extends AwsClient {}
+class RDSDataServiceClient extends AwsClient
+{
+}

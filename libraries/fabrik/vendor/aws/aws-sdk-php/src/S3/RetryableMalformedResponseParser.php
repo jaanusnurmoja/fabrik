@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Api\Parser\AbstractParser;
@@ -22,7 +23,8 @@ class RetryableMalformedResponseParser extends AbstractParser
     public function __construct(
         callable $parser,
         $exceptionClass = AwsException::class
-    ) {
+    )
+    {
         $this->parser = $parser;
         $this->exceptionClass = $exceptionClass;
     }
@@ -30,15 +32,19 @@ class RetryableMalformedResponseParser extends AbstractParser
     public function __invoke(
         CommandInterface $command,
         ResponseInterface $response
-    ) {
+    )
+    {
         $fn = $this->parser;
 
-        try {
+        try
+        {
             return $fn($command, $response);
-        } catch (ParserException $e) {
+        }
+        catch (ParserException $e)
+        {
             throw new $this->exceptionClass(
                 "Error parsing response for {$command->getName()}:"
-                    . " AWS parsing error: {$e->getMessage()}",
+                . " AWS parsing error: {$e->getMessage()}",
                 $command,
                 ['connection_error' => true, 'exception' => $e],
                 $e
@@ -50,7 +56,8 @@ class RetryableMalformedResponseParser extends AbstractParser
         StreamInterface $stream,
         StructureShape $member,
         $response
-    ) {
+    )
+    {
         return $this->parser->parseMemberFromStream($stream, $member, $response);
     }
 }

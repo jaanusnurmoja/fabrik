@@ -16,7 +16,6 @@
 - Close this header so the markdown will render properly
 - Added preserve line break option. Defaults to false.
 
-
 ## 1.6.9
 
 - Added Changelog
@@ -111,4 +110,5 @@ $$ 1.6.7
 - Added magic and each methods to the collection. Plus some tests
 - Added a collection object
 - Added charset encoding
-- fixed a bug with closing tags If a closing tag did not have an opening tag it would cause the scan to end instead of ignoring the closing tag.
+- fixed a bug with closing tags If a closing tag did not have an opening tag it would cause the scan to end instead of
+  ignoring the closing tag.

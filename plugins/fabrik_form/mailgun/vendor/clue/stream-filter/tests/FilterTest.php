@@ -8,7 +8,8 @@ class FilterTest extends PHPUnit_Framework_TestCase
     {
         $stream = $this->createStream();
 
-        StreamFilter\append($stream, function ($chunk) {
+        StreamFilter\append($stream, function ($chunk)
+        {
             return strtoupper($chunk);
         });
 
@@ -40,8 +41,9 @@ class FilterTest extends PHPUnit_Framework_TestCase
     {
         $stream = $this->createStream();
 
-        StreamFilter\append($stream, function ($chunk) {
-            return str_replace(array('a','e','i','o','u'), '', $chunk);
+        StreamFilter\append($stream, function ($chunk)
+        {
+            return str_replace(['a', 'e', 'i', 'o', 'u'], '', $chunk);
         });
 
         fwrite($stream, 'hello');
@@ -57,7 +59,8 @@ class FilterTest extends PHPUnit_Framework_TestCase
     {
         $stream = $this->createStream();
 
-        StreamFilter\append($stream, function ($chunk) {
+        StreamFilter\append($stream, function ($chunk)
+        {
             return '';
         });
 
@@ -76,8 +79,10 @@ class FilterTest extends PHPUnit_Framework_TestCase
 
         $stream = $this->createStream();
 
-        StreamFilter\append($stream, function ($chunk = null) {
-            if ($chunk === null) {
+        StreamFilter\append($stream, function ($chunk = null)
+        {
+            if ($chunk === null)
+            {
                 // this signals the end event
                 return '!';
             }
@@ -85,7 +90,8 @@ class FilterTest extends PHPUnit_Framework_TestCase
         }, STREAM_FILTER_WRITE);
 
         $buffered = '';
-        StreamFilter\append($stream, function ($chunk) use (&$buffered) {
+        StreamFilter\append($stream, function ($chunk) use (&$buffered)
+        {
             $buffered .= $chunk;
             return '';
         });
@@ -103,8 +109,10 @@ class FilterTest extends PHPUnit_Framework_TestCase
         $stream = $this->createStream();
 
         $ended = false;
-        $filter = StreamFilter\append($stream, function ($chunk = null) use (&$ended) {
-            if ($chunk === null) {
+        $filter = StreamFilter\append($stream, function ($chunk = null) use (&$ended)
+        {
+            if ($chunk === null)
+            {
                 $ended = true;
             }
             return $chunk;
@@ -120,8 +128,10 @@ class FilterTest extends PHPUnit_Framework_TestCase
         $stream = $this->createStream();
 
         $ended = false;
-        StreamFilter\append($stream, function ($chunk = null) use (&$ended) {
-            if ($chunk === null) {
+        StreamFilter\append($stream, function ($chunk = null) use (&$ended)
+        {
+            if ($chunk === null)
+            {
                 $ended = true;
             }
             return $chunk;
@@ -138,7 +148,8 @@ class FilterTest extends PHPUnit_Framework_TestCase
 
         $invoked = 0;
 
-        StreamFilter\append($stream, function ($chunk) use (&$invoked) {
+        StreamFilter\append($stream, function ($chunk) use (&$invoked)
+        {
             ++$invoked;
 
             return $chunk;
@@ -161,7 +172,8 @@ class FilterTest extends PHPUnit_Framework_TestCase
 
         $invoked = 0;
 
-        StreamFilter\append($stream, function ($chunk) use (&$invoked) {
+        StreamFilter\append($stream, function ($chunk) use (&$invoked)
+        {
             ++$invoked;
 
             return $chunk;
@@ -183,11 +195,13 @@ class FilterTest extends PHPUnit_Framework_TestCase
     {
         $stream = $this->createStream();
 
-        StreamFilter\append($stream, function ($chunk) {
+        StreamFilter\append($stream, function ($chunk)
+        {
             return '[' . $chunk . ']';
         }, STREAM_FILTER_WRITE);
 
-        StreamFilter\prepend($stream, function ($chunk) {
+        StreamFilter\prepend($stream, function ($chunk)
+        {
             return '(' . $chunk . ')';
         }, STREAM_FILTER_WRITE);
 
@@ -203,11 +217,13 @@ class FilterTest extends PHPUnit_Framework_TestCase
     {
         $stream = $this->createStream();
 
-        $first = StreamFilter\append($stream, function ($chunk) {
+        $first = StreamFilter\append($stream, function ($chunk)
+        {
             return $chunk . '?';
         }, STREAM_FILTER_WRITE);
 
-        StreamFilter\append($stream, function ($chunk) {
+        StreamFilter\append($stream, function ($chunk)
+        {
             return $chunk . '!';
         }, STREAM_FILTER_WRITE);
 
@@ -246,7 +262,8 @@ class FilterTest extends PHPUnit_Framework_TestCase
         $stream = $this->createStream();
         $this->createErrorHandler($errors);
 
-        StreamFilter\append($stream, function ($chunk) {
+        StreamFilter\append($stream, function ($chunk)
+        {
             throw new \DomainException($chunk);
         });
 
@@ -262,8 +279,10 @@ class FilterTest extends PHPUnit_Framework_TestCase
         $stream = $this->createStream();
         $this->createErrorHandler($errors);
 
-        StreamFilter\append($stream, function ($chunk = null) {
-            if ($chunk === null) {
+        StreamFilter\append($stream, function ($chunk = null)
+        {
+            if ($chunk === null)
+            {
                 throw new \DomainException('end');
             }
             return $chunk;
@@ -291,8 +310,10 @@ class FilterTest extends PHPUnit_Framework_TestCase
         $this->createErrorHandler($errors);
 
         $ended = false;
-        StreamFilter\append($stream, function ($chunk = null) use (&$ended) {
-            if ($chunk === null) {
+        StreamFilter\append($stream, function ($chunk = null) use (&$ended)
+        {
+            if ($chunk === null)
+            {
                 $ended = true;
                 return '';
             }
@@ -314,8 +335,10 @@ class FilterTest extends PHPUnit_Framework_TestCase
         $stream = $this->createStream();
         $this->createErrorHandler($errors);
 
-        StreamFilter\append($stream, function ($chunk = null) {
-            if ($chunk === null) {
+        StreamFilter\append($stream, function ($chunk = null)
+        {
+            if ($chunk === null)
+            {
                 $chunk = 'end';
                 //return '';
             }
@@ -335,7 +358,9 @@ class FilterTest extends PHPUnit_Framework_TestCase
     public function testAppendInvalidStreamIsRuntimeError()
     {
         if (defined('HHVM_VERSION')) $this->markTestSkipped('Not supported on HHVM (does not reject invalid stream)');
-        StreamFilter\append(false, function () { });
+        StreamFilter\append(false, function ()
+        {
+        });
     }
 
     /**
@@ -344,7 +369,9 @@ class FilterTest extends PHPUnit_Framework_TestCase
     public function testPrependInvalidStreamIsRuntimeError()
     {
         if (defined('HHVM_VERSION')) $this->markTestSkipped('Not supported on HHVM (does not reject invalid stream)');
-        StreamFilter\prepend(false, function () { });
+        StreamFilter\prepend(false, function ()
+        {
+        });
     }
 
     /**
@@ -373,9 +400,10 @@ class FilterTest extends PHPUnit_Framework_TestCase
 
     private function createErrorHandler(&$errors)
     {
-        $errors = array();
-        set_error_handler(function ($_, $message) use (&$errors) {
-            $errors []= $message;
+        $errors = [];
+        set_error_handler(function ($_, $message) use (&$errors)
+        {
+            $errors [] = $message;
         });
     }
 

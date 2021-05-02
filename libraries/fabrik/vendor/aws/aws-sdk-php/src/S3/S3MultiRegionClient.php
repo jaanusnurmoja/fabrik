@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\CacheInterface;
@@ -199,21 +200,27 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
     public static function getArguments()
     {
         $args = parent::getArguments();
-        $regionDef = $args['region'] + ['default' => function (array &$args) {
-            $availableRegions = array_keys($args['partition']['regions']);
-            return end($availableRegions);
-        }];
+        $regionDef = $args['region'] + [
+                'default' => function (array &$args)
+                {
+                    $availableRegions = array_keys($args['partition']['regions']);
+                    return end($availableRegions);
+                }
+            ];
         unset($args['region']);
 
         return $args + [
-            'bucket_region_cache' => [
-                'type' => 'config',
-                'valid' => [CacheInterface::class],
-                'doc' => 'Cache of regions in which given buckets are located.',
-                'default' => function () { return new LruArrayCache; },
-            ],
-            'region' => $regionDef,
-        ];
+                'bucket_region_cache' => [
+                    'type'    => 'config',
+                    'valid'   => [CacheInterface::class],
+                    'doc'     => 'Cache of regions in which given buckets are located.',
+                    'default' => function ()
+                    {
+                        return new LruArrayCache;
+                    },
+                ],
+                'region'              => $regionDef,
+            ];
     }
 
     public function __construct(array $args)
@@ -229,13 +236,16 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
 
     private function determineRegionMiddleware()
     {
-        return function (callable $handler) {
-            return function (CommandInterface $command) use ($handler) {
+        return function (callable $handler)
+        {
+            return function (CommandInterface $command) use ($handler)
+            {
                 $cacheKey = $this->getCacheKey($command['Bucket']);
                 if (
                     empty($command['@region']) &&
                     $region = $this->cache->get($cacheKey)
-                ) {
+                )
+                {
                     $command['@region'] = $region;
                 }
 
@@ -243,19 +253,27 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
                     $handler,
                     $command,
                     $cacheKey
-                ) {
-                    try {
+                )
+                {
+                    try
+                    {
                         yield $handler($command);
-                    } catch (PermanentRedirectException $e) {
-                        if (empty($command['Bucket'])) {
+                    }
+                    catch (PermanentRedirectException $e)
+                    {
+                        if (empty($command['Bucket']))
+                        {
                             throw $e;
                         }
                         $result = $e->getResult();
                         $region = null;
-                        if (isset($result['@metadata']['headers']['x-amz-bucket-region'])) {
+                        if (isset($result['@metadata']['headers']['x-amz-bucket-region']))
+                        {
                             $region = $result['@metadata']['headers']['x-amz-bucket-region'];
                             $this->cache->set($cacheKey, $region);
-                        } else {
+                        }
+                        else
+                        {
                             $region = (yield $this->determineBucketRegionAsync(
                                 $command['Bucket']
                             ));
@@ -263,20 +281,28 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
 
                         $command['@region'] = $region;
                         yield $handler($command);
-                    } catch (AwsException $e) {
-                        if ($e->getAwsErrorCode() === 'AuthorizationHeaderMalformed') {
+                    }
+                    catch (AwsException $e)
+                    {
+                        if ($e->getAwsErrorCode() === 'AuthorizationHeaderMalformed')
+                        {
                             $region = $this->determineBucketRegionFromExceptionBody(
                                 $e->getResponse()
                             );
-                            if (!empty($region)) {
+                            if (!empty($region))
+                            {
                                 $this->cache->set($cacheKey, $region);
 
                                 $command['@region'] = $region;
                                 yield $handler($command);
-                            } else {
+                            }
+                            else
+                            {
                                 throw $e;
                             }
-                        } else {
+                        }
+                        else
+                        {
                             throw $e;
                         }
                     }
@@ -287,7 +313,8 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
 
     public function createPresignedRequest(CommandInterface $command, $expires)
     {
-        if (empty($command['Bucket'])) {
+        if (empty($command['Bucket']))
+        {
             throw new \InvalidArgumentException('The S3\\MultiRegionClient'
                 . ' cannot create presigned requests for commands without a'
                 . ' specified bucket.');
@@ -316,7 +343,8 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
     public function determineBucketRegionAsync($bucketName)
     {
         $cacheKey = $this->getCacheKey($bucketName);
-        if ($cached = $this->cache->get($cacheKey)) {
+        if ($cached = $this->cache->get($cacheKey))
+        {
             return Promise\promise_for($cached);
         }
 
@@ -324,7 +352,8 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
         $regionalClient = $this->getClientFromPool();
         return $regionalClient->determineBucketRegionAsync($bucketName)
             ->then(
-                function ($region) use ($cacheKey) {
+                function ($region) use ($cacheKey)
+                {
                     $this->cache->set($cacheKey, $region);
 
                     return $region;

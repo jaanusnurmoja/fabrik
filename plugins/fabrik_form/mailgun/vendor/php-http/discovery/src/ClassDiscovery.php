@@ -44,23 +44,31 @@ abstract class ClassDiscovery
     protected static function findOneByType($type)
     {
         // Look in the cache
-        if (null !== ($class = self::getFromCache($type))) {
+        if (null !== ($class = self::getFromCache($type)))
+        {
             return $class;
         }
 
         $exceptions = [];
-        foreach (self::$strategies as $strategy) {
-            try {
-                $candidates = call_user_func($strategy.'::getCandidates', $type);
-            } catch (StrategyUnavailableException $e) {
+        foreach (self::$strategies as $strategy)
+        {
+            try
+            {
+                $candidates = call_user_func($strategy . '::getCandidates', $type);
+            }
+            catch (StrategyUnavailableException $e)
+            {
                 $exceptions[] = $e;
 
                 continue;
             }
 
-            foreach ($candidates as $candidate) {
-                if (isset($candidate['condition'])) {
-                    if (!self::evaluateCondition($candidate['condition'])) {
+            foreach ($candidates as $candidate)
+            {
+                if (isset($candidate['condition']))
+                {
+                    if (!self::evaluateCondition($candidate['condition']))
+                    {
                         continue;
                     }
                 }
@@ -84,13 +92,16 @@ abstract class ClassDiscovery
      */
     private static function getFromCache($type)
     {
-        if (!isset(self::$cache[$type])) {
+        if (!isset(self::$cache[$type]))
+        {
             return;
         }
 
         $candidate = self::$cache[$type];
-        if (isset($candidate['condition'])) {
-            if (!self::evaluateCondition($candidate['condition'])) {
+        if (isset($candidate['condition']))
+        {
+            if (!self::evaluateCondition($candidate['condition']))
+            {
                 return;
             }
         }
@@ -159,18 +170,26 @@ abstract class ClassDiscovery
      */
     protected static function evaluateCondition($condition)
     {
-        if (is_string($condition)) {
+        if (is_string($condition))
+        {
             // Should be extended for functions, extensions???
             return class_exists($condition);
-        } elseif (is_callable($condition)) {
+        }
+        elseif (is_callable($condition))
+        {
             return $condition();
-        } elseif (is_bool($condition)) {
+        }
+        elseif (is_bool($condition))
+        {
             return $condition;
-        } elseif (is_array($condition)) {
+        }
+        elseif (is_array($condition))
+        {
             $evaluatedCondition = true;
 
             // Immediately stop execution if the condition is false
-            for ($i = 0; $i < count($condition) && false !== $evaluatedCondition; ++$i) {
+            for ($i = 0; $i < count($condition) && false !== $evaluatedCondition; ++$i)
+            {
                 $evaluatedCondition &= static::evaluateCondition($condition[$i]);
             }
 
@@ -191,15 +210,20 @@ abstract class ClassDiscovery
      */
     protected static function instantiateClass($class)
     {
-        try {
-            if (is_string($class)) {
+        try
+        {
+            if (is_string($class))
+            {
                 return new $class();
             }
 
-            if (is_callable($class)) {
+            if (is_callable($class))
+            {
                 return $class();
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             throw new ClassInstantiationFailedException('Unexpected exception when instantiating class.', 0, $e);
         }
 

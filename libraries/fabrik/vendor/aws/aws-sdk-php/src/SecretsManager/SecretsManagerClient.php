@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\SecretsManager;
 
 use Aws\AwsClient;
@@ -42,4 +43,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateSecretVersionStage(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateSecretVersionStageAsync(array $args = [])
  */
-class SecretsManagerClient extends AwsClient {}
+class SecretsManagerClient extends AwsClient
+{
+}

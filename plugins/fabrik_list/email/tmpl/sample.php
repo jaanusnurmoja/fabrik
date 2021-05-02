@@ -15,20 +15,20 @@ $formModel = $model->getFormModel();
 
 foreach ($data as $name => $value)
 {
-	if (preg_match('#_raw$#', $name))
-	{
-		continue;
-	}
+    if (preg_match('#_raw$#', $name))
+    {
+        continue;
+    }
 
-	$elementModel = $formModel->getElement($name);
+    $elementModel = $formModel->getElement($name);
 
-	if (empty($elementModel))
-	{
-		continue;
-	}
+    if (empty($elementModel))
+    {
+        continue;
+    }
 
-	$element = $elementModel->getElement();
-	$label = $element->label;
-	//$fval = $elementModel->renderListData($val, $row);
-	echo "$name : $label : $value <br />\n"; 
+    $element = $elementModel->getElement();
+    $label = $element->label;
+    //$fval = $elementModel->renderListData($val, $row);
+    echo "$name : $label : $value <br />\n";
 }

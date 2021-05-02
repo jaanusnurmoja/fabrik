@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto\Cipher;
 
 trait CipherBuilderTrait
@@ -34,7 +35,8 @@ trait CipherBuilderTrait
      */
     protected function buildCipherMethod($cipherName, $iv, $keySize)
     {
-        switch ($cipherName) {
+        switch ($cipherName)
+        {
             case 'cbc':
                 return new Cbc(
                     $iv,
@@ -57,7 +59,8 @@ trait CipherBuilderTrait
      */
     protected function getCipherFromAesName($aesName)
     {
-        switch ($aesName) {
+        switch ($aesName)
+        {
             case 'AES/GCM/NoPadding':
                 return 'gcm';
             case 'AES/CBC/PKCS5Padding':

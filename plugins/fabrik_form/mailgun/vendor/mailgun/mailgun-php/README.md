@@ -1,10 +1,7 @@
 # Mailgun PHP client
 
-This is the Mailgun PHP SDK. This SDK contains methods for easily interacting 
-with the Mailgun API. 
-Below are examples to get you started. For additional examples, please see our 
-official documentation 
-at http://documentation.mailgun.com
+This is the Mailgun PHP SDK. This SDK contains methods for easily interacting with the Mailgun API. Below are examples
+to get you started. For additional examples, please see our official documentation at http://documentation.mailgun.com
 
 [![Latest Version](https://img.shields.io/github/release/mailgun/mailgun-php.svg?style=flat-square)](https://github.com/mailgun/mailgun-php/releases)
 [![Build Status](https://img.shields.io/travis/mailgun/mailgun-php/master.svg?style=flat-square)](https://travis-ci.org/mailgun/mailgun-php)
@@ -16,19 +13,18 @@ at http://documentation.mailgun.com
 
 ## Installation
 
-To install the SDK, you will need to be using [Composer](http://getcomposer.org/) 
-in your project. 
-If you aren't using Composer yet, it's really simple! Here's how to install 
-composer:
+To install the SDK, you will need to be using [Composer](http://getcomposer.org/)
+in your project. If you aren't using Composer yet, it's really simple! Here's how to install composer:
 
 ```bash
 curl -sS https://getcomposer.org/installer | php
 ```
 
-The Mailgun api client is not hard coupled to Guzzle or any other library that sends HTTP messages. It uses an abstraction 
-called HTTPlug. This will give you the flexibilty to choose what PSR-7 implementation and HTTP client to use. 
+The Mailgun api client is not hard coupled to Guzzle or any other library that sends HTTP messages. It uses an
+abstraction called HTTPlug. This will give you the flexibilty to choose what PSR-7 implementation and HTTP client to
+use.
 
-If you just want to get started quickly you should run the following command: 
+If you just want to get started quickly you should run the following command:
 
 ```bash
 php composer.phar require mailgun/mailgun-php php-http/curl-client guzzlehttp/psr7
@@ -37,13 +33,18 @@ php composer.phar require mailgun/mailgun-php php-http/curl-client guzzlehttp/ps
 ### Why requiring so many packages?
 
 Mailgun has a dependency on the virtual package
-[php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) which requires you to install **an** adapter, but we do not care which one. That is an implementation detail in your application. We also need **a** PSR-7 implementation and **a** message factory. 
+[php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) which requires you to
+install **an** adapter, but we do not care which one. That is an implementation detail in your application. We also
+need **a** PSR-7 implementation and **a** message factory.
 
-You do not have to use the `php-http/curl-client` if you do not want to. You may use the `php-http/guzzle6-adapter`. Read more about the virtual packages, why this is a good idea and about the flexibility it brings at the [HTTPlug docs](http://docs.php-http.org/en/latest/httplug/users.html).
+You do not have to use the `php-http/curl-client` if you do not want to. You may use the `php-http/guzzle6-adapter`.
+Read more about the virtual packages, why this is a good idea and about the flexibility it brings at
+the [HTTPlug docs](http://docs.php-http.org/en/latest/httplug/users.html).
 
 ## Usage
 
-You should always use Composer's autoloader in your application to automatically load the your dependencies. All examples below assumes you've already included this in your file:
+You should always use Composer's autoloader in your application to automatically load the your dependencies. All
+examples below assumes you've already included this in your file:
 
 ```php
 require 'vendor/autoload.php';
@@ -66,19 +67,20 @@ $mg->messages()->send('example.com', [
 ]);
 ```
 
-Attention: `$domain` must match to the domain you have configured on [app.mailgun.com](https://app.mailgun.com/app/domains).
+Attention: `$domain` must match to the domain you have configured
+on [app.mailgun.com](https://app.mailgun.com/app/domains).
 
 ### All usage examples
 
-You find more detailed documentation at [/doc](doc/index.md) and on 
+You find more detailed documentation at [/doc](doc/index.md) and on
 [https://documentation.mailgun.com](https://documentation.mailgun.com/api_reference.html).
 
 ### Response
 
-The result of an API call is, by default, a domain object. This will make it easy
-to understand the response without reading the documentation. One can just read the
-doc blocks on the response classes. This provides an excellent IDE integration.
- 
+The result of an API call is, by default, a domain object. This will make it easy to understand the response without
+reading the documentation. One can just read the doc blocks on the response classes. This provides an excellent IDE
+integration.
+
 ```php
 $mg = Mailgun::create('key-example');
 $dns = $mg->domains()->show('example.com')->getInboundDNSRecords();
@@ -89,7 +91,7 @@ foreach ($dns as $record) {
 ```
 
 If you'd rather work with an array than an object you can inject the `ArrayHydrator`
-to the Mailgun class. 
+to the Mailgun class.
 
 ```php
 use Mailgun\Hydrator\ArrayHydrator;
@@ -105,27 +107,25 @@ foreach ($data['receiving_dns_records'] as $record) {
 }
 ```
 
-You can also use the `NoopHydrator` to get a PSR7 Response returned from 
-the API calls. 
+You can also use the `NoopHydrator` to get a PSR7 Response returned from the API calls.
 
 **Warning: When using `NoopHydrator` there will be no exceptions on a non-200 response.**
 
 ### Debugging
 
-Debugging the PHP SDK can be really helpful when things aren't working quite right. 
-To debug the SDK, here are some suggestions: 
+Debugging the PHP SDK can be really helpful when things aren't working quite right. To debug the SDK, here are some
+suggestions:
 
-Set the endpoint to Mailgun's Postbin. A Postbin is a web service that allows you to 
-post data, which is then displayed through a browser. This allows you to quickly determine
-what is actually being transmitted to Mailgun's API. 
+Set the endpoint to Mailgun's Postbin. A Postbin is a web service that allows you to post data, which is then displayed
+through a browser. This allows you to quickly determine what is actually being transmitted to Mailgun's API.
 
 **Step 1 - Create a new Postbin.**  
-Go to http://bin.mailgun.net. The Postbin will generate a special URL. Save that URL. 
+Go to http://bin.mailgun.net. The Postbin will generate a special URL. Save that URL.
 
-**Step 2 - Instantiate the Mailgun client using Postbin.**  
+**Step 2 - Instantiate the Mailgun client using Postbin.**
 
-*Tip: The bin id will be the URL part after bin.mailgun.net. It will be random generated letters and numbers. 
-For example, the bin id in this URL, http://bin.mailgun.net/aecf68de, is "aecf68de".*
+*Tip: The bin id will be the URL part after bin.mailgun.net. It will be random generated letters and numbers. For
+example, the bin id in this URL, http://bin.mailgun.net/aecf68de, is "aecf68de".*
 
 ```php
 $configurator = new HttpClientConfigurator();
@@ -141,23 +141,21 @@ $mg->messages()->send('example.com', [
   'text'    => 'It is so simple to send a message.'
 ]);
 ```
+
 ### Additional Info
 
-For usage examples on each API endpoint, head over to our official documentation 
-pages. 
+For usage examples on each API endpoint, head over to our official documentation pages.
 
-This SDK includes a [Message Builder](src/Mailgun/Messages/README.md), 
+This SDK includes a [Message Builder](src/Mailgun/Messages/README.md),
 [Batch Message](src/Mailgun/Messages/README.md) and [Opt-In Handler](src/Mailgun/Lists/README.md) component.
 
-Message Builder allows you to quickly create the array of parameters, required 
-to send a message, by calling a methods for each parameter.
-Batch Message is an extension of Message Builder, and allows you to easily send 
-a batch message job within a few seconds. The complexity of 
-batch messaging is eliminated! 
+Message Builder allows you to quickly create the array of parameters, required to send a message, by calling a methods
+for each parameter. Batch Message is an extension of Message Builder, and allows you to easily send a batch message job
+within a few seconds. The complexity of batch messaging is eliminated!
 
 ## Framework integration
 
-If you are using a framework you might consider these composer packages to make the framework integration easier. 
+If you are using a framework you might consider these composer packages to make the framework integration easier.
 
 * [tehplague/swiftmailer-mailgun-bundle](https://github.com/tehplague/swiftmailer-mailgun-bundle) for Symfony
 * [Bogardo/Mailgun](https://github.com/Bogardo/Mailgun) for Laravel
@@ -166,16 +164,17 @@ If you are using a framework you might consider these composer packages to make 
 
 ## Contribute
 
-We are currently building a new object oriented API client. Feel free to contribute in any way. As an example you may: 
+We are currently building a new object oriented API client. Feel free to contribute in any way. As an example you may:
+
 * Trying out dev-master the code
 * Create issues if you find problems
 * Reply to other people's issues
 * Review PRs
-* Write PR. You find our current milestone [here](https://github.com/mailgun/mailgun-php/milestone/1) 
+* Write PR. You find our current milestone [here](https://github.com/mailgun/mailgun-php/milestone/1)
 
 ### Running the test code
 
-If you want to run the tests you should run the following commands: 
+If you want to run the tests you should run the following commands:
 
 ```terminal
 git clone git@github.com:mailgun/mailgun-php.git
@@ -186,11 +185,10 @@ composer test
 
 ## Support and Feedback
 
-Be sure to visit the Mailgun official 
-[documentation website](http://documentation.mailgun.com/) for additional 
-information about our API. 
+Be sure to visit the Mailgun official
+[documentation website](http://documentation.mailgun.com/) for additional information about our API.
 
-If you find a bug, please submit the issue in Github directly. 
+If you find a bug, please submit the issue in Github directly.
 [Mailgun-PHP Issues](https://github.com/mailgun/mailgun-php/issues)
 
 As always, if you need additional assistance, drop us a note through your Control Panel at

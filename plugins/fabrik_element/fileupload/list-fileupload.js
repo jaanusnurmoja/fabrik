@@ -6,23 +6,23 @@
  */
 
 define(['jquery'], function (jQuery) {
-	var FbFileuploadList = new Class({
+    var FbFileuploadList = new Class({
 
-		options: {
-			'isCarousel': false
-		},
+        options: {
+            'isCarousel': false
+        },
 
-		Implements: [Events, Options],
+        Implements: [Events, Options],
 
-		initialize: function (id, options) {
-			this.setOptions(options);
+        initialize: function (id, options) {
+            this.setOptions(options);
 
-			if (this.options.isCarousel) {
-				jQuery('.slickCarousel').slick();
-				jQuery('.slickCarouselImage').css('opacity', '1');
-			}
-		}
-	});
+            if (this.options.isCarousel) {
+                jQuery('.slickCarousel').slick();
+                jQuery('.slickCarouselImage').css('opacity', '1');
+            }
+        }
+    });
 
-	return FbFileuploadList;
+    return FbFileuploadList;
 });

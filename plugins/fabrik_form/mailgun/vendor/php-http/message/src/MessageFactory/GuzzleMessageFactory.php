@@ -22,7 +22,8 @@ final class GuzzleMessageFactory implements MessageFactory
         array $headers = [],
         $body = null,
         $protocolVersion = '1.1'
-    ) {
+    )
+    {
         return new Request(
             $method,
             $uri,
@@ -41,7 +42,8 @@ final class GuzzleMessageFactory implements MessageFactory
         array $headers = [],
         $body = null,
         $protocolVersion = '1.1'
-    ) {
+    )
+    {
         return new Response(
             $statusCode,
             $headers,

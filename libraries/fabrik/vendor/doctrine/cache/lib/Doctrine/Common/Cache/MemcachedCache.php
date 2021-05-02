@@ -62,11 +62,13 @@ class MemcachedCache extends CacheProvider
      */
     protected function doSaveMultiple(array $keysAndValues, $lifetime = 0)
     {
-        foreach (array_keys($keysAndValues) as $id) {
+        foreach (array_keys($keysAndValues) as $id)
+        {
             $this->validateCacheId($id);
         }
 
-        if ($lifetime > 30 * 24 * 3600) {
+        if ($lifetime > 30 * 24 * 3600)
+        {
             $lifetime = time() + $lifetime;
         }
 
@@ -90,11 +92,12 @@ class MemcachedCache extends CacheProvider
     {
         $this->validateCacheId($id);
 
-        if ($lifeTime > 30 * 24 * 3600) {
+        if ($lifeTime > 30 * 24 * 3600)
+        {
             $lifeTime = time() + $lifeTime;
         }
 
-        return $this->memcached->set($id, $data, (int) $lifeTime);
+        return $this->memcached->set($id, $data, (int)$lifeTime);
     }
 
     /**
@@ -128,15 +131,15 @@ class MemcachedCache extends CacheProvider
      */
     protected function doGetStats()
     {
-        $stats   = $this->memcached->getStats();
+        $stats = $this->memcached->getStats();
         $servers = $this->memcached->getServerList();
-        $key     = $servers[0]['host'] . ':' . $servers[0]['port'];
-        $stats   = $stats[$key];
+        $key = $servers[0]['host'] . ':' . $servers[0]['port'];
+        $stats = $stats[$key];
 
         return [
-            Cache::STATS_HITS   => $stats['get_hits'],
-            Cache::STATS_MISSES => $stats['get_misses'],
-            Cache::STATS_UPTIME => $stats['uptime'],
+            Cache::STATS_HITS             => $stats['get_hits'],
+            Cache::STATS_MISSES           => $stats['get_misses'],
+            Cache::STATS_UPTIME           => $stats['uptime'],
             Cache::STATS_MEMORY_USAGE     => $stats['bytes'],
             Cache::STATS_MEMORY_AVAILABLE => $stats['limit_maxbytes'],
         ];
@@ -155,15 +158,18 @@ class MemcachedCache extends CacheProvider
      */
     private function validateCacheId($id)
     {
-        if (strlen($id) > self::CACHE_ID_MAX_LENGTH) {
+        if (strlen($id) > self::CACHE_ID_MAX_LENGTH)
+        {
             throw InvalidCacheId::exceedsMaxLength($id, self::CACHE_ID_MAX_LENGTH);
         }
 
-        if (strpos($id, ' ') !== false) {
+        if (strpos($id, ' ') !== false)
+        {
             throw InvalidCacheId::containsUnauthorizedCharacter($id, ' ');
         }
 
-        if (preg_match('/[\t\r\n]/', $id) === 1) {
+        if (preg_match('/[\t\r\n]/', $id) === 1)
+        {
             throw InvalidCacheId::containsControlCharacter($id);
         }
     }

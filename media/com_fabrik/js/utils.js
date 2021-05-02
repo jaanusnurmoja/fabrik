@@ -1,4 +1,5 @@
 /*jshint mootools: true */
+
 /*global Fabrik:true, fconsole:true, Joomla:true, $H:true, FbForm:true , define:true */
 
 /**
@@ -20,11 +21,11 @@ Request.HTML = new Class({
     Extends: Request,
 
     options: {
-        update     : false,
-        append     : false,
+        update: false,
+        append: false,
         evalScripts: true,
-        filter     : false,
-        headers    : {
+        filter: false,
+        headers: {
             Accept: 'text/html, application/xml, text/xml, */*'
         }
     },
@@ -91,7 +92,7 @@ Element.implement({
         var t = window.getScrollTop() + (jQuery(window).height() / 2 - this.getHeight() / 2);
         this.setStyles({
             left: l,
-            top : t
+            top: t
         });
     }
 });

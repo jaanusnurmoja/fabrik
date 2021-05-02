@@ -22,412 +22,411 @@ use \stdClass;
  * @subpackage  Fabrik.helpers
  * @since       3.0
  */
-
 class ArrayHelper
 {
-	/**
-	 * Get a value from a nested array
-	 *
-	 * @param   array   $array         Data to search
-	 * @param   string  $key           Search key, use key.dot.format to get nested value
-	 * @param   string  $default       Default value if key not found
-	 * @param   bool    $allowObjects  Should objects found in $array be converted into arrays
-	 *
-	 * @return  mixed
-	 */
+    /**
+     * Get a value from a nested array
+     *
+     * @param array $array Data to search
+     * @param string $key Search key, use key.dot.format to get nested value
+     * @param string $default Default value if key not found
+     * @param bool $allowObjects Should objects found in $array be converted into arrays
+     *
+     * @return  mixed
+     */
 
-	public static function getNestedValue($array, $key, $default = null, $allowObjects = false)
-	{
-		$keys = explode('.', $key);
+    public static function getNestedValue($array, $key, $default = null, $allowObjects = false)
+    {
+        $keys = explode('.', $key);
 
-		foreach ($keys as $key)
-		{
-			if (is_object($array) && $allowObjects)
-			{
-				$array = self::fromObject($array);
-			}
+        foreach ($keys as $key)
+        {
+            if (is_object($array) && $allowObjects)
+            {
+                $array = self::fromObject($array);
+            }
 
-			if (!is_array($array))
-			{
-				return $default;
-			}
+            if (!is_array($array))
+            {
+                return $default;
+            }
 
-			if (array_key_exists($key, $array))
-			{
-				$array = $array[$key];
-			}
-			else
-			{
-				return $default;
-			}
-		}
+            if (array_key_exists($key, $array))
+            {
+                $array = $array[$key];
+            }
+            else
+            {
+                return $default;
+            }
+        }
 
-		return $array;
-	}
+        return $array;
+    }
 
-	/**
-	 * update the data that gets posted via the form and stored by the form
-	 * model. Used in elements to modify posted data see fabrikfileupload
-	 *
-	 * @param   array   &$array  array to set value for
-	 * @param   string  $key     (in key.dot.format) to set a recursive array
-	 * @param   string  $val     value to set key to
-	 *
-	 * @return  null
-	 */
+    /**
+     * update the data that gets posted via the form and stored by the form
+     * model. Used in elements to modify posted data see fabrikfileupload
+     *
+     * @param array   &$array array to set value for
+     * @param string $key (in key.dot.format) to set a recursive array
+     * @param string $val value to set key to
+     *
+     * @return  null
+     */
 
-	public static function setValue(&$array, $key, $val)
-	{
-		if (strstr($key, '.'))
-		{
-			$nodes = explode('.', $key);
-			$count = count($nodes);
-			$pathNodes = $count - 1;
+    public static function setValue(&$array, $key, $val)
+    {
+        if (strstr($key, '.'))
+        {
+            $nodes = explode('.', $key);
+            $count = count($nodes);
+            $pathNodes = $count - 1;
 
-			if ($pathNodes < 0)
-			{
-				$pathNodes = 0;
-			}
+            if ($pathNodes < 0)
+            {
+                $pathNodes = 0;
+            }
 
-			$ns = $array;
+            $ns = $array;
 
-			for ($i = 0; $i <= $pathNodes; $i++)
-			{
-				/**
-				 * If any node along the registry path does not exist, create it
-				 * if (!isset($this->formData[$nodes[$i]])) { //this messed up for joined data
-				 */
-				if (!isset($ns[$nodes[$i]]))
-				{
-					$ns[$nodes[$i]] = array();
-				}
+            for ($i = 0; $i <= $pathNodes; $i++)
+            {
+                /**
+                 * If any node along the registry path does not exist, create it
+                 * if (!isset($this->formData[$nodes[$i]])) { //this messed up for joined data
+                 */
+                if (!isset($ns[$nodes[$i]]))
+                {
+                    $ns[$nodes[$i]] = [];
+                }
 
-				$ns = $ns[$nodes[$i]];
-			}
+                $ns = $ns[$nodes[$i]];
+            }
 
-			$ns = $val;
-			$ns = $array;
+            $ns = $val;
+            $ns = $array;
 
-			for ($i = 0; $i <= $pathNodes; $i++)
-			{
-				/**
-				 * If any node along the registry path does not exist, create it
-				 * if (!isset($this->formData[$nodes[$i]])) { //this messed up for joined data
-				 */
-				if (!isset($ns[$nodes[$i]]))
-				{
-					$ns[$nodes[$i]] = array();
-				}
+            for ($i = 0; $i <= $pathNodes; $i++)
+            {
+                /**
+                 * If any node along the registry path does not exist, create it
+                 * if (!isset($this->formData[$nodes[$i]])) { //this messed up for joined data
+                 */
+                if (!isset($ns[$nodes[$i]]))
+                {
+                    $ns[$nodes[$i]] = [];
+                }
 
-				$ns = $ns[$nodes[$i]];
-			}
+                $ns = $ns[$nodes[$i]];
+            }
 
-			$ns = $val;
-		}
-		else
-		{
-			$array[$key] = $val;
-		}
-	}
+            $ns = $val;
+        }
+        else
+        {
+            $array[$key] = $val;
+        }
+    }
 
-	/**
-	 * Utility function to map an array to a stdClass object.
-	 *
-	 * @param   array   &$array   The array to map.
-	 * @param   string  $class    Name of the class to create
-	 * @param   bool    $recurse  into each value and set any arrays to objects
-	 *
-	 * @return  object	The object mapped from the given array
-	 *
-	 * @since	1.5
-	 */
+    /**
+     * Utility function to map an array to a stdClass object.
+     *
+     * @param array   &$array The array to map.
+     * @param string $class Name of the class to create
+     * @param bool $recurse into each value and set any arrays to objects
+     *
+     * @return  object    The object mapped from the given array
+     *
+     * @since    1.5
+     */
 
-	public static function toObject(&$array, $class = 'stdClass', $recurse = true)
-	{
-		$obj = null;
+    public static function toObject(&$array, $class = 'stdClass', $recurse = true)
+    {
+        $obj = null;
 
-		if (is_array($array))
-		{
-			$obj = new $class;
+        if (is_array($array))
+        {
+            $obj = new $class;
 
-			foreach ($array as $k => $v)
-			{
-				// avoid PHP error if property name is empty
-				if ($k !== '')
-				{
-					if (is_array($v) && $recurse)
-					{
-						$obj->$k = self::toObject($v, $class);
-					}
-					else
-					{
-						$obj->$k = $v;
-					}
-				}
-			}
-		}
+            foreach ($array as $k => $v)
+            {
+                // avoid PHP error if property name is empty
+                if ($k !== '')
+                {
+                    if (is_array($v) && $recurse)
+                    {
+                        $obj->$k = self::toObject($v, $class);
+                    }
+                    else
+                    {
+                        $obj->$k = $v;
+                    }
+                }
+            }
+        }
 
-		return $obj;
-	}
+        return $obj;
+    }
 
-	/**
-	 * returns copy of array $ar1 with those entries removed
-	 * whose keys appear as keys in any of the other function args
-	 *
-	 * @param   array  $ar1  first array
-	 * @param   array  $ar2  second array
-	 *
-	 * @return  array
-	 */
+    /**
+     * returns copy of array $ar1 with those entries removed
+     * whose keys appear as keys in any of the other function args
+     *
+     * @param array $ar1 first array
+     * @param array $ar2 second array
+     *
+     * @return  array
+     */
 
-	public function array_key_diff($ar1, $ar2)
-	{
-		/**
-		 *  , $ar3, $ar4, ...
-		 *
-		 */
-		$aSubtrahends = array_slice(func_get_args(), 1);
+    public function array_key_diff($ar1, $ar2)
+    {
+        /**
+         *  , $ar3, $ar4, ...
+         *
+         */
+        $aSubtrahends = array_slice(func_get_args(), 1);
 
-		foreach ($ar1 as $key => $val)
-		{
-			foreach ($aSubtrahends as $aSubtrahend)
-			{
-				if (array_key_exists($key, $aSubtrahend))
-				{
-					unset($ar1[$key]);
-				}
-			}
-		}
+        foreach ($ar1 as $key => $val)
+        {
+            foreach ($aSubtrahends as $aSubtrahend)
+            {
+                if (array_key_exists($key, $aSubtrahend))
+                {
+                    unset($ar1[$key]);
+                }
+            }
+        }
 
-		return $ar1;
-	}
+        return $ar1;
+    }
 
-	/**
-	 * filters array of objects removing those when key does not match
-	 * the value
-	 *
-	 * @param   array   &$array  of objects - passed by ref
-	 * @param   string  $key     to search on
-	 * @param   string  $value   of key to keep from array
-	 *
-	 * @return unknown_type
-	 */
+    /**
+     * filters array of objects removing those when key does not match
+     * the value
+     *
+     * @param array   &$array of objects - passed by ref
+     * @param string $key to search on
+     * @param string $value of key to keep from array
+     *
+     * @return unknown_type
+     */
 
-	public static function filter(&$array, $key, $value)
-	{
-		for ($i = count($array) - 1; $i >= 0; $i--)
-		{
-			if ($array[$i]->$key !== $value)
-			{
-				unset($array[$i]);
-			}
-		}
-	}
+    public static function filter(&$array, $key, $value)
+    {
+        for ($i = count($array) - 1; $i >= 0; $i--)
+        {
+            if ($array[$i]->$key !== $value)
+            {
+                unset($array[$i]);
+            }
+        }
+    }
 
-	/**
-	 * get the first object in an array whose key = value
-	 *
-	 * @param   array   $array  of objects
-	 * @param   string  $key    to search on
-	 * @param   string  $value  to search on
-	 *
-	 * @return  mixed  value or false
-	 */
+    /**
+     * get the first object in an array whose key = value
+     *
+     * @param array $array of objects
+     * @param string $key to search on
+     * @param string $value to search on
+     *
+     * @return  mixed  value or false
+     */
 
-	public function get($array, $key, $value)
-	{
-		for ($i = count($array) - 1; $i >= 0; $i--)
-		{
-			if ($array[$i]->$key == $value)
-			{
-				return $array[$i];
-			}
-		}
+    public function get($array, $key, $value)
+    {
+        for ($i = count($array) - 1; $i >= 0; $i--)
+        {
+            if ($array[$i]->$key == $value)
+            {
+                return $array[$i];
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Extract an array of single property values from an array of objects
-	 *
-	 * @param   array   $array  the array of objects to search
-	 * @param   string  $key    the key to extract the values on.
-	 *
-	 * @return  array of single key values
-	 */
+    /**
+     * Extract an array of single property values from an array of objects
+     *
+     * @param array $array the array of objects to search
+     * @param string $key the key to extract the values on.
+     *
+     * @return  array of single key values
+     */
 
-	public static function extract($array, $key)
-	{
-		$return = array();
+    public static function extract($array, $key)
+    {
+        $return = [];
 
-		foreach ($array as $object)
-		{
-			$return[] = $object->$key;
-		}
+        foreach ($array as $object)
+        {
+            $return[] = $object->$key;
+        }
 
-		return $return;
-	}
+        return $return;
+    }
 
-	/**
-	 * Returns first key in an array, used if we aren't sure if array is assoc or
-	 * not, and just want the first row.
-	 *
-	 * @param   array  $array  the array to get the first key for
-	 *
-	 * @since	3.0.6
-	 *
-	 * @return  string  the first array key.
-	 */
+    /**
+     * Returns first key in an array, used if we aren't sure if array is assoc or
+     * not, and just want the first row.
+     *
+     * @param array $array the array to get the first key for
+     *
+     * @return  string  the first array key.
+     * @since    3.0.6
+     *
+     */
 
-	public static function firstKey($array)
-	{
-		reset($array);
+    public static function firstKey($array)
+    {
+        reset($array);
 
-		return key($array);
-	}
+        return key($array);
+    }
 
-	/**
-	 * Array is empty, or only has one entry which itself is an empty string
-	 *
-	 * @param   array  $array            The array to test
-	 * @param   bool   $even_emptierish  If true, use empty() to test single key, if false only count empty string or null as empty
-	 *
-	 * @since 3.0.8
-	 *
-	 * @return  bool  is array empty(ish)
-	 */
+    /**
+     * Array is empty, or only has one entry which itself is an empty string
+     *
+     * @param array $array The array to test
+     * @param bool $even_emptierish If true, use empty() to test single key, if false only count empty string or null as empty
+     *
+     * @return  bool  is array empty(ish)
+     * @since 3.0.8
+     *
+     */
 
-	public static function emptyIsh($array, $even_emptierish = false)
-	{
-		if (empty($array))
-		{
-			return true;
-		}
+    public static function emptyIsh($array, $even_emptierish = false)
+    {
+        if (empty($array))
+        {
+            return true;
+        }
 
-		if (count($array) > 1)
-		{
-			return false;
-		}
+        if (count($array) > 1)
+        {
+            return false;
+        }
 
-		$val = self::getValue($array, self::firstKey($array), '');
+        $val = self::getValue($array, self::firstKey($array), '');
 
-		return  $even_emptierish ? empty($val) : $val === '' || !isset($val);
-	}
+        return $even_emptierish ? empty($val) : $val === '' || !isset($val);
+    }
 
-	/**
-	 * Workaround for J! 3.4 change in FArrayHelper::getValue(), which now forces $array to be, well, an array.
-	 * We've been a bit naughty and using it for things like SimpleXMLElement.  So for J! 3.4 release, 2/25/2015,
-	 * globally replaced all use of JArrayHelper::getValue() with FArrayHelper::getValue().  This code is just a
-	 * copy of the J! code, it just doesn't specify "array $array".
-	 *
-	 * @param   array   &$array   A named array
-	 * @param   string  $name     The key to search for
-	 * @param   mixed   $default  The default value to give if no key found
-	 * @param   string  $type     Return type for the variable (INT, FLOAT, STRING, WORD, BOOLEAN, ARRAY)
-	 *
-	 * @return  mixed  The value from the source array
-	 */
+    /**
+     * Workaround for J! 3.4 change in FArrayHelper::getValue(), which now forces $array to be, well, an array.
+     * We've been a bit naughty and using it for things like SimpleXMLElement.  So for J! 3.4 release, 2/25/2015,
+     * globally replaced all use of JArrayHelper::getValue() with FArrayHelper::getValue().  This code is just a
+     * copy of the J! code, it just doesn't specify "array $array".
+     *
+     * @param array   &$array A named array
+     * @param string $name The key to search for
+     * @param mixed $default The default value to give if no key found
+     * @param string $type Return type for the variable (INT, FLOAT, STRING, WORD, BOOLEAN, ARRAY)
+     *
+     * @return  mixed  The value from the source array
+     */
 
-	public static function getValue(&$array, $name, $default = null, $type = '')
-	{
-		if (is_object($array))
-		{
-			$array = self::fromObject($array);
-		}
+    public static function getValue(&$array, $name, $default = null, $type = '')
+    {
+        if (is_object($array))
+        {
+            $array = self::fromObject($array);
+        }
 
-		$result = null;
+        $result = null;
 
-		if (!is_scalar($name))
-		{
-			return $default;
-		}
+        if (!is_scalar($name))
+        {
+            return $default;
+        }
 
-		if (isset($array[$name]))
-		{
-			$result = $array[$name];
-		}
+        if (isset($array[$name]))
+        {
+            $result = $array[$name];
+        }
 
-		// Handle the default case
-		if (is_null($result))
-		{
-			$result = $default;
-		}
+        // Handle the default case
+        if (is_null($result))
+        {
+            $result = $default;
+        }
 
-		// Handle the type constraint
-		switch (strtoupper($type))
-		{
-			case 'INT':
-			case 'INTEGER':
-				// Only use the first integer value
-				@preg_match('/-?[0-9]+/', $result, $matches);
-				$result = @(int) $matches[0];
-				break;
+        // Handle the type constraint
+        switch (strtoupper($type))
+        {
+            case 'INT':
+            case 'INTEGER':
+                // Only use the first integer value
+                @preg_match('/-?[0-9]+/', $result, $matches);
+                $result = @(int)$matches[0];
+                break;
 
-			case 'FLOAT':
-			case 'DOUBLE':
-				// Only use the first floating point value
-				@preg_match('/-?[0-9]+(\.[0-9]+)?/', $result, $matches);
-				$result = @(float) $matches[0];
-				break;
+            case 'FLOAT':
+            case 'DOUBLE':
+                // Only use the first floating point value
+                @preg_match('/-?[0-9]+(\.[0-9]+)?/', $result, $matches);
+                $result = @(float)$matches[0];
+                break;
 
-			case 'BOOL':
-			case 'BOOLEAN':
-				$result = (bool) $result;
-				break;
+            case 'BOOL':
+            case 'BOOLEAN':
+                $result = (bool)$result;
+                break;
 
-			case 'ARRAY':
-				if (!is_array($result))
-				{
-					$result = array($result);
-				}
-				break;
+            case 'ARRAY':
+                if (!is_array($result))
+                {
+                    $result = [$result];
+                }
+                break;
 
-			case 'STRING':
-				$result = (string) $result;
-				break;
+            case 'STRING':
+                $result = (string)$result;
+                break;
 
-			case 'WORD':
-				$result = (string) preg_replace('#\W#', '', $result);
-				break;
+            case 'WORD':
+                $result = (string)preg_replace('#\W#', '', $result);
+                break;
 
-			case 'NONE':
-			default:
-				// No casting necessary
-				break;
-		}
+            case 'NONE':
+            default:
+                // No casting necessary
+                break;
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
-	/**
-	 *
-	 * Wrapper for srray_fill, 'cos PHP <5.6 tosses a warning if $num is not positive,
-	 * and we often call it with 0 length
-	 *
-	 * @param   int    $start_index
-	 * @param   int    $num
-	 * @param   mixed  $value
-	 *
-	 * @return  array
-	 */
-	public static function array_fill($start_index, $num, $value)
-	{
-		if ($num > 0)
-		{
-			return array_fill($start_index, $num, $value);
-		}
-		else
-		{
-			return array();
-		}
-	}
+    /**
+     *
+     * Wrapper for srray_fill, 'cos PHP <5.6 tosses a warning if $num is not positive,
+     * and we often call it with 0 length
+     *
+     * @param int $start_index
+     * @param int $num
+     * @param mixed $value
+     *
+     * @return  array
+     */
+    public static function array_fill($start_index, $num, $value)
+    {
+        if ($num > 0)
+        {
+            return array_fill($start_index, $num, $value);
+        }
+        else
+        {
+            return [];
+        }
+    }
 
     /**
      * Utility function to map an object to an array
      *
-     * @param   object   $p_obj    The source object
-     * @param   boolean  $recurse  True to recurse through multi-level objects
-     * @param   string   $regex    An optional regular expression to match on field names
+     * @param object $p_obj The source object
+     * @param boolean $recurse True to recurse through multi-level objects
+     * @param string $regex An optional regular expression to match on field names
      *
      * @return  array
      *
@@ -440,15 +439,15 @@ class ArrayHelper
             return self::arrayFromObject($p_obj, $recurse, $regex);
         }
 
-        return array();
+        return [];
     }
 
     /**
      * Utility function to map an object or array to an array
      *
-     * @param   mixed    $item     The source object or array
-     * @param   boolean  $recurse  True to recurse through multi-level objects
-     * @param   string   $regex    An optional regular expression to match on field names
+     * @param mixed $item The source object or array
+     * @param boolean $recurse True to recurse through multi-level objects
+     * @param string $regex An optional regular expression to match on field names
      *
      * @return  array
      *
@@ -458,7 +457,7 @@ class ArrayHelper
     {
         if (is_object($item))
         {
-            $result = array();
+            $result = [];
 
             foreach (get_object_vars($item) as $k => $v)
             {
@@ -480,7 +479,7 @@ class ArrayHelper
 
         if (is_array($item))
         {
-            $result = array();
+            $result = [];
 
             foreach ($item as $k => $v)
             {
@@ -493,92 +492,92 @@ class ArrayHelper
         return $item;
     }
 
-	/**
-	 * Wrapper for standard array_chunk that allows for flipping a grid.  So without flipping, chunking ...
-	 *
-	 * 1, 2, 3, 4, 5
-	 *
-	 * ... into a chunksize of 2 becomes ...
-	 *
-	 * 1, 2
-	 * 3, 4
-	 * 5
-	 *
-	 * With flipping, it becomes ...
-	 *
-	 * 1, 4
-	 * 2, 5
-	 * 3
-	 *
-	 * This is useful for building Bootstrap style grids from unchunked arrays.
-	 *
-	 * @param      $array
-	 * @param      $cols
-	 * @param bool $flip
-	 *
-	 * @return array
-	 *
-	 * @since 3.8
-	 */
+    /**
+     * Wrapper for standard array_chunk that allows for flipping a grid.  So without flipping, chunking ...
+     *
+     * 1, 2, 3, 4, 5
+     *
+     * ... into a chunksize of 2 becomes ...
+     *
+     * 1, 2
+     * 3, 4
+     * 5
+     *
+     * With flipping, it becomes ...
+     *
+     * 1, 4
+     * 2, 5
+     * 3
+     *
+     * This is useful for building Bootstrap style grids from unchunked arrays.
+     *
+     * @param      $array
+     * @param      $cols
+     * @param bool $flip
+     *
+     * @return array
+     *
+     * @since 3.8
+     */
     public static function chunk($array, $cols, $flip = false)
     {
-    	$chunked = array_chunk($array, $cols);
+        $chunked = array_chunk($array, $cols);
 
-    	if ($flip)
-	    {
-		    $rows = count($chunked);
-		    $ridx = 0;
-		    $cidx = 0;
-		    $flipped = array();
+        if ($flip)
+        {
+            $rows = count($chunked);
+            $ridx = 0;
+            $cidx = 0;
+            $flipped = [];
 
-		    foreach($chunked as $row)
-		    {
-			    foreach($row as $val)
-			    {
-				    $flipped[$ridx][$cidx] = $val;
-				    $ridx++;
+            foreach ($chunked as $row)
+            {
+                foreach ($row as $val)
+                {
+                    $flipped[$ridx][$cidx] = $val;
+                    $ridx++;
 
-				    if($ridx >= $rows)
-				    {
-					    $cidx++;
-					    $ridx = 0;
-				    }
-			    }
-		    }
+                    if ($ridx >= $rows)
+                    {
+                        $cidx++;
+                        $ridx = 0;
+                    }
+                }
+            }
 
-		    return $flipped;
-	    }
+            return $flipped;
+        }
 
-	    return $chunked;
+        return $chunked;
     }
 
-	/**
-	 *
-	 * Allows reordering subgrouped arrays; 
-	 * needed i.e when we have multiple repeated joins both related to one parent (usually list's main) table
-	 * and the data is displayed like 1: a,a,a,b,b,b,c,c,c  2: a,b,c,a,b,c,a,b,c  
-	 * but we need it to have a correct look 1: a,b,c 2: a,b,c as the data is related to main row, not to each other
-	 * Created during implementing an alternate way (rowspan method) for joined data merge
-	 * 
-	 * 28.04.2017 Jaanus Nurmoja: many thanks to mr Aivar Luist who worked it out!
-	 * array $input
-	 * @return  $output
-	 */
-	 
+    /**
+     *
+     * Allows reordering subgrouped arrays;
+     * needed i.e when we have multiple repeated joins both related to one parent (usually list's main) table
+     * and the data is displayed like 1: a,a,a,b,b,b,c,c,c  2: a,b,c,a,b,c,a,b,c
+     * but we need it to have a correct look 1: a,b,c 2: a,b,c as the data is related to main row, not to each other
+     * Created during implementing an alternate way (rowspan method) for joined data merge
+     *
+     * 28.04.2017 Jaanus Nurmoja: many thanks to mr Aivar Luist who worked it out!
+     * array $input
+     * @return  $output
+     */
+
     public static function sortSubgroupedArrays($input)
     {
         $output = [];
-        
+
         if (!is_array($input))
         {
             throw new Exception("ArrayHelper::sortSubgroupedArrays Input must be an array!");
         }
-        
+
         if (count($input) <= 0)
         {
             return $output;
         }
-        
+
         //Loop through groups
         foreach ($input as $group => $groupData)
         {
@@ -588,9 +587,9 @@ class ArrayHelper
                 $output[$group] = $groupData;
                 continue;
             }
-            
+
             $output[$group] = [];
-            
+
             //Loop through sub groups
             foreach ($groupData as $subGroup => $subGroupData)
             {
@@ -601,7 +600,7 @@ class ArrayHelper
                     $output[$group][$subGroup] = $subGroupData;
                     continue;
                 }
-                
+
                 $valuesToSort = [];
                 //Check all sub arrays
                 foreach ($subGroupData as $sortArrayKey => $sortArrays)
@@ -610,17 +609,17 @@ class ArrayHelper
                     {
                         continue;
                     }
-                    
+
                     //Collect values from arrays
                     foreach ($sortArrays as $sortVal)
                     {
                         $valuesToSort[] = $sortVal;
                     }
                 }
-                
+
                 //Reorder values
                 sort($valuesToSort);
-                
+
                 //Loop through all sub arrays, assign sorted values and preserve keys
                 foreach ($subGroupData as $sortArrayKey => $sortArrays)
                 {
@@ -629,50 +628,50 @@ class ArrayHelper
                         $output[$group][$subGroup][$sortArrayKey] = $sortArrays;
                         continue;
                     }
-                    
+
                     $output[$group][$subGroup][$sortArrayKey] = [];
                     foreach ($sortArrays as $sortKey => $sortVal)
                     {
                         $output[$group][$subGroup][$sortArrayKey][$sortKey] = array_shift($valuesToSort);
                     }
                 }
-                
+
             }
-            
-            
+
+
         }
 
         return $output;
     }
 
-	/*
-	https://stackoverflow.com/questions/8587341/recursive-function-to-generate-multidimensional-array-from-database-result/8587437
-	
-	* Take the array of all elements and the id of the current parent (initially 0/nothing/null/whatever).
-	 */
+    /*
+    https://stackoverflow.com/questions/8587341/recursive-function-to-generate-multidimensional-array-from-database-result/8587437
 
-	 public static function buildTree($allParentsWithChildren, $dataGroup, $key) 
-	{
-		// Cos I want to return an array
-		
-		$tree = $dataGroup[$key];
-		$dataGroupTree = array();
+    * Take the array of all elements and the id of the current parent (initially 0/nothing/null/whatever).
+     */
 
-		// Loop through all elements.
-		// foreach ($allParentsWithChildren[$key] as $gKey => $group) 
-		foreach ($allParentsWithChildren[$key] as $fKey => $fields)
-		{
-			if (isset($fields['parentKeyFor']))
-			{
-				foreach ($fields['parentKeyFor'] as $gKey => $parentKeysFor)
-				{
-					$dataGroupTree[$gKey] = ArrayHelper::buildTree($allParentsWithChildren, $dataGroup, $gKey);					
-				}
-			}
-		}
-		
-		if ($dataGroupTree) $tree['joins'] = $dataGroupTree;
-		return $tree;
-	}
-	
+    public static function buildTree($allParentsWithChildren, $dataGroup, $key)
+    {
+        // Cos I want to return an array
+
+        $tree = $dataGroup[$key];
+        $dataGroupTree = [];
+
+        // Loop through all elements.
+        // foreach ($allParentsWithChildren[$key] as $gKey => $group)
+        foreach ($allParentsWithChildren[$key] as $fKey => $fields)
+        {
+            if (isset($fields['parentKeyFor']))
+            {
+                foreach ($fields['parentKeyFor'] as $gKey => $parentKeysFor)
+                {
+                    $dataGroupTree[$gKey] = ArrayHelper::buildTree($allParentsWithChildren, $dataGroup, $gKey);
+                }
+            }
+        }
+
+        if ($dataGroupTree) $tree['joins'] = $dataGroupTree;
+        return $tree;
+    }
+
 }

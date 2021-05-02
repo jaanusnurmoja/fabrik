@@ -28,7 +28,7 @@ class Tag extends HttpApi
      * Returns a list of tags.
      *
      * @param string $domain
-     * @param int    $limit
+     * @param int $limit
      *
      * @return IndexResponse|ResponseInterface
      */
@@ -93,7 +93,7 @@ class Tag extends HttpApi
      *
      * @param string $domain Name of the domain
      * @param string $tag
-     * @param array  $params
+     * @param array $params
      *
      * @return StatisticsResponse|ResponseInterface
      */

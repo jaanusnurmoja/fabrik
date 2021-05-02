@@ -58,19 +58,24 @@ class ReCaptcha
      */
     public function __construct($secret, RequestMethod $requestMethod = null)
     {
-        if (empty($secret)) {
+        if (empty($secret))
+        {
             throw new \RuntimeException('No secret provided');
         }
 
-        if (!is_string($secret)) {
+        if (!is_string($secret))
+        {
             throw new \RuntimeException('The provided secret must be a string');
         }
 
         $this->secret = $secret;
 
-        if (!is_null($requestMethod)) {
+        if (!is_null($requestMethod))
+        {
             $this->requestMethod = $requestMethod;
-        } else {
+        }
+        else
+        {
             $this->requestMethod = new RequestMethod\Post();
         }
     }
@@ -86,8 +91,9 @@ class ReCaptcha
     public function verify($response, $remoteIp = null)
     {
         // Discard empty solution submissions
-        if (empty($response)) {
-            $recaptchaResponse = new Response(false, array('missing-input-response'));
+        if (empty($response))
+        {
+            $recaptchaResponse = new Response(false, ['missing-input-response']);
             return $recaptchaResponse;
         }
 

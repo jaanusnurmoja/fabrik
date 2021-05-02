@@ -13,41 +13,44 @@ use Twilio\ListResource;
 use Twilio\Values;
 use Twilio\Version;
 
-class AuthRegistrationsCredentialListMappingList extends ListResource {
+class AuthRegistrationsCredentialListMappingList extends ListResource
+{
     /**
      * Construct the AuthRegistrationsCredentialListMappingList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $accountSid The unique id of the account responsible for this
      *                           domain
      * @param string $domainSid A string that uniquely identifies the SIP Domain
-     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\AuthTypes\AuthTypeRegistrations\AuthRegistrationsCredentialListMappingList 
+     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\AuthTypes\AuthTypeRegistrations\AuthRegistrationsCredentialListMappingList
      */
-    public function __construct(Version $version, $accountSid, $domainSid) {
+    public function __construct(Version $version, $accountSid, $domainSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('accountSid' => $accountSid, 'domainSid' => $domainSid, );
+        $this->solution = ['accountSid' => $accountSid, 'domainSid' => $domainSid,];
 
         $this->uri = '/Accounts/' . rawurlencode($accountSid) . '/SIP/Domains/' . rawurlencode($domainSid) . '/Auth/Registrations/CredentialListMappings.json';
     }
 
     /**
      * Create a new AuthRegistrationsCredentialListMappingInstance
-     * 
+     *
      * @param string $credentialListSid A string that uniquely identifies
      *                                  credential list resource
      * @return AuthRegistrationsCredentialListMappingInstance Newly created
      *                                                        AuthRegistrationsCredentialListMappingInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function create($credentialListSid) {
-        $data = Values::of(array('CredentialListSid' => $credentialListSid, ));
+    public function create($credentialListSid)
+    {
+        $data = Values::of(['CredentialListSid' => $credentialListSid,]);
 
         $payload = $this->version->create(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -67,7 +70,7 @@ class AuthRegistrationsCredentialListMappingList extends ListResource {
      * is reached.
      * The results are returned as a generator, so this operation is memory
      * efficient.
-     * 
+     *
      * @param int $limit Upper limit for the number of records to return. stream()
      *                   guarantees to never return more than limit.  Default is no
      *                   limit
@@ -78,7 +81,8 @@ class AuthRegistrationsCredentialListMappingList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return \Twilio\Stream stream of results
      */
-    public function stream($limit = null, $pageSize = null) {
+    public function stream($limit = null, $pageSize = null)
+    {
         $limits = $this->version->readLimits($limit, $pageSize);
 
         $page = $this->page($limits['pageSize']);
@@ -91,7 +95,7 @@ class AuthRegistrationsCredentialListMappingList extends ListResource {
      * a list.
      * Unlike stream(), this operation is eager and will load `limit` records into
      * memory before returning.
-     * 
+     *
      * @param int $limit Upper limit for the number of records to return. read()
      *                   guarantees to never return more than limit.  Default is no
      *                   limit
@@ -102,7 +106,8 @@ class AuthRegistrationsCredentialListMappingList extends ListResource {
      *                        efficient page size, i.e. min(limit, 1000)
      * @return AuthRegistrationsCredentialListMappingInstance[] Array of results
      */
-    public function read($limit = null, $pageSize = null) {
+    public function read($limit = null, $pageSize = null)
+    {
         return iterator_to_array($this->stream($limit, $pageSize), false);
     }
 
@@ -110,18 +115,19 @@ class AuthRegistrationsCredentialListMappingList extends ListResource {
      * Retrieve a single page of AuthRegistrationsCredentialListMappingInstance
      * records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param mixed $pageSize Number of records to return, defaults to 50
      * @param string $pageToken PageToken provided by the API
      * @param mixed $pageNumber Page Number, this value is simply for client state
      * @return \Twilio\Page Page of AuthRegistrationsCredentialListMappingInstance
      */
-    public function page($pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE) {
-        $params = Values::of(array(
+    public function page($pageSize = Values::NONE, $pageToken = Values::NONE, $pageNumber = Values::NONE)
+    {
+        $params = Values::of([
             'PageToken' => $pageToken,
-            'Page' => $pageNumber,
-            'PageSize' => $pageSize,
-        ));
+            'Page'      => $pageNumber,
+            'PageSize'  => $pageSize,
+        ]);
 
         $response = $this->version->page(
             'GET',
@@ -136,11 +142,12 @@ class AuthRegistrationsCredentialListMappingList extends ListResource {
      * Retrieve a specific page of AuthRegistrationsCredentialListMappingInstance
      * records from the API.
      * Request is executed immediately
-     * 
+     *
      * @param string $targetUrl API-generated URL for the requested results page
      * @return \Twilio\Page Page of AuthRegistrationsCredentialListMappingInstance
      */
-    public function getPage($targetUrl) {
+    public function getPage($targetUrl)
+    {
         $response = $this->version->getDomain()->getClient()->request(
             'GET',
             $targetUrl
@@ -151,11 +158,12 @@ class AuthRegistrationsCredentialListMappingList extends ListResource {
 
     /**
      * Constructs a AuthRegistrationsCredentialListMappingContext
-     * 
+     *
      * @param string $sid Fetch by unique credential list Sid
-     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\AuthTypes\AuthTypeRegistrations\AuthRegistrationsCredentialListMappingContext 
+     * @return \Twilio\Rest\Api\V2010\Account\Sip\Domain\AuthTypes\AuthTypeRegistrations\AuthRegistrationsCredentialListMappingContext
      */
-    public function getContext($sid) {
+    public function getContext($sid)
+    {
         return new AuthRegistrationsCredentialListMappingContext(
             $this->version,
             $this->solution['accountSid'],
@@ -166,10 +174,11 @@ class AuthRegistrationsCredentialListMappingList extends ListResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Api.V2010.AuthRegistrationsCredentialListMappingList]';
     }
 }

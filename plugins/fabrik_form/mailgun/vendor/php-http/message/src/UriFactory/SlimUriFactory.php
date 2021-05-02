@@ -18,11 +18,13 @@ final class SlimUriFactory implements UriFactory
      */
     public function createUri($uri)
     {
-        if ($uri instanceof UriInterface) {
+        if ($uri instanceof UriInterface)
+        {
             return $uri;
         }
 
-        if (is_string($uri)) {
+        if (is_string($uri))
+        {
             return Uri::createFromString($uri);
         }
 

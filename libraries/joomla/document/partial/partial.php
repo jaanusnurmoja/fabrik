@@ -23,17 +23,17 @@ file_exists(JPATH_LIBRARIES . '/joomla/document/html/html.php') && require_once 
 class JDocumentpartial extends JDocumentHTML
 {
 
-	/**
-	 * Class constructor
-	 *
-	 * @access protected
-	 * @param   array	$options Associative array of options
-	 */
-	function __construct($options = array())
-	{
-		parent::__construct($options);
+    /**
+     * Class constructor
+     *
+     * @access protected
+     * @param array $options Associative array of options
+     */
+    function __construct($options = [])
+    {
+        parent::__construct($options);
 
-		//set document type
-		$this->_type = 'partial';
-	}
+        //set document type
+        $this->_type = 'partial';
+    }
 }

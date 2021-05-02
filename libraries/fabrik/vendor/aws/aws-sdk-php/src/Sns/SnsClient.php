@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Sns;
 
 use Aws\AwsClient;
@@ -67,4 +68,6 @@ use Aws\AwsClient;
  * @method \Aws\Result unsubscribe(array $args = [])
  * @method \GuzzleHttp\Promise\Promise unsubscribeAsync(array $args = [])
  */
-class SnsClient extends AwsClient {}
+class SnsClient extends AwsClient
+{
+}

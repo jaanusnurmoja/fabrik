@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 /**
@@ -355,7 +356,8 @@ class Sdk
     {
         $this->args = $args;
 
-        if (!isset($args['handler']) && !isset($args['http_handler'])) {
+        if (!isset($args['handler']) && !isset($args['http_handler']))
+        {
             $this->args['http_handler'] = default_http_handler();
         }
     }
@@ -363,11 +365,13 @@ class Sdk
     public function __call($name, array $args)
     {
         $args = isset($args[0]) ? $args[0] : [];
-        if (strpos($name, 'createMultiRegion') === 0) {
+        if (strpos($name, 'createMultiRegion') === 0)
+        {
             return $this->createMultiRegionClient(substr($name, 17), $args);
         }
 
-        if (strpos($name, 'create') === 0) {
+        if (strpos($name, 'create') === 0)
+        {
             return $this->createClient(substr($name, 6), $args);
         }
 
@@ -378,7 +382,7 @@ class Sdk
      * Get a client by name using an array of constructor options.
      *
      * @param string $name Service name or namespace (e.g., DynamoDb, s3).
-     * @param array  $args Arguments to configure the client.
+     * @param array $args Arguments to configure the client.
      *
      * @return AwsClientInterface
      * @throws \InvalidArgumentException if any required options are missing or
@@ -411,12 +415,14 @@ class Sdk
     private function mergeArgs($namespace, array $manifest, array $args = [])
     {
         // Merge provided args with stored, service-specific args.
-        if (isset($this->args[$namespace])) {
+        if (isset($this->args[$namespace]))
+        {
             $args += $this->args[$namespace];
         }
 
         // Provide the endpoint prefix in the args.
-        if (!isset($args['service'])) {
+        if (!isset($args['service']))
+        {
             $args['service'] = $manifest['endpoint'];
         }
 

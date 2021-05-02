@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Serializer;
 
 use Aws\Api\Service;
@@ -17,15 +18,16 @@ class RestJsonSerializer extends RestSerializer
     private $contentType;
 
     /**
-     * @param Service  $api           Service API description
-     * @param string   $endpoint      Endpoint to connect to
+     * @param Service $api Service API description
+     * @param string $endpoint Endpoint to connect to
      * @param JsonBody $jsonFormatter Optional JSON formatter to use
      */
     public function __construct(
         Service $api,
         $endpoint,
         JsonBody $jsonFormatter = null
-    ) {
+    )
+    {
         parent::__construct($api, $endpoint);
         $this->contentType = JsonBody::getContentType($api);
         $this->jsonFormatter = $jsonFormatter ?: new JsonBody($api);
@@ -34,6 +36,6 @@ class RestJsonSerializer extends RestSerializer
     protected function payload(StructureShape $member, array $value, array &$opts)
     {
         $opts['headers']['Content-Type'] = $this->contentType;
-        $opts['body'] = (string) $this->jsonFormatter->build($member, $value);
+        $opts['body'] = (string)$this->jsonFormatter->build($member, $value);
     }
 }

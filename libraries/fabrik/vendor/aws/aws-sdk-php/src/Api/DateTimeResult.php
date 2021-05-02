@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -36,6 +37,6 @@ class DateTimeResult extends \DateTime implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return (string) $this;
+        return (string)$this;
     }
 }

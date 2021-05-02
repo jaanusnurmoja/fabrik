@@ -11,6 +11,7 @@
 /**
  * @namespace
  */
+
 namespace Pop\Shipping\Adapter;
 
 /**
@@ -29,7 +30,7 @@ interface AdapterInterface
     /**
      * Set ship to
      *
-     * @param  array  $shipTo
+     * @param array $shipTo
      * @return mixed
      */
     public function shipTo(array $shipTo);
@@ -37,7 +38,7 @@ interface AdapterInterface
     /**
      * Set ship from
      *
-     * @param  array  $shipFrom
+     * @param array $shipFrom
      * @return mixed
      */
     public function shipFrom(array $shipFrom);
@@ -45,8 +46,8 @@ interface AdapterInterface
     /**
      * Set dimensions
      *
-     * @param  array  $dimensions
-     * @param  string $unit
+     * @param array $dimensions
+     * @param string $unit
      * @return mixed
      */
     public function setDimensions(array $dimensions, $unit = null);
@@ -54,8 +55,8 @@ interface AdapterInterface
     /**
      * Set dimensions
      *
-     * @param  string $weight
-     * @param  string $unit
+     * @param string $weight
+     * @param string $unit
      * @return mixed
      */
     public function setWeight($weight, $unit = null);
@@ -63,7 +64,7 @@ interface AdapterInterface
     /**
      * Send transaction
      *
-     * @param  boolean $verifyPeer
+     * @param boolean $verifyPeer
      * @return void
      */
     public function send($verifyPeer = true);

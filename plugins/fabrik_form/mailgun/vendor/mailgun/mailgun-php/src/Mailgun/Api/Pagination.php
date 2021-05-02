@@ -72,7 +72,8 @@ trait Pagination
     {
         Assert::stringNotEmpty($class);
 
-        if (empty($url)) {
+        if (empty($url))
+        {
             return;
         }
 

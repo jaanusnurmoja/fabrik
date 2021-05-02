@@ -22,49 +22,49 @@ use Twilio\Exceptions\TwilioException;
  * @subpackage  Fabrik.form.sms
  * @since       3.0
  */
-
 class Twilio extends JObject
 {
-	/**
-	 * Send SMS
-	 *
-	 * @param   string  $message  sms message
-	 * @param   array   $opts     options
-	 *
-	 * @return  void
-	 */
+    /**
+     * Send SMS
+     *
+     * @param string $message sms message
+     * @param array $opts options
+     *
+     * @return  void
+     */
 
-	public function process($message = '', $opts)
-	{
-		$sid = ArrayHelper::getValue($opts, 'sms-username');
-		$token = ArrayHelper::getValue($opts, 'sms-password');
-		$smsto = ArrayHelper::getValue($opts, 'sms-to');
+    public function process($message = '', $opts)
+    {
+        $sid = ArrayHelper::getValue($opts, 'sms-username');
+        $token = ArrayHelper::getValue($opts, 'sms-password');
+        $smsto = ArrayHelper::getValue($opts, 'sms-to');
 
-		// From a valid Twilio number
-		$smsfrom = ArrayHelper::getValue($opts, 'sms-from');
-		$smstos = empty($smsto) ? array() : explode(",", $smsto);
+        // From a valid Twilio number
+        $smsfrom = ArrayHelper::getValue($opts, 'sms-from');
+        $smstos = empty($smsto) ? [] : explode(",", $smsto);
 
-		$client = new Twilio\Rest\Client($sid, $token);
+        $client = new Twilio\Rest\Client($sid, $token);
 
-		foreach ($smstos as $smsto)
-		{
-			try {
-				$client->messages->create(
-					trim($smsto),
-					array(
-						'from' => $smsfrom,
-						'body' => $message
-					)
-				);
-			}
-			catch (TwilioException $e)
-			{
-				JFactory::getApplication()->enqueueMessage($e->getMessage(), 'error');
+        foreach ($smstos as $smsto)
+        {
+            try
+            {
+                $client->messages->create(
+                    trim($smsto),
+                    [
+                        'from' => $smsfrom,
+                        'body' => $message
+                    ]
+                );
+            }
+            catch (TwilioException $e)
+            {
+                JFactory::getApplication()->enqueueMessage($e->getMessage(), 'error');
 
-				return false;
-			}
-		}
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 }

@@ -32,7 +32,8 @@ class ChunkStream extends FilteredStream
     {
         parent::fill();
 
-        if ($this->stream->eof()) {
+        if ($this->stream->eof())
+        {
             $this->buffer .= "0\r\n\r\n";
         }
     }

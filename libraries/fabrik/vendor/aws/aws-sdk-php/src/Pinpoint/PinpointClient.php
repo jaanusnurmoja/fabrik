@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Pinpoint;
 
 use Aws\Api\ApiProvider;
@@ -160,18 +161,19 @@ use Aws\AwsClient;
 class PinpointClient extends AwsClient
 {
     private static $nameCollisionOverrides = [
-        'GetUserEndpoint' => 'GetEndpoint',
-        'GetUserEndpointAsync' => 'GetEndpointAsync',
-        'UpdateUserEndpoint' => 'UpdateEndpoint',
-        'UpdateUserEndpointAsync' => 'UpdateEndpointAsync',
-        'UpdateUserEndpointsBatch' => 'UpdateEndpointsBatch',
+        'GetUserEndpoint'               => 'GetEndpoint',
+        'GetUserEndpointAsync'          => 'GetEndpointAsync',
+        'UpdateUserEndpoint'            => 'UpdateEndpoint',
+        'UpdateUserEndpointAsync'       => 'UpdateEndpointAsync',
+        'UpdateUserEndpointsBatch'      => 'UpdateEndpointsBatch',
         'UpdateUserEndpointsBatchAsync' => 'UpdateEndpointsBatchAsync',
     ];
 
     public function __call($name, array $args)
     {
         // Overcomes a naming collision with `AwsClient::getEndpoint`.
-        if (isset(self::$nameCollisionOverrides[ucfirst($name)])) {
+        if (isset(self::$nameCollisionOverrides[ucfirst($name)]))
+        {
             $name = self::$nameCollisionOverrides[ucfirst($name)];
         }
 
@@ -184,8 +186,10 @@ class PinpointClient extends AwsClient
      */
     public static function applyDocFilters(array $api, array $docs)
     {
-        foreach (self::$nameCollisionOverrides as $overrideName => $operationName) {
-            if (substr($overrideName, -5) === 'Async') {
+        foreach (self::$nameCollisionOverrides as $overrideName => $operationName)
+        {
+            if (substr($overrideName, -5) === 'Async')
+            {
                 continue;
             }
             // Overcomes a naming collision with `AwsClient::getEndpoint`.

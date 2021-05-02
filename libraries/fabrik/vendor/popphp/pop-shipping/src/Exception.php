@@ -11,6 +11,7 @@
 /**
  * @namespace
  */
+
 namespace Pop\Shipping;
 
 /**
@@ -23,4 +24,6 @@ namespace Pop\Shipping;
  * @license    http://www.popphp.org/license     New BSD License
  * @version    2.1.0
  */
-class Exception extends \Exception {}
+class Exception extends \Exception
+{
+}

@@ -2,7 +2,8 @@
 
 namespace Twilio\Jwt\Grants;
 
-class TaskRouterGrant implements Grant {
+class TaskRouterGrant implements Grant
+{
     private $workspaceSid;
     private $workerSid;
     private $role;
@@ -93,14 +94,17 @@ class TaskRouterGrant implements Grant {
      */
     public function getPayload()
     {
-        $payload = array();
-        if ($this->workspaceSid) {
+        $payload = [];
+        if ($this->workspaceSid)
+        {
             $payload['workspace_sid'] = $this->workspaceSid;
         }
-        if ($this->workerSid) {
+        if ($this->workerSid)
+        {
             $payload['worker_sid'] = $this->workerSid;
         }
-        if ($this->role) {
+        if ($this->role)
+        {
             $payload['role'] = $this->role;
         }
 

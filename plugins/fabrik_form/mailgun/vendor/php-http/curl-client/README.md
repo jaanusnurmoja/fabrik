@@ -9,7 +9,6 @@
 
 The cURL client use the cURL PHP extension which must be activated in your `php.ini`.
 
-
 ## Install
 
 Via Composer
@@ -32,12 +31,10 @@ $ composer test
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details.
 
-
 ## Security
 
 If you discover any security related issues, please contact us at
 [security@php-http.org](mailto:security@php-http.org).
-
 
 ## License
 

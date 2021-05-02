@@ -25,86 +25,86 @@ require_once COM_FABRIK_FRONTEND . '/models/validation_rule.php';
  */
 class PlgFabrik_ValidationruleRegex extends PlgFabrik_Validationrule
 {
-	/**
-	 * Plugin name
-	 *
-	 * @var string
-	 */
-	protected $pluginName = 'regex';
+    /**
+     * Plugin name
+     *
+     * @var string
+     */
+    protected $pluginName = 'regex';
 
-	/**
-	 * Validate the elements data against the rule
-	 *
-	 * @param   string  $data           To check
-	 * @param   int     $repeatCounter  Repeat group counter
-	 *
-	 * @return  bool  true if validation passes, false if fails
-	 */
-	public function validate($data, $repeatCounter)
-	{
-		// For multi-select elements
-		if (is_array($data))
-		{
-			$data = implode('', $data);
-		}
+    /**
+     * Validate the elements data against the rule
+     *
+     * @param string $data To check
+     * @param int $repeatCounter Repeat group counter
+     *
+     * @return  bool  true if validation passes, false if fails
+     */
+    public function validate($data, $repeatCounter)
+    {
+        // For multi-select elements
+        if (is_array($data))
+        {
+            $data = implode('', $data);
+        }
 
-		$params = $this->getParams();
-		$doMatch = $params->get('regex-match');
+        $params = $this->getParams();
+        $doMatch = $params->get('regex-match');
 
-		if ($doMatch)
-		{
-			$matches = array();
-			$v = $params->get('regex-expression');
-			$v = trim($v);
-			$found = empty($v) ? true : preg_match($v, $data, $matches);
+        if ($doMatch)
+        {
+            $matches = [];
+            $v = $params->get('regex-expression');
+            $v = trim($v);
+            $found = empty($v) ? true : preg_match($v, $data, $matches);
 
-			return $found;
-		}
+            return $found;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Checks if the validation should replace the submitted element data
-	 * if so then the replaced data is returned otherwise original data returned
-	 *
-	 * @param   string  $data           Original data
-	 * @param   int     $repeatCounter  Repeat group counter
-	 *
-	 * @return  string	original or replaced data
-	 */
-	public function replace($data, $repeatCounter)
-	{
-		$params = $this->getParams();
-		$doMatch = $params->get('regex-match');
+    /**
+     * Checks if the validation should replace the submitted element data
+     * if so then the replaced data is returned otherwise original data returned
+     *
+     * @param string $data Original data
+     * @param int $repeatCounter Repeat group counter
+     *
+     * @return  string    original or replaced data
+     */
+    public function replace($data, $repeatCounter)
+    {
+        $params = $this->getParams();
+        $doMatch = $params->get('regex-match');
 
-		if (!$doMatch)
-		{
-			$v = $params->get($this->pluginName . '-expression');
-			$v = trim($v);
-			$replace = $params->get('regex-replacestring');
-			$return = empty($v) ? $data : preg_replace($v, $replace, $data);
+        if (!$doMatch)
+        {
+            $v = $params->get($this->pluginName . '-expression');
+            $v = trim($v);
+            $replace = $params->get('regex-replacestring');
+            $return = empty($v) ? $data : preg_replace($v, $replace, $data);
 
-			return $return;
-		}
+            return $return;
+        }
 
-		return $data;
-	}
+        return $data;
+    }
 
-	/**
-	 * Get the base icon image as defined by the J Plugin options
-	 *
-	 * @since   3.1b2
-	 *
-	 * @return  string
-	 */
-	public function iconImage()
-	{
-		$plugin = JPluginHelper::getPlugin('fabrik_validationrule', $this->pluginName);
-		$globalParams = new Registry($plugin->params);
-		$default = $globalParams->get('icon', 'star');
-		$params = $this->getParams();
+    /**
+     * Get the base icon image as defined by the J Plugin options
+     *
+     * @return  string
+     * @since   3.1b2
+     *
+     */
+    public function iconImage()
+    {
+        $plugin = JPluginHelper::getPlugin('fabrik_validationrule', $this->pluginName);
+        $globalParams = new Registry($plugin->params);
+        $default = $globalParams->get('icon', 'star');
+        $params = $this->getParams();
 
-		return $params->get('icon', $default);
-	}
+        return $params->get('icon', $default);
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CodeBuild;
 
 use Aws\AwsClient;
@@ -44,4 +45,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateWebhook(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateWebhookAsync(array $args = [])
  */
-class CodeBuildClient extends AwsClient {}
+class CodeBuildClient extends AwsClient
+{
+}

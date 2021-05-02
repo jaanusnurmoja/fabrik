@@ -42,17 +42,17 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
 
     public function provideJson()
     {
-        return array(
-            array('{"success": true}', true, array(), null),
-            array('{"success": true, "hostname": "google.com"}', true, array(), 'google.com'),
-            array('{"success": false, "error-codes": ["test"]}', false, array('test'), null),
-            array('{"success": false, "error-codes": ["test"], "hostname": "google.com"}', false, array('test'), 'google.com'),
-            array('{"success": true, "error-codes": ["test"]}', true, array(), null),
-            array('{"success": true, "error-codes": ["test"], "hostname": "google.com"}', true, array(), 'google.com'),
-            array('{"success": false}', false, array(), null),
-            array('{"success": false, "hostname": "google.com"}', false, array(), 'google.com'),
-            array('BAD JSON', false, array('invalid-json'), null),
-        );
+        return [
+            ['{"success": true}', true, [], null],
+            ['{"success": true, "hostname": "google.com"}', true, [], 'google.com'],
+            ['{"success": false, "error-codes": ["test"]}', false, ['test'], null],
+            ['{"success": false, "error-codes": ["test"], "hostname": "google.com"}', false, ['test'], 'google.com'],
+            ['{"success": true, "error-codes": ["test"]}', true, [], null],
+            ['{"success": true, "error-codes": ["test"], "hostname": "google.com"}', true, [], 'google.com'],
+            ['{"success": false}', false, [], null],
+            ['{"success": false, "hostname": "google.com"}', false, [], 'google.com'],
+            ['BAD JSON', false, ['invalid-json'], null],
+        ];
     }
 
     public function testIsSuccess()
@@ -63,22 +63,22 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $response = new Response(false);
         $this->assertFalse($response->isSuccess());
 
-        $response = new Response(true, array(), 'example.com');
+        $response = new Response(true, [], 'example.com');
         $this->assertEquals('example.com', $response->getHostName());
     }
 
     public function testGetErrorCodes()
     {
-        $errorCodes = array('test');
+        $errorCodes = ['test'];
         $response = new Response(true, $errorCodes);
         $this->assertEquals($errorCodes, $response->getErrorCodes());
     }
 
     public function testGetHostname()
     {
-      $hostname = 'google.com';
-      $errorCodes = array();
-      $response = new Response(true, $errorCodes, $hostname);
-      $this->assertEquals($hostname, $response->getHostname());
+        $hostname = 'google.com';
+        $errorCodes = [];
+        $response = new Response(true, $errorCodes, $hostname);
+        $this->assertEquals($hostname, $response->getHostname());
     }
 }

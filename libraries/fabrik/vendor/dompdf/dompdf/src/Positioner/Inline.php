@@ -40,7 +40,8 @@ class Inline extends AbstractPositioner
 
         // End debugging
 
-        if (!$p) {
+        if (!$p)
+        {
             throw new Exception("No block-level parent found.  Not good.");
         }
 
@@ -51,8 +52,10 @@ class Inline extends AbstractPositioner
 
         // Skip the page break if in a fixed position element
         $is_fixed = false;
-        while ($f = $f->get_parent()) {
-            if ($f->get_style()->position === "fixed") {
+        while ($f = $f->get_parent())
+        {
+            if ($f->get_style()->position === "fixed")
+            {
                 $is_fixed = true;
                 break;
             }
@@ -60,14 +63,17 @@ class Inline extends AbstractPositioner
 
         $f = $frame;
 
-        if (!$is_fixed && $f->get_parent() &&
+        if (
+            !$is_fixed && $f->get_parent() &&
             $f->get_parent() instanceof InlineFrameDecorator &&
             $f->is_text_node()
-        ) {
+        )
+        {
             $min_max = $f->get_reflower()->get_min_max_width();
 
             // If the frame doesn't fit in the current line, a line break occurs
-            if ($min_max["min"] > ($cb["w"] - $line->left - $line->w - $line->right)) {
+            if ($min_max["min"] > ($cb["w"] - $line->left - $line->w - $line->right))
+            {
                 $p->add_line();
             }
         }

@@ -26,52 +26,52 @@ require_once JPATH_SITE . '/plugins/fabrik_validationrule/openprovider/libs/api.
  */
 class PlgFabrik_ValidationruleOpenprovider extends PlgFabrik_Validationrule
 {
-	/**
-	 * Plugin name
-	 *
-	 * @var string
-	 */
-	protected $pluginName = 'openprovider';
+    /**
+     * Plugin name
+     *
+     * @var string
+     */
+    protected $pluginName = 'openprovider';
 
-	/**
-	 * Validate the elements data against the rule
-	 *
-	 * @param   string  $data           To check
-	 * @param   int     $repeatCounter  Repeat group counter
-	 *
-	 * @return  bool  true if validation passes, false if fails
-	 */
-	public function validate($data, $repeatCounter)
-	{
-		$params = $this->getParams();
-		$username = $params->get('openprovider_username');
-		$password = $params->get('openprovider_password');
-		$data = strtolower($data);
+    /**
+     * Validate the elements data against the rule
+     *
+     * @param string $data To check
+     * @param int $repeatCounter Repeat group counter
+     *
+     * @return  bool  true if validation passes, false if fails
+     */
+    public function validate($data, $repeatCounter)
+    {
+        $params = $this->getParams();
+        $username = $params->get('openprovider_username');
+        $password = $params->get('openprovider_password');
+        $data = strtolower($data);
 
-		// Strip www. from front
-		if (substr($data, 0, 4) == 'www.')
-		{
-			$data = substr($data, 4, strlen($data));
-		}
+        // Strip www. from front
+        if (substr($data, 0, 4) == 'www.')
+        {
+            $data = substr($data, 4, strlen($data));
+        }
 
-		list($domain, $extension) = explode('.', $data, 2);
-		$api = new OP_API('https://api.openprovider.eu');
-		$args = array(
-			'domains' => array(
-				array(
-					'name' => $domain,
-					'extension' => $extension
-				)
-			)
-		);
-		$request = new OP_Request;
-		$request->setCommand('checkDomainRequest')
-		->setAuth(array('username' => $username, 'password' => $password))
-		->setArgs($args);
+        list($domain, $extension) = explode('.', $data, 2);
+        $api = new OP_API('https://api.openprovider.eu');
+        $args = [
+            'domains' => [
+                [
+                    'name'      => $domain,
+                    'extension' => $extension
+                ]
+            ]
+        ];
+        $request = new OP_Request;
+        $request->setCommand('checkDomainRequest')
+            ->setAuth(['username' => $username, 'password' => $password])
+            ->setArgs($args);
 
-		$reply = $api->setDebug(0)->process($request);
-		$res = $reply->getValue();
+        $reply = $api->setDebug(0)->process($request);
+        $res = $reply->getValue();
 
-		return $res[0]['status'] === 'active' ? false : true;
-	}
+        return $res[0]['status'] === 'active' ? false : true;
+    }
 }

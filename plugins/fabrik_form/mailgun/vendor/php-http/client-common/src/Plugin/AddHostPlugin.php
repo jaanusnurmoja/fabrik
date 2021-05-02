@@ -26,14 +26,15 @@ final class AddHostPlugin implements Plugin
 
     /**
      * @param UriInterface $host
-     * @param array        $config {
+     * @param array $config {
      *
-     *     @var bool $replace True will replace all hosts, false will only add host when none is specified.
+     * @var bool $replace True will replace all hosts, false will only add host when none is specified.
      * }
      */
     public function __construct(UriInterface $host, array $config = [])
     {
-        if ('' === $host->getHost()) {
+        if ('' === $host->getHost())
+        {
             throw new \LogicException('Host can not be empty');
         }
 
@@ -51,12 +52,12 @@ final class AddHostPlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        if ($this->replace || '' === $request->getUri()->getHost()) {
+        if ($this->replace || '' === $request->getUri()->getHost())
+        {
             $uri = $request->getUri()
                 ->withHost($this->host->getHost())
                 ->withScheme($this->host->getScheme())
-                ->withPort($this->host->getPort())
-            ;
+                ->withPort($this->host->getPort());
 
             $request = $request->withUri($uri);
         }

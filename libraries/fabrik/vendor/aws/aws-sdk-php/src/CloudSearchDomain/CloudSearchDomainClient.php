@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudSearchDomain;
 
 use Aws\AwsClient;
@@ -30,7 +31,8 @@ class CloudSearchDomainClient extends AwsClient
     {
         $args = parent::getArguments();
         $args['endpoint']['required'] = true;
-        $args['region']['default'] = function (array $args) {
+        $args['region']['default'] = function (array $args)
+        {
             // Determine the region from the provided endpoint.
             // (e.g. http://search-blah.{region}.cloudsearch.amazonaws.com)
             return explode('.', new Uri($args['endpoint']))[1];
@@ -46,12 +48,15 @@ class CloudSearchDomainClient extends AwsClient
      */
     private function searchByPost()
     {
-        return static function (callable $handler) {
+        return static function (callable $handler)
+        {
             return function (
                 CommandInterface $c,
                 RequestInterface $r = null
-            ) use ($handler) {
-                if ($c->getName() !== 'Search') {
+            ) use ($handler)
+            {
+                if ($c->getName() !== 'Search')
+                {
                     return $handler($c, $r);
                 }
                 return $handler($c, self::convertGetToPost($r));
@@ -69,7 +74,8 @@ class CloudSearchDomainClient extends AwsClient
      */
     public static function convertGetToPost(RequestInterface $r)
     {
-        if ($r->getMethod() === 'POST') {
+        if ($r->getMethod() === 'POST')
+        {
             return $r;
         }
 

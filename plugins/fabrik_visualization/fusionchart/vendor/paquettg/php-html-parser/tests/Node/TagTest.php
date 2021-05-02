@@ -2,7 +2,8 @@
 
 use PHPHtmlParser\Dom\Tag;
 
-class NodeTagTest extends PHPUnit_Framework_TestCase {
+class NodeTagTest extends PHPUnit_Framework_TestCase
+{
 
     public function testSelfClosing()
     {
@@ -36,10 +37,10 @@ class NodeTagTest extends PHPUnit_Framework_TestCase {
     public function testRemoveAllAttributes()
     {
         $attr = [
-                'class' => [
-                        'value'       => 'clear-fix',
-                        'doubleQuote' => true,
-                ],
+            'class' => [
+                'value'       => 'clear-fix',
+                'doubleQuote' => true,
+            ],
         ];
 
         $tag = new Tag('a');

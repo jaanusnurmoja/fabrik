@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp;
 
 use GuzzleHttp\Cookie\CookieJar;
@@ -61,14 +62,18 @@ class Client implements ClientInterface
      */
     public function __construct(array $config = [])
     {
-        if (!isset($config['handler'])) {
+        if (!isset($config['handler']))
+        {
             $config['handler'] = HandlerStack::create();
-        } elseif (!is_callable($config['handler'])) {
+        }
+        elseif (!is_callable($config['handler']))
+        {
             throw new \InvalidArgumentException('handler must be a callable');
         }
 
         // Convert the base_uri to a UriInterface
-        if (isset($config['base_uri'])) {
+        if (isset($config['base_uri']))
+        {
             $config['base_uri'] = Psr7\uri_for($config['base_uri']);
         }
 
@@ -77,7 +82,8 @@ class Client implements ClientInterface
 
     public function __call($method, $args)
     {
-        if (count($args) < 1) {
+        if (count($args) < 1)
+        {
             throw new \InvalidArgumentException('Magic request methods require a URI and optional options array');
         }
 
@@ -115,7 +121,8 @@ class Client implements ClientInterface
         $version = isset($options['version']) ? $options['version'] : '1.1';
         // Merge the URI into the base URI.
         $uri = $this->buildUri($uri, $options);
-        if (is_array($body)) {
+        if (is_array($body))
+        {
             $this->invalidBody();
         }
         $request = new Psr7\Request($method, $uri, $headers, $body, $version);
@@ -143,7 +150,8 @@ class Client implements ClientInterface
         // for BC we accept null which would otherwise fail in uri_for
         $uri = Psr7\uri_for($uri === null ? '' : $uri);
 
-        if (isset($config['base_uri'])) {
+        if (isset($config['base_uri']))
+        {
             $uri = Psr7\UriResolver::resolve(Psr7\uri_for($config['base_uri']), $uri);
         }
 
@@ -170,32 +178,41 @@ class Client implements ClientInterface
         // We can only trust the HTTP_PROXY environment variable in a CLI
         // process due to the fact that PHP has no reliable mechanism to
         // get environment variables that start with "HTTP_".
-        if (php_sapi_name() == 'cli' && getenv('HTTP_PROXY')) {
+        if (php_sapi_name() == 'cli' && getenv('HTTP_PROXY'))
+        {
             $defaults['proxy']['http'] = getenv('HTTP_PROXY');
         }
 
-        if ($proxy = getenv('HTTPS_PROXY')) {
+        if ($proxy = getenv('HTTPS_PROXY'))
+        {
             $defaults['proxy']['https'] = $proxy;
         }
 
-        if ($noProxy = getenv('NO_PROXY')) {
+        if ($noProxy = getenv('NO_PROXY'))
+        {
             $cleanedNoProxy = str_replace(' ', '', $noProxy);
             $defaults['proxy']['no'] = explode(',', $cleanedNoProxy);
         }
 
         $this->config = $config + $defaults;
 
-        if (!empty($config['cookies']) && $config['cookies'] === true) {
+        if (!empty($config['cookies']) && $config['cookies'] === true)
+        {
             $this->config['cookies'] = new CookieJar();
         }
 
         // Add the default user-agent header.
-        if (!isset($this->config['headers'])) {
+        if (!isset($this->config['headers']))
+        {
             $this->config['headers'] = ['User-Agent' => default_user_agent()];
-        } else {
+        }
+        else
+        {
             // Add the User-Agent header if one was not already set.
-            foreach (array_keys($this->config['headers']) as $name) {
-                if (strtolower($name) === 'user-agent') {
+            foreach (array_keys($this->config['headers']) as $name)
+            {
+                if (strtolower($name) === 'user-agent')
+                {
                     return;
                 }
             }
@@ -214,7 +231,8 @@ class Client implements ClientInterface
     {
         $defaults = $this->config;
 
-        if (!empty($defaults['headers'])) {
+        if (!empty($defaults['headers']))
+        {
             // Default headers are only added if they are not present.
             $defaults['_conditional'] = $defaults['headers'];
             unset($defaults['headers']);
@@ -222,12 +240,16 @@ class Client implements ClientInterface
 
         // Special handling for headers is required as they are added as
         // conditional headers and as headers passed to a request ctor.
-        if (array_key_exists('headers', $options)) {
+        if (array_key_exists('headers', $options))
+        {
             // Allows default headers to be unset.
-            if ($options['headers'] === null) {
+            if ($options['headers'] === null)
+            {
                 $defaults['_conditional'] = null;
                 unset($options['headers']);
-            } elseif (!is_array($options['headers'])) {
+            }
+            elseif (!is_array($options['headers']))
+            {
                 throw new \InvalidArgumentException('headers must be an array');
             }
         }
@@ -236,8 +258,10 @@ class Client implements ClientInterface
         $result = $options + $defaults;
 
         // Remove null values.
-        foreach ($result as $k => $v) {
-            if ($v === null) {
+        foreach ($result as $k => $v)
+        {
+            if ($v === null)
+            {
                 unset($result[$k]);
             }
         }
@@ -252,20 +276,22 @@ class Client implements ClientInterface
      * as-is without merging in default options.
      *
      * @param RequestInterface $request
-     * @param array            $options
+     * @param array $options
      *
      * @return Promise\PromiseInterface
      */
     private function transfer(RequestInterface $request, array $options)
     {
         // save_to -> sink
-        if (isset($options['save_to'])) {
+        if (isset($options['save_to']))
+        {
             $options['sink'] = $options['save_to'];
             unset($options['save_to']);
         }
 
         // exceptions -> http_errors
-        if (isset($options['exceptions'])) {
+        if (isset($options['exceptions']))
+        {
             $options['http_errors'] = $options['exceptions'];
             unset($options['exceptions']);
         }
@@ -273,9 +299,12 @@ class Client implements ClientInterface
         $request = $this->applyOptions($request, $options);
         $handler = $options['handler'];
 
-        try {
+        try
+        {
             return Promise\promise_for($handler($request, $options));
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             return Promise\rejection_for($e);
         }
     }
@@ -284,7 +313,7 @@ class Client implements ClientInterface
      * Applies the array of request options to a request.
      *
      * @param RequestInterface $request
-     * @param array            $options
+     * @param array $options
      *
      * @return RequestInterface
      */
@@ -294,13 +323,16 @@ class Client implements ClientInterface
             'set_headers' => [],
         ];
 
-        if (isset($options['headers'])) {
+        if (isset($options['headers']))
+        {
             $modify['set_headers'] = $options['headers'];
             unset($options['headers']);
         }
 
-        if (isset($options['form_params'])) {
-            if (isset($options['multipart'])) {
+        if (isset($options['form_params']))
+        {
+            if (isset($options['multipart']))
+            {
                 throw new \InvalidArgumentException('You cannot use '
                     . 'form_params and multipart at the same time. Use the '
                     . 'form_params option if you want to send application/'
@@ -314,12 +346,14 @@ class Client implements ClientInterface
             $options['_conditional']['Content-Type'] = 'application/x-www-form-urlencoded';
         }
 
-        if (isset($options['multipart'])) {
+        if (isset($options['multipart']))
+        {
             $options['body'] = new Psr7\MultipartStream($options['multipart']);
             unset($options['multipart']);
         }
 
-        if (isset($options['json'])) {
+        if (isset($options['json']))
+        {
             $options['body'] = \GuzzleHttp\json_encode($options['json']);
             unset($options['json']);
             // Ensure that we don't have the header in different case and set the new value.
@@ -327,26 +361,32 @@ class Client implements ClientInterface
             $options['_conditional']['Content-Type'] = 'application/json';
         }
 
-        if (!empty($options['decode_content'])
+        if (
+            !empty($options['decode_content'])
             && $options['decode_content'] !== true
-        ) {
+        )
+        {
             // Ensure that we don't have the header in different case and set the new value.
             $options['_conditional'] = Psr7\_caseless_remove(['Accept-Encoding'], $options['_conditional']);
             $modify['set_headers']['Accept-Encoding'] = $options['decode_content'];
         }
 
-        if (isset($options['body'])) {
-            if (is_array($options['body'])) {
+        if (isset($options['body']))
+        {
+            if (is_array($options['body']))
+            {
                 $this->invalidBody();
             }
             $modify['body'] = Psr7\stream_for($options['body']);
             unset($options['body']);
         }
 
-        if (!empty($options['auth']) && is_array($options['auth'])) {
+        if (!empty($options['auth']) && is_array($options['auth']))
+        {
             $value = $options['auth'];
             $type = isset($value[2]) ? strtolower($value[2]) : 'basic';
-            switch ($type) {
+            switch ($type)
+            {
                 case 'basic':
                     // Ensure that we don't have the header in different case and set the new value.
                     $modify['set_headers'] = Psr7\_caseless_remove(['Authorization'], $modify['set_headers']);
@@ -365,12 +405,15 @@ class Client implements ClientInterface
             }
         }
 
-        if (isset($options['query'])) {
+        if (isset($options['query']))
+        {
             $value = $options['query'];
-            if (is_array($value)) {
+            if (is_array($value))
+            {
                 $value = http_build_query($value, null, '&', PHP_QUERY_RFC3986);
             }
-            if (!is_string($value)) {
+            if (!is_string($value))
+            {
                 throw new \InvalidArgumentException('query must be a string or array');
             }
             $modify['query'] = $value;
@@ -378,15 +421,18 @@ class Client implements ClientInterface
         }
 
         // Ensure that sink is not an invalid value.
-        if (isset($options['sink'])) {
+        if (isset($options['sink']))
+        {
             // TODO: Add more sink validation?
-            if (is_bool($options['sink'])) {
+            if (is_bool($options['sink']))
+            {
                 throw new \InvalidArgumentException('sink must not be a boolean');
             }
         }
 
         $request = Psr7\modify_request($request, $modify);
-        if ($request->getBody() instanceof Psr7\MultipartStream) {
+        if ($request->getBody() instanceof Psr7\MultipartStream)
+        {
             // Use a multipart/form-data POST if a Content-Type is not set.
             // Ensure that we don't have the header in different case and set the new value.
             $options['_conditional'] = Psr7\_caseless_remove(['Content-Type'], $options['_conditional']);
@@ -395,11 +441,14 @@ class Client implements ClientInterface
         }
 
         // Merge in conditional headers if they are not present.
-        if (isset($options['_conditional'])) {
+        if (isset($options['_conditional']))
+        {
             // Build up the changes so it's in a single clone of the message.
             $modify = [];
-            foreach ($options['_conditional'] as $k => $v) {
-                if (!$request->hasHeader($k)) {
+            foreach ($options['_conditional'] as $k => $v)
+            {
+                if (!$request->hasHeader($k))
+                {
                     $modify['set_headers'][$k] = $v;
                 }
             }

@@ -27,13 +27,17 @@ final class FulfilledPromise implements Promise
      */
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        if (null === $onFulfilled) {
+        if (null === $onFulfilled)
+        {
             return $this;
         }
 
-        try {
+        try
+        {
             return new self($onFulfilled($this->result));
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             return new RejectedPromise($e);
         }
     }
@@ -51,7 +55,8 @@ final class FulfilledPromise implements Promise
      */
     public function wait($unwrap = true)
     {
-        if ($unwrap) {
+        if ($unwrap)
+        {
             return $this->result;
         }
     }

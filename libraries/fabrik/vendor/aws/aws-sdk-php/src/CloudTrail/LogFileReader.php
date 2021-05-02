@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudTrail;
 
 use Aws\S3\S3Client;
@@ -29,7 +30,7 @@ class LogFileReader
      * Downloads, unzips, and reads a CloudTrail log file from Amazon S3
      *
      * @param string $s3BucketName The bucket name of the log file in Amazon S3
-     * @param string $logFileKey   The key of the log file in Amazon S3
+     * @param string $logFileKey The key of the log file in Amazon S3
      *
      * @return array
      */
@@ -37,8 +38,8 @@ class LogFileReader
     {
         // Create a command for getting the log file object
         $command = $this->s3Client->getCommand('GetObject', [
-            'Bucket' => (string) $s3BucketName,
-            'Key' => (string) $logFileKey,
+            'Bucket'                  => (string)$s3BucketName,
+            'Key'                     => (string)$logFileKey,
             'ResponseContentEncoding' => 'x-gzip'
         ]);
 

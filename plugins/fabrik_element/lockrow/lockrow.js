@@ -6,16 +6,16 @@
  */
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
-	window.FbLockrow = new Class({
+    window.FbLockrow = new Class({
 
-		Extends: FbElement,
+        Extends: FbElement,
 
-		initialize: function (element, options) {
-			this.parent(element, options);
-			this.plugin = 'FbLockrow';
-			this.setOptions(element, options);
-		}
-	});
+        initialize: function (element, options) {
+            this.parent(element, options);
+            this.plugin = 'FbLockrow';
+            this.setOptions(element, options);
+        }
+    });
 
-	return window.FbLockrow;
+    return window.FbLockrow;
 });

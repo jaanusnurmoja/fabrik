@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 /**
@@ -19,9 +20,9 @@ class Command implements CommandInterface
      *
      * - @http: (array) Associative array of transfer options.
      *
-     * @param string      $name           Name of the command
-     * @param array       $args           Arguments to pass to the command
-     * @param HandlerList $list           Handler list
+     * @param string $name Name of the command
+     * @param array $args Arguments to pass to the command
+     * @param HandlerList $list Handler list
      */
     public function __construct($name, array $args = [], HandlerList $list = null)
     {
@@ -29,7 +30,8 @@ class Command implements CommandInterface
         $this->data = $args;
         $this->handlerList = $list ?: new HandlerList();
 
-        if (!isset($this->data['@http'])) {
+        if (!isset($this->data['@http']))
+        {
             $this->data['@http'] = [];
         }
     }

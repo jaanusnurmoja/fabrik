@@ -32,7 +32,8 @@ final class HeaderSetPlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        foreach ($this->headers as $header => $headerValue) {
+        foreach ($this->headers as $header => $headerValue)
+        {
             $request = $request->withHeader($header, $headerValue);
         }
 

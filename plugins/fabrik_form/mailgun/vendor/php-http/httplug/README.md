@@ -12,7 +12,6 @@
 
 **HTTPlug, the HTTP client abstraction for PHP.**
 
-
 ## Install
 
 Via Composer
@@ -21,19 +20,16 @@ Via Composer
 $ composer require php-http/httplug
 ```
 
-
 ## Intro
 
-This is the contract package for HTTP Client.
-Use it to create HTTP Clients which are interoperable and compatible with [PSR-7](http://www.php-fig.org/psr/psr-7/).
+This is the contract package for HTTP Client. Use it to create HTTP Clients which are interoperable and compatible
+with [PSR-7](http://www.php-fig.org/psr/psr-7/).
 
 This library is the official successor of the [ivory http adapter](https://github.com/egeloen/ivory-http-adapter).
-
 
 ## Documentation
 
 Please see the [official documentation](http://docs.php-http.org).
-
 
 ## Testing
 
@@ -41,16 +37,13 @@ Please see the [official documentation](http://docs.php-http.org).
 $ composer test
 ```
 
-
 ## Contributing
 
 Please see our [contributing guide](http://docs.php-http.org/en/latest/development/contributing.html).
 
-
 ## Security
 
 If you discover any security related issues, please contact us at [security@php-http.org](mailto:security@php-http.org).
-
 
 ## License
 

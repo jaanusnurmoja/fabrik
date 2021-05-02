@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Psr\Http\Message\RequestInterface;
@@ -11,7 +12,7 @@ use Aws\Exception\AwsException;
 class History implements \Countable, \IteratorAggregate
 {
     private $maxEntries;
-    private $entries = array();
+    private $entries = [];
 
     /**
      * @param int $maxEntries Maximum number of entries to store.
@@ -39,7 +40,8 @@ class History implements \Countable, \IteratorAggregate
      */
     public function getLastCommand()
     {
-        if (!$this->entries) {
+        if (!$this->entries)
+        {
             throw new \LogicException('No commands received');
         }
 
@@ -54,7 +56,8 @@ class History implements \Countable, \IteratorAggregate
      */
     public function getLastRequest()
     {
-        if (!$this->entries) {
+        if (!$this->entries)
+        {
             throw new \LogicException('No requests received');
         }
 
@@ -69,17 +72,20 @@ class History implements \Countable, \IteratorAggregate
      */
     public function getLastReturn()
     {
-        if (!$this->entries) {
+        if (!$this->entries)
+        {
             throw new \LogicException('No entries');
         }
 
         $last = end($this->entries);
 
-        if (isset($last['result'])) {
+        if (isset($last['result']))
+        {
             return $last['result'];
         }
 
-        if (isset($last['exception'])) {
+        if (isset($last['exception']))
+        {
             return $last['exception'];
         }
 
@@ -111,27 +117,34 @@ class History implements \Countable, \IteratorAggregate
      * Finish adding an entry to the history container.
      *
      * @param string $ticket Ticket returned from the start call.
-     * @param mixed  $result The result (an exception or AwsResult).
+     * @param mixed $result The result (an exception or AwsResult).
      */
     public function finish($ticket, $result)
     {
-        if (!isset($this->entries[$ticket])) {
+        if (!isset($this->entries[$ticket]))
+        {
             throw new \InvalidArgumentException('Invalid history ticket');
         }
 
-        if (isset($this->entries[$ticket]['result'])
+        if (
+            isset($this->entries[$ticket]['result'])
             || isset($this->entries[$ticket]['exception'])
-        ) {
+        )
+        {
             throw new \LogicException('History entry is already finished');
         }
 
-        if ($result instanceof \Exception) {
+        if ($result instanceof \Exception)
+        {
             $this->entries[$ticket]['exception'] = $result;
-        } else {
+        }
+        else
+        {
             $this->entries[$ticket]['result'] = $result;
         }
 
-        if (count($this->entries) >= $this->maxEntries) {
+        if (count($this->entries) >= $this->maxEntries)
+        {
             $this->entries = array_slice($this->entries, -$this->maxEntries, null, true);
         }
     }

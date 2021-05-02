@@ -33,7 +33,8 @@ final class ConnectionResponse implements ApiResponse
      */
     public static function create(array $data)
     {
-        if (!isset($data['connection'])) {
+        if (!isset($data['connection']))
+        {
             return;
         }
         $connSettings = $data['connection'];
@@ -45,7 +46,7 @@ final class ConnectionResponse implements ApiResponse
     }
 
     /**
-     * @param bool $noVerify   Disable remote TLS certificate verification
+     * @param bool $noVerify Disable remote TLS certificate verification
      * @param bool $requireTLS Requires TLS for all outbound communication
      */
     private function __construct($noVerify, $requireTLS)

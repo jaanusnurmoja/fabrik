@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\ServerlessApplicationRepository;
 
 use Aws\AwsClient;
@@ -32,4 +33,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateApplication(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateApplicationAsync(array $args = [])
  */
-class ServerlessApplicationRepositoryClient extends AwsClient {}
+class ServerlessApplicationRepositoryClient extends AwsClient
+{
+}

@@ -51,9 +51,9 @@ class TotalResponseItem
 
     /**
      * @param \DateTime $time
-     * @param array     $accepted
-     * @param array     $delivered
-     * @param array     $failed
+     * @param array $accepted
+     * @param array $delivered
+     * @param array $failed
      */
     private function __construct(\DateTime $time, array $accepted, array $delivered, array $failed)
     {

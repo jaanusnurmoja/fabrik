@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DynamoDb;
 
 /**
@@ -19,9 +20,9 @@ interface SessionConnectionInterface
     /**
      * Writes session data to DynamoDB
      *
-     * @param string $id        Session ID
-     * @param string $data      Serialized session data
-     * @param bool   $isChanged Whether or not the data has changed
+     * @param string $id Session ID
+     * @param string $data Serialized session data
+     * @param bool $isChanged Whether or not the data has changed
      *
      * @return bool
      */

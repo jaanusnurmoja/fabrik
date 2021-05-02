@@ -30,7 +30,7 @@ use Svg\Tag\UseTag;
 class Document extends AbstractTag
 {
     protected $filename;
-    public $inDefs = false;
+    public    $inDefs = false;
 
     protected $x;
     protected $y;
@@ -48,36 +48,38 @@ class Document extends AbstractTag
     protected $surface;
 
     /** @var AbstractTag[] */
-    protected $stack = array();
+    protected $stack = [];
 
     /** @var AbstractTag[] */
-    protected $defs = array();
+    protected $defs = [];
 
     /** @var \Sabberworm\CSS\CSSList\Document[] */
-    protected $styleSheets = array();
+    protected $styleSheets = [];
 
     public function loadFile($filename)
     {
         $this->filename = $filename;
     }
 
-    protected function initParser() {
+    protected function initParser()
+    {
         $parser = xml_parser_create("utf-8");
         xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, false);
         xml_set_element_handler(
             $parser,
-            array($this, "_tagStart"),
-            array($this, "_tagEnd")
+            [$this, "_tagStart"],
+            [$this, "_tagEnd"]
         );
         xml_set_character_data_handler(
             $parser,
-            array($this, "_charData")
+            [$this, "_charData"]
         );
 
         return $this->parser = $parser;
     }
 
-    public function __construct() {
+    public function __construct()
+    {
 
     }
 
@@ -104,28 +106,35 @@ class Document extends AbstractTag
         return $this->height;
     }
 
-    public function getDimensions() {
+    public function getDimensions()
+    {
         $rootAttributes = null;
 
         $parser = xml_parser_create("utf-8");
         xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, false);
         xml_set_element_handler(
             $parser,
-            function ($parser, $name, $attributes) use (&$rootAttributes) {
-                if ($name === "svg" && $rootAttributes === null) {
+            function ($parser, $name, $attributes) use (&$rootAttributes)
+            {
+                if ($name === "svg" && $rootAttributes === null)
+                {
                     $attributes = array_change_key_case($attributes, CASE_LOWER);
 
                     $rootAttributes = $attributes;
                 }
             },
-            function ($parser, $name) {}
+            function ($parser, $name)
+            {
+            }
         );
 
         $fp = fopen($this->filename, "r");
-        while ($line = fread($fp, 8192)) {
+        while ($line = fread($fp, 8192))
+        {
             xml_parse($parser, $line, false);
 
-            if ($rootAttributes !== null) {
+            if ($rootAttributes !== null)
+            {
                 break;
             }
         }
@@ -135,44 +144,53 @@ class Document extends AbstractTag
         return $this->handleSizeAttributes($rootAttributes);
     }
 
-    public function handleSizeAttributes($attributes){
-        if ($this->width === null) {
-            if (isset($attributes["width"])) {
+    public function handleSizeAttributes($attributes)
+    {
+        if ($this->width === null)
+        {
+            if (isset($attributes["width"]))
+            {
                 $width = Style::convertSize($attributes["width"], 400);
-                $this->width  = $width;
+                $this->width = $width;
             }
 
-            if (isset($attributes["height"])) {
+            if (isset($attributes["height"]))
+            {
                 $height = Style::convertSize($attributes["height"], 300);
                 $this->height = $height;
             }
 
-            if (isset($attributes['viewbox'])) {
+            if (isset($attributes['viewbox']))
+            {
                 $viewBox = preg_split('/[\s,]+/is', trim($attributes['viewbox']));
-                if (count($viewBox) == 4) {
+                if (count($viewBox) == 4)
+                {
                     $this->x = $viewBox[0];
                     $this->y = $viewBox[1];
 
-                    if (!$this->width) {
+                    if (!$this->width)
+                    {
                         $this->width = $viewBox[2];
                     }
-                    if (!$this->height) {
+                    if (!$this->height)
+                    {
                         $this->height = $viewBox[3];
                     }
                 }
             }
         }
 
-        return array(
-            0        => $this->width,
-            1        => $this->height,
+        return [
+            0 => $this->width,
+            1 => $this->height,
 
             "width"  => $this->width,
             "height" => $this->height,
-        );
+        ];
     }
 
-    public function getDocument(){
+    public function getDocument()
+    {
         return $this;
     }
 
@@ -181,7 +199,8 @@ class Document extends AbstractTag
      *
      * @param \Sabberworm\CSS\CSSList\Document $stylesheet
      */
-    public function appendStyleSheet($stylesheet) {
+    public function appendStyleSheet($stylesheet)
+    {
         $this->styleSheets[] = $stylesheet;
     }
 
@@ -190,7 +209,8 @@ class Document extends AbstractTag
      *
      * @return \Sabberworm\CSS\CSSList\Document[]
      */
-    public function getStyleSheets() {
+    public function getStyleSheets()
+    {
         return $this->styleSheets;
     }
 
@@ -214,12 +234,14 @@ class Document extends AbstractTag
 
         $parser = $this->initParser();
 
-        if ($this->x || $this->y) {
+        if ($this->x || $this->y)
+        {
             $surface->translate(-$this->x, -$this->y);
         }
 
         $fp = fopen($this->filename, "r");
-        while ($line = fread($fp, 8192)) {
+        while ($line = fread($fp, 8192))
+        {
             xml_parse($parser, $line, false);
         }
 
@@ -235,7 +257,8 @@ class Document extends AbstractTag
         $this->handleSizeAttributes($attributes);
     }
 
-    public function getDef($id) {
+    public function getDef($id)
+    {
         $id = ltrim($id, "#");
 
         return isset($this->defs[$id]) ? $this->defs[$id] : null;
@@ -250,16 +273,19 @@ class Document extends AbstractTag
 
         $attributes = array_change_key_case($attributes, CASE_LOWER);
 
-        switch (strtolower($name)) {
+        switch (strtolower($name))
+        {
             case 'defs':
                 $this->inDefs = true;
                 return;
 
             case 'svg':
-                if (count($this->attributes)) {
+                if (count($this->attributes))
+                {
                     $tag = new Group($this, $name);
                 }
-                else {
+                else
+                {
                     $tag = $this;
                     $this->svgOffset($attributes);
                 }
@@ -338,14 +364,18 @@ class Document extends AbstractTag
                 return;
         }
 
-        if ($tag) {
-            if (isset($attributes["id"])) {
+        if ($tag)
+        {
+            if (isset($attributes["id"]))
+            {
                 $this->defs[$attributes["id"]] = $tag;
             }
-            else {
+            else
+            {
                 /** @var AbstractTag $top */
                 $top = end($this->stack);
-                if ($top && $top != $tag) {
+                if ($top && $top != $tag)
+                {
                     $top->children[] = $tag;
                 }
             }
@@ -360,7 +390,8 @@ class Document extends AbstractTag
     {
         $stack_top = end($this->stack);
 
-        if ($stack_top instanceof Text || $stack_top instanceof StyleTag) {
+        if ($stack_top instanceof Text || $stack_top instanceof StyleTag)
+        {
             $stack_top->appendText($data);
         }
     }
@@ -369,7 +400,8 @@ class Document extends AbstractTag
     {
         /** @var AbstractTag $tag */
         $tag = null;
-        switch (strtolower($name)) {
+        switch (strtolower($name))
+        {
             case 'defs':
                 $this->inDefs = false;
                 return;
@@ -397,7 +429,8 @@ class Document extends AbstractTag
                 break;
         }
 
-        if (!$this->inDefs && $tag) {
+        if (!$this->inDefs && $tag)
+        {
             $tag->handleEnd();
         }
     }

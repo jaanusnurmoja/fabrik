@@ -20,34 +20,33 @@ jimport('joomla.application.component.view');
  * @subpackage  Fabrik.visualization.calendar
  * @since       3.0
  */
-
 class FabrikViewFullcalendar extends JViewLegacy
 {
-	/**
-	 * Display the view
-	 *
-	 * @param   string  $tmpl  Template
-	 *
-	 * @return  void
-	 */
+    /**
+     * Display the view
+     *
+     * @param string $tmpl Template
+     *
+     * @return  void
+     */
 
-	public function display($tmpl = 'default')
-	{
-		$model = $this->getModel();
-		$app = JFactory::getApplication();
-		$input = $app->input;
-		$listid = $input->get('listid', '');
-		$eventListKey = $input->get('eventListKey', '');
-		$usersConfig = JComponentHelper::getParams('com_fabrik');
-		$model->setId($input->getInt('id', $usersConfig->get('visualizationid', $input->getInt('visualizationid', 0))));
+    public function display($tmpl = 'default')
+    {
+        $model = $this->getModel();
+        $app = JFactory::getApplication();
+        $input = $app->input;
+        $listid = $input->get('listid', '');
+        $eventListKey = $input->get('eventListKey', '');
+        $usersConfig = JComponentHelper::getParams('com_fabrik');
+        $model->setId($input->getInt('id', $usersConfig->get('visualizationid', $input->getInt('visualizationid', 0))));
 
-		if (!$model->canView())
-		{
-			echo FText::_('JERROR_ALERTNOAUTHOR');
+        if (!$model->canView())
+        {
+            echo FText::_('JERROR_ALERTNOAUTHOR');
 
-			return false;
-		}
+            return false;
+        }
 
-		echo $model->getEvents($listid, $eventListKey);
-	}
+        echo $model->getEvents($listid, $eventListKey);
+    }
 }

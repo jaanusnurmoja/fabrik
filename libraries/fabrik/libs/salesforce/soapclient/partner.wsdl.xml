@@ -5,10 +5,15 @@ Generated on 2008-07-15 00:26:57 +0000.
 
 Copyright 1999-2008 salesforce.com, inc.
 All Rights Reserved
---><definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ens="urn:sobject.partner.soap.sforce.com" xmlns:fns="urn:fault.partner.soap.sforce.com" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="urn:partner.soap.sforce.com" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:partner.soap.sforce.com">
+-->
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ens="urn:sobject.partner.soap.sforce.com"
+             xmlns:fns="urn:fault.partner.soap.sforce.com" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="urn:partner.soap.sforce.com" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             targetNamespace="urn:partner.soap.sforce.com">
     <types>
 
-        <schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="urn:sobject.partner.soap.sforce.com">
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+                targetNamespace="urn:sobject.partner.soap.sforce.com">
 
             <import namespace="urn:partner.soap.sforce.com"/>
 
@@ -25,7 +30,8 @@ All Rights Reserved
 
         </schema>
 
-        <schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="urn:partner.soap.sforce.com">
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+                targetNamespace="urn:partner.soap.sforce.com">
 
             <import namespace="urn:sobject.partner.soap.sforce.com"/>
 
@@ -50,7 +56,6 @@ All Rights Reserved
                     <element name="size" type="xsd:int"/>
                 </sequence>
             </complexType>
-
 
 
             <!-- Search Result -->
@@ -448,7 +453,8 @@ All Rights Reserved
             <complexType name="DescribeSObjectResult">
                 <sequence>
                     <element name="activateable" type="xsd:boolean"/>
-                    <element maxOccurs="unbounded" minOccurs="0" name="childRelationships" type="tns:ChildRelationship"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="childRelationships"
+                             type="tns:ChildRelationship"/>
                     <element name="createable" type="xsd:boolean"/>
                     <element name="custom" type="xsd:boolean"/>
                     <element name="deletable" type="xsd:boolean"/>
@@ -512,7 +518,8 @@ All Rights Reserved
                     <enumeration value="url"/>
                     <enumeration value="email"/>
                     <enumeration value="encryptedstring"/>
-                    <enumeration value="anyType"/> <!-- can be string, picklist, reference, boolean, currency, int, double, percent, id, date, datetime, url, email -->
+                    <enumeration
+                            value="anyType"/> <!-- can be string, picklist, reference, boolean, currency, int, double, percent, id, date, datetime, url, email -->
                 </restriction>
             </simpleType>
 
@@ -556,7 +563,8 @@ All Rights Reserved
                     <element name="nameField" type="xsd:boolean"/>
                     <element minOccurs="0" name="namePointing" type="xsd:boolean"/>
                     <element name="nillable" type="xsd:boolean"/>
-                    <element maxOccurs="unbounded" minOccurs="0" name="picklistValues" nillable="true" type="tns:PicklistEntry"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="picklistValues" nillable="true"
+                             type="tns:PicklistEntry"/>
                     <element name="precision" type="xsd:int"/>
                     <element maxOccurs="unbounded" minOccurs="0" name="referenceTo" nillable="true" type="xsd:string"/>
                     <element minOccurs="0" name="relationshipName" type="xsd:string"/>
@@ -594,7 +602,8 @@ All Rights Reserved
                 <sequence>
                     <element maxOccurs="unbounded" name="infoFields" type="tns:DescribeSoftphoneLayoutInfoField"/>
                     <element name="name" type="xsd:string"/>
-                    <element maxOccurs="unbounded" minOccurs="0" name="sections" type="tns:DescribeSoftphoneLayoutSection"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="sections"
+                             type="tns:DescribeSoftphoneLayoutSection"/>
                 </sequence>
             </complexType>
 
@@ -620,15 +629,18 @@ All Rights Reserved
             <complexType name="DescribeLayoutResult">
                 <sequence>
                     <element maxOccurs="unbounded" name="layouts" type="tns:DescribeLayout"/>
-                    <element maxOccurs="unbounded" minOccurs="0" name="recordTypeMappings" type="tns:RecordTypeMapping"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="recordTypeMappings"
+                             type="tns:RecordTypeMapping"/>
                     <element name="recordTypeSelectorRequired" type="xsd:boolean"/>
                 </sequence>
             </complexType>
 
             <complexType name="DescribeLayout">
                 <sequence>
-                    <element maxOccurs="unbounded" minOccurs="0" name="detailLayoutSections" type="tns:DescribeLayoutSection"/>
-                    <element maxOccurs="unbounded" minOccurs="0" name="editLayoutSections" type="tns:DescribeLayoutSection"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="detailLayoutSections"
+                             type="tns:DescribeLayoutSection"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="editLayoutSections"
+                             type="tns:DescribeLayoutSection"/>
                     <element name="id" type="tns:ID"/>
 
 
@@ -658,7 +670,8 @@ All Rights Reserved
                 <sequence>
                     <element name="editable" type="xsd:boolean"/>
                     <element name="label" nillable="true" type="xsd:string"/>
-                    <element maxOccurs="unbounded" minOccurs="0" name="layoutComponents" type="tns:DescribeLayoutComponent"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="layoutComponents"
+                             type="tns:DescribeLayoutComponent"/>
                     <element name="placeholder" type="xsd:boolean"/>
                     <element name="required" type="xsd:boolean"/>
                 </sequence>
@@ -696,7 +709,8 @@ All Rights Reserved
                     <element name="defaultRecordTypeMapping" type="xsd:boolean"/>
                     <element name="layoutId" type="tns:ID"/>
                     <element name="name" type="xsd:string"/>
-                    <element maxOccurs="unbounded" minOccurs="0" name="picklistsForRecordType" nillable="true" type="tns:PicklistForRecordType"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="picklistsForRecordType" nillable="true"
+                             type="tns:PicklistForRecordType"/>
                     <element name="recordTypeId" nillable="true" type="tns:ID"/>
                 </sequence>
             </complexType>
@@ -704,7 +718,8 @@ All Rights Reserved
             <complexType name="PicklistForRecordType">
                 <sequence>
                     <element name="picklistName" type="xsd:string"/>
-                    <element maxOccurs="unbounded" minOccurs="0" name="picklistValues" nillable="true" type="tns:PicklistEntry"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="picklistValues" nillable="true"
+                             type="tns:PicklistEntry"/>
                 </sequence>
             </complexType>
 
@@ -736,7 +751,6 @@ All Rights Reserved
                     <element name="column" type="xsd:string"/>
                 </sequence>
             </complexType>
-
 
 
             <complexType name="EmailFileAttachment">
@@ -789,7 +803,8 @@ All Rights Reserved
                             <element name="charset" nillable="true" type="xsd:string"/>
                             <element maxOccurs="unbounded" minOccurs="0" name="documentAttachments" type="tns:ID"/>
                             <element name="htmlBody" nillable="true" type="xsd:string"/>
-                            <element maxOccurs="unbounded" minOccurs="0" name="fileAttachments" type="tns:EmailFileAttachment"/>
+                            <element maxOccurs="unbounded" minOccurs="0" name="fileAttachments"
+                                     type="tns:EmailFileAttachment"/>
                             <element name="plainTextBody" nillable="true" type="xsd:string"/>
                             <element name="targetObjectId" nillable="true" type="tns:ID"/>
                             <element name="templateId" nillable="true" type="tns:ID"/>
@@ -806,7 +821,6 @@ All Rights Reserved
                     <element name="success" type="xsd:boolean"/>
                 </sequence>
             </complexType>
-
 
 
             <complexType name="DescribeTabSetResult">
@@ -829,9 +843,6 @@ All Rights Reserved
                     <element name="url" type="xsd:string"/>
                 </sequence>
             </complexType>
-
-
-
 
 
             <!-- Login Message Types -->
@@ -878,7 +889,8 @@ All Rights Reserved
             <element name="describeSObjectsResponse">
                 <complexType>
                     <sequence>
-                        <element maxOccurs="100" minOccurs="0" name="result" nillable="true" type="tns:DescribeSObjectResult"/>
+                        <element maxOccurs="100" minOccurs="0" name="result" nillable="true"
+                                 type="tns:DescribeSObjectResult"/>
                     </sequence>
                 </complexType>
             </element>
@@ -935,7 +947,8 @@ All Rights Reserved
             <element name="describeTabsResponse">
                 <complexType>
                     <sequence>
-                        <element maxOccurs="unbounded" minOccurs="0" name="result" nillable="true" type="tns:DescribeTabSetResult"/>
+                        <element maxOccurs="unbounded" minOccurs="0" name="result" nillable="true"
+                                 type="tns:DescribeTabSetResult"/>
                     </sequence>
                 </complexType>
             </element>
@@ -955,7 +968,6 @@ All Rights Reserved
                     </sequence>
                 </complexType>
             </element>
-
 
 
             <!-- Send Email Types -->
@@ -1236,7 +1248,6 @@ All Rights Reserved
             </element>
 
 
-
             <!-- Create Search -->
             <element name="search">
                 <complexType>
@@ -1252,7 +1263,6 @@ All Rights Reserved
                     </sequence>
                 </complexType>
             </element>
-
 
 
             <element name="getServerTimestamp">
@@ -1311,7 +1321,6 @@ All Rights Reserved
                     </sequence>
                 </complexType>
             </element>
-
 
 
             <!-- Header Elements -->
@@ -1414,7 +1423,6 @@ All Rights Reserved
             </element>
 
 
-
             <element name="LocaleOptions">
                 <complexType>
                     <sequence>
@@ -1424,7 +1432,8 @@ All Rights Reserved
             </element>
         </schema>
 
-        <schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="urn:fault.partner.soap.sforce.com">
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+                targetNamespace="urn:fault.partner.soap.sforce.com">
 
             <simpleType name="ExceptionCode">
                 <restriction base="xsd:string">
@@ -1604,8 +1613,8 @@ All Rights Reserved
                 <complexContent>
                     <extension base="fns:ApiFault">
                         <sequence>
-                        <element name="row" type="xsd:int"/>
-                        <element name="column" type="xsd:int"/>
+                            <element name="row" type="xsd:int"/>
+                            <element name="column" type="xsd:int"/>
                         </sequence>
                     </extension>
                 </complexContent>
@@ -1942,7 +1951,6 @@ All Rights Reserved
     <message name="sendEmailResponse">
         <part element="tns:sendEmailResponse" name="parameters"/>
     </message>
-
 
 
     <!-- Soap PortType -->

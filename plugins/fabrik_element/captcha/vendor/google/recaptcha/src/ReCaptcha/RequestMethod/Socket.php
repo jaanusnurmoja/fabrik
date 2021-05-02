@@ -36,7 +36,7 @@ class Socket
 
     /**
      * fsockopen
-     * 
+     *
      * @see http://php.net/fsockopen
      * @param string $hostname
      * @param int $port
@@ -47,9 +47,11 @@ class Socket
      */
     public function fsockopen($hostname, $port = -1, &$errno = 0, &$errstr = '', $timeout = null)
     {
-        $this->handle = fsockopen($hostname, $port, $errno, $errstr, (is_null($timeout) ? ini_get("default_socket_timeout") : $timeout));
+        $this->handle = fsockopen($hostname, $port, $errno, $errstr,
+            (is_null($timeout) ? ini_get("default_socket_timeout") : $timeout));
 
-        if ($this->handle != false && $errno === 0 && $errstr === '') {
+        if ($this->handle != false && $errno === 0 && $errstr === '')
+        {
             return $this->handle;
         }
         return false;
@@ -57,7 +59,7 @@ class Socket
 
     /**
      * fwrite
-     * 
+     *
      * @see http://php.net/fwrite
      * @param string $string
      * @param int $length
@@ -70,7 +72,7 @@ class Socket
 
     /**
      * fgets
-     * 
+     *
      * @see http://php.net/fgets
      * @param int $length
      * @return string
@@ -82,7 +84,7 @@ class Socket
 
     /**
      * feof
-     * 
+     *
      * @see http://php.net/feof
      * @return bool
      */
@@ -93,7 +95,7 @@ class Socket
 
     /**
      * fclose
-     * 
+     *
      * @see http://php.net/fclose
      * @return bool
      */

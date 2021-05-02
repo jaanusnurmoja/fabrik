@@ -1,4 +1,5 @@
 <?php
+
 namespace JmesPath\Tests;
 
 use JmesPath\AstRuntime;
@@ -33,22 +34,29 @@ class ComplianceTest extends \PHPUnit_Framework_TestCase
         $case,
         $compiled,
         $asAssoc
-    ) {
+    )
+    {
         $evalResult = null;
         $failed = false;
         $failureMsg = '';
         $failure = '';
         $compiledStr = '';
 
-        try {
-            if ($compiled) {
+        try
+        {
+            if ($compiled)
+            {
                 $compiledStr = \JmesPath\Env::COMPILE_DIR . '=on ';
                 $runtime = new CompilerRuntime(self::$path);
-            } else {
+            }
+            else
+            {
                 $runtime = new AstRuntime();
             }
             $evalResult = $runtime($expression, $data);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             $failed = $e instanceof SyntaxErrorException ? 'syntax' : 'runtime';
             $failureMsg = sprintf(
                 '%s (%s line %d)',
@@ -63,9 +71,12 @@ class ComplianceTest extends \PHPUnit_Framework_TestCase
             . "Expected: " . $this->prettyJson($result) . "\n\n";
         $failure .= 'Associative? ' . var_export($asAssoc, true) . "\n\n";
 
-        if (!$error && $failed) {
+        if (!$error && $failed)
+        {
             $this->fail("Should not have failed\n{$failure}=> {$failed} {$failureMsg}");
-        } elseif ($error && !$failed) {
+        }
+        elseif ($error && !$failed)
+        {
             $this->fail("Should have failed\n{$failure}");
         }
 
@@ -80,18 +91,23 @@ class ComplianceTest extends \PHPUnit_Framework_TestCase
     {
         $cases = [];
 
-        $files = array_map(function ($f) {
+        $files = array_map(function ($f)
+        {
             return basename($f, '.json');
         }, glob(__DIR__ . '/compliance/*.json'));
 
-        foreach ($files as $name) {
+        foreach ($files as $name)
+        {
             $contents = file_get_contents(__DIR__ . "/compliance/{$name}.json");
-            foreach ([true, false] as $asAssoc) {
+            foreach ([true, false] as $asAssoc)
+            {
                 $json = json_decode($contents, true);
                 $jsonObj = json_decode($contents);
-                foreach ($json as $suiteNumber => $suite) {
+                foreach ($json as $suiteNumber => $suite)
+                {
                     $given = $asAssoc ? $suite['given'] : $jsonObj[$suiteNumber]->given;
-                    foreach ($suite['cases'] as $caseNumber => $case) {
+                    foreach ($suite['cases'] as $caseNumber => $case)
+                    {
                         $caseData = [
                             $given,
                             $case['expression'],
@@ -116,18 +132,24 @@ class ComplianceTest extends \PHPUnit_Framework_TestCase
 
     private function convertAssoc($data)
     {
-        if ($data instanceof \stdClass) {
-            return $this->convertAssoc((array) $data);
-        } elseif (is_array($data)) {
+        if ($data instanceof \stdClass)
+        {
+            return $this->convertAssoc((array)$data);
+        }
+        elseif (is_array($data))
+        {
             return array_map([$this, 'convertAssoc'], $data);
-        } else {
+        }
+        else
+        {
             return $data;
         }
     }
 
     private function prettyJson($json)
     {
-        if (defined('JSON_PRETTY_PRINT')) {
+        if (defined('JSON_PRETTY_PRINT'))
+        {
             return json_encode($json, JSON_PRETTY_PRINT);
         }
 

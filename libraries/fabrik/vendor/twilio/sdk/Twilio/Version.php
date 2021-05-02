@@ -6,7 +6,8 @@ use Twilio\Exceptions\RestException;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Http\Response;
 
-abstract class Version {
+abstract class Version
+{
     /**
      * @const int MAX_PAGE_SIZE largest page the Twilio API will return
      */
@@ -25,7 +26,8 @@ abstract class Version {
     /**
      * @param \Twilio\Domain $domain
      */
-    public function __construct(Domain $domain) {
+    public function __construct(Domain $domain)
+    {
         $this->domain = $domain;
         $this->version = null;
     }
@@ -35,7 +37,8 @@ abstract class Version {
      * @param string $uri Version relative uri
      * @return string Absolute URL
      */
-    public function absoluteUrl($uri) {
+    public function absoluteUrl($uri)
+    {
         return $this->getDomain()->absoluteUrl($this->relativeUri($uri));
     }
 
@@ -44,13 +47,15 @@ abstract class Version {
      * @param string $uri Version relative uri
      * @return string Domain relative uri
      */
-    public function relativeUri($uri) {
+    public function relativeUri($uri)
+    {
         return trim($this->version, '/') . '/' . trim($uri, '/');
     }
 
-    public function request($method, $uri, $params = array(), $data = array(),
-                            $headers = array(), $username = null,
-                            $password = null, $timeout = null) {
+    public function request($method, $uri, $params = [], $data = [],
+                            $headers = [], $username = null,
+                            $password = null, $timeout = null)
+    {
         $uri = $this->relativeUri($uri);
         return $this->getDomain()->request(
             $method,
@@ -75,15 +80,19 @@ abstract class Version {
      * @param string $header Header for exception message
      * @return TwilioException
      */
-    protected function exception($response, $header) {
+    protected function exception($response, $header)
+    {
         $message = '[HTTP ' . $response->getStatusCode() . '] ' . $header;
 
         $content = $response->getContent();
-        if (is_array($content)) {
+        if (is_array($content))
+        {
             $message .= isset($content['message']) ? ': ' . $content['message'] : '';
             $code = isset($content['code']) ? $content['code'] : $response->getStatusCode();
             return new RestException($message, $code, $response->getStatusCode());
-        } else {
+        }
+        else
+        {
             return new RestException($message, $response->getStatusCode(), $response->getStatusCode());
         }
     }
@@ -91,9 +100,10 @@ abstract class Version {
     /**
      * @throws TwilioException
      */
-    public function fetch($method, $uri, $params = array(), $data = array(),
-                          $headers = array(), $username = null,
-                          $password = null, $timeout = null) {
+    public function fetch($method, $uri, $params = [], $data = [],
+                          $headers = [], $username = null,
+                          $password = null, $timeout = null)
+    {
         $response = $this->request(
             $method,
             $uri,
@@ -105,7 +115,8 @@ abstract class Version {
             $timeout
         );
 
-        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300)
+        {
             throw $this->exception($response, 'Unable to fetch record');
         }
 
@@ -115,9 +126,10 @@ abstract class Version {
     /**
      * @throws TwilioException
      */
-    public function update($method, $uri, $params = array(), $data = array(),
-                           $headers = array(), $username = null,
-                           $password = null, $timeout = null) {
+    public function update($method, $uri, $params = [], $data = [],
+                           $headers = [], $username = null,
+                           $password = null, $timeout = null)
+    {
         $response = $this->request(
             $method,
             $uri,
@@ -129,7 +141,8 @@ abstract class Version {
             $timeout
         );
 
-        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300)
+        {
             throw $this->exception($response, 'Unable to update record');
         }
 
@@ -139,9 +152,10 @@ abstract class Version {
     /**
      * @throws TwilioException
      */
-    public function delete($method, $uri, $params = array(), $data = array(),
-                           $headers = array(), $username = null,
-                           $password = null, $timeout = null) {
+    public function delete($method, $uri, $params = [], $data = [],
+                           $headers = [], $username = null,
+                           $password = null, $timeout = null)
+    {
         $response = $this->request(
             $method,
             $uri,
@@ -153,18 +167,22 @@ abstract class Version {
             $timeout
         );
 
-        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300)
+        {
             throw $this->exception($response, 'Unable to delete record');
         }
 
         return $response->getStatusCode() == 204;
     }
 
-    public function readLimits($limit = null, $pageSize = null) {
+    public function readLimits($limit = null, $pageSize = null)
+    {
         $pageLimit = Values::NONE;
 
-        if ($limit) {
-            if (is_null($pageSize)) {
+        if ($limit)
+        {
+            if (is_null($pageSize))
+            {
                 $pageSize = min($limit, self::MAX_PAGE_SIZE);
             }
             $pageLimit = (int)(ceil($limit / (float)$pageSize));
@@ -172,16 +190,17 @@ abstract class Version {
 
         $pageSize = min($pageSize, self::MAX_PAGE_SIZE);
 
-        return array(
-            'limit' => $limit ?: Values::NONE,
-            'pageSize' => $pageSize ?: Values::NONE,
+        return [
+            'limit'     => $limit ?: Values::NONE,
+            'pageSize'  => $pageSize ?: Values::NONE,
             'pageLimit' => $pageLimit,
-        );
+        ];
     }
 
-    public function page($method, $uri, $params = array(), $data = array(),
-                         $headers = array(), $username = null,
-                         $password = null, $timeout = null) {
+    public function page($method, $uri, $params = [], $data = [],
+                         $headers = [], $username = null,
+                         $password = null, $timeout = null)
+    {
         return $this->request(
             $method,
             $uri,
@@ -194,16 +213,18 @@ abstract class Version {
         );
     }
 
-    public function stream($page, $limit = null, $pageLimit = null) {
+    public function stream($page, $limit = null, $pageLimit = null)
+    {
         return new Stream($page, $limit, $pageLimit);
     }
 
     /**
      * @throws TwilioException
      */
-    public function create($method, $uri, $params = array(), $data = array(),
-                           $headers = array(), $username = null,
-                           $password = null, $timeout = null) {
+    public function create($method, $uri, $params = [], $data = [],
+                           $headers = [], $username = null,
+                           $password = null, $timeout = null)
+    {
         $response = $this->request(
             $method,
             $uri,
@@ -215,7 +236,8 @@ abstract class Version {
             $timeout
         );
 
-        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300)
+        {
             throw $this->exception($response, 'Unable to create record');
         }
 
@@ -225,11 +247,13 @@ abstract class Version {
     /**
      * @return \Twilio\Domain $domain
      */
-    public function getDomain() {
+    public function getDomain()
+    {
         return $this->domain;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return '[Version]';
     }
 }

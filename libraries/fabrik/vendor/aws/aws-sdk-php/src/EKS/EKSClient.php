@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\EKS;
 
 use Aws\AwsClient;
@@ -20,4 +21,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateClusterVersion(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateClusterVersionAsync(array $args = [])
  */
-class EKSClient extends AwsClient {}
+class EKSClient extends AwsClient
+{
+}

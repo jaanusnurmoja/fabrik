@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Parser;
 
 use Aws\Api\DateTimeResult;
@@ -32,23 +33,27 @@ class XmlParser
         ];
 
         $type = $shape['type'];
-        if (isset($methods[$type])) {
+        if (isset($methods[$type]))
+        {
             return $this->{$methods[$type]}($shape, $value);
         }
 
-        return (string) $value;
+        return (string)$value;
     }
 
     private function parse_structure(
         StructureShape $shape,
         \SimpleXMLElement $value
-    ) {
+    )
+    {
         $target = [];
 
-        foreach ($shape->getMembers() as $name => $member) {
+        foreach ($shape->getMembers() as $name => $member)
+        {
             // Extract the name of the XML node
             $node = $this->memberKey($member, $name);
-            if (isset($value->{$node})) {
+            if (isset($value->{$node}))
+            {
                 $target[$name] = $this->dispatch($member, $value->{$node});
             }
         }
@@ -58,27 +63,31 @@ class XmlParser
 
     private function memberKey(Shape $shape, $name)
     {
-        if (null !== $shape['locationName']) {
+        if (null !== $shape['locationName'])
+        {
             return $shape['locationName'];
         }
 
-        if ($shape instanceof ListShape && $shape['flattened']) {
+        if ($shape instanceof ListShape && $shape['flattened'])
+        {
             return $shape->getMember()['locationName'] ?: $name;
         }
 
         return $name;
     }
 
-    private function parse_list(ListShape $shape, \SimpleXMLElement  $value)
+    private function parse_list(ListShape $shape, \SimpleXMLElement $value)
     {
         $target = [];
         $member = $shape->getMember();
 
-        if (!$shape['flattened']) {
+        if (!$shape['flattened'])
+        {
             $value = $value->{$member['locationName'] ?: 'member'};
         }
 
-        foreach ($value as $v) {
+        foreach ($value as $v)
+        {
             $target[] = $this->dispatch($member, $v);
         }
 
@@ -89,7 +98,8 @@ class XmlParser
     {
         $target = [];
 
-        if (!$shape['flattened']) {
+        if (!$shape['flattened'])
+        {
             $value = $value->entry;
         }
 
@@ -98,7 +108,8 @@ class XmlParser
         $keyName = $shape->getKey()['locationName'] ?: 'key';
         $valueName = $shape->getValue()['locationName'] ?: 'value';
 
-        foreach ($value as $node) {
+        foreach ($value as $node)
+        {
             $key = $this->dispatch($mapKey, $node->{$keyName});
             $value = $this->dispatch($mapValue, $node->{$valueName});
             $target[$key] = $value;
@@ -109,17 +120,17 @@ class XmlParser
 
     private function parse_blob(Shape $shape, $value)
     {
-        return base64_decode((string) $value);
+        return base64_decode((string)$value);
     }
 
     private function parse_float(Shape $shape, $value)
     {
-        return (float) (string) $value;
+        return (float)(string)$value;
     }
 
     private function parse_integer(Shape $shape, $value)
     {
-        return (int) (string) $value;
+        return (int)(string)$value;
     }
 
     private function parse_boolean(Shape $shape, $value)
@@ -129,9 +140,12 @@ class XmlParser
 
     private function parse_timestamp(Shape $shape, $value)
     {
-        if (!empty($shape['timestampFormat'])
-            && $shape['timestampFormat'] === 'unixTimestamp') {
-            return DateTimeResult::fromEpoch((string) $value);
+        if (
+            !empty($shape['timestampFormat'])
+            && $shape['timestampFormat'] === 'unixTimestamp'
+        )
+        {
+            return DateTimeResult::fromEpoch((string)$value);
         }
         return new DateTimeResult($value);
     }

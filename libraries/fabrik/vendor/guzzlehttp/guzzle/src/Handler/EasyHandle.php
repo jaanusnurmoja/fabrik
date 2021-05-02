@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Handler;
 
 use GuzzleHttp\Psr7\Response;
@@ -44,7 +45,8 @@ final class EasyHandle
      */
     public function createResponse()
     {
-        if (empty($this->headers)) {
+        if (empty($this->headers))
+        {
             throw new \RuntimeException('No headers have been received');
         }
 
@@ -53,20 +55,26 @@ final class EasyHandle
         $headers = \GuzzleHttp\headers_from_lines($this->headers);
         $normalizedKeys = \GuzzleHttp\normalize_header_keys($headers);
 
-        if (!empty($this->options['decode_content'])
+        if (
+            !empty($this->options['decode_content'])
             && isset($normalizedKeys['content-encoding'])
-        ) {
+        )
+        {
             $headers['x-encoded-content-encoding']
                 = $headers[$normalizedKeys['content-encoding']];
             unset($headers[$normalizedKeys['content-encoding']]);
-            if (isset($normalizedKeys['content-length'])) {
+            if (isset($normalizedKeys['content-length']))
+            {
                 $headers['x-encoded-content-length']
                     = $headers[$normalizedKeys['content-length']];
 
-                $bodyLength = (int) $this->sink->getSize();
-                if ($bodyLength) {
+                $bodyLength = (int)$this->sink->getSize();
+                if ($bodyLength)
+                {
                     $headers[$normalizedKeys['content-length']] = $bodyLength;
-                } else {
+                }
+                else
+                {
                     unset($headers[$normalizedKeys['content-length']]);
                 }
             }
@@ -78,7 +86,7 @@ final class EasyHandle
             $headers,
             $this->sink,
             substr($startLine[0], 5),
-            isset($startLine[2]) ? (string) $startLine[2] : null
+            isset($startLine[2]) ? (string)$startLine[2] : null
         );
     }
 

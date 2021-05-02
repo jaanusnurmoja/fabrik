@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Psr7;
 
 use Psr\Http\Message\StreamInterface;
@@ -29,11 +30,16 @@ class StreamWrapper
     {
         self::register();
 
-        if ($stream->isReadable()) {
+        if ($stream->isReadable())
+        {
             $mode = $stream->isWritable() ? 'r+' : 'r';
-        } elseif ($stream->isWritable()) {
+        }
+        elseif ($stream->isWritable())
+        {
             $mode = 'w';
-        } else {
+        }
+        else
+        {
             throw new \InvalidArgumentException('The stream must be readable, '
                 . 'writable, or both.');
         }
@@ -48,7 +54,8 @@ class StreamWrapper
      */
     public static function register()
     {
-        if (!in_array('guzzle', stream_get_wrappers())) {
+        if (!in_array('guzzle', stream_get_wrappers()))
+        {
             stream_wrapper_register('guzzle', __CLASS__);
         }
     }
@@ -57,7 +64,8 @@ class StreamWrapper
     {
         $options = stream_context_get_options($this->context);
 
-        if (!isset($options['guzzle']['stream'])) {
+        if (!isset($options['guzzle']['stream']))
+        {
             return false;
         }
 
@@ -74,7 +82,7 @@ class StreamWrapper
 
     public function stream_write($data)
     {
-        return (int) $this->stream->write($data);
+        return (int)$this->stream->write($data);
     }
 
     public function stream_tell()

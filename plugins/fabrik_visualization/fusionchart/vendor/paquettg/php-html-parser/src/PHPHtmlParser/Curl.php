@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser;
 
 use PHPHtmlParser\Exceptions\CurlException;
@@ -22,7 +23,8 @@ class Curl implements CurlInterface
     {
         $ch = curl_init($url);
 
-        if ( ! ini_get('open_basedir')) {
+        if (!ini_get('open_basedir'))
+        {
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         }
 
@@ -30,10 +32,11 @@ class Curl implements CurlInterface
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 
         $content = curl_exec($ch);
-        if ($content === false) {
+        if ($content === false)
+        {
             // there was a problem
             $error = curl_error($ch);
-            throw new CurlException('Error retrieving "'.$url.'" ('.$error.')');
+            throw new CurlException('Error retrieving "' . $url . '" (' . $error . ')');
         }
 
         return $content;

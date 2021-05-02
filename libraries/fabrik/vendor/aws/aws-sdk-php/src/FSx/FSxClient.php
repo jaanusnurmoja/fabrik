@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\FSx;
 
 use Aws\AwsClient;
@@ -28,4 +29,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateFileSystem(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateFileSystemAsync(array $args = [])
  */
-class FSxClient extends AwsClient {}
+class FSxClient extends AwsClient
+{
+}

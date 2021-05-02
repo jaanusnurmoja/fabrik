@@ -17,36 +17,39 @@ use Twilio\Version;
 
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- * 
+ *
  * @property \Twilio\Rest\Preview\BulkExports\Export\DayList days
  */
-class ExportContext extends InstanceContext {
+class ExportContext extends InstanceContext
+{
     protected $_days = null;
 
     /**
      * Initialize the ExportContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $resourceType The resource_type
-     * @return \Twilio\Rest\Preview\BulkExports\ExportContext 
+     * @return \Twilio\Rest\Preview\BulkExports\ExportContext
      */
-    public function __construct(Version $version, $resourceType) {
+    public function __construct(Version $version, $resourceType)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('resourceType' => $resourceType, );
+        $this->solution = ['resourceType' => $resourceType,];
 
         $this->uri = '/Exports/' . rawurlencode($resourceType) . '';
     }
 
     /**
      * Fetch a ExportInstance
-     * 
+     *
      * @return ExportInstance Fetched ExportInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -59,11 +62,13 @@ class ExportContext extends InstanceContext {
 
     /**
      * Access the days
-     * 
-     * @return \Twilio\Rest\Preview\BulkExports\Export\DayList 
+     *
+     * @return \Twilio\Rest\Preview\BulkExports\Export\DayList
      */
-    protected function getDays() {
-        if (!$this->_days) {
+    protected function getDays()
+    {
+        if (!$this->_days)
+        {
             $this->_days = new DayList($this->version, $this->solution['resourceType']);
         }
 
@@ -72,13 +77,15 @@ class ExportContext extends InstanceContext {
 
     /**
      * Magic getter to lazy load subresources
-     * 
+     *
      * @param string $name Subresource to return
      * @return \Twilio\ListResource The requested subresource
      * @throws \Twilio\Exceptions\TwilioException For unknown subresources
      */
-    public function __get($name) {
-        if (property_exists($this, '_' . $name)) {
+    public function __get($name)
+    {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -88,16 +95,18 @@ class ExportContext extends InstanceContext {
 
     /**
      * Magic caller to get resource contexts
-     * 
+     *
      * @param string $name Resource to return
      * @param array $arguments Context parameters
      * @return \Twilio\InstanceContext The requested resource context
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         $property = $this->$name;
-        if (method_exists($property, 'getContext')) {
-            return call_user_func_array(array($property, 'getContext'), $arguments);
+        if (method_exists($property, 'getContext'))
+        {
+            return call_user_func_array([$property, 'getContext'], $arguments);
         }
 
         throw new TwilioException('Resource does not have a context');
@@ -105,12 +114,14 @@ class ExportContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Preview.BulkExports.ExportContext ' . implode(' ', $context) . ']';

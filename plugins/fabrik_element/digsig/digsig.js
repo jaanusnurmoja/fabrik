@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbDigsig = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('digsig');
             this.parent(element, options);
@@ -21,14 +21,13 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 }
                 var oc_options = {
                     defaultAction: 'drawIt',
-                    lineTop      : '100',
-                    output       : '#' + this.options.sig_id,
-                    canvas       : '#' + this.element.id + '_oc_pad',
-                    drawOnly     : true
+                    lineTop: '100',
+                    output: '#' + this.options.sig_id,
+                    canvas: '#' + this.element.id + '_oc_pad',
+                    drawOnly: true
                 };
                 jQuery('#' + this.element.id).signaturePad(oc_options).regenerate(this.options.value);
-            }
-            else {
+            } else {
                 jQuery('#' + this.options.sig_id).signaturePad({displayOnly: true}).regenerate(this.options.value);
             }
         },

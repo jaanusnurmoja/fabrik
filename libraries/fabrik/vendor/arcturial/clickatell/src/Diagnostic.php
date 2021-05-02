@@ -1,33 +1,33 @@
 <?php
 /**
-* The Clickatell SMS Library provides a standardised way of talking to and
-* receiving replies from the Clickatell API's.
-*
-* PHP Version 5.3
-*
-* @package  Clickatell
-* @author   Chris Brand <chris@cainsvault.com>
-* @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
-* @link     https://github.com/arcturial
-*/
+ * The Clickatell SMS Library provides a standardised way of talking to and
+ * receiving replies from the Clickatell API's.
+ *
+ * PHP Version 5.3
+ *
+ * @package  Clickatell
+ * @author   Chris Brand <chris@cainsvault.com>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
+ * @link     https://github.com/arcturial
+ */
 
 namespace Clickatell;
 
 /**
-* This diagnostic file maps Clickatell message response codes to error messages. It's
-* a convenience class.
-*
-* @package  Clickatell
-* @author   Chris Brand <chris@cainsvault.com>
-* @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
-* @link     https://github.com/arcturial
-*/
+ * This diagnostic file maps Clickatell message response codes to error messages. It's
+ * a convenience class.
+ *
+ * @package  Clickatell
+ * @author   Chris Brand <chris@cainsvault.com>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
+ * @link     https://github.com/arcturial
+ */
 class Diagnostic
 {
     /**
      * @var array
      */
-    private static $statusCodes = array(
+    private static $statusCodes = [
         "001" => "The message ID is incorrect or reporting is delayed.",
         "002" => "The message could not be delivered and has been queued for attempted redelivery.",
         "003" => "Delivered to the upstream gateway or network (delivered to the recipient).",
@@ -40,7 +40,7 @@ class Diagnostic
         "011" => "Message has been queued at the gateway for delivery at a later time (delayed delivery).",
         "012" => "The message cannot be delivered due to a lack of funds in your account. Please re-purchase credits.",
         "014" => "Maximum MT limit exceeded The allowable amount for MT messaging has been exceeded.",
-    );
+    ];
 
     /**
      * Retrieves a description from a specfied code.

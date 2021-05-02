@@ -15,13 +15,15 @@ use Twilio\Values;
 /**
  * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
  */
-abstract class SessionOptions {
+abstract class SessionOptions
+{
     /**
      * @param string $uniqueName The unique_name
      * @param string $status The status
      * @return ReadSessionOptions Options builder
      */
-    public static function read($uniqueName = Values::NONE, $status = Values::NONE) {
+    public static function read($uniqueName = Values::NONE, $status = Values::NONE)
+    {
         return new ReadSessionOptions($uniqueName, $status);
     }
 
@@ -34,7 +36,8 @@ abstract class SessionOptions {
      * @param array $participants The participants
      * @return CreateSessionOptions Options builder
      */
-    public static function create($uniqueName = Values::NONE, $dateExpiry = Values::NONE, $ttl = Values::NONE, $mode = Values::NONE, $status = Values::NONE, $participants = Values::NONE) {
+    public static function create($uniqueName = Values::NONE, $dateExpiry = Values::NONE, $ttl = Values::NONE, $mode = Values::NONE, $status = Values::NONE, $participants = Values::NONE)
+    {
         return new CreateSessionOptions($uniqueName, $dateExpiry, $ttl, $mode, $status, $participants);
     }
 
@@ -46,52 +49,60 @@ abstract class SessionOptions {
      * @param array $participants The participants
      * @return UpdateSessionOptions Options builder
      */
-    public static function update($dateExpiry = Values::NONE, $ttl = Values::NONE, $mode = Values::NONE, $status = Values::NONE, $participants = Values::NONE) {
+    public static function update($dateExpiry = Values::NONE, $ttl = Values::NONE, $mode = Values::NONE, $status = Values::NONE, $participants = Values::NONE)
+    {
         return new UpdateSessionOptions($dateExpiry, $ttl, $mode, $status, $participants);
     }
 }
 
-class ReadSessionOptions extends Options {
+class ReadSessionOptions extends Options
+{
     /**
      * @param string $uniqueName The unique_name
      * @param string $status The status
      */
-    public function __construct($uniqueName = Values::NONE, $status = Values::NONE) {
+    public function __construct($uniqueName = Values::NONE, $status = Values::NONE)
+    {
         $this->options['uniqueName'] = $uniqueName;
         $this->options['status'] = $status;
     }
 
     /**
      * The unique_name
-     * 
+     *
      * @param string $uniqueName The unique_name
      * @return $this Fluent Builder
      */
-    public function setUniqueName($uniqueName) {
+    public function setUniqueName($uniqueName)
+    {
         $this->options['uniqueName'] = $uniqueName;
         return $this;
     }
 
     /**
      * The status
-     * 
+     *
      * @param string $status The status
      * @return $this Fluent Builder
      */
-    public function setStatus($status) {
+    public function setStatus($status)
+    {
         $this->options['status'] = $status;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -99,7 +110,8 @@ class ReadSessionOptions extends Options {
     }
 }
 
-class CreateSessionOptions extends Options {
+class CreateSessionOptions extends Options
+{
     /**
      * @param string $uniqueName A unique, developer assigned name of this Session.
      * @param \DateTime $dateExpiry The date this Session should expire
@@ -108,7 +120,8 @@ class CreateSessionOptions extends Options {
      * @param string $status Session status
      * @param array $participants The participants
      */
-    public function __construct($uniqueName = Values::NONE, $dateExpiry = Values::NONE, $ttl = Values::NONE, $mode = Values::NONE, $status = Values::NONE, $participants = Values::NONE) {
+    public function __construct($uniqueName = Values::NONE, $dateExpiry = Values::NONE, $ttl = Values::NONE, $mode = Values::NONE, $status = Values::NONE, $participants = Values::NONE)
+    {
         $this->options['uniqueName'] = $uniqueName;
         $this->options['dateExpiry'] = $dateExpiry;
         $this->options['ttl'] = $ttl;
@@ -119,79 +132,88 @@ class CreateSessionOptions extends Options {
 
     /**
      * Your unique identifier for this Session such as a Job ID or conversation ID. *Should not contain PII.*
-     * 
+     *
      * @param string $uniqueName A unique, developer assigned name of this Session.
      * @return $this Fluent Builder
      */
-    public function setUniqueName($uniqueName) {
+    public function setUniqueName($uniqueName)
+    {
         $this->options['uniqueName'] = $uniqueName;
         return $this;
     }
 
     /**
      * An absolute time (ISO 8601) at which this Session should close. If this is populated, it takes precedence over TTL values.
-     * 
+     *
      * @param \DateTime $dateExpiry The date this Session should expire
      * @return $this Fluent Builder
      */
-    public function setDateExpiry($dateExpiry) {
+    public function setDateExpiry($dateExpiry)
+    {
         $this->options['dateExpiry'] = $dateExpiry;
         return $this;
     }
 
     /**
      * The time, in seconds, after the latest of Session create time or the Session's last Interaction time at which the session will expire.
-     * 
+     *
      * @param integer $ttl TTL for a Session, in seconds.
      * @return $this Fluent Builder
      */
-    public function setTtl($ttl) {
+    public function setTtl($ttl)
+    {
         $this->options['ttl'] = $ttl;
         return $this;
     }
 
     /**
      * The type of communications mediums allowed on a Session. Defaults to `voice-and-message`. Other options are `voice-only` or `message-only`.
-     * 
+     *
      * @param string $mode The Mode of this Session
      * @return $this Fluent Builder
      */
-    public function setMode($mode) {
+    public function setMode($mode)
+    {
         $this->options['mode'] = $mode;
         return $this;
     }
 
     /**
      * Set this value to `closed` to close the session. A Session can be re-opened by posting to a closed session with the value `in-progress`.  This will be `open` by default on create.
-     * 
+     *
      * @param string $status Session status
      * @return $this Fluent Builder
      */
-    public function setStatus($status) {
+    public function setStatus($status)
+    {
         $this->options['status'] = $status;
         return $this;
     }
 
     /**
      * The participants
-     * 
+     *
      * @param array $participants The participants
      * @return $this Fluent Builder
      */
-    public function setParticipants($participants) {
+    public function setParticipants($participants)
+    {
         $this->options['participants'] = $participants;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -199,7 +221,8 @@ class CreateSessionOptions extends Options {
     }
 }
 
-class UpdateSessionOptions extends Options {
+class UpdateSessionOptions extends Options
+{
     /**
      * @param \DateTime $dateExpiry The date this Session should expire
      * @param integer $ttl TTL for a Session, in seconds.
@@ -207,7 +230,8 @@ class UpdateSessionOptions extends Options {
      * @param string $status The Status of this Session
      * @param array $participants The participants
      */
-    public function __construct($dateExpiry = Values::NONE, $ttl = Values::NONE, $mode = Values::NONE, $status = Values::NONE, $participants = Values::NONE) {
+    public function __construct($dateExpiry = Values::NONE, $ttl = Values::NONE, $mode = Values::NONE, $status = Values::NONE, $participants = Values::NONE)
+    {
         $this->options['dateExpiry'] = $dateExpiry;
         $this->options['ttl'] = $ttl;
         $this->options['mode'] = $mode;
@@ -217,68 +241,76 @@ class UpdateSessionOptions extends Options {
 
     /**
      * The date that this Session should expire, given in ISO 8601 format.
-     * 
+     *
      * @param \DateTime $dateExpiry The date this Session should expire
      * @return $this Fluent Builder
      */
-    public function setDateExpiry($dateExpiry) {
+    public function setDateExpiry($dateExpiry)
+    {
         $this->options['dateExpiry'] = $dateExpiry;
         return $this;
     }
 
     /**
      * The time, in seconds, after the latest of Session create time or the Session's last Interaction time at which the session will expire.
-     * 
+     *
      * @param integer $ttl TTL for a Session, in seconds.
      * @return $this Fluent Builder
      */
-    public function setTtl($ttl) {
+    public function setTtl($ttl)
+    {
         $this->options['ttl'] = $ttl;
         return $this;
     }
 
     /**
      * The mode
-     * 
+     *
      * @param string $mode The mode
      * @return $this Fluent Builder
      */
-    public function setMode($mode) {
+    public function setMode($mode)
+    {
         $this->options['mode'] = $mode;
         return $this;
     }
 
     /**
      * The Status of this Session. Set to `in-progress` to re-open a session or `closed` to close a session.
-     * 
+     *
      * @param string $status The Status of this Session
      * @return $this Fluent Builder
      */
-    public function setStatus($status) {
+    public function setStatus($status)
+    {
         $this->options['status'] = $status;
         return $this;
     }
 
     /**
      * The participants
-     * 
+     *
      * @param array $participants The participants
      * @return $this Fluent Builder
      */
-    public function setParticipants($participants) {
+    public function setParticipants($participants)
+    {
         $this->options['participants'] = $participants;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

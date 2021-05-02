@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Psr\Cache\CacheItemPoolInterface;
@@ -24,7 +25,8 @@ class PsrCacheAdapter implements CacheInterface
     {
         $item = $this->pool->getItem($key);
         $item->set($value);
-        if ($ttl > 0) {
+        if ($ttl > 0)
+        {
             $item->expiresAfter($ttl);
         }
 

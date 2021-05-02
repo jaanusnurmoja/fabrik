@@ -8,6 +8,8 @@ $view = $d->view;
 $id = $d->view === 'list' ? '' : 'id="' . $d->id . '"';
 ?>
 
-<div <?php echo $id;?> class="gmStaticMap">
-	<img src="<?php echo $d->src;?>" alt="static map" />
+<div <?php
+echo $id; ?> class="gmStaticMap">
+    <img src="<?php
+    echo $d->src; ?>" alt="static map"/>
 </div>

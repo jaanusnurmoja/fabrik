@@ -15,7 +15,8 @@ use Twilio\Values;
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
  */
-abstract class CompositionSettingsOptions {
+abstract class CompositionSettingsOptions
+{
     /**
      * @param string $awsCredentialsSid SID of the Stored Credential resource CRxx
      * @param string $encryptionKeySid SID of the Public Key resource CRxx
@@ -32,12 +33,15 @@ abstract class CompositionSettingsOptions {
      *                                   Compositions will be stored encrypted.
      * @return CreateCompositionSettingsOptions Options builder
      */
-    public static function create($awsCredentialsSid = Values::NONE, $encryptionKeySid = Values::NONE, $awsS3Url = Values::NONE, $awsStorageEnabled = Values::NONE, $encryptionEnabled = Values::NONE) {
-        return new CreateCompositionSettingsOptions($awsCredentialsSid, $encryptionKeySid, $awsS3Url, $awsStorageEnabled, $encryptionEnabled);
+    public static function create($awsCredentialsSid = Values::NONE, $encryptionKeySid = Values::NONE, $awsS3Url = Values::NONE, $awsStorageEnabled = Values::NONE, $encryptionEnabled = Values::NONE)
+    {
+        return new CreateCompositionSettingsOptions($awsCredentialsSid, $encryptionKeySid, $awsS3Url,
+            $awsStorageEnabled, $encryptionEnabled);
     }
 }
 
-class CreateCompositionSettingsOptions extends Options {
+class CreateCompositionSettingsOptions extends Options
+{
     /**
      * @param string $awsCredentialsSid SID of the Stored Credential resource CRxx
      * @param string $encryptionKeySid SID of the Public Key resource CRxx
@@ -53,7 +57,8 @@ class CreateCompositionSettingsOptions extends Options {
      * @param boolean $encryptionEnabled true|false When set to true, all
      *                                   Compositions will be stored encrypted.
      */
-    public function __construct($awsCredentialsSid = Values::NONE, $encryptionKeySid = Values::NONE, $awsS3Url = Values::NONE, $awsStorageEnabled = Values::NONE, $encryptionEnabled = Values::NONE) {
+    public function __construct($awsCredentialsSid = Values::NONE, $encryptionKeySid = Values::NONE, $awsS3Url = Values::NONE, $awsStorageEnabled = Values::NONE, $encryptionEnabled = Values::NONE)
+    {
         $this->options['awsCredentialsSid'] = $awsCredentialsSid;
         $this->options['encryptionKeySid'] = $encryptionKeySid;
         $this->options['awsS3Url'] = $awsS3Url;
@@ -63,43 +68,46 @@ class CreateCompositionSettingsOptions extends Options {
 
     /**
      * SID of the Stored Credential resource `CRxx`
-     * 
+     *
      * @param string $awsCredentialsSid SID of the Stored Credential resource CRxx
      * @return $this Fluent Builder
      */
-    public function setAwsCredentialsSid($awsCredentialsSid) {
+    public function setAwsCredentialsSid($awsCredentialsSid)
+    {
         $this->options['awsCredentialsSid'] = $awsCredentialsSid;
         return $this;
     }
 
     /**
      * SID of the Public Key resource `CRxx`
-     * 
+     *
      * @param string $encryptionKeySid SID of the Public Key resource CRxx
      * @return $this Fluent Builder
      */
-    public function setEncryptionKeySid($encryptionKeySid) {
+    public function setEncryptionKeySid($encryptionKeySid)
+    {
         $this->options['encryptionKeySid'] = $encryptionKeySid;
         return $this;
     }
 
     /**
      * Identity of the external location where the compositions should be stored. We only support DNS-compliant URLs like `http://<my-bucket>.s3-<aws-region>.amazonaws.com/compositions`,  where `compositions` is the path where you want compositions to be stored.
-     * 
+     *
      * @param string $awsS3Url Identity of the external location where the
      *                         compositions should be stored. We only support
      *                         DNS-compliant URLs like
      *                         http://<my-bucket>.s3-<aws-region>.amazonaws.com/compositions, where compositions is the path where you want compositions to be stored.
      * @return $this Fluent Builder
      */
-    public function setAwsS3Url($awsS3Url) {
+    public function setAwsS3Url($awsS3Url)
+    {
         $this->options['awsS3Url'] = $awsS3Url;
         return $this;
     }
 
     /**
      * `true|false` When set to `true`, all Compositions will be written to the `AwsS3Url` specified above. When set to `false`, all Compositions will be stored in Twilio's cloud.
-     * 
+     *
      * @param boolean $awsStorageEnabled true|false When set to true, all
      *                                   Compositions will be written to the
      *                                   AwsS3Url specified above. When set to
@@ -107,32 +115,37 @@ class CreateCompositionSettingsOptions extends Options {
      *                                   Twilio's cloud.
      * @return $this Fluent Builder
      */
-    public function setAwsStorageEnabled($awsStorageEnabled) {
+    public function setAwsStorageEnabled($awsStorageEnabled)
+    {
         $this->options['awsStorageEnabled'] = $awsStorageEnabled;
         return $this;
     }
 
     /**
      * `true|false` When set to `true`, all Compositions will be stored encrypted. Dafault value is `false`
-     * 
+     *
      * @param boolean $encryptionEnabled true|false When set to true, all
      *                                   Compositions will be stored encrypted.
      * @return $this Fluent Builder
      */
-    public function setEncryptionEnabled($encryptionEnabled) {
+    public function setEncryptionEnabled($encryptionEnabled)
+    {
         $this->options['encryptionEnabled'] = $encryptionEnabled;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

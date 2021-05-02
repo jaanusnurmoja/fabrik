@@ -30,7 +30,7 @@ final class DecoderPlugin implements Plugin
     /**
      * @param array $config {
      *
-     *    @var bool $use_content_encoding Whether this plugin should look at the Content-Encoding header first or only at the Transfer-Encoding (defaults to true).
+     * @var bool $use_content_encoding Whether this plugin should look at the Content-Encoding header first or only at the Transfer-Encoding (defaults to true).
      * }
      */
     public function __construct(array $config = [])
@@ -52,13 +52,15 @@ final class DecoderPlugin implements Plugin
     {
         $encodings = extension_loaded('zlib') ? ['gzip', 'deflate'] : ['identity'];
 
-        if ($this->useContentEncoding) {
+        if ($this->useContentEncoding)
+        {
             $request = $request->withHeader('Accept-Encoding', $encodings);
         }
         $encodings[] = 'chunked';
         $request = $request->withHeader('TE', $encodings);
 
-        return $next($request)->then(function (ResponseInterface $response) {
+        return $next($request)->then(function (ResponseInterface $response)
+        {
             return $this->decodeResponse($response);
         });
     }
@@ -74,7 +76,8 @@ final class DecoderPlugin implements Plugin
     {
         $response = $this->decodeOnEncodingHeader('Transfer-Encoding', $response);
 
-        if ($this->useContentEncoding) {
+        if ($this->useContentEncoding)
+        {
             $response = $this->decodeOnEncodingHeader('Content-Encoding', $response);
         }
 
@@ -84,21 +87,24 @@ final class DecoderPlugin implements Plugin
     /**
      * Decode a response on a specific header (content encoding or transfer encoding mainly).
      *
-     * @param string            $headerName Name of the header
-     * @param ResponseInterface $response   Response
+     * @param string $headerName Name of the header
+     * @param ResponseInterface $response Response
      *
      * @return ResponseInterface A new instance of the response decoded
      */
     private function decodeOnEncodingHeader($headerName, ResponseInterface $response)
     {
-        if ($response->hasHeader($headerName)) {
+        if ($response->hasHeader($headerName))
+        {
             $encodings = $response->getHeader($headerName);
             $newEncodings = [];
 
-            while ($encoding = array_pop($encodings)) {
+            while ($encoding = array_pop($encodings))
+            {
                 $stream = $this->decorateStream($encoding, $response->getBody());
 
-                if (false === $stream) {
+                if (false === $stream)
+                {
                     array_unshift($newEncodings, $encoding);
 
                     continue;
@@ -116,22 +122,25 @@ final class DecoderPlugin implements Plugin
     /**
      * Decorate a stream given an encoding.
      *
-     * @param string          $encoding
+     * @param string $encoding
      * @param StreamInterface $stream
      *
      * @return StreamInterface|false A new stream interface or false if encoding is not supported
      */
     private function decorateStream($encoding, StreamInterface $stream)
     {
-        if ('chunked' === strtolower($encoding)) {
+        if ('chunked' === strtolower($encoding))
+        {
             return new Encoding\DechunkStream($stream);
         }
 
-        if ('deflate' === strtolower($encoding)) {
+        if ('deflate' === strtolower($encoding))
+        {
             return new Encoding\DecompressStream($stream);
         }
 
-        if ('gzip' === strtolower($encoding)) {
+        if ('gzip' === strtolower($encoding))
+        {
             return new Encoding\GzipDecodeStream($stream);
         }
 

@@ -16,25 +16,25 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
 
         options: {
             fxProperties: {transition: Fx.Transitions.linear, duration: 500},
-            'position'  : 'top',
-            'trigger'   : 'hover',
-            'content'   : 'title',
-            'distance'  : 50,
-            'tipfx'     : 'Fx.Transitions.linear',
-            'heading'   : '',
-            'duration'  : 500,
-            'fadein'    : false,
-            'notice'    : false,
-            'html'      : true,
-            showFn      : function (e) {
+            'position': 'top',
+            'trigger': 'hover',
+            'content': 'title',
+            'distance': 50,
+            'tipfx': 'Fx.Transitions.linear',
+            'heading': '',
+            'duration': 500,
+            'fadein': false,
+            'notice': false,
+            'html': true,
+            showFn: function (e) {
                 e.stop();
                 return true;
             },
-            hideFn      : function (e) {
+            hideFn: function (e) {
                 e.stop();
                 return true;
             },
-            placement   : function (tip, ele) {
+            placement: function (tip, ele) {
                 // Custom functions should return top, left, right, bottom to set the tip location
                 // Return false to use the default location
                 Fabrik.fireEvent('bootstrap.tips.place', [tip, ele]);
@@ -49,7 +49,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
         },
 
         initialize: function (elements, options) {
-            if (Fabrik.bootstrapVersion('modal') >= 3 || typeof(Materialize) === 'object') {
+            if (Fabrik.bootstrapVersion('modal') >= 3 || typeof (Materialize) === 'object') {
                 // We should override any Fabrik3 custom tip settings with bootstrap3 data-foo attributes in JLayouts
                 return;
             }
@@ -66,7 +66,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
         },
 
         attach: function (elements) {
-            if (Fabrik.bootstrapVersion('modal') >= 3 || typeof(Materialize) === 'object') {
+            if (Fabrik.bootstrapVersion('modal') >= 3 || typeof (Materialize) === 'object') {
                 // We should override any Fabrik3 custom tip settings with bootstrap3 data-foo attributes in JLayouts
                 this.elements = document.getElements(elements);
                 this.elements.each(function (trigger) {
@@ -86,7 +86,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                 }
                 if (thisOpts.position) {
                     thisOpts.defaultPos = thisOpts.position;
-                    delete(thisOpts.position);
+                    delete (thisOpts.position);
                 }
                 var opts = jQuery.extend({}, self.options, thisOpts);
                 if (opts.content === 'title') {
@@ -164,7 +164,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
         PopoverEx.prototype = $.extend({}, $.fn.popover.Constructor.prototype, {
 
             constructor: PopoverEx,
-            tip        : function () {
+            tip: function () {
                 if (!this.$tip) {
                     this.$tip = $(this.options.template);
                     if (this.options.modifier) {

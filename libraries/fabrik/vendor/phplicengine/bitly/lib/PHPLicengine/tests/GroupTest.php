@@ -35,12 +35,12 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/tags')                    
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/tags')
+            );
         $bitlink = new Group($mock);
         $bitlink->getGroupTags('test');
-    } 
-    
+    }
+
     public function testGetGroupMetricsByReferringNetworks()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -48,12 +48,12 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/referring_networks')                    
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/referring_networks')
+            );
         $bitlink = new Group($mock);
         $bitlink->getGroupMetricsByReferringNetworks('test');
-    }     
-    
+    }
+
     public function testGetGroupShortenCounts()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -61,11 +61,11 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/shorten_counts')                    
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/shorten_counts')
+            );
         $bitlink = new Group($mock);
         $bitlink->getGroupShortenCounts('test');
-    }         
+    }
 
     public function testGetGroups()
     {
@@ -74,12 +74,12 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Group($mock);
         $bitlink->getGroups(['key' => 'value']);
-    }         
+    }
 
     public function testGetGroupPreferences()
     {
@@ -88,11 +88,11 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/preferences')
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/preferences')
+            );
         $bitlink = new Group($mock);
         $bitlink->getGroupPreferences('test');
-    }         
+    }
 
     public function testUpdateGroupPreferences()
     {
@@ -101,12 +101,12 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('patch')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/preferences'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/preferences'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Group($mock);
         $bitlink->updateGroupPreferences('test', ['key' => 'value']);
-    }        
+    }
 
     public function testGetBitlinksByGroup()
     {
@@ -115,12 +115,12 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/bitlinks'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/bitlinks'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Group($mock);
         $bitlink->getBitlinksByGroup('test', ['key' => 'value']);
-    }         
+    }
 
     public function testGetGroupMetricsByCountries()
     {
@@ -129,11 +129,11 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/bitlinks')
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/bitlinks')
+            );
         $bitlink = new Group($mock);
         $bitlink->getBitlinksByGroup('test');
-    }         
+    }
 
     public function testGetSortedBitlinks()
     {
@@ -142,12 +142,12 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/bitlinks/clicks'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test/bitlinks/clicks'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Group($mock);
         $bitlink->getSortedBitlinks('test', ['key' => 'value']);
-    }         
+    }
 
     public function testUpdateGroup()
     {
@@ -156,12 +156,12 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('patch')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Group($mock);
         $bitlink->updateGroup('test', ['key' => 'value']);
-    }        
+    }
 
     public function testGetGroup()
     {
@@ -170,11 +170,11 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test')
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test')
+            );
         $bitlink = new Group($mock);
         $bitlink->getGroup('test');
-    }         
+    }
 
     public function testDeleteGroup()
     {
@@ -183,10 +183,10 @@ class GroupTest extends TestCase
             ->expects($this->once())
             ->method('delete')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/groups/test')
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/groups/test')
+            );
         $bitlink = new Group($mock);
         $bitlink->deleteGroup('test');
-    }         
+    }
 
 }

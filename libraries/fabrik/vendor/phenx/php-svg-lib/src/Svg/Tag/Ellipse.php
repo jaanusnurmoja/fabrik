@@ -2,7 +2,7 @@
 /**
  * @package php-svg-lib
  * @link    http://github.com/PhenX/php-svg-lib
- * @author  Fabien Ménager <fabien.menager@gmail.com>
+ * @author  Fabien Mï¿½nager <fabien.menager@gmail.com>
  * @license GNU LGPLv3+ http://www.gnu.org/copyleft/lesser.html
  */
 
@@ -19,16 +19,20 @@ class Ellipse extends Shape
     {
         parent::start($attributes);
 
-        if (isset($attributes['cx'])) {
+        if (isset($attributes['cx']))
+        {
             $this->cx = $attributes['cx'];
         }
-        if (isset($attributes['cy'])) {
+        if (isset($attributes['cy']))
+        {
             $this->cy = $attributes['cy'];
         }
-        if (isset($attributes['rx'])) {
+        if (isset($attributes['rx']))
+        {
             $this->rx = $attributes['rx'];
         }
-        if (isset($attributes['ry'])) {
+        if (isset($attributes['ry']))
+        {
             $this->ry = $attributes['ry'];
         }
 

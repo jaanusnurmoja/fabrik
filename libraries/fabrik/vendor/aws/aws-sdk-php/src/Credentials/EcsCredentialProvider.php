@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Credentials;
 
 use Aws\Exception\CredentialsException;
@@ -46,17 +47,19 @@ class EcsCredentialProvider
             $request,
             [
                 'timeout' => $this->timeout,
-                'proxy' => '',
+                'proxy'   => '',
             ]
-        )->then(function (ResponseInterface $response) {
-            $result = $this->decodeResult((string) $response->getBody());
+        )->then(function (ResponseInterface $response)
+        {
+            $result = $this->decodeResult((string)$response->getBody());
             return new Credentials(
                 $result['AccessKeyId'],
                 $result['SecretAccessKey'],
                 $result['Token'],
                 strtotime($result['Expiration'])
             );
-        })->otherwise(function ($reason) {
+        })->otherwise(function ($reason)
+        {
             $reason = is_array($reason) ? $reason['exception'] : $reason;
             $msg = $reason->getMessage();
             throw new CredentialsException(
@@ -80,7 +83,8 @@ class EcsCredentialProvider
     {
         $result = json_decode($response, true);
 
-        if (!isset($result['AccessKeyId'])) {
+        if (!isset($result['AccessKeyId']))
+        {
             throw new CredentialsException('Unexpected ECS credential value');
         }
         return $result;

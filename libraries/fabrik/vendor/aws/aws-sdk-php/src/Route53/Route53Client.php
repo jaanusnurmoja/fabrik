@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Route53;
 
 use Aws\AwsClient;
@@ -131,10 +132,14 @@ class Route53Client extends AwsClient
 
     private function cleanIdFn()
     {
-        return function (callable $handler) {
-            return function (CommandInterface $c, RequestInterface $r = null) use ($handler) {
-                foreach (['Id', 'HostedZoneId', 'DelegationSetId'] as $clean) {
-                    if ($c->hasParam($clean)) {
+        return function (callable $handler)
+        {
+            return function (CommandInterface $c, RequestInterface $r = null) use ($handler)
+            {
+                foreach (['Id', 'HostedZoneId', 'DelegationSetId'] as $clean)
+                {
+                    if ($c->hasParam($clean))
+                    {
                         $c[$clean] = $this->cleanId($c[$clean]);
                     }
                 }

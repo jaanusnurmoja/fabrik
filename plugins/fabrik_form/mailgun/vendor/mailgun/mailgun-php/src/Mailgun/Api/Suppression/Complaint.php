@@ -28,7 +28,7 @@ class Complaint extends HttpApi
 
     /**
      * @param string $domain Domain to get complaints for
-     * @param int    $limit  optional
+     * @param int $limit optional
      *
      * @return IndexResponse
      */
@@ -47,7 +47,7 @@ class Complaint extends HttpApi
     }
 
     /**
-     * @param string $domain  Domain to show complaint for
+     * @param string $domain Domain to show complaint for
      * @param string $address Complaint address
      *
      * @return ShowResponse
@@ -62,8 +62,8 @@ class Complaint extends HttpApi
     }
 
     /**
-     * @param string $domain    Domain to create complaint for
-     * @param string $address   Complaint address
+     * @param string $domain Domain to create complaint for
+     * @param string $address Complaint address
      * @param string $createdAt (optional) rfc2822 compliant format. (new \DateTime())->format('r')
      *
      * @return CreateResponse
@@ -75,7 +75,8 @@ class Complaint extends HttpApi
         Assert::stringNotEmpty($createdAt);
 
         $params['address'] = $address;
-        if (null !== $createdAt) {
+        if (null !== $createdAt)
+        {
             $params['created_at'] = $createdAt;
         }
 
@@ -85,7 +86,7 @@ class Complaint extends HttpApi
     }
 
     /**
-     * @param string $domain  Domain to delete complaint for
+     * @param string $domain Domain to delete complaint for
      * @param string $address Complaint address
      *
      * @return DeleteResponse

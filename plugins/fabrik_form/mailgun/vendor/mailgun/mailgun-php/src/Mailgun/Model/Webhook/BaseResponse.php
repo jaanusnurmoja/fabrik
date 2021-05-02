@@ -29,7 +29,7 @@ abstract class BaseResponse implements ApiResponse
     private $message;
 
     /**
-     * @param array  $webhook
+     * @param array $webhook
      * @param string $message
      */
     public function __construct(array $webhook, $message)
@@ -47,11 +47,13 @@ abstract class BaseResponse implements ApiResponse
     {
         $webhook = [];
         $message = '';
-        if (isset($data['webhook'])) {
+        if (isset($data['webhook']))
+        {
             $webhook = $data['webhook'];
         }
 
-        if (isset($data['message'])) {
+        if (isset($data['message']))
+        {
             $message = $data['message'];
         }
 
@@ -63,7 +65,8 @@ abstract class BaseResponse implements ApiResponse
      */
     public function getWebhookUrl()
     {
-        if (isset($this->webhook['url'])) {
+        if (isset($this->webhook['url']))
+        {
             return $this->webhook['url'];
         }
     }

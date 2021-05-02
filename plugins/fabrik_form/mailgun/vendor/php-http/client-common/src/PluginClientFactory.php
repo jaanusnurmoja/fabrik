@@ -25,9 +25,9 @@ final class PluginClientFactory
      * Unlike the createClient method, this one is static to allow zero configuration profiling by hooking into early
      * application execution.
      *
+     * @param callable $factory
      * @internal
      *
-     * @param callable $factory
      */
     public static function setFactory(callable $factory)
     {
@@ -36,20 +36,21 @@ final class PluginClientFactory
 
     /**
      * @param HttpClient|HttpAsyncClient $client
-     * @param Plugin[]                   $plugins
-     * @param array                      $options {
+     * @param Plugin[] $plugins
+     * @param array $options {
      *
-     *     @var string $client_name to give client a name which may be used when displaying client information  like in
+     * @return PluginClient
+     * @see PluginClient constructor for PluginClient specific $options.
+     *
+     * @var string $client_name to give client a name which may be used when displaying client information  like in
      *         the HTTPlugBundle profiler.
      * }
      *
-     * @see PluginClient constructor for PluginClient specific $options.
-     *
-     * @return PluginClient
      */
     public function createClient($client, array $plugins = [], array $options = [])
     {
-        if (static::$factory) {
+        if (static::$factory)
+        {
             $factory = static::$factory;
 
             return $factory($client, $plugins, $options);

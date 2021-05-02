@@ -23,19 +23,19 @@ require_once JPATH_SITE . '/components/com_fabrik/views/form/view.base.php';
  */
 class FabrikViewIdentity extends FabrikViewFormBase
 {
-	/**
-	 * Display the Identity
-	 *
-	 * @param   string $tpl The name of the template file to parse; automatically searches through the template paths.
-	 *
-	 * @return  mixed  A string if successful, otherwise a JError object.
-	 */
-	public function display($tpl = null)
-	{
-		$this->doc->setMimeEncoding('application/xml');
+    /**
+     * Display the Identity
+     *
+     * @param string $tpl The name of the template file to parse; automatically searches through the template paths.
+     *
+     * @return  mixed  A string if successful, otherwise a JError object.
+     */
+    public function display($tpl = null)
+    {
+        $this->doc->setMimeEncoding('application/xml');
 
-		echo $this->getModel()->identity();
+        echo $this->getModel()->identity();
 
-		return true;
-	}
+        return true;
+    }
 }

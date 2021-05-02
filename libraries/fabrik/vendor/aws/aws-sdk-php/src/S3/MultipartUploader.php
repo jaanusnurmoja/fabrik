@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\HashingStream;
@@ -57,30 +58,31 @@ class MultipartUploader extends AbstractUploader
      *   options are ignored.
      *
      * @param S3ClientInterface $client Client used for the upload.
-     * @param mixed             $source Source of the data to upload.
-     * @param array             $config Configuration used to perform the upload.
+     * @param mixed $source Source of the data to upload.
+     * @param array $config Configuration used to perform the upload.
      */
     public function __construct(
         S3ClientInterface $client,
         $source,
         array $config = []
-    ) {
+    )
+    {
         parent::__construct($client, $source, array_change_key_case($config) + [
-            'bucket' => null,
-            'key'    => null,
-            'exception_class' => S3MultipartUploadException::class,
-        ]);
+                'bucket'          => null,
+                'key'             => null,
+                'exception_class' => S3MultipartUploadException::class,
+            ]);
     }
 
     protected function loadUploadWorkflowInfo()
     {
         return [
-            'command' => [
+            'command'  => [
                 'initiate' => 'CreateMultipartUpload',
                 'upload'   => 'UploadPart',
                 'complete' => 'CompleteMultipartUpload',
             ],
-            'id' => [
+            'id'       => [
                 'bucket'    => 'Bucket',
                 'key'       => 'Key',
                 'upload_id' => 'UploadId',
@@ -97,19 +99,23 @@ class MultipartUploader extends AbstractUploader
         // Apply custom params to UploadPart data
         $config = $this->getConfig();
         $params = isset($config['params']) ? $config['params'] : [];
-        foreach ($params as $k => $v) {
+        foreach ($params as $k => $v)
+        {
             $data[$k] = $v;
         }
 
         $data['PartNumber'] = $number;
 
         // Read from the source to create the body stream.
-        if ($seekable) {
+        if ($seekable)
+        {
             // Case 1: Source is seekable, use lazy stream to defer work.
             $body = $this->limitPartStream(
                 new Psr7\LazyOpenStream($this->source->getMetadata('uri'), 'r')
             );
-        } else {
+        }
+        else
+        {
             // Case 2: Stream is not seekable; must store in temp stream.
             $source = $this->limitPartStream($this->source);
             $source = $this->decorateWithHashes($source, $data);
@@ -120,7 +126,8 @@ class MultipartUploader extends AbstractUploader
         $contentLength = $body->getSize();
 
         // Do not create a part if the body size is zero.
-        if ($contentLength === 0) {
+        if ($contentLength === 0)
+        {
             return false;
         }
 
@@ -138,7 +145,8 @@ class MultipartUploader extends AbstractUploader
 
     protected function getSourceMimeType()
     {
-        if ($uri = $this->source->getMetadata('uri')) {
+        if ($uri = $this->source->getMetadata('uri'))
+        {
             return Psr7\mimetype_from_filename($uri)
                 ?: 'application/octet-stream';
         }
@@ -153,7 +161,7 @@ class MultipartUploader extends AbstractUploader
      * Decorates a stream with a sha256 linear hashing stream.
      *
      * @param Stream $stream Stream to decorate.
-     * @param array  $data   Part data to augment with the hash result.
+     * @param array $data Part data to augment with the hash result.
      *
      * @return Stream
      */
@@ -161,7 +169,8 @@ class MultipartUploader extends AbstractUploader
     {
         // Decorate source with a hashing stream
         $hash = new PhpHash('sha256');
-        return new HashingStream($stream, $hash, function ($result) use (&$data) {
+        return new HashingStream($stream, $hash, function ($result) use (&$data)
+        {
             $data['ContentSHA256'] = bin2hex($result);
         });
     }

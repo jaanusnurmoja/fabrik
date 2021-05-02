@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\GlobalAccelerator;
 
 use Aws\AwsClient;
@@ -40,4 +41,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateListener(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateListenerAsync(array $args = [])
  */
-class GlobalAcceleratorClient extends AwsClient {}
+class GlobalAcceleratorClient extends AwsClient
+{
+}

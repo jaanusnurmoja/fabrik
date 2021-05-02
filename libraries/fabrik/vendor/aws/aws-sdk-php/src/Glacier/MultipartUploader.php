@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Glacier;
 
 use Aws\CommandInterface;
@@ -37,10 +38,10 @@ class MultipartUploader extends AbstractUploader
      * Creates an UploadState object for a multipart upload by querying the
      * service for the specified upload's information.
      *
-     * @param GlacierClient $client    GlacierClient object to use.
-     * @param string        $vaultName Vault name for the multipart upload.
-     * @param string        $uploadId  Upload ID for the multipart upload.
-     * @param string        $accountId Account ID for the multipart upload.
+     * @param GlacierClient $client GlacierClient object to use.
+     * @param string $vaultName Vault name for the multipart upload.
+     * @param string $uploadId Upload ID for the multipart upload.
+     * @param string $accountId Account ID for the multipart upload.
      *
      * @return UploadState
      */
@@ -49,20 +50,24 @@ class MultipartUploader extends AbstractUploader
         $vaultName,
         $uploadId,
         $accountId = '-'
-    ) {
+    )
+    {
         $state = new UploadState([
             'accountId' => $accountId,
             'vaultName' => $vaultName,
             'uploadId'  => $uploadId,
         ]);
 
-        foreach ($client->getPaginator('ListParts', $state->getId()) as $result) {
+        foreach ($client->getPaginator('ListParts', $state->getId()) as $result)
+        {
             // Get the part size from the first part in the first result.
-            if (!$state->getPartSize()) {
+            if (!$state->getPartSize())
+            {
                 $state->setPartSize($result['PartSizeInBytes']);
             }
             // Mark all the parts returned by ListParts as uploaded.
-            foreach ($result['Parts'] as $part) {
+            foreach ($result['Parts'] as $part)
+            {
                 list($rangeIndex, $rangeSize) = self::parseRange(
                     $part['RangeInBytes'],
                     $state->getPartSize()
@@ -112,26 +117,26 @@ class MultipartUploader extends AbstractUploader
      *   uploaded.
      *
      * @param GlacierClient $client Client used for the upload.
-     * @param mixed         $source Source of the data to upload.
-     * @param array         $config Configuration used to perform the upload.
+     * @param mixed $source Source of the data to upload.
+     * @param array $config Configuration used to perform the upload.
      */
     public function __construct(GlacierClient $client, $source, array $config = [])
     {
         parent::__construct($client, $source, $config + [
-            'account_id' => '-',
-            'vault_name' => null,
-        ]);
+                'account_id' => '-',
+                'vault_name' => null,
+            ]);
     }
 
     protected function loadUploadWorkflowInfo()
     {
         return [
-            'command' => [
+            'command'  => [
                 'initiate' => 'InitiateMultipartUpload',
                 'upload'   => 'UploadMultipartPart',
                 'complete' => 'CompleteMultipartUpload',
             ],
-            'id' => [
+            'id'       => [
                 'account_id' => 'accountId',
                 'vault_name' => 'vaultName',
                 'upload_id'  => 'uploadId',
@@ -146,7 +151,8 @@ class MultipartUploader extends AbstractUploader
         $partSize = $this->config['part_size'] ?: self::PART_MIN_SIZE;
 
         // Ensure that the part size is valid.
-        if (!in_array($partSize, self::$validPartSizes)) {
+        if (!in_array($partSize, self::$validPartSizes))
+        {
             throw new \InvalidArgumentException('The part_size must be a power '
                 . 'of 2, in megabytes, such that 1 MB <= PART_SIZE <= 4 GB.');
         }
@@ -161,7 +167,8 @@ class MultipartUploader extends AbstractUploader
 
         // Read from the source to create the body stream. This also
         // calculates the linear and tree hashes as the data is read.
-        if ($seekable) {
+        if ($seekable)
+        {
             // Case 1: Stream is seekable, can make stream from new handle.
             $body = Psr7\try_fopen($this->source->getMetadata('uri'), 'r');
             $body = $this->limitPartStream(Psr7\stream_for($body));
@@ -171,7 +178,9 @@ class MultipartUploader extends AbstractUploader
             while (!$decoratedBody->eof()) $decoratedBody->read(1048576);
             // Seek the original source forward to the end of the range.
             $this->source->seek($this->source->tell() + $body->getSize());
-        } else {
+        }
+        else
+        {
             // Case 2: Stream is not seekable, must store part in temp stream.
             $source = $this->limitPartStream($this->source);
             $source = $this->decorateWithHashes($source, $data);
@@ -180,7 +189,8 @@ class MultipartUploader extends AbstractUploader
         }
 
         // Do not create a part if the body size is zero.
-        if ($body->getSize() === 0) {
+        if ($body->getSize() === 0)
+        {
             return false;
         }
 
@@ -208,7 +218,8 @@ class MultipartUploader extends AbstractUploader
     protected function getInitiateParams()
     {
         $params = ['partSize' => $this->state->getPartSize()];
-        if (isset($this->config['archive_description'])) {
+        if (isset($this->config['archive_description']))
+        {
             $params['archiveDescription'] = $this->config['archive_description'];
         }
 
@@ -219,7 +230,8 @@ class MultipartUploader extends AbstractUploader
     {
         $treeHash = new TreeHash();
         $archiveSize = 0;
-        foreach ($this->state->getUploadedParts() as $part) {
+        foreach ($this->state->getUploadedParts() as $part)
+        {
             $archiveSize += $part['size'];
             $treeHash->addChecksum($part['checksum']);
         }
@@ -234,7 +246,7 @@ class MultipartUploader extends AbstractUploader
      * Decorates a stream with a tree AND linear sha256 hashing stream.
      *
      * @param Stream $stream Stream to decorate.
-     * @param array  $data   Data bag that results are injected into.
+     * @param array $data Data bag that results are injected into.
      *
      * @return Stream
      */
@@ -242,14 +254,16 @@ class MultipartUploader extends AbstractUploader
     {
         // Make sure that a tree hash is calculated.
         $stream = new HashingStream($stream, new TreeHash(),
-            function ($result) use (&$data) {
+            function ($result) use (&$data)
+            {
                 $data['checksum'] = bin2hex($result);
             }
         );
 
         // Make sure that a linear SHA256 hash is calculated.
         $stream = new HashingStream($stream, new PhpHash('sha256'),
-            function ($result) use (&$data) {
+            function ($result) use (&$data)
+            {
                 $data['ContentSHA256'] = bin2hex($result);
             }
         );
@@ -260,15 +274,16 @@ class MultipartUploader extends AbstractUploader
     /**
      * Parses a Glacier range string into a size and part number.
      *
-     * @param string $range    Glacier range string (e.g., "bytes 5-5000/*")
-     * @param int    $partSize The chosen part size
+     * @param string $range Glacier range string (e.g., "bytes 5-5000/*")
+     * @param int $partSize The chosen part size
      *
      * @return array
      */
     private static function parseRange($range, $partSize)
     {
         // Strip away the prefix and suffix.
-        if (strpos($range, 'bytes') !== false) {
+        if (strpos($range, 'bytes') !== false)
+        {
             $range = substr($range, 6, -2);
         }
 

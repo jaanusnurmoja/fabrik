@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -15,7 +16,8 @@ class StructureShape extends Shape
     {
         $definition['type'] = 'structure';
 
-        if (!isset($definition['members'])) {
+        if (!isset($definition['members']))
+        {
             $definition['members'] = [];
         }
 
@@ -29,7 +31,8 @@ class StructureShape extends Shape
      */
     public function getMembers()
     {
-        if (empty($this->members)) {
+        if (empty($this->members))
+        {
             $this->generateMembersHash();
         }
 
@@ -60,7 +63,8 @@ class StructureShape extends Shape
     {
         $members = $this->getMembers();
 
-        if (!isset($members[$name])) {
+        if (!isset($members[$name]))
+        {
             throw new \InvalidArgumentException('Unknown member ' . $name);
         }
 
@@ -72,7 +76,8 @@ class StructureShape extends Shape
     {
         $this->members = [];
 
-        foreach ($this->definition['members'] as $name => $definition) {
+        foreach ($this->definition['members'] as $name => $definition)
+        {
             $this->members[$name] = $this->shapeFor($definition);
         }
     }

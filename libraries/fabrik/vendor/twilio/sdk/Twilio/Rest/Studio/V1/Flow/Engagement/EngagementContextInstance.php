@@ -21,39 +21,43 @@ use Twilio\Version;
  * @property string flowSid
  * @property string url
  */
-class EngagementContextInstance extends InstanceResource {
+class EngagementContextInstance extends InstanceResource
+{
     /**
      * Initialize the EngagementContextInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $flowSid Flow Sid.
      * @param string $engagementSid Engagement Sid.
-     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\EngagementContextInstance 
+     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\EngagementContextInstance
      */
-    public function __construct(Version $version, array $payload, $flowSid, $engagementSid) {
+    public function __construct(Version $version, array $payload, $flowSid, $engagementSid)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'accountSid' => Values::array_get($payload, 'account_sid'),
-            'context' => Values::array_get($payload, 'context'),
+        $this->properties = [
+            'accountSid'    => Values::array_get($payload, 'account_sid'),
+            'context'       => Values::array_get($payload, 'context'),
             'engagementSid' => Values::array_get($payload, 'engagement_sid'),
-            'flowSid' => Values::array_get($payload, 'flow_sid'),
-            'url' => Values::array_get($payload, 'url'),
-        );
+            'flowSid'       => Values::array_get($payload, 'flow_sid'),
+            'url'           => Values::array_get($payload, 'url'),
+        ];
 
-        $this->solution = array('flowSid' => $flowSid, 'engagementSid' => $engagementSid, );
+        $this->solution = ['flowSid' => $flowSid, 'engagementSid' => $engagementSid,];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Studio\V1\Flow\Engagement\EngagementContextContext Context for this EngagementContextInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new EngagementContextContext(
                 $this->version,
                 $this->solution['flowSid'],
@@ -66,27 +70,31 @@ class EngagementContextInstance extends InstanceResource {
 
     /**
      * Fetch a EngagementContextInstance
-     * 
+     *
      * @return EngagementContextInstance Fetched EngagementContextInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -96,12 +104,14 @@ class EngagementContextInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Studio.V1.EngagementContextInstance ' . implode(' ', $context) . ']';

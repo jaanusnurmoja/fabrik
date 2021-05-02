@@ -14,23 +14,23 @@ defined('_JEXEC') or die('Restricted access');
 ?>
 <a href="{readmore}">read more</a>
 <table border="1">
-<?php
-foreach ($this->data as $key => $val)
-{
+    <?php
+    foreach ($this->data as $key => $val)
+    {
 
-	echo '<tr><td>' . $key . '</td><td>';
-	if (is_array($val)) :
-		foreach ($val as $v):
-			if (is_array($v)) :
-				echo implode("<br>", $v);
-			else:
-				echo implode("<br>", $val);
-			endif;
-		endforeach;
-	else:
-		echo $val;
-	endif;
-	echo "&nbsp;</td></tr>";
-}
-?>
+        echo '<tr><td>' . $key . '</td><td>';
+        if (is_array($val)) :
+            foreach ($val as $v):
+                if (is_array($v)) :
+                    echo implode("<br>", $v);
+                else:
+                    echo implode("<br>", $val);
+                endif;
+            endforeach;
+        else:
+            echo $val;
+        endif;
+        echo "&nbsp;</td></tr>";
+    }
+    ?>
 </table>

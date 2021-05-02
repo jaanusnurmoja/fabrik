@@ -18,32 +18,35 @@ use Twilio\Version;
 /**
  * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
  */
-class TaskActionsContext extends InstanceContext {
+class TaskActionsContext extends InstanceContext
+{
     /**
      * Initialize the TaskActionsContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $assistantSid The unique ID of the parent Assistant.
      * @param string $taskSid The unique ID of the Task.
-     * @return \Twilio\Rest\Autopilot\V1\Assistant\Task\TaskActionsContext 
+     * @return \Twilio\Rest\Autopilot\V1\Assistant\Task\TaskActionsContext
      */
-    public function __construct(Version $version, $assistantSid, $taskSid) {
+    public function __construct(Version $version, $assistantSid, $taskSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('assistantSid' => $assistantSid, 'taskSid' => $taskSid, );
+        $this->solution = ['assistantSid' => $assistantSid, 'taskSid' => $taskSid,];
 
         $this->uri = '/Assistants/' . rawurlencode($assistantSid) . '/Tasks/' . rawurlencode($taskSid) . '/Actions';
     }
 
     /**
      * Fetch a TaskActionsInstance
-     * 
+     *
      * @return TaskActionsInstance Fetched TaskActionsInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -61,20 +64,21 @@ class TaskActionsContext extends InstanceContext {
 
     /**
      * Update the TaskActionsInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return TaskActionsInstance Updated TaskActionsInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array('Actions' => Serialize::jsonObject($options['actions']), ));
+        $data = Values::of(['Actions' => Serialize::jsonObject($options['actions']),]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -88,12 +92,14 @@ class TaskActionsContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Autopilot.V1.TaskActionsContext ' . implode(' ', $context) . ']';

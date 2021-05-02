@@ -25,7 +25,7 @@ final class RequestMatcherPlugin implements Plugin
 
     /**
      * @param RequestMatcher $requestMatcher
-     * @param Plugin         $delegatedPlugin
+     * @param Plugin $delegatedPlugin
      */
     public function __construct(RequestMatcher $requestMatcher, Plugin $delegatedPlugin)
     {
@@ -38,7 +38,8 @@ final class RequestMatcherPlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        if ($this->requestMatcher->matches($request)) {
+        if ($this->requestMatcher->matches($request))
+        {
             return $this->delegatedPlugin->handleRequest($request, $next, $first);
         }
 

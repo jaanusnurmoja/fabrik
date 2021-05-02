@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Amplify;
 
 use Aws\AwsClient;
@@ -46,4 +47,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateDomainAssociation(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateDomainAssociationAsync(array $args = [])
  */
-class AmplifyClient extends AwsClient {}
+class AmplifyClient extends AwsClient
+{
+}

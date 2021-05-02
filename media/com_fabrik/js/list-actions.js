@@ -1,7 +1,7 @@
 /**
  * Created by rob on 21/03/2016.
  */
-define (['jquery', 'fab/tipsBootStrapMock'], function (jQuery, FloatingTips) {
+define(['jquery', 'fab/tipsBootStrapMock'], function (jQuery, FloatingTips) {
 
     /**
      * set up and show/hide list actions for each row
@@ -10,9 +10,9 @@ define (['jquery', 'fab/tipsBootStrapMock'], function (jQuery, FloatingTips) {
     var FbListActions = new Class({
 
         Implements: [Options],
-        options   : {
+        options: {
             'selector': 'ul.fabrik_action, .btn-group.fabrik_action',
-            'method'  : 'floating',
+            'method': 'floating',
             'floatPos': 'bottom'
         },
 
@@ -51,10 +51,10 @@ define (['jquery', 'fab/tipsBootStrapMock'], function (jQuery, FloatingTips) {
                     }
                     var t = Fabrik.tips ? Fabrik.tips.options : {};
                     var tipOpts = Object.merge(Object.clone(t), {
-                        showOn  : 'click',
-                        hideOn  : 'click',
+                        showOn: 'click',
+                        hideOn: 'click',
                         position: 'bottom',
-                        content : c
+                        content: c
                     });
                     var tip = new FloatingTips(trigger, tipOpts);
                     el.dispose();
@@ -104,15 +104,15 @@ define (['jquery', 'fab/tipsBootStrapMock'], function (jQuery, FloatingTips) {
                         }.bind(this.list);
 
                         var opts = {
-                            position : this.options.floatPos,
-                            showOn   : 'change',
-                            hideOn   : 'click',
-                            content  : c,
+                            position: this.options.floatPos,
+                            showOn: 'change',
+                            hideOn: 'click',
+                            content: c,
                             'heading': 'Edit: ',
-                            hideFn   : function (e) {
+                            hideFn: function (e) {
                                 return !e.target.checked;
                             },
-                            showFn   : function (e, trigger) {
+                            showFn: function (e, trigger) {
                                 Fabrik.activeRow = ul.getParent().retrieve('activeRow');
                                 trigger.store('list', this.list);
                                 return e.target.checked;
@@ -141,16 +141,16 @@ define (['jquery', 'fab/tipsBootStrapMock'], function (jQuery, FloatingTips) {
 
             var t = Fabrik.tips ? Object.clone(Fabrik.tips.options) : {};
             var tipChxAllOpts = Object.merge(t, {
-                position : this.options.floatPos,
-                html     : true,
-                showOn   : 'click',
-                hideOn   : 'click',
-                content  : c,
+                position: this.options.floatPos,
+                html: true,
+                showOn: 'click',
+                hideOn: 'click',
+                content: c,
                 'heading': 'Edit all: ',
-                hideFn   : function (e) {
+                hideFn: function (e) {
                     return !e.target.checked;
                 },
-                showFn   : function (e, trigger) {
+                showFn: function (e, trigger) {
                     trigger.retrieve('tip').click.store('list', this.list);
                     return e.target.checked;
                 }.bind(this.list)

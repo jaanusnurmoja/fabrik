@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto;
 
 use GuzzleHttp\Psr7;
@@ -57,7 +58,8 @@ trait DecryptionTrait
         MaterialsProvider $provider,
         MetadataEnvelope $envelope,
         array $cipherOptions = []
-    ) {
+    )
+    {
         $cipherOptions['Iv'] = base64_decode(
             $envelope[MetadataEnvelope::IV_HEADER]
         );
@@ -92,13 +94,15 @@ trait DecryptionTrait
     private function getTagFromCiphertextStream(
         Psr7\Stream $cipherText,
         $tagLength
-    ) {
+    )
+    {
         $cipherTextSize = $cipherText->getSize();
-        if ($cipherTextSize == null || $cipherTextSize <= 0) {
+        if ($cipherTextSize == null || $cipherTextSize <= 0)
+        {
             throw new \RuntimeException('Cannot decrypt a stream of unknown'
                 . ' size.');
         }
-        return (string) new LimitStream(
+        return (string)new LimitStream(
             $cipherText,
             $tagLength,
             $cipherTextSize - $tagLength
@@ -108,9 +112,11 @@ trait DecryptionTrait
     private function getStrippedCiphertextStream(
         Psr7\Stream $cipherText,
         $tagLength
-    ) {
+    )
+    {
         $cipherTextSize = $cipherText->getSize();
-        if ($cipherTextSize == null || $cipherTextSize <= 0) {
+        if ($cipherTextSize == null || $cipherTextSize <= 0)
+        {
             throw new \RuntimeException('Cannot decrypt a stream of unknown'
                 . ' size.');
         }
@@ -140,14 +146,16 @@ trait DecryptionTrait
         $cipherText,
         $cek,
         $cipherOptions
-    ) {
+    )
+    {
         $cipherTextStream = Psr7\stream_for($cipherText);
-        switch ($cipherOptions['Cipher']) {
+        switch ($cipherOptions['Cipher'])
+        {
             case 'gcm':
                 $cipherOptions['Tag'] = $this->getTagFromCiphertextStream(
-                        $cipherTextStream,
-                        $cipherOptions['TagLength']
-                    );
+                    $cipherTextStream,
+                    $cipherOptions['TagLength']
+                );
 
                 return new AesGcmDecryptingStream(
                     $this->getStrippedCiphertextStream(

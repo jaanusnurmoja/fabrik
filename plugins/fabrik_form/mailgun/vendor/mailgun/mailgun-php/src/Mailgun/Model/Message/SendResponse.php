@@ -46,10 +46,12 @@ class SendResponse implements ApiResponse
         $id = '';
         $message = '';
 
-        if (isset($data['id'])) {
+        if (isset($data['id']))
+        {
             $id = $data['id'];
         }
-        if (isset($data['message'])) {
+        if (isset($data['message']))
+        {
             $message = $data['message'];
         }
 

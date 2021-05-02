@@ -14,14 +14,14 @@ define(['jquery'], function (jQuery) {
         Implements: [Events, Options],
 
         options: {
-	        element    : null,
-	        defaultVal : '',
-	        value      : '',
-	        label      : '',
-	        editable   : false,
-	        isJoin     : false,
-	        joinId     : 0,
-	        changeEvent: 'change',
+            element: null,
+            defaultVal: '',
+            value: '',
+            label: '',
+            editable: false,
+            isJoin: false,
+            joinId: 0,
+            changeEvent: 'change',
             hasAjaxValidation: false
         },
 
@@ -754,7 +754,7 @@ define(['jquery'], function (jQuery) {
                         if (container.hasClass('fabrikSuccess')) {
                             container.removeClass('fabrikSuccess');
                             this.start.delay(700, this, {
-                                'opacity'   : 0,
+                                'opacity': 0,
                                 'onComplete': function () {
                                     container.addClass('success').removeClass('error');
                                     parent.updateMainError();
@@ -890,13 +890,13 @@ define(['jquery'], function (jQuery) {
             return this.element.get('tag') === 'select' ? 'click' : 'focus';
         },
 
-	    getChangeEvent: function () {
-		    return this.options.changeEvent;
-	    },
+        getChangeEvent: function () {
+            return this.options.changeEvent;
+        },
 
         select: function () {
         },
-        focus : function () {
+        focus: function () {
             this.removeTipMsg();
         },
 
@@ -951,25 +951,25 @@ define(['jquery'], function (jQuery) {
             }.bind(this)).delay(500);
         },
 
-        getTab: function(tab_div) {
+        getTab: function (tab_div) {
             var tab_dl;
-	        if (Fabrik.bootstrapped) {
-		        var a = jQuery('a[href$=#' + tab_div.id + ']');
-		        tab_dl = a.closest('[data-role=fabrik_tab]');
-	        } else {
-		        tab_dl = tab_div.getPrevious('.tabs');
-	        }
-	        if (tab_dl) {
-	            return tab_dl;
+            if (Fabrik.bootstrapped) {
+                var a = jQuery('a[href$=#' + tab_div.id + ']');
+                tab_dl = a.closest('[data-role=fabrik_tab]');
+            } else {
+                tab_dl = tab_div.getPrevious('.tabs');
+            }
+            if (tab_dl) {
+                return tab_dl;
             }
             return false;
         },
 
-        getTabDiv: function() {
-	        var c = Fabrik.bootstrapped ? '.tab-pane' : '.current';
-	        var tab_div = this.element.getParent(c);
-	        if (tab_div) {
-	            return tab_div;
+        getTabDiv: function () {
+            var c = Fabrik.bootstrapped ? '.tab-pane' : '.current';
+            var tab_div = this.element.getParent(c);
+            if (tab_div) {
+                return tab_div;
             }
             return false;
         },
@@ -978,7 +978,7 @@ define(['jquery'], function (jQuery) {
          * Tabs mess with element positioning - some element (googlemaps, file upload) need to redraw themselves
          * when the tab is clicked
          */
-        watchTab      : function () {
+        watchTab: function () {
             var c = Fabrik.bootstrapped ? '.tab-pane' : '.current',
                 a, tab_dl;
             var tab_div = this.element.getParent(c);

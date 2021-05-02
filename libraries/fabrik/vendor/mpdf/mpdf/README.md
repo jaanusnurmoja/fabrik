@@ -1,8 +1,8 @@
 mPDF is a PHP library which generates PDF files from UTF-8 encoded HTML.
 
 It is based on [FPDF](http://www.fpdf.org/) and [HTML2FPDF](http://html2fpdf.sourceforge.net/)
-(see [CREDITS](CREDITS.txt)), with a number of enhancements. mPDF was written by Ian Back and is released
-under the [GNU GPL v2 licence](LICENSE.txt).
+(see [CREDITS](CREDITS.txt)), with a number of enhancements. mPDF was written by Ian Back and is released under
+the [GNU GPL v2 licence](LICENSE.txt).
 
 [![Build Status](https://travis-ci.org/mpdf/mpdf.svg?branch=development)](https://travis-ci.org/mpdf/mpdf)
 
@@ -14,9 +14,8 @@ Requirements
 
 **mPDF 7** requires PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0`. PHP `mbstring` and `gd` extensions have to be loaded.
 
-Additional extensions may be required for some advanced features such as `zlib` for compression of output and
-embedded resources such as fonts, `bcmath` for generating barcodes or `xml` for character set conversion
-and SVG handling.
+Additional extensions may be required for some advanced features such as `zlib` for compression of output and embedded
+resources such as fonts, `bcmath` for generating barcodes or `xml` for character set conversion and SVG handling.
 
 mPDF has some problems with fetching external HTTP resources with single threaded servers such as `php -S`. A proper
 server such as nginx (php-fpm) or Apache is recommended.
@@ -30,7 +29,8 @@ Consider supporting development of mPDF with a donation of any value. [Donation 
 Installation
 ============
 
-Official installation method is via composer and its packagist package [mpdf/mpdf](https://packagist.org/packages/mpdf/mpdf).
+Official installation method is via composer and its packagist
+package [mpdf/mpdf](https://packagist.org/packages/mpdf/mpdf).
 
 ```
 $ composer require mpdf/mpdf
@@ -57,15 +57,14 @@ This will output the PDF inline to the browser as `application/pdf` Content-type
 Setup & Configuration
 =====================
 
-All [configuration directives](https://mpdf.github.io/reference/mpdf-variables/overview.html) can
-be set by the `$config` parameter of the constructor.
+All [configuration directives](https://mpdf.github.io/reference/mpdf-variables/overview.html) can be set by
+the `$config` parameter of the constructor.
 
-It is recommended to set one's own temporary directory via `tempDir` configuration variable.
-The directory must have write permissions (mode `775` is recommended) for users using mPDF
+It is recommended to set one's own temporary directory via `tempDir` configuration variable. The directory must have
+write permissions (mode `775` is recommended) for users using mPDF
 (typically `cli`, `webserver`, `fpm`).
 
 **Warning:** mPDF will clean up old temporary files in the temporary directory. Choose a path dedicated to mPDF only.
-
 
 ```php
 <?php
@@ -89,12 +88,14 @@ Online manual
 
 Online manual is available at https://mpdf.github.io/.
 
-For general questions or troubleshooting please use the [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf) at Stack Overflow (and not the project's issue tracker).
+For general questions or troubleshooting please use the [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf) at
+Stack Overflow (and not the project's issue tracker).
 
 Contributing
 ============
 
-Please read before submitting issues and pull requests the [CONTRIBUTING.md](https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md) file.
+Please read before submitting issues and pull requests
+the [CONTRIBUTING.md](https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md) file.
 
 Unit Testing
 ============
@@ -106,7 +107,7 @@ To get started, run `composer install` from the command line while in the mPDF r
 
 To execute tests, run `vendor/bin/phpunit` from the command line while in the mPDF root directory.
 
-Any assistance writing unit tests for mPDF is greatly appreciated. If you'd like to help, please
-note that any PHP file located in the `/tests/` directory will be autoloaded when unit testing.
+Any assistance writing unit tests for mPDF is greatly appreciated. If you'd like to help, please note that any PHP file
+located in the `/tests/` directory will be autoloaded when unit testing.
 
 [1]: https://mpdf.github.io

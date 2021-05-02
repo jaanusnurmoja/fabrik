@@ -4,15 +4,18 @@
 namespace Twilio\Security;
 
 
-class RequestValidator {
+class RequestValidator
+{
 
     protected $authToken;
 
-    function __construct($authToken) {
+    function __construct($authToken)
+    {
         $this->authToken = $authToken;
     }
 
-    public function computeSignature($url, $data = array()) {
+    public function computeSignature($url, $data = [])
+    {
         // sort the array by keys
         ksort($data);
 
@@ -24,28 +27,33 @@ class RequestValidator {
         return base64_encode(hash_hmac("sha1", $url, $this->authToken, true));
     }
 
-    public function computeBodyHash($data = '') {
+    public function computeBodyHash($data = '')
+    {
         return base64_encode(hash("sha256", $data, true));
     }
 
-    public function validate($expectedSignature, $url, $data = array()) {
-        if (is_array($data)) {
+    public function validate($expectedSignature, $url, $data = [])
+    {
+        if (is_array($data))
+        {
             return self::compare(
                 $this->computeSignature($url, $data),
                 $expectedSignature
             );
-        } else {
+        }
+        else
+        {
             $queryString = explode('?', $url);
             $queryString = $queryString[1];
             parse_str($queryString, $params);
 
             return self::compare(
-                $this->computeSignature($url),
-                $expectedSignature
-            ) && self::compare(
-                $this->computeBodyHash($data),
-                $params['bodySHA256']
-            );
+                    $this->computeSignature($url),
+                    $expectedSignature
+                ) && self::compare(
+                    $this->computeBodyHash($data),
+                    $params['bodySHA256']
+                );
         }
     }
 
@@ -57,21 +65,26 @@ class RequestValidator {
      * @return bool True if $a == $b, false otherwise.
      */
     public
-    static function compare($a, $b) {
+    static function compare($a, $b)
+    {
         $result = true;
 
-        if (strlen($a) != strlen($b)) {
+        if (strlen($a) != strlen($b))
+        {
             return false;
         }
 
-        if (!$a && !$b) {
+        if (!$a && !$b)
+        {
             return true;
         }
 
         $limit = strlen($a);
 
-        for ($i = 0; $i < $limit; ++$i) {
-            if ($a[$i] != $b[$i]) {
+        for ($i = 0; $i < $limit; ++$i)
+        {
+            if ($a[$i] != $b[$i])
+            {
                 $result = false;
             }
         }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Endpoint;
 
 use ArrayAccess;
@@ -38,8 +39,10 @@ final class Partition implements ArrayAccess, PartitionInterface
      */
     public function __construct(array $definition)
     {
-        foreach (['partition', 'regions', 'services', 'dnsSuffix'] as $key) {
-            if (!isset($definition[$key])) {
+        foreach (['partition', 'regions', 'services', 'dnsSuffix'] as $key)
+        {
+            if (!isset($definition[$key]))
+            {
                 throw new Iae("Partition missing required $key field");
             }
         }
@@ -54,14 +57,17 @@ final class Partition implements ArrayAccess, PartitionInterface
 
     public function isRegionMatch($region, $service)
     {
-        if (isset($this->data['regions'][$region])
+        if (
+            isset($this->data['regions'][$region])
             || isset($this->data['services'][$service]['endpoints'][$region])
-        ) {
+        )
+        {
             return true;
         }
 
-        if (isset($this->data['regionRegex'])) {
-            return (bool) preg_match(
+        if (isset($this->data['regionRegex']))
+        {
+            return (bool)preg_match(
                 "@{$this->data['regionRegex']}@",
                 $region
             );
@@ -73,12 +79,15 @@ final class Partition implements ArrayAccess, PartitionInterface
     public function getAvailableEndpoints(
         $service,
         $allowNonRegionalEndpoints = false
-    ) {
-        if ($this->isServicePartitionGlobal($service)) {
+    )
+    {
+        if ($this->isServicePartitionGlobal($service))
+        {
             return [$this->getPartitionEndpoint($service)];
         }
 
-        if (isset($this->data['services'][$service]['endpoints'])) {
+        if (isset($this->data['services'][$service]['endpoints']))
+        {
             $serviceRegions = array_keys(
                 $this->data['services'][$service]['endpoints']
             );
@@ -101,16 +110,16 @@ final class Partition implements ArrayAccess, PartitionInterface
         $data = $this->getEndpointData($service, $region);
 
         return [
-            'endpoint' => "{$scheme}://" . $this->formatEndpoint(
+            'endpoint'         => "{$scheme}://" . $this->formatEndpoint(
                     isset($data['hostname']) ? $data['hostname'] : '',
                     $service,
                     $region
                 ),
             'signatureVersion' => $this->getSignatureVersion($data),
-            'signingRegion' => isset($data['credentialScope']['region'])
+            'signingRegion'    => isset($data['credentialScope']['region'])
                 ? $data['credentialScope']['region']
                 : $region,
-            'signingName' => isset($data['credentialScope']['service'])
+            'signingName'      => isset($data['credentialScope']['service'])
                 ? $data['credentialScope']['service']
                 : $service,
         ];
@@ -153,7 +162,8 @@ final class Partition implements ArrayAccess, PartitionInterface
 
     private function resolveRegion($service, $region)
     {
-        if ($this->isServicePartitionGlobal($service)) {
+        if ($this->isServicePartitionGlobal($service))
+        {
             return $this->getPartitionEndpoint($service);
         }
 
@@ -175,8 +185,8 @@ final class Partition implements ArrayAccess, PartitionInterface
     private function formatEndpoint($template, $service, $region)
     {
         return strtr($template, [
-            '{service}' => $service,
-            '{region}' => $region,
+            '{service}'   => $service,
+            '{region}'    => $region,
             '{dnsSuffix}' => $this->data['dnsSuffix'],
         ]);
     }

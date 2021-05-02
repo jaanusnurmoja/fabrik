@@ -22,8 +22,10 @@ final class Chain implements Authentication
      */
     public function __construct(array $authenticationChain = [])
     {
-        foreach ($authenticationChain as $authentication) {
-            if (!$authentication instanceof Authentication) {
+        foreach ($authenticationChain as $authentication)
+        {
+            if (!$authentication instanceof Authentication)
+            {
                 throw new \InvalidArgumentException(
                     'Members of the authentication chain must be of type Http\Message\Authentication'
                 );
@@ -38,7 +40,8 @@ final class Chain implements Authentication
      */
     public function authenticate(RequestInterface $request)
     {
-        foreach ($this->authenticationChain as $authentication) {
+        foreach ($this->authenticationChain as $authentication)
+        {
             $request = $authentication->authenticate($request);
         }
 

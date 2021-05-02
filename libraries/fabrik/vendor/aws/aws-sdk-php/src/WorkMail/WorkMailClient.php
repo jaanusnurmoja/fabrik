@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\WorkMail;
 
 use Aws\AwsClient;
@@ -68,4 +69,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateResource(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateResourceAsync(array $args = [])
  */
-class WorkMailClient extends AwsClient {}
+class WorkMailClient extends AwsClient
+{
+}

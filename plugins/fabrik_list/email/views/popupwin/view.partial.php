@@ -22,54 +22,54 @@ jimport('joomla.application.component.view');
  */
 class FabrikViewPopupwin extends JViewLegacy
 {
-	/**
-	 * Display the view
-	 *
-	 * @param   string $tmpl Template
-	 *
-	 * @return  JView  this
-	 */
-	public function display($tmpl = 'default')
-	{
-		$w           = new FabrikWorker;
-		$app         = JFactory::getApplication();
-		$model       = $this->getModel();
-		$input       = $app->input;
-		$renderOrder = $input->getInt('renderOrder');
+    /**
+     * Display the view
+     *
+     * @param string $tmpl Template
+     *
+     * @return  JView  this
+     */
+    public function display($tmpl = 'default')
+    {
+        $w = new FabrikWorker;
+        $app = JFactory::getApplication();
+        $model = $this->getModel();
+        $input = $app->input;
+        $renderOrder = $input->getInt('renderOrder');
 
-		$path = JPATH_ROOT . '/plugins/fabrik_list/email/views/popupwin/tmpl/' . $tmpl;
-		$this->_setPath('template', $path);
+        $path = JPATH_ROOT . '/plugins/fabrik_list/email/views/popupwin/tmpl/' . $tmpl;
+        $this->_setPath('template', $path);
 
-		$this->showToField = $model->getShowToField();
-		$records = $model->getRecords();
+        $this->showToField = $model->getShowToField();
+        $records = $model->getRecords();
 
-		if (count($records) == 0)
-		{
-			$app->enqueueMessage(FText::_('PLG_LIST_EMAIL_ERR_NONE_MAILED'), 'notice');
+        if (count($records) == 0)
+        {
+            $app->enqueueMessage(FText::_('PLG_LIST_EMAIL_ERR_NONE_MAILED'), 'notice');
 
-			return;
-		}
+            return;
+        }
 
-		$this->recordcount     = count($records);
-		$this->renderOrder     = $renderOrder;
-		$this->recordids       = implode(',', $records);
-		$this->listid          = $this->get('id', 'list');
-		$this->showSubject     = $model->getShowSubject();
-		$this->subject         = $model->getSubject();
-		$this->message         = $model->getMessage();
-		$this->allowAttachment = $model->getAllowAttachment();
-		$this->editor          = $model->getEditor();
-		$this->toType          = $model->_toType();
-		$this->emailTo        = $model->_emailTo();
-		$this->params          = $model->getParams();
-		$this->listEmailTo     = $model->formModel->getElementList('list_email_to');
-		$this->addressBook     = $model->addressBook();
-		$this->additionalQS    = $w->parseMessageForPlaceHolder($this->params->get('list_email_additional_qs', ''));
+        $this->recordcount = count($records);
+        $this->renderOrder = $renderOrder;
+        $this->recordids = implode(',', $records);
+        $this->listid = $this->get('id', 'list');
+        $this->showSubject = $model->getShowSubject();
+        $this->subject = $model->getSubject();
+        $this->message = $model->getMessage();
+        $this->allowAttachment = $model->getAllowAttachment();
+        $this->editor = $model->getEditor();
+        $this->toType = $model->_toType();
+        $this->emailTo = $model->_emailTo();
+        $this->params = $model->getParams();
+        $this->listEmailTo = $model->formModel->getElementList('list_email_to');
+        $this->addressBook = $model->addressBook();
+        $this->additionalQS = $w->parseMessageForPlaceHolder($this->params->get('list_email_additional_qs', ''));
 
-		$srcs = FabrikHelperHTML::framework();
-		FabrikHelperHTML::iniRequireJs();
-		FabrikHelperHTML::script($srcs);
+        $srcs = FabrikHelperHTML::framework();
+        FabrikHelperHTML::iniRequireJs();
+        FabrikHelperHTML::script($srcs);
 
-		return parent::display();
-	}
+        return parent::display();
+    }
 }

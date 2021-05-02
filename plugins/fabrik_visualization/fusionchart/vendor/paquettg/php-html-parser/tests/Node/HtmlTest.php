@@ -6,7 +6,8 @@ use PHPHtmlParser\Dom\TextNode;
 use PHPHtmlParser\Dom\MockNode;
 use PHPHtmlParser\Dom\Tag;
 
-class NodeHtmlTest extends PHPUnit_Framework_TestCase {
+class NodeHtmlTest extends PHPUnit_Framework_TestCase
+{
 
     public function testInnerHtml()
     {
@@ -27,8 +28,8 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
         $br = new Tag('br');
         $br->selfClosing();
 
-        $parent  = new HtmlNode($div);
-        $childa  = new HtmlNode($a);
+        $parent = new HtmlNode($div);
+        $childa = new HtmlNode($a);
         $childbr = new HtmlNode($br);
         $parent->addChild($childa);
         $parent->addChild($childbr);
@@ -50,8 +51,8 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
         $br = new Tag('br');
         $br->selfClosing();
 
-        $parent  = new HtmlNode($div);
-        $childa  = new HtmlNode($a);
+        $parent = new HtmlNode($div);
+        $childa = new HtmlNode($a);
         $childa->setAttribute('href', [
             'value'       => 'http://google.com',
             'doubleQuote' => false,
@@ -87,8 +88,8 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
         $br = new Tag('br');
         $br->selfClosing();
 
-        $parent  = new HtmlNode($div);
-        $childa  = new HtmlNode($a);
+        $parent = new HtmlNode($div);
+        $childa = new HtmlNode($a);
         $childbr = new MockNode($br);
         $parent->addChild($childa);
         $parent->addChild($childbr);
@@ -100,14 +101,14 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
 
     public function testInnerHtmlMagic()
     {
-        $parent  = new HtmlNode('div');
+        $parent = new HtmlNode('div');
         $parent->tag->setAttributes([
             'class' => [
                 'value'       => 'all',
                 'doubleQuote' => true,
             ],
         ]);
-        $childa  = new HtmlNode('a');
+        $childa = new HtmlNode('a');
         $childa->getTag()->setAttributes([
             'href' => [
                 'value'       => 'http://google.com',
@@ -143,14 +144,15 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
         $br = new Tag('br');
         $br->selfClosing();
 
-        $parent  = new HtmlNode($div);
-        $childa  = new HtmlNode($a);
+        $parent = new HtmlNode($div);
+        $childa = new HtmlNode($a);
         $childbr = new HtmlNode($br);
         $parent->addChild($childa);
         $parent->addChild($childbr);
         $childa->addChild(new TextNode('link'));
 
-        $this->assertEquals('<div class="all"><a href=\'http://google.com\'>link</a><br /></div>', $parent->outerHtml());
+        $this->assertEquals('<div class="all"><a href=\'http://google.com\'>link</a><br /></div>',
+            $parent->outerHtml());
     }
 
     public function testOuterHtmlTwice()
@@ -172,8 +174,8 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
         $br = new Tag('br');
         $br->selfClosing();
 
-        $parent  = new HtmlNode($div);
-        $childa  = new HtmlNode($a);
+        $parent = new HtmlNode($div);
+        $childa = new HtmlNode($a);
         $childbr = new HtmlNode($br);
         $parent->addChild($childa);
         $parent->addChild($childbr);
@@ -193,20 +195,20 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
             ],
         ]);
         $node = new HtmlNode($a);
-        
+
         $this->assertEquals("<a href='http://google.com'></a>", $node->OuterHtml());
     }
 
     public function testOuterHtmlMagic()
     {
-        $parent  = new HtmlNode('div');
+        $parent = new HtmlNode('div');
         $parent->getTag()->setAttributes([
             'class' => [
                 'value'       => 'all',
                 'doubleQuote' => true,
             ],
         ]);
-        $childa  = new HtmlNode('a');
+        $childa = new HtmlNode('a');
         $childa->getTag()->setAttributes([
             'href' => [
                 'value'       => 'http://google.com',
@@ -225,12 +227,12 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
 
     public function testOuterHtmlNoValueAttribute()
     {
-        $parent  = new HtmlNode('div');
+        $parent = new HtmlNode('div');
         $parent->setAttribute('class', [
             'value'       => 'all',
             'doubleQuote' => true,
         ]);
-        $childa  = new HtmlNode('a');
+        $childa = new HtmlNode('a');
         $childa->setAttribute('href', [
             'value'       => 'http://google.com',
             'doubleQuote' => false,
@@ -243,31 +245,32 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
         $parent->addChild($childbr);
         $childa->addChild(new TextNode('link'));
 
-        $this->assertEquals('<div class="all"><a href=\'http://google.com\' ui-view>link</a><br /></div>', $parent->outerHtml);
+        $this->assertEquals('<div class="all"><a href=\'http://google.com\' ui-view>link</a><br /></div>',
+            $parent->outerHtml);
     }
 
     public function testText()
     {
-        $a    = new Tag('a');
+        $a = new Tag('a');
         $node = new HtmlNode($a);
         $node->addChild(new TextNode('link'));
-        
+
         $this->assertEquals('link', $node->text());
     }
 
     public function testTextTwice()
     {
-        $a    = new Tag('a');
+        $a = new Tag('a');
         $node = new HtmlNode($a);
         $node->addChild(new TextNode('link'));
-        
+
         $text = $node->text();
         $this->assertEquals($text, $node->text());
     }
 
     public function testTextNone()
     {
-        $a    = new Tag('a');
+        $a = new Tag('a');
         $node = new HtmlNode($a);
 
         $this->assertEmpty($node->text());
@@ -277,7 +280,7 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
     {
         $node = new HtmlNode('a');
         $node->addChild(new TextNode('link'));
-        
+
         $this->assertEquals('link', $node->text);
     }
 
@@ -314,7 +317,7 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
     {
         $node = new HtmlNode('a');
         $node->getTag()->setAttributes([
-            'href' => [
+            'href'  => [
                 'value'       => 'http://google.com',
                 'doubleQuote' => false,
             ],
@@ -323,7 +326,7 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
                 'doubleQuote' => true,
             ],
         ]);
-        
+
         $this->assertEquals('outerlink rounded', $node->getAttribute('class'));
     }
 
@@ -331,7 +334,7 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
     {
         $node = new HtmlNode('a');
         $node->getTag()->setAttributes([
-            'href' => [
+            'href'  => [
                 'value'       => 'http://google.com',
                 'doubleQuote' => false,
             ],
@@ -340,7 +343,7 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
                 'doubleQuote' => true,
             ],
         ]);
-        
+
         $this->assertEquals('http://google.com', $node->href);
     }
 
@@ -348,7 +351,7 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
     {
         $node = new HtmlNode('a');
         $node->getTag()->setAttributes([
-            'href' => [
+            'href'  => [
                 'value'       => 'http://google.com',
                 'doubleQuote' => false,
             ],
@@ -357,7 +360,7 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
                 'doubleQuote' => true,
             ],
         ]);
-        
+
         $this->assertEquals('outerlink rounded', $node->getAttributes()['class']);
     }
 
@@ -404,8 +407,8 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
         $br = new Tag('br');
         $br->selfClosing();
 
-        $parent  = new HtmlNode($div);
-        $childa  = new HtmlNode($a);
+        $parent = new HtmlNode($div);
+        $childa = new HtmlNode($a);
         $childbr = new HtmlNode($br);
         $parent->addChild($childa);
         $parent->addChild($childbr);
@@ -433,15 +436,16 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
         $br = new Tag('br');
         $br->selfClosing();
 
-        $parent  = new HtmlNode($div);
-        $childa  = new HtmlNode($a);
+        $parent = new HtmlNode($div);
+        $childa = new HtmlNode($a);
         $childbr = new HtmlNode($br);
         $parent->addChild($childa);
         $parent->addChild($childbr);
         $childa->addChild(new TextNode('link'));
 
         $children = 0;
-        foreach ($parent as $child) {
+        foreach ($parent as $child)
+        {
             ++$children;
         }
         $this->assertEquals(2, $children);
@@ -452,7 +456,7 @@ class NodeHtmlTest extends PHPUnit_Framework_TestCase {
      */
     public function testAncestorByTagFailure()
     {
-        $a    = new Tag('a');
+        $a = new Tag('a');
         $node = new HtmlNode($a);
         $node->ancestorByTag('div');
     }

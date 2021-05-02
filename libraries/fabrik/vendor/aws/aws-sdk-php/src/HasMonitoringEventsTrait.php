@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 
@@ -34,6 +35,6 @@ trait HasMonitoringEventsTrait
      */
     public function appendMonitoringEvent(array $event)
     {
-        $this->monitoringEvents []= $event;
+        $this->monitoringEvents [] = $event;
     }
 }

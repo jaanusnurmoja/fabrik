@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DynamoDb;
 
 use Aws\Api\Parser\Crc32ValidatingParser;
@@ -116,7 +117,8 @@ class DynamoDbClient extends AwsClient
     /** @internal */
     public static function _applyRetryConfig($value, array &$args, HandlerList $list)
     {
-        if (!$value) {
+        if (!$value)
+        {
             return;
         }
 
@@ -126,13 +128,14 @@ class DynamoDbClient extends AwsClient
                     $value,
                     ['errorCodes' => ['TransactionInProgressException']]
                 ),
-                function ($retries) {
+                function ($retries)
+                {
                     return $retries
                         ? RetryMiddleware::exponentialDelay($retries) / 2
                         : 0;
                 },
                 isset($args['stats']['retries'])
-                    ? (bool) $args['stats']['retries']
+                    ? (bool)$args['stats']['retries']
                     : false
             ),
             'retry'

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Parser;
 
 use Aws\Api\StructureShape;
@@ -24,10 +25,13 @@ class Crc32ValidatingParser extends AbstractParser
     public function __invoke(
         CommandInterface $command,
         ResponseInterface $response
-    ) {
-        if ($expected = $response->getHeaderLine('x-amz-crc32')) {
+    )
+    {
+        if ($expected = $response->getHeaderLine('x-amz-crc32'))
+        {
             $hash = hexdec(Psr7\hash($response->getBody(), 'crc32b'));
-            if ($expected != $hash) {
+            if ($expected != $hash)
+            {
                 throw new AwsException(
                     "crc32 mismatch. Expected {$expected}, found {$hash}.",
                     $command,
@@ -48,7 +52,8 @@ class Crc32ValidatingParser extends AbstractParser
         StreamInterface $stream,
         StructureShape $member,
         $response
-    ) {
+    )
+    {
         return $this->parser->parseMemberFromStream($stream, $member, $response);
     }
 }

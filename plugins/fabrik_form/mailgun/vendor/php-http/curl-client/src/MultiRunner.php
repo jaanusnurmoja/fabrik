@@ -1,4 +1,5 @@
 <?php
+
 namespace Http\Client\Curl;
 
 use Http\Client\Exception\RequestException;
@@ -31,7 +32,8 @@ class MultiRunner
      */
     public function __destruct()
     {
-        if (is_resource($this->multiHandle)) {
+        if (is_resource($this->multiHandle))
+        {
             curl_multi_close($this->multiHandle);
         }
     }
@@ -43,15 +45,18 @@ class MultiRunner
      */
     public function add(PromiseCore $core)
     {
-        foreach ($this->cores as $existed) {
-            if ($existed === $core) {
+        foreach ($this->cores as $existed)
+        {
+            if ($existed === $core)
+            {
                 return;
             }
         }
 
         $this->cores[] = $core;
 
-        if (null === $this->multiHandle) {
+        if (null === $this->multiHandle)
+        {
             $this->multiHandle = curl_multi_init();
         }
         curl_multi_add_handle($this->multiHandle, $core->getHandle());
@@ -64,8 +69,10 @@ class MultiRunner
      */
     public function remove(PromiseCore $core)
     {
-        foreach ($this->cores as $index => $existed) {
-            if ($existed === $core) {
+        foreach ($this->cores as $index => $existed)
+        {
+            if ($existed === $core)
+            {
                 curl_multi_remove_handle($this->multiHandle, $core->getHandle());
                 unset($this->cores[$index]);
                 return;
@@ -80,28 +87,35 @@ class MultiRunner
      */
     public function wait(PromiseCore $targetCore = null)
     {
-        do {
+        do
+        {
             $status = curl_multi_exec($this->multiHandle, $active);
             $info = curl_multi_info_read($this->multiHandle);
-            if (false !== $info) {
+            if (false !== $info)
+            {
                 $core = $this->findCoreByHandle($info['handle']);
 
-                if (null === $core) {
+                if (null === $core)
+                {
                     // We have no promise for this handle. Drop it.
                     curl_multi_remove_handle($this->multiHandle, $info['handle']);
                     continue;
                 }
 
-                if (CURLE_OK === $info['result']) {
+                if (CURLE_OK === $info['result'])
+                {
                     $core->fulfill();
-                } else {
+                }
+                else
+                {
                     $error = curl_error($core->getHandle());
                     $core->reject(new RequestException($error, $core->getRequest()));
                 }
                 $this->remove($core);
 
                 // This is a promise we are waited for. So exiting wait().
-                if ($core === $targetCore) {
+                if ($core === $targetCore)
+                {
                     return;
                 }
             }
@@ -117,8 +131,10 @@ class MultiRunner
      */
     private function findCoreByHandle($handle)
     {
-        foreach ($this->cores as $core) {
-            if ($core->getHandle() === $handle) {
+        foreach ($this->cores as $core)
+        {
+            if ($core->getHandle() === $handle)
+            {
                 return $core;
             }
         }

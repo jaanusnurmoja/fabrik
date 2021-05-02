@@ -39,9 +39,9 @@ class Suppression
     private $hydrator;
 
     /**
-     * @param HttpClient     $httpClient
+     * @param HttpClient $httpClient
      * @param RequestBuilder $requestBuilder
-     * @param Hydrator       $hydrator
+     * @param Hydrator $hydrator
      */
     public function __construct(HttpClient $httpClient, RequestBuilder $requestBuilder, Hydrator $hydrator)
     {

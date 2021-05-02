@@ -40,13 +40,13 @@ class ReCaptchaTest extends \PHPUnit_Framework_TestCase
 
     public function invalidSecretProvider()
     {
-        return array(
-            array(''),
-            array(null),
-            array(0),
-            array(new \stdClass()),
-            array(array()),
-        );
+        return [
+            [''],
+            [null],
+            [0],
+            [new \stdClass()],
+            [[]],
+        ];
     }
 
     public function testVerifyReturnsErrorOnMissingResponse()
@@ -54,20 +54,20 @@ class ReCaptchaTest extends \PHPUnit_Framework_TestCase
         $rc = new ReCaptcha('secret');
         $response = $rc->verify('');
         $this->assertFalse($response->isSuccess());
-        $this->assertEquals(array('missing-input-response'), $response->getErrorCodes());
+        $this->assertEquals(['missing-input-response'], $response->getErrorCodes());
     }
 
     public function testVerifyReturnsResponse()
     {
-        $method = $this->getMock('\\ReCaptcha\\RequestMethod', array('submit'));
+        $method = $this->getMock('\\ReCaptcha\\RequestMethod', ['submit']);
         $method->expects($this->once())
-                ->method('submit')
-                ->with($this->callback(function ($params) {
+            ->method('submit')
+            ->with($this->callback(function ($params)
+            {
 
-                            return true;
-                        }))
-                ->will($this->returnValue('{"success": true}'));
-        ;
+                return true;
+            }))
+            ->will($this->returnValue('{"success": true}'));;
         $rc = new ReCaptcha('secret', $method);
         $response = $rc->verify('response');
         $this->assertTrue($response->isSuccess());

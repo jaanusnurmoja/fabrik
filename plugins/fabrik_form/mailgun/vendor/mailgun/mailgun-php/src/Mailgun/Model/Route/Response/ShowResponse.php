@@ -27,7 +27,8 @@ final class ShowResponse implements ApiResponse
      */
     public static function create(array $data)
     {
-        if (isset($data['route'])) {
+        if (isset($data['route']))
+        {
             return new self(Route::create($data['route']));
         }
 

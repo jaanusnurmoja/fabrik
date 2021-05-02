@@ -5,5 +5,5 @@ $d = $displayData;
 
 foreach ($d->data as $d)
 {
-	echo  '<div style="width:15px;height:15px;background-color:rgb(' . $d . ')"></div>';
+    echo '<div style="width:15px;height:15px;background-color:rgb(' . $d . ')"></div>';
 }

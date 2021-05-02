@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Exception\MultipartUploadException;
@@ -32,20 +33,20 @@ class ObjectCopier implements PromisorInterface
     ];
 
     /**
-     * @param S3ClientInterface $client         The S3 Client used to execute
+     * @param S3ClientInterface $client The S3 Client used to execute
      *                                          the copy command(s).
-     * @param array             $source         The object to copy, specified as
+     * @param array $source The object to copy, specified as
      *                                          an array with a 'Bucket' and
      *                                          'Key' keys. Provide a
      *                                          'VersionID' key to copy a
      *                                          specified version of an object.
-     * @param array             $destination    The bucket and key to which to
+     * @param array $destination The bucket and key to which to
      *                                          copy the $source, specified as
      *                                          an array with a 'Bucket' and
      *                                          'Key' keys.
-     * @param string            $acl            ACL to apply to the copy
+     * @param string $acl ACL to apply to the copy
      *                                          (default: private).
-     * @param array             $options        Options used to configure the
+     * @param array $options Options used to configure the
      *                                          copy process. Options passed in
      *                                          through 'params' are added to
      *                                          the sub commands.
@@ -58,7 +59,8 @@ class ObjectCopier implements PromisorInterface
         array $destination,
         $acl = 'private',
         array $options = []
-    ) {
+    )
+    {
         $this->validateLocation($source);
         $this->validateLocation($destination);
 
@@ -76,33 +78,38 @@ class ObjectCopier implements PromisorInterface
      */
     public function promise()
     {
-        return \GuzzleHttp\Promise\coroutine(function () {
+        return \GuzzleHttp\Promise\coroutine(function ()
+        {
             $headObjectCommand = $this->client->getCommand(
                 'HeadObject',
                 $this->options['params'] + $this->source
             );
-            if (is_callable($this->options['before_lookup'])) {
+            if (is_callable($this->options['before_lookup']))
+            {
                 $this->options['before_lookup']($headObjectCommand);
             }
             $objectStats = (yield $this->client->executeAsync(
                 $headObjectCommand
             ));
 
-            if ($objectStats['ContentLength'] > $this->options['mup_threshold']) {
+            if ($objectStats['ContentLength'] > $this->options['mup_threshold'])
+            {
                 $mup = new MultipartCopy(
                     $this->client,
                     $this->getSourcePath(),
                     ['source_metadata' => $objectStats, 'acl' => $this->acl]
-                        + $this->destination
-                        + $this->options
+                    + $this->destination
+                    + $this->options
                 );
 
                 yield $mup->promise();
-            } else {
+            }
+            else
+            {
                 $defaults = [
-                    'ACL' => $this->acl,
+                    'ACL'               => $this->acl,
                     'MetadataDirective' => 'COPY',
-                    'CopySource' => $this->getSourcePath(),
+                    'CopySource'        => $this->getSourcePath(),
                 ];
 
                 $params = array_diff_key($this->options, self::$defaults)
@@ -131,7 +138,8 @@ class ObjectCopier implements PromisorInterface
 
     private function validateLocation(array $location)
     {
-        if (empty($location['Bucket']) || empty($location['Key'])) {
+        if (empty($location['Bucket']) || empty($location['Key']))
+        {
             throw new \InvalidArgumentException('Locations provided to an'
                 . ' Aws\S3\ObjectCopier must have a non-empty Bucket and Key');
         }
@@ -141,7 +149,8 @@ class ObjectCopier implements PromisorInterface
     {
         $sourcePath = "/{$this->source['Bucket']}/"
             . rawurlencode($this->source['Key']);
-        if (isset($this->source['VersionId'])) {
+        if (isset($this->source['VersionId']))
+        {
             $sourcePath .= "?versionId={$this->source['VersionId']}";
         }
 

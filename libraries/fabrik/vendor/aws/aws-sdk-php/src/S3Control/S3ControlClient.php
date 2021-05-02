@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3Control;
 
 use Aws\AwsClient;
@@ -12,22 +13,22 @@ use Aws\AwsClient;
  * @method \Aws\Result putPublicAccessBlock(array $args = [])
  * @method \GuzzleHttp\Promise\Promise putPublicAccessBlockAsync(array $args = [])
  */
-class S3ControlClient extends AwsClient 
+class S3ControlClient extends AwsClient
 {
     public static function getArguments()
     {
         $args = parent::getArguments();
         return $args + [
-            'use_dual_stack_endpoint' => [
-                'type' => 'config',
-                'valid' => ['bool'],
-                'doc' => 'Set to true to send requests to an S3 Control Dual Stack'
-                    . ' endpoint by default, which enables IPv6 Protocol.'
-                    . ' Can be enabled or disabled on individual operations by setting'
-                    . ' \'@use_dual_stack_endpoint\' to true or false.',
-                'default' => false,
-            ],
-        ];
+                'use_dual_stack_endpoint' => [
+                    'type'    => 'config',
+                    'valid'   => ['bool'],
+                    'doc'     => 'Set to true to send requests to an S3 Control Dual Stack'
+                        . ' endpoint by default, which enables IPv6 Protocol.'
+                        . ' Can be enabled or disabled on individual operations by setting'
+                        . ' \'@use_dual_stack_endpoint\' to true or false.',
+                    'default' => false,
+                ],
+            ];
     }
 
     /**

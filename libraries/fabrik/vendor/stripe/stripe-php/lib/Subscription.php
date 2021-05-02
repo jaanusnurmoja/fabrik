@@ -39,7 +39,8 @@ class Subscription extends ApiResource
 
     use ApiOperations\All;
     use ApiOperations\Create;
-    use ApiOperations\Delete {
+    use ApiOperations\Delete
+    {
         delete as protected _delete;
     }
     use ApiOperations\Retrieve;
@@ -50,16 +51,17 @@ class Subscription extends ApiResource
      *
      * @link https://stripe.com/docs/api#subscription_object-status
      */
-    const STATUS_ACTIVE   = 'active';
+    const STATUS_ACTIVE = 'active';
     const STATUS_CANCELED = 'canceled';
     const STATUS_PAST_DUE = 'past_due';
     const STATUS_TRIALING = 'trialing';
-    const STATUS_UNPAID   = 'unpaid';
+    const STATUS_UNPAID = 'unpaid';
 
     public static function getSavedNestedResources()
     {
         static $savedNestedResources = null;
-        if ($savedNestedResources === null) {
+        if ($savedNestedResources === null)
+        {
             $savedNestedResources = new Util\Set([
                 'source',
             ]);

@@ -6,23 +6,24 @@ namespace Composer\Autoload;
 
 class ComposerStaticInita500736021707f7685d123ee21254f7b
 {
-    public static $prefixLengthsPsr4 = array (
-        'D' => 
-        array (
-            'DrewM\\MailChimp\\' => 16,
-        ),
-    );
+    public static $prefixLengthsPsr4 = [
+        'D' =>
+            [
+                'DrewM\\MailChimp\\' => 16,
+            ],
+    ];
 
-    public static $prefixDirsPsr4 = array (
-        'DrewM\\MailChimp\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/drewm/mailchimp-api/src',
-        ),
-    );
+    public static $prefixDirsPsr4 = [
+        'DrewM\\MailChimp\\' =>
+            [
+                0 => __DIR__ . '/..' . '/drewm/mailchimp-api/src',
+            ],
+    ];
 
     public static function getInitializer(ClassLoader $loader)
     {
-        return \Closure::bind(function () use ($loader) {
+        return \Closure::bind(function () use ($loader)
+        {
             $loader->prefixLengthsPsr4 = ComposerStaticInita500736021707f7685d123ee21254f7b::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInita500736021707f7685d123ee21254f7b::$prefixDirsPsr4;
 

@@ -30,9 +30,9 @@ use ReCaptcha\RequestParameters;
 
 class PostTest extends \PHPUnit_Framework_TestCase
 {
-    public static $assert = null;
-    protected $parameters = null;
-    protected $runcount = 0;
+    public static $assert     = null;
+    protected     $parameters = null;
+    protected     $runcount   = 0;
 
     public function setUp()
     {
@@ -47,7 +47,7 @@ class PostTest extends \PHPUnit_Framework_TestCase
     public function testHTTPContextOptions()
     {
         $req = new Post();
-        self::$assert = array($this, "httpContextOptionsCallback");
+        self::$assert = [$this, "httpContextOptionsCallback"];
         $req->submit($this->parameters);
         $this->assertEquals(1, $this->runcount, "The assertion was ran");
     }
@@ -55,7 +55,7 @@ class PostTest extends \PHPUnit_Framework_TestCase
     public function testSSLContextOptions()
     {
         $req = new Post();
-        self::$assert = array($this, "sslContextOptionsCallback");
+        self::$assert = [$this, "sslContextOptionsCallback"];
         $req->submit($this->parameters);
         $this->assertEquals(1, $this->runcount, "The assertion was ran");
     }
@@ -75,10 +75,11 @@ class PostTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->parameters->toQueryString(), $options['http']['content']);
 
         $this->assertArrayHasKey('header', $options['http']);
-        $headers = array(
+        $headers = [
             "Content-type: application/x-www-form-urlencoded",
-        );
-        foreach ($headers as $header) {
+        ];
+        foreach ($headers as $header)
+        {
             $this->assertContains($header, $options['http']['header']);
         }
     }
@@ -110,7 +111,8 @@ class PostTest extends \PHPUnit_Framework_TestCase
 
 function file_get_contents()
 {
-    if (PostTest::$assert) {
+    if (PostTest::$assert)
+    {
         return call_user_func(PostTest::$assert, func_get_args());
     }
     // Since we can't represent maxlen in userland...

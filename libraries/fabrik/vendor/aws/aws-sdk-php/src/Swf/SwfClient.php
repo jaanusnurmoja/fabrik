@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Swf;
 
 use Aws\AwsClient;
@@ -69,4 +70,6 @@ use Aws\AwsClient;
  * @method \Aws\Result terminateWorkflowExecution(array $args = [])
  * @method \GuzzleHttp\Promise\Promise terminateWorkflowExecutionAsync(array $args = [])
  */
-class SwfClient extends AwsClient {}
+class SwfClient extends AwsClient
+{
+}

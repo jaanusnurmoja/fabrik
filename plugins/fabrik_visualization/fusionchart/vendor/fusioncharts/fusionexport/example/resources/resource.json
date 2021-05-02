@@ -1,10 +1,10 @@
 {
-    "basePath": "",
-    "include": [
-        "*.jpg",
-        "*.json"
-    ],
-    "exclude": [
-        "resource.json"
-    ]
+  "basePath": "",
+  "include": [
+    "*.jpg",
+    "*.json"
+  ],
+  "exclude": [
+    "resource.json"
+  ]
 }

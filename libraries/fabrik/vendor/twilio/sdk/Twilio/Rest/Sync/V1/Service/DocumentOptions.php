@@ -15,7 +15,8 @@ use Twilio\Values;
 /**
  * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
  */
-abstract class DocumentOptions {
+abstract class DocumentOptions
+{
     /**
      * @param string $uniqueName Human-readable name for this document
      * @param array $data JSON data to be stored in this document
@@ -23,7 +24,8 @@ abstract class DocumentOptions {
      *                     expiration.
      * @return CreateDocumentOptions Options builder
      */
-    public static function create($uniqueName = Values::NONE, $data = Values::NONE, $ttl = Values::NONE) {
+    public static function create($uniqueName = Values::NONE, $data = Values::NONE, $ttl = Values::NONE)
+    {
         return new CreateDocumentOptions($uniqueName, $data, $ttl);
     }
 
@@ -33,19 +35,22 @@ abstract class DocumentOptions {
      * @param integer $ttl New time-to-live of this Document in seconds.
      * @return UpdateDocumentOptions Options builder
      */
-    public static function update($data = Values::NONE, $ttl = Values::NONE) {
+    public static function update($data = Values::NONE, $ttl = Values::NONE)
+    {
         return new UpdateDocumentOptions($data, $ttl);
     }
 }
 
-class CreateDocumentOptions extends Options {
+class CreateDocumentOptions extends Options
+{
     /**
      * @param string $uniqueName Human-readable name for this document
      * @param array $data JSON data to be stored in this document
      * @param integer $ttl Time-to-live of this Document in seconds, defaults to no
      *                     expiration.
      */
-    public function __construct($uniqueName = Values::NONE, $data = Values::NONE, $ttl = Values::NONE) {
+    public function __construct($uniqueName = Values::NONE, $data = Values::NONE, $ttl = Values::NONE)
+    {
         $this->options['uniqueName'] = $uniqueName;
         $this->options['data'] = $data;
         $this->options['ttl'] = $ttl;
@@ -53,47 +58,53 @@ class CreateDocumentOptions extends Options {
 
     /**
      * Human-readable name for this document
-     * 
+     *
      * @param string $uniqueName Human-readable name for this document
      * @return $this Fluent Builder
      */
-    public function setUniqueName($uniqueName) {
+    public function setUniqueName($uniqueName)
+    {
         $this->options['uniqueName'] = $uniqueName;
         return $this;
     }
 
     /**
      * JSON data to be stored in this document
-     * 
+     *
      * @param array $data JSON data to be stored in this document
      * @return $this Fluent Builder
      */
-    public function setData($data) {
+    public function setData($data)
+    {
         $this->options['data'] = $data;
         return $this;
     }
 
     /**
      * Time-to-live of this Document in seconds, defaults to no expiration. In the range [1, 31 536 000 (1 year)], or 0 for infinity.
-     * 
+     *
      * @param integer $ttl Time-to-live of this Document in seconds, defaults to no
      *                     expiration.
      * @return $this Fluent Builder
      */
-    public function setTtl($ttl) {
+    public function setTtl($ttl)
+    {
         $this->options['ttl'] = $ttl;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -101,49 +112,56 @@ class CreateDocumentOptions extends Options {
     }
 }
 
-class UpdateDocumentOptions extends Options {
+class UpdateDocumentOptions extends Options
+{
     /**
      * @param array $data Contains an arbitrary JSON object to be stored in this
      *                    Document.
      * @param integer $ttl New time-to-live of this Document in seconds.
      */
-    public function __construct($data = Values::NONE, $ttl = Values::NONE) {
+    public function __construct($data = Values::NONE, $ttl = Values::NONE)
+    {
         $this->options['data'] = $data;
         $this->options['ttl'] = $ttl;
     }
 
     /**
      * Contains an arbitrary JSON object to be stored in this Document. Serialized to string to respect HTTP form input, up to 16KB.
-     * 
+     *
      * @param array $data Contains an arbitrary JSON object to be stored in this
      *                    Document.
      * @return $this Fluent Builder
      */
-    public function setData($data) {
+    public function setData($data)
+    {
         $this->options['data'] = $data;
         return $this;
     }
 
     /**
      * New time-to-live of this Document in seconds. In the range [1, 31 536 000 (1 year)], or 0 for infinity.
-     * 
+     *
      * @param integer $ttl New time-to-live of this Document in seconds.
      * @return $this Fluent Builder
      */
-    public function setTtl($ttl) {
+    public function setTtl($ttl)
+    {
         $this->options['ttl'] = $ttl;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

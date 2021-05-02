@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudTrail;
 
 use Aws\S3\S3Client;
@@ -44,9 +45,9 @@ class LogFileIterator extends \IteratorIterator
      * information about the trail necessary for constructing the
      * LogRecordIterator.
      *
-     * @param S3Client         $s3Client
+     * @param S3Client $s3Client
      * @param CloudTrailClient $cloudTrailClient
-     * @param array            $options
+     * @param array $options
      *
      * @return LogRecordIterator
      * @throws \InvalidArgumentException
@@ -56,7 +57,8 @@ class LogFileIterator extends \IteratorIterator
         S3Client $s3Client,
         CloudTrailClient $cloudTrailClient,
         array $options = []
-    ) {
+    )
+    {
         $trailName = isset($options[self::TRAIL_NAME])
             ? $options[self::TRAIL_NAME]
             : self::DEFAULT_TRAIL_NAME;
@@ -65,7 +67,8 @@ class LogFileIterator extends \IteratorIterator
 
         // Use the CloudTrail client to get information about the trail,
         // including the bucket name.
-        try {
+        try
+        {
             $result = $cloudTrailClient->describeTrails([
                 'trailNameList' => [$trailName]
             ]);
@@ -73,12 +76,15 @@ class LogFileIterator extends \IteratorIterator
             $options[self::KEY_PREFIX] = $result->search(
                 'trailList[0].S3KeyPrefix'
             );
-        } catch (CloudTrailException $e) {
+        }
+        catch (CloudTrailException $e)
+        {
             // There was an error describing the trail
         }
 
         // If the bucket name is still unknown, then throw an exception
-        if (!$s3BucketName) {
+        if (!$s3BucketName)
+        {
             $prev = isset($e) ? $e : null;
             throw new \InvalidArgumentException('The bucket name could not '
                 . 'be determined from the trail.', 0, $prev);
@@ -108,14 +114,15 @@ class LogFileIterator extends \IteratorIterator
      * - log_region: Region of the services of the log records you want to read.
      *
      * @param S3Client $s3Client
-     * @param string   $s3BucketName
-     * @param array    $options
+     * @param string $s3BucketName
+     * @param array $options
      */
     public function __construct(
         S3Client $s3Client,
         $s3BucketName,
         array $options = []
-    ) {
+    )
+    {
         $this->s3Client = $s3Client;
         $this->s3BucketName = $s3BucketName;
         parent::__construct($this->buildListObjectsIterator($options));
@@ -129,7 +136,8 @@ class LogFileIterator extends \IteratorIterator
      */
     public function current()
     {
-        if ($object = parent::current()) {
+        if ($object = parent::current())
+        {
             return [
                 'Bucket' => $this->s3BucketName,
                 'Key'    => $object['Key']
@@ -159,16 +167,16 @@ class LogFileIterator extends \IteratorIterator
 
         // Determine the parts of the key prefix of the log files being read
         $parts = [
-            'prefix' => isset($options[self::KEY_PREFIX])
-                    ? $options[self::KEY_PREFIX]
-                    : null,
+            'prefix'  => isset($options[self::KEY_PREFIX])
+                ? $options[self::KEY_PREFIX]
+                : null,
             'account' => isset($options[self::ACCOUNT_ID])
-                    ? $options[self::ACCOUNT_ID]
-                    : self::PREFIX_WILDCARD,
-            'region' => isset($options[self::LOG_REGION])
-                    ? $options[self::LOG_REGION]
-                    : self::PREFIX_WILDCARD,
-            'date' => $this->determineDateForPrefix($startDate, $endDate),
+                ? $options[self::ACCOUNT_ID]
+                : self::PREFIX_WILDCARD,
+            'region'  => isset($options[self::LOG_REGION])
+                ? $options[self::LOG_REGION]
+                : self::PREFIX_WILDCARD,
+            'date'    => $this->determineDateForPrefix($startDate, $endDate),
         ];
 
         // Determine the longest key prefix that can be used to retrieve all
@@ -177,7 +185,8 @@ class LogFileIterator extends \IteratorIterator
         $logKeyPrefix = $candidatePrefix;
         $index = strpos($candidatePrefix, self::PREFIX_WILDCARD);
 
-        if ($index !== false) {
+        if ($index !== false)
+        {
             $logKeyPrefix = substr($candidatePrefix, 0, $index);
         }
 
@@ -216,11 +225,16 @@ class LogFileIterator extends \IteratorIterator
      */
     private function normalizeDateValue($date)
     {
-        if (is_string($date)) {
+        if (is_string($date))
+        {
             $date = strtotime($date);
-        } elseif ($date instanceof \DateTime) {
+        }
+        elseif ($date instanceof \DateTime)
+        {
             $date = $date->format('U');
-        } elseif (!is_int($date)) {
+        }
+        elseif (!is_int($date))
+        {
             throw new \InvalidArgumentException('Date values must be a '
                 . 'string, an int, or a DateTime object.');
         }
@@ -238,12 +252,17 @@ class LogFileIterator extends \IteratorIterator
 
         // Narrow down the date by replacing the WILDCARDs with values if they
         // are the same for the start and end date.
-        if ($startDate && $endDate) {
-            foreach ($dateParts as $key => &$value) {
+        if ($startDate && $endDate)
+        {
+            foreach ($dateParts as $key => &$value)
+            {
                 $candidateValue = date($key, $startDate);
-                if ($candidateValue === date($key, $endDate)) {
+                if ($candidateValue === date($key, $endDate))
+                {
                     $value = $candidateValue;
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }
@@ -257,8 +276,8 @@ class LogFileIterator extends \IteratorIterator
      * based on the provided options.
      *
      * @param \Iterator $objectsIterator
-     * @param string    $logKeyPrefix
-     * @param string    $candidatePrefix
+     * @param string $logKeyPrefix
+     * @param string $candidatePrefix
      *
      * @return \Iterator
      */
@@ -266,10 +285,12 @@ class LogFileIterator extends \IteratorIterator
         $objectsIterator,
         $logKeyPrefix,
         $candidatePrefix
-    ) {
+    )
+    {
         // If the prefix and candidate prefix are not the same, then there were
         // WILDCARDs.
-        if ($logKeyPrefix !== $candidatePrefix) {
+        if ($logKeyPrefix !== $candidatePrefix)
+        {
             // Turn the candidate prefix into a regex by trimming and
             // converting WILDCARDs to regex notation.
             $regex = rtrim($candidatePrefix, '/' . self::PREFIX_WILDCARD) . '/';
@@ -277,12 +298,14 @@ class LogFileIterator extends \IteratorIterator
 
             // After trimming WILDCARDs or the end, if the regex is the same as
             // the prefix, then no regex is needed.
-            if ($logKeyPrefix !== $regex) {
+            if ($logKeyPrefix !== $regex)
+            {
                 // Apply a regex filter iterator to remove files that don't
                 // match the provided options.
                 $objectsIterator = new \CallbackFilterIterator(
                     $objectsIterator,
-                    function ($object) use ($regex) {
+                    function ($object) use ($regex)
+                    {
                         return preg_match("#{$regex}#", $object['Key']);
                     }
                 );
@@ -297,8 +320,8 @@ class LogFileIterator extends \IteratorIterator
      * specified date range.
      *
      * @param \Iterator $objectsIterator
-     * @param int       $startDate
-     * @param int       $endDate
+     * @param int $startDate
+     * @param int $endDate
      *
      * @return \Iterator
      */
@@ -306,9 +329,12 @@ class LogFileIterator extends \IteratorIterator
     {
         // If either a start or end date was provided, filter out dates that
         // don't match the date range.
-        if ($startDate || $endDate) {
-            $fn = function ($object) use ($startDate, $endDate) {
-                if (!preg_match('/[0-9]{8}T[0-9]{4}Z/', $object['Key'], $m)) {
+        if ($startDate || $endDate)
+        {
+            $fn = function ($object) use ($startDate, $endDate)
+            {
+                if (!preg_match('/[0-9]{8}T[0-9]{4}Z/', $object['Key'], $m))
+                {
                     return false;
                 }
                 $date = strtotime($m[0]);

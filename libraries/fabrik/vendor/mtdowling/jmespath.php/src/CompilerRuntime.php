@@ -1,4 +1,5 @@
 <?php
+
 namespace JmesPath;
 
 /**
@@ -29,7 +30,8 @@ class CompilerRuntime
         $this->compiler = new TreeCompiler();
         $dir = $dir ?: sys_get_temp_dir();
 
-        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+        if (!is_dir($dir) && !mkdir($dir, 0755, true))
+        {
             throw new \RuntimeException("Unable to create cache directory: $dir");
         }
 
@@ -42,7 +44,7 @@ class CompilerRuntime
      * expression.
      *
      * @param string $expression JMESPath expression to evaluate
-     * @param mixed  $data       Data to search. This data should be data that
+     * @param mixed $data Data to search. This data should be data that
      *                           is similar to data returned from json_decode
      *                           using associative arrays rather than objects.
      *
@@ -53,9 +55,11 @@ class CompilerRuntime
     {
         $functionName = 'jmespath_' . md5($expression);
 
-        if (!function_exists($functionName)) {
+        if (!function_exists($functionName))
+        {
             $filename = "{$this->cacheDir}/{$functionName}.php";
-            if (!file_exists($filename)) {
+            if (!file_exists($filename))
+            {
                 $this->compile($filename, $expression, $functionName);
             }
             require $filename;
@@ -72,7 +76,8 @@ class CompilerRuntime
             $expression
         );
 
-        if (!file_put_contents($filename, $code)) {
+        if (!file_put_contents($filename, $code))
+        {
             throw new \RuntimeException(sprintf(
                 'Unable to write the compiled PHP code to: %s (%s)',
                 $filename,

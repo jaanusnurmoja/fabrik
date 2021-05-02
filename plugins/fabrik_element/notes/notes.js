@@ -14,12 +14,12 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbNotes = new Class({
 
         options: {
-			'rowid': 0,
-			'primaryKey' : 0,
-			'id'   : 0
+            'rowid': 0,
+            'primaryKey': 0,
+            'id': 0
         },
 
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('notes');
             this.parent(element, options);
@@ -35,7 +35,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 var msg = this.element.getElement('div');
                 msg.makeResizable({
                     'modifiers': {x: false, y: 'height'},
-                    'handle'   : this.element.getElement('.noteHandle')
+                    'handle': this.element.getElement('.noteHandle')
                 });
                 this.element.getElement('.noteHandle').setStyle('cursor', 'all-scroll');
             }
@@ -47,37 +47,36 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             if (label !== '') {
                 Fabrik.loader.start(this.element);
                 var data = {
-                    'option'    : 'com_fabrik',
-                    'format'    : 'raw',
-                    'task'      : 'plugin.pluginAjax',
-                    'plugin'    : 'notes',
-                    'method'    : 'ajax_addNote',
+                    'option': 'com_fabrik',
+                    'format': 'raw',
+                    'task': 'plugin.pluginAjax',
+                    'plugin': 'notes',
+                    'method': 'ajax_addNote',
                     'element_id': this.options.id,
-                    'v'         : label,
-                    'rowid'  : this.options.rowid,
-                    'joinPkVal'  : this.options.joinPkVal,
-                    'primaryKey' : this.options.primaryKey,
-					'formid'    : this.form.id
+                    'v': label,
+                    'rowid': this.options.rowid,
+                    'joinPkVal': this.options.joinPkVal,
+                    'primaryKey': this.options.primaryKey,
+                    'formid': this.form.id
                 };
                 this.myAjax = new Request.JSON({
-                    'url'      : '',
-                    'data'     : data,
-                    onSuccess  : function (json) {
+                    'url': '',
+                    'data': data,
+                    onSuccess: function (json) {
                         Fabrik.loader.stop(this.element);
                         if (this.options.j3) {
                             var rows = this.element.getElement('div');
                             var row = new Element('div', {'class': 'row-fluid'});
                             var inner_row = new Element('div', {'class': 'span12'}).set('html', json.label).inject(row);
                             inner_row.inject(rows);
-                        }
-                        else {
+                        } else {
                             var ul = this.element.getElement('ul');
                             var c = 'oddRow' + ul.getElements('li').length % 2;
                             new Element('li', {'class': c}).set('html', json.label).inject(ul);
                         }
                         this.field.value = '';
                     }.bind(this),
-                    'onError'  : function (text) {
+                    'onError': function (text) {
                         Fabrik.loader.stop(this.element);
                         window.alert(text);
                     },
@@ -85,7 +84,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                         Fabrik.loader.stop(this.element);
                         window.alert('ajax failed');
                     },
-                    'onCancel' : function () {
+                    'onCancel': function () {
                         Fabrik.loader.stop(this.element);
                     }
                 }).send();

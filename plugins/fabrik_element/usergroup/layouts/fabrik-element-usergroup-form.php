@@ -5,8 +5,8 @@ defined('JPATH_BASE') or die;
 $d = $displayData;
 
 if ($d->isEditable) :
-	echo $d->input;
+    echo $d->input;
 else :
-	echo $d->selected;
+    echo $d->selected;
 endif;
 

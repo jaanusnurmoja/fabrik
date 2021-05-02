@@ -5,48 +5,46 @@
  * @license:   GNU/GPL http://www.gnu.org/copyleft/gpl.html
  */
 define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
-	'use strict';
-	var Stripe = new Class({
+    'use strict';
+    var Stripe = new Class({
 
-		options: {
-			'publicKey' : '',
-			'item' : '',
-			'zipCode': true,
-			'allowRememberMe': false,
-			'email': '',
-			'name': '',
-			'panelLabel': '',
-			'useCheckout': true,
+        options: {
+            'publicKey': '',
+            'item': '',
+            'zipCode': true,
+            'allowRememberMe': false,
+            'email': '',
+            'name': '',
+            'panelLabel': '',
+            'useCheckout': true,
             'failedValidation': false,
             'stripeTokenId': '',
             'stripeTokenEmail': '',
             'stripeTokenOpts': '',
-			'billingAddress': false,
-			'couponElement': '',
-			'renderOrder': ''
-		},
+            'billingAddress': false,
+            'couponElement': '',
+            'renderOrder': ''
+        },
 
 
-		/**
-		 * Initialize
-		 * @param {object} options
-		 */
-		initialize: function (options) {
-			var self = this;
-			this.options = jQuery.extend(this.options, options);
-			this.form = Fabrik.getBlock('form_' + this.options.formid);
-			Fabrik.FabrikStripeForm = null;
-			Fabrik.FabrikStripeFormSubmitting = false;
+        /**
+         * Initialize
+         * @param {object} options
+         */
+        initialize: function (options) {
+            var self = this;
+            this.options = jQuery.extend(this.options, options);
+            this.form = Fabrik.getBlock('form_' + this.options.formid);
+            Fabrik.FabrikStripeForm = null;
+            Fabrik.FabrikStripeFormSubmitting = false;
 
-            if (this.options.productElement !== '')
-            {
+            if (this.options.productElement !== '') {
                 this.productElement = self.form.formElements.get(this.options.productElement);
                 var productElEvnt;
 
                 if (this.productElement.hasSubElements()) {
                     productElEvnt = this.productElement.getChangeEvent();
-                }
-                else {
+                } else {
                     productElEvnt = this.productElement.getBlurEvent();
                 }
 
@@ -59,15 +57,13 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                     }
                 );
 
-                if (this.options.qtyElement !== '')
-                {
+                if (this.options.qtyElement !== '') {
                     this.qtyElement = self.form.formElements.get(this.options.qtyElement);
                     var qtyElEvnt;
 
                     if (this.productElement.hasSubElements()) {
                         qtyElEvnt = this.productElement.getChangeEvent();
-                    }
-                    else {
+                    } else {
                         qtyElEvnt = this.productElement.getBlurEvent();
                     }
 
@@ -91,20 +87,15 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                             }
                         );
                     }
-                }
-                else
-                {
+                } else {
                     this.qtyElement = false;
                 }
-            }
-            else
-			{
-				this.productElement = false;
+            } else {
+                this.productElement = false;
                 this.qtyElement = false;
-			}
+            }
 
-            if (this.options.couponElement !== '')
-            {
+            if (this.options.couponElement !== '') {
                 this.couponElement = self.form.formElements.get(this.options.couponElement);
                 var couponElEvnt = this.couponElement.getBlurEvent();
 
@@ -115,28 +106,23 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                     function (e) {
                         if (self.options.productElement !== '') {
                             self.getCost(e);
-                        }
-                        else {
+                        } else {
                             self.getCoupon(e);
                         }
                     }
                 );
-            }
-            else
-            {
+            } else {
                 this.couponElement = false;
             }
 
-            if (this.options.totalElement !== '')
-            {
+            if (this.options.totalElement !== '') {
                 this.totalElement = self.form.formElements.get(this.options.totalElement);
+            } else {
+                this.totalElement = false;
             }
-            else {
-				this.totalElement = false;
-			}
 
-			if (this.options.useCheckout) {
-			    if (!this.options.failedValidation) {
+            if (this.options.useCheckout) {
+                if (!this.options.failedValidation) {
                     requirejs(['https://checkout.stripe.com/checkout.js?'], function (Stripe) {
                         self.handler = StripeCheckout.configure({
                             key: self.options.publicKey,
@@ -168,17 +154,16 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                     });
                 }
 
-				Fabrik.addEvent('fabrik.form.submit.start', function (form, event, btn) {
-				    if (!this.options.useCheckout) {
-				        return;
+                Fabrik.addEvent('fabrik.form.submit.start', function (form, event, btn) {
+                    if (!this.options.useCheckout) {
+                        return;
                     }
 
-					if (!this.options.ccOnFree && this.options.amount == 0)
-					{
-						return;
-					}
+                    if (!this.options.ccOnFree && this.options.amount == 0) {
+                        return;
+                    }
 
-					if (!this.options.failedValidation) {
+                    if (!this.options.failedValidation) {
                         if (
                             typeof Fabrik.FabrikStripeForm === 'undefined' ||
                             Fabrik.FabrikStripeFormSubmitting !== true ||
@@ -198,8 +183,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                             event.preventDefault();
                             form.result = false;
                         }
-                    }
-					else {
+                    } else {
                         this.form.form.adopt(new Element('input', {
                             'name': 'stripe_token_id',
                             'value': this.options.stripeTokenId,
@@ -217,16 +201,14 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                         }));
                         form.result = true;
                     }
-				}.bind(this));
+                }.bind(this));
 
-				window.addEventListener('popstate', function () {
-					this.handler.close();
-				});
-			}
-			else if (this.options.updateCheckout)
-			{
-				var changeBtn = this.form.form.getElement('.fabrikStripeChange');
-				if (typeOf(changeBtn) !== 'null') {
+                window.addEventListener('popstate', function () {
+                    this.handler.close();
+                });
+            } else if (this.options.updateCheckout) {
+                var changeBtn = this.form.form.getElement('.fabrikStripeChange');
+                if (typeOf(changeBtn) !== 'null') {
                     requirejs(['https://checkout.stripe.com/checkout.js?'], function (Stripe) {
                         self.handler = StripeCheckout.configure({
                             key: self.options.publicKey,
@@ -266,11 +248,11 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                             });
                         }.bind(this));
                     });
-				}
-			}
-		},
+                }
+            }
+        },
 
-		getCoupon: function (e) {
+        getCoupon: function (e) {
             Fabrik.loader.start('form_' + this.options.formid, Joomla.JText._('PLG_FORM_STRIPE_CALCULATING'));
 
             var v = this.couponElement.getValue(),
@@ -278,35 +260,35 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                 self = this;
 
             jQuery.ajax({
-                url     : Fabrik.liveSite + 'index.php',
-                method  : 'post',
+                url: Fabrik.liveSite + 'index.php',
+                method: 'post',
                 dataType: 'json',
-                'data'  : {
-                    'option'               : 'com_fabrik',
-                    'format'               : 'raw',
-                    'task'                 : 'plugin.pluginAjax',
-                    'plugin'               : 'stripe',
-                    'method'               : 'ajax_getCoupon',
-					'amount'               : this.options.origAmount,
-                    'g'                    : 'form',
-                    'v'                    : v,
-                    'formid'               : formid,
-					'renderOrder'          : this.options.renderOrder
+                'data': {
+                    'option': 'com_fabrik',
+                    'format': 'raw',
+                    'task': 'plugin.pluginAjax',
+                    'plugin': 'stripe',
+                    'method': 'ajax_getCoupon',
+                    'amount': this.options.origAmount,
+                    'g': 'form',
+                    'v': v,
+                    'formid': formid,
+                    'renderOrder': this.options.renderOrder
                 }
 
             }).always(function () {
                 Fabrik.loader.stop('form_' + self.options.formid);
             }).fail(function (jqXHR, textStatus, errorThrown) {
-				window.alert(textStatus);
-			}).done(function (json) {
-				self.updateForm(json);
-			});
+                window.alert(textStatus);
+            }).done(function (json) {
+                self.updateForm(json);
+            });
         },
 
         getCost: function (e) {
-			if (this.totalElement) {
+            if (this.totalElement) {
                 Fabrik.loader.start(this.options.totalElement, Joomla.JText._('PLG_FORM_STRIPE_CALCULATING'));
-			}
+            }
             var productId = this.options.productElement !== '' ? this.productElement.getValue() : '',
                 qty = this.options.qtyElement !== '' ? this.qtyElement.getValue() : '',
                 coupon = this.options.couponElement !== '' ? this.couponElement.getValue() : '',
@@ -315,21 +297,21 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
 
             jQuery.ajax({
                 dataType: 'json',
-                url     : Fabrik.liveSite + 'index.php',
-                method  : 'post',
-                'data'  : {
-                    'option'               : 'com_fabrik',
-                    'format'               : 'raw',
-                    'task'                 : 'plugin.pluginAjax',
-                    'plugin'               : 'stripe',
-                    'method'               : 'ajax_getCost',
-                    'amount'               : this.options.origAmount,
-                    'g'                    : 'form',
-                    'productId'            : productId,
-					'qty'                  : qty,
-					'coupon'               : coupon,
-                    'formid'               : formid,
-                    'renderOrder'          : this.options.renderOrder
+                url: Fabrik.liveSite + 'index.php',
+                method: 'post',
+                'data': {
+                    'option': 'com_fabrik',
+                    'format': 'raw',
+                    'task': 'plugin.pluginAjax',
+                    'plugin': 'stripe',
+                    'method': 'ajax_getCost',
+                    'amount': this.options.origAmount,
+                    'g': 'form',
+                    'productId': productId,
+                    'qty': qty,
+                    'coupon': coupon,
+                    'formid': formid,
+                    'renderOrder': this.options.renderOrder
                 }
 
             }).always(function () {
@@ -337,24 +319,24 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
                     Fabrik.loader.stop(self.options.totalElement);
                 }
             }).fail(function (jqXHR, textStatus, errorThrown) {
-				window.alert(textStatus);
-			}).done(function (json) {
-				self.updateForm(json);
-			});
+                window.alert(textStatus);
+            }).done(function (json) {
+                self.updateForm(json);
+            });
         },
 
-		updateForm: function (json) {
-			this.options.amount = json.stripe_amount;
-			jQuery('.fabrikStripePrice').html(json.display_amount);
+        updateForm: function (json) {
+            this.options.amount = json.stripe_amount;
+            jQuery('.fabrikStripePrice').html(json.display_amount);
             jQuery('.fabrikStripeItem').html(json.product_name);
-			jQuery('.fabrikStripeCouponText').html(json.msg);
+            jQuery('.fabrikStripeCouponText').html(json.msg);
 
-			if (this.totalElement) {
-				this.totalElement.update(json.display_amount);
-			}
-		}
+            if (this.totalElement) {
+                this.totalElement.update(json.display_amount);
+            }
+        }
 
-	});
+    });
 
-	return Stripe;
+    return Stripe;
 });

@@ -8,8 +8,8 @@
 
 define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
     window.FbFileUpload = new Class({
-        Extends   : FbFileElement,
-        options : {
+        Extends: FbFileElement,
+        options: {
             folderSelect: false,
             ajax_upload: false,
             ajax_show_widget: true,
@@ -35,8 +35,8 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                     this.uploader.trigger('FilesAdded', this.options.files);
                     jQuery.each(this.options.files, function (key, file) {
                         var response = {
-                                filepath  : file.path,
-                                uri       : file.url,
+                                filepath: file.path,
+                                uri: file.url,
                                 showWidget: false
                             },
                             newBar = jQuery(Fabrik.jLayouts['fabrik-progress-bar-success'])[0],
@@ -56,8 +56,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             this.watchDeleteButton();
             this.watchTab();
 
-            if (this.options.isCarousel)
-            {
+            if (this.options.isCarousel) {
                 jQuery('.slickCarousel').slick();
                 jQuery('.slickCarouselImage').css('opacity', '1');
             }
@@ -69,11 +68,11 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                     lensSize: 200
                 });
 
-                jQuery('.slickCarousel').on('beforeChange', function(event, slick, currentSlide, nextSlide){
+                jQuery('.slickCarousel').on('beforeChange', function (event, slick, currentSlide, nextSlide) {
                     jQuery('.zoomWindowContainer,.zoomContainer').remove();
                 });
 
-                jQuery('.slickCarousel').on('afterChange', function(event, slick, currentSlide){
+                jQuery('.slickCarousel').on('afterChange', function (event, slick, currentSlide) {
                     jQuery('.slick-active').find('img').ezPlus({
                         zoomType: 'lens',
                         lensShape: 'round',
@@ -98,15 +97,14 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 if (file_element.length > 0) {
                     var fileContainer = file_element.parent();
                     fileContainer.css({
-                        'width' : browseButton.width(),
+                        'width': browseButton.width(),
                         'height': browseButton.height()
                     });
                     fileContainer.css('top', diff);
                 }
             }
 
-            if (this.options.isCarousel)
-            {
+            if (this.options.isCarousel) {
                 jQuery('.slickCarousel').slick('resize');
             }
         },
@@ -134,8 +132,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                     }.bind(this))(f);
                     // Read in the image file as a data URL.
                     reader.readAsDataURL(f);
-                }
-                else if (f.type.match('video.*')) {
+                } else if (f.type.match('video.*')) {
                     var c = jQuery(this.getContainer()),
                         video = c.find('video');
                     if (video.length > 0) {
@@ -190,17 +187,17 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             if (window.confirm(Joomla.JText._('PLG_ELEMENT_FILEUPLOAD_CONFIRM_SOFT_DELETE'))) {
                 var joinPkVal = b.data('join-pk-val');
                 new jQuery.ajax({
-                    url : '',
+                    url: '',
                     data: {
-                        'option'    : 'com_fabrik',
-                        'format'    : 'raw',
-                        'task'      : 'plugin.pluginAjax',
-                        'plugin'    : 'fileupload',
-                        'method'    : 'ajax_clearFileReference',
+                        'option': 'com_fabrik',
+                        'format': 'raw',
+                        'task': 'plugin.pluginAjax',
+                        'plugin': 'fileupload',
+                        'method': 'ajax_clearFileReference',
                         'element_id': this.options.id,
-                        'formid'    : this.form.id,
-                        'rowid'     : this.form.options.rowid,
-                        'joinPkVal' : joinPkVal
+                        'formid': this.form.id,
+                        'rowid': this.form.options.rowid,
+                        'joinPkVal': joinPkVal
                     }
                 }).done(function () {
                     Fabrik.trigger('fabrik.fileupload.clearfileref.complete', self);
@@ -212,9 +209,9 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 }
 
                 b.remove();
-	            var el = jQuery(this.element);
-	            var i = el.closest('.fabrikElement').find('img');
-	            i.attr('src', this.options.defaultImage !== '' ? Fabrik.liveSite + this.options.defaultImage : '');
+                var el = jQuery(this.element);
+                var i = el.closest('.fabrikElement').find('img');
+                i.attr('src', this.options.defaultImage !== '' ? Fabrik.liveSite + this.options.defaultImage : '');
             }
         },
 
@@ -302,8 +299,8 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
          */
         makeDeletedImageField: function (groupId, value) {
             return jQuery(document.createElement('input')).attr({
-                'type' : 'hidden',
-                'name' : 'fabrik_fileupload_deletedfile[' + groupId + '][]',
+                'type': 'hidden',
+                'name': 'fabrik_fileupload_deletedfile[' + groupId + '][]',
                 'value': value
             });
         },
@@ -311,7 +308,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
         makeVideoPreview: function () {
             var el = jQuery(this.element);
             return jQuery(document.createElement('video')).attr({
-                'id'      : el.prop('id') + '_video_preview',
+                'id': el.prop('id') + '_video_preview',
                 'controls': true
             });
         },
@@ -344,7 +341,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 dropTxt.show();
             } else {
                 tr = jQuery(document.createElementget('tr')).addClass('plupload_droptext').html('<td colspan="4"><i class="icon-move"></i> ' + Joomla.JText
-                        ._('PLG_ELEMENT_FILEUPLOAD_DRAG_FILES_HERE') + ' </td>');
+                    ._('PLG_ELEMENT_FILEUPLOAD_DRAG_FILES_HERE') + ' </td>');
                 this.container.find('tbody').append(tr);
             }
             this.container.find('thead').hide();
@@ -383,9 +380,9 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                         x: this.options.winWidth / 2,
                         y: this.options.winHeight / 2
                     },
-                    crop     : this.options.crop,
-                    modalId  : this.options.modalId,
-                    quality  : this.options.quality
+                    crop: this.options.crop,
+                    modalId: this.options.modalId,
+                    quality: this.options.quality
                 });
             }
             this.pluploadContainer = c.find('.plupload_container');
@@ -400,20 +397,20 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             }
 
             var plupopts = {
-                runtimes           : this.options.ajax_runtime,
-                browse_button      : elementId + '_browseButton',
-                container          : elementId + '_container',
-                drop_element       : elementId + '_dropList_container',
-                url                : url,
-                max_file_size      : this.options.max_file_size + 'kb',
-                unique_names       : false,
-                flash_swf_url      : this.options.ajax_flash_path,
+                runtimes: this.options.ajax_runtime,
+                browse_button: elementId + '_browseButton',
+                container: elementId + '_container',
+                drop_element: elementId + '_dropList_container',
+                url: url,
+                max_file_size: this.options.max_file_size + 'kb',
+                unique_names: false,
+                flash_swf_url: this.options.ajax_flash_path,
                 silverlight_xap_url: this.options.ajax_silverlight_path,
-                chunk_size         : this.options.ajax_chunk_size + 'kb',
-                dragdrop           : true,
-                multipart          : true,
-                filters            : this.options.filters,
-                page_url           : this.options.page_url
+                chunk_size: this.options.ajax_chunk_size + 'kb',
+                dragdrop: true,
+                multipart: true,
+                filters: this.options.filters,
+                page_url: this.options.page_url
             };
             this.uploader = new plupload.Uploader(plupopts);
 
@@ -472,7 +469,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                             innerLi = self.imageCells(file, title, a);
 
                             self.droplist.append(jQuery(document.createElement(rElement)).attr({
-                                id     : file.id,
+                                id: file.id,
                                 'class': 'plupload_delete'
                             }).append(innerLi));
                         }
@@ -515,7 +512,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
 
             this.uploader.bind('ChunkUploaded', function (up, file, response) {
                 response = JSON.parse(response.response);
-                if (typeof(response) === 'object') {
+                if (typeof (response) === 'object') {
                     if (response.error) {
                         fconsole(response.error.message);
                     }
@@ -540,7 +537,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 resizeButton.show();
                 resizeButton.attr({
                     href: response.uri,
-                    id  : 'resizebutton_' + file.id
+                    id: 'resizebutton_' + file.id
                 });
 
                 resizeButton.data('filepath', response.filepath);
@@ -557,9 +554,9 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 }
                 // Stores the cropparams which we need to reload the crop widget in the correct state (rotation, zoom, etc)
                 jQuery(document.createElement('input')).attr({
-                    'type' : 'hidden',
-                    name   : name + '[crop][' + response.filepath + ']',
-                    'id'   : 'coords_' + file.id,
+                    'type': 'hidden',
+                    name: name + '[crop][' + response.filepath + ']',
+                    'id': 'coords_' + file.id,
                     'value': JSON.stringify(file.params)
                 }).insertAfter(self.pluploadContainer);
 
@@ -574,9 +571,9 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 // Stores the image id if > 1 fileupload
                 idValue = [file.recordid, '0'].pick();
                 jQuery(document.createElement('input')).attr({
-                    'type' : 'hidden',
-                    name   : name + '[id][' + response.filepath + ']',
-                    'id'   : 'id_' + file.id,
+                    'type': 'hidden',
+                    name: name + '[id][' + response.filepath + ']',
+                    'id': 'id_' + file.id,
                     'value': idValue
                 }).insertAfter(self.pluploadContainer);
 
@@ -608,7 +605,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                     'class': 'plupload_file_name'
                 }).adopt([title, new Element('div', {
                     'class': 'plupload_resize',
-                    style  : 'display:none'
+                    style: 'display:none'
                 }).adopt(a)]);
                 status = new Element('div', {
                     'class': 'plupload_file_status'
@@ -633,7 +630,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             if (Fabrik.bootstrapped) {
                 return jQuery(document.createElement('a')).addClass('editImage').attr({
                     'href': '#',
-                    alt   : Joomla.JText._('PLG_ELEMENT_FILEUPLOAD_RESIZE')
+                    alt: Joomla.JText._('PLG_ELEMENT_FILEUPLOAD_RESIZE')
                 }).css({
                     'display': 'none'
                 }).on('click', function (e) {
@@ -645,7 +642,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             } else {
                 return new Element('a', {
                     'href': '#',
-                    alt   : Joomla.JText._('PLG_ELEMENT_FILEUPLOAD_RESIZE'),
+                    alt: Joomla.JText._('PLG_ELEMENT_FILEUPLOAD_RESIZE'),
                     events: {
                         'click': function (e) {
                             e.stop();
@@ -671,7 +668,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                     jQuery(document.createElement('a'))
                         .html(icon)
                         .attr({
-                            'href' : '#'
+                            'href': '#'
                         })
                         .on('click', function (e) {
                             e.stopPropagation();
@@ -683,9 +680,9 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 return new Element('div', {
                     'class': 'plupload_file_action'
                 }).adopt(new Element('a', {
-                    'href' : '#',
+                    'href': '#',
                     'style': 'display:block',
-                    events : {
+                    events: {
                         'click': function (e) {
                             this.pluploadRemoveFile(e);
                         }.bind(this)
@@ -731,21 +728,21 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             // Send a request to delete the file from the server.
             var self = this;
             var data = {
-                'option'       : 'com_fabrik',
-                    'format'       : 'raw',
-                    'task'         : 'plugin.pluginAjax',
-                    'plugin'       : 'fileupload',
-                    'method'       : 'ajax_deleteFile',
-                    'element_id'   : this.options.id,
-                    'file'         : f,
-                    'recordid'     : id,
-                    'repeatCounter': this.options.repeatCounter
+                'option': 'com_fabrik',
+                'format': 'raw',
+                'task': 'plugin.pluginAjax',
+                'plugin': 'fileupload',
+                'method': 'ajax_deleteFile',
+                'element_id': this.options.id,
+                'file': f,
+                'recordid': id,
+                'repeatCounter': this.options.repeatCounter
             }
 
             data[this.options.ajaxToken] = 1;
 
             jQuery.ajax({
-                url : '',
+                url: '',
                 data: data
             }).done(function (r) {
                 r = JSON.parse(r);
@@ -857,14 +854,14 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
 
             this.imageDefault = {
                 'rotation': 0,
-                'scale'   : 100,
+                'scale': 100,
                 'imagedim': {
                     x: 200,
                     y: 200,
                     w: 400,
                     h: 400
                 },
-                'cropdim' : {
+                'cropdim': {
                     x: 75,
                     y: 25,
                     w: 150,
@@ -875,24 +872,24 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             jQuery.extend(this.imageDefault, opts);
 
             this.windowopts = {
-                'id'             : this.modalId,
-                'type'           : 'modal',
-                loadMethod       : 'html',
-                width            : parseInt(this.imageDefault.imagedim.w, 10) + 40,
-                height           : parseInt(this.imageDefault.imagedim.h, 10) + 170,
-                storeOnClose     : true,
+                'id': this.modalId,
+                'type': 'modal',
+                loadMethod: 'html',
+                width: parseInt(this.imageDefault.imagedim.w, 10) + 40,
+                height: parseInt(this.imageDefault.imagedim.h, 10) + 170,
+                storeOnClose: true,
                 createShowOverLay: false,
-                crop             : opts.crop,
-                destroy          : false,
-                modalId          : opts.modalId,
-                quality          : opts.quality,
-                onClose          : function () {
+                crop: opts.crop,
+                destroy: false,
+                modalId: opts.modalId,
+                quality: opts.quality,
+                onClose: function () {
                     this.storeActiveImageData();
                 }.bind(this),
-                onContentLoaded  : function () {
+                onContentLoaded: function () {
                     this.center();
                 },
-                onOpen           : function () {
+                onOpen: function () {
                     this.center();
                 }
             };
@@ -905,8 +902,8 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             this.images = {};
             this.CANVAS = new FbCanvas({
                 canvasElement: this.canvas,
-                enableMouse  : true,
-                cacheCtxPos  : false
+                enableMouse: true,
+                cacheCtxPos: false
             });
 
             this.CANVAS.layers.add(new Layer({
@@ -924,8 +921,8 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                 }));
             }
             var bg = new CanvasItem({
-                id    : 'bg',
-                scale : 1,
+                id: 'bg',
+                scale: 1,
                 events: {
                     onDraw: function (ctx) {
                         if (ctx === undefined) {
@@ -940,7 +937,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             this.CANVAS.layers.get('bg-layer').add(bg);
             if (opts.crop) {
                 this.overlay = new CanvasItem({
-                    id    : 'overlay',
+                    id: 'overlay',
                     events: {
                         onDraw: function (ctx) {
                             if (ctx === undefined) {
@@ -1085,16 +1082,16 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
         makeImgCanvas: function () {
             var parent = this;
             return new CanvasItem({
-                id         : 'imgtocrop',
-                w          : this.imageDefault.imagedim.w,
-                h          : this.imageDefault.imagedim.h,
-                x          : 200,
-                y          : 200,
+                id: 'imgtocrop',
+                w: this.imageDefault.imagedim.w,
+                h: this.imageDefault.imagedim.h,
+                x: 200,
+                y: 200,
                 interactive: true,
-                rotation   : 0,
-                scale      : 1,
-                offset     : [0, 0],
-                events     : {
+                rotation: 0,
+                scale: 1,
+                offset: [0, 0],
+                events: {
                     onMousemove: function (x, y) {
                         if (this.dragging) {
                             var w = this.w * this.scale;
@@ -1103,7 +1100,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                             this.y = y - this.offset[1] + h * 0.5;
                         }
                     },
-                    onDraw     : function (ctx) {
+                    onDraw: function (ctx) {
                         ctx = parent.CANVAS.ctx;
                         if (parent.img === undefined) {
                             // console.log('no parent img', parent);
@@ -1172,14 +1169,14 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
         makeCropperCanvas: function () {
             var parent = this;
             return new CanvasItem({
-                id         : 'item',
-                x          : 175,
-                y          : 175,
-                w          : 150,
-                h          : 50,
+                id: 'item',
+                x: 175,
+                y: 175,
+                w: 150,
+                h: 50,
                 interactive: true,
-                offset     : [0, 0],
-                events     : {
+                offset: [0, 0],
+                events: {
                     onDraw: function (ctx) {
                         ctx = parent.CANVAS.ctx;
                         if (ctx === undefined) {
@@ -1262,7 +1259,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
         makeThread: function () {
             var self = this;
             this.CANVAS.addThread(new Thread({
-                id    : 'myThread',
+                id: 'myThread',
                 onExec: function () {
                     if (self.CANVAS !== undefined) {
                         if (self.CANVAS.ctxEl !== undefined) {
@@ -1309,7 +1306,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             var canvas = win.find('canvas');
 
             var target = jQuery(document.createElement('canvas')).attr({
-                'width' : w + 'px',
+                'width': w + 'px',
                 'height': h + 'px'
             }).appendTo(document.body);
             var ctx = target[0].getContext('2d');
@@ -1335,7 +1332,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
             }
             var scaleField = this.window.find('input[name=zoom-val]');
             this.scaleSlide = new Slider(this.window.find('.fabrikslider-line')[0], this.window.find('.knob')[0], {
-                range   : [20, 300],
+                range: [20, 300],
                 onChange: function (pos) {
                     self.imgCanvas.scale = pos / 100;
                     if (self.img !== undefined) {
@@ -1376,7 +1373,7 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
                     }
                     rotateField.val(pos);
                 },
-                steps   : 360
+                steps: 360
             }).set(0);
             rotateField.on('change', function () {
                 self.rotateSlide.set(jQuery(this).val());
@@ -1408,5 +1405,5 @@ define(['jquery', 'fab/fileelement'], function (jQuery, FbFileElement) {
         }
     });
 
-    return  window.FbFileUpload;
+    return window.FbFileUpload;
 });

@@ -28,7 +28,7 @@ class Bounce extends HttpApi
 
     /**
      * @param string $domain Domain to list bounces for
-     * @param int    $limit  optional
+     * @param int $limit optional
      *
      * @return IndexResponse
      */
@@ -47,7 +47,7 @@ class Bounce extends HttpApi
     }
 
     /**
-     * @param string $domain  Domain to show bounce from
+     * @param string $domain Domain to show bounce from
      * @param string $address Bounce address to show
      *
      * @return ShowResponse
@@ -63,9 +63,9 @@ class Bounce extends HttpApi
     }
 
     /**
-     * @param string $domain  Domain to create a bounce for
+     * @param string $domain Domain to create a bounce for
      * @param string $address Address to create a bounce for
-     * @param array  $params  optional
+     * @param array $params optional
      *
      * @return CreateResponse
      */
@@ -82,7 +82,7 @@ class Bounce extends HttpApi
     }
 
     /**
-     * @param string $domain  Domain to delete a bounce for
+     * @param string $domain Domain to delete a bounce for
      * @param string $address Bounce address to delete
      *
      * @return DeleteResponse

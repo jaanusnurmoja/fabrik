@@ -17,7 +17,7 @@ $lang->load('com_fabrik', JPATH_BASE . '/components/com_fabrik');
 
 if (!defined('COM_FABRIK_FRONTEND'))
 {
-	JError::raiseError(400, JText::_('COM_FABRIK_SYSTEM_PLUGIN_NOT_ACTIVE'));
+    JError::raiseError(400, JText::_('COM_FABRIK_SYSTEM_PLUGIN_NOT_ACTIVE'));
 }
 
 $app = JFactory::getApplication();
@@ -43,34 +43,37 @@ $input->set('layout', $origLayout);
 JTable::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_fabrik/tables');
 JModelLegacy::addIncludePath(COM_FABRIK_FRONTEND . '/models', 'FabrikFEModel');
 
-$formId = (int) $params->get('formid');
+$formId = (int)$params->get('formid');
 
 if (empty($formId))
 {
-	throw new \InvalidArgumentException('No form selected in Fabrik form module!');
+    throw new \InvalidArgumentException('No form selected in Fabrik form module!');
 }
 
 $readonly = $params->get('readonly', '0');
-if ($readonly == 1) {
-	require_once COM_FABRIK_FRONTEND . '/controllers/details.php';
-	$controller = new FabrikControllerDetails;
-	$input->set('view', 'details');
-} else {
-	require_once COM_FABRIK_FRONTEND . '/controllers/form.php';
-	$controller = new FabrikControllerForm;
-	$input->set('view', 'form');
+if ($readonly == 1)
+{
+    require_once COM_FABRIK_FRONTEND . '/controllers/details.php';
+    $controller = new FabrikControllerDetails;
+    $input->set('view', 'details');
+}
+else
+{
+    require_once COM_FABRIK_FRONTEND . '/controllers/form.php';
+    $controller = new FabrikControllerForm;
+    $input->set('view', 'form');
 }
 
 $layout = $params->get('template', 'default');
 $usersConfig = JComponentHelper::getParams('com_fabrik');
-$rowid = (string) $params->get('row_id', '');
+$rowid = (string)$params->get('row_id', '');
 $usersConfig->set('rowid', $rowid);
 
 $usekey = $params->get('usekey', '');
 
 if (!empty($usekey))
 {
-	$input->set('usekey', $usekey);
+    $input->set('usekey', $usekey);
 }
 
 $moduleclass_sfx = $params->get('moduleclass_sfx', '');

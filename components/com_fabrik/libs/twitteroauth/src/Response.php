@@ -73,8 +73,10 @@ class Response
      */
     public function setHeaders($headers)
     {
-        foreach ($headers as $key => $value) {
-            if (substr($key, 0, 1) == 'x') {
+        foreach ($headers as $key => $value)
+        {
+            if (substr($key, 0, 1) == 'x')
+            {
                 $this->xHeaders[$key] = $value;
             }
         }

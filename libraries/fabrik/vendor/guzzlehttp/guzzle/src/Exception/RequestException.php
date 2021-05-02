@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Exception;
 
 use Psr\Http\Message\RequestInterface;
@@ -26,7 +27,8 @@ class RequestException extends TransferException
         ResponseInterface $response = null,
         \Exception $previous = null,
         array $handlerContext = []
-    ) {
+    )
+    {
         // Set the code of the exception if the response is set and not future.
         $code = $response && !($response instanceof PromiseInterface)
             ? $response->getStatusCode()
@@ -41,7 +43,7 @@ class RequestException extends TransferException
      * Wrap non-RequestExceptions with a RequestException
      *
      * @param RequestInterface $request
-     * @param \Exception       $e
+     * @param \Exception $e
      *
      * @return RequestException
      */
@@ -55,10 +57,10 @@ class RequestException extends TransferException
     /**
      * Factory method to create a new exception with a normalized error message
      *
-     * @param RequestInterface  $request  Request
+     * @param RequestInterface $request Request
      * @param ResponseInterface $response Response received
-     * @param \Exception        $previous Previous exception
-     * @param array             $ctx      Optional handler context.
+     * @param \Exception $previous Previous exception
+     * @param array $ctx Optional handler context.
      *
      * @return self
      */
@@ -67,8 +69,10 @@ class RequestException extends TransferException
         ResponseInterface $response = null,
         \Exception $previous = null,
         array $ctx = []
-    ) {
-        if (!$response) {
+    )
+    {
+        if (!$response)
+        {
             return new self(
                 'Error completing request',
                 $request,
@@ -78,14 +82,19 @@ class RequestException extends TransferException
             );
         }
 
-        $level = (int) floor($response->getStatusCode() / 100);
-        if ($level === 4) {
+        $level = (int)floor($response->getStatusCode() / 100);
+        if ($level === 4)
+        {
             $label = 'Client error';
             $className = ClientException::class;
-        } elseif ($level === 5) {
+        }
+        elseif ($level === 5)
+        {
             $label = 'Server error';
             $className = ServerException::class;
-        } else {
+        }
+        else
+        {
             $label = 'Unsuccessful request';
             $className = __CLASS__;
         }
@@ -106,7 +115,8 @@ class RequestException extends TransferException
 
         $summary = static::getResponseBodySummary($response);
 
-        if ($summary !== null) {
+        if ($summary !== null)
+        {
             $message .= ":\n{$summary}\n";
         }
 
@@ -126,26 +136,30 @@ class RequestException extends TransferException
     {
         $body = $response->getBody();
 
-        if (!$body->isSeekable()) {
+        if (!$body->isSeekable())
+        {
             return null;
         }
 
         $size = $body->getSize();
 
-        if ($size === 0) {
+        if ($size === 0)
+        {
             return null;
         }
 
         $summary = $body->read(120);
         $body->rewind();
 
-        if ($size > 120) {
+        if ($size > 120)
+        {
             $summary .= ' (truncated...)';
         }
 
         // Matches any printable character, including unicode characters:
         // letters, marks, numbers, punctuation, spacing, and separators.
-        if (preg_match('/[^\pL\pM\pN\pP\pS\pZ\n\r\t]/', $summary)) {
+        if (preg_match('/[^\pL\pM\pN\pP\pS\pZ\n\r\t]/', $summary))
+        {
             return null;
         }
 
@@ -163,7 +177,8 @@ class RequestException extends TransferException
     {
         $userInfo = $uri->getUserInfo();
 
-        if (false !== ($pos = strpos($userInfo, ':'))) {
+        if (false !== ($pos = strpos($userInfo, ':')))
+        {
             return $uri->withUserInfo(substr($userInfo, 0, $pos), '***');
         }
 

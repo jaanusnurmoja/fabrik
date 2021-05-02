@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Parser;
 
 use Aws\Api\DateTimeResult;
@@ -11,16 +12,20 @@ class JsonParser
 {
     public function parse(Shape $shape, $value)
     {
-        if ($value === null) {
+        if ($value === null)
+        {
             return $value;
         }
 
-        switch ($shape['type']) {
+        switch ($shape['type'])
+        {
             case 'structure':
                 $target = [];
-                foreach ($shape->getMembers() as $name => $member) {
+                foreach ($shape->getMembers() as $name => $member)
+                {
                     $locationName = $member['locationName'] ?: $name;
-                    if (isset($value[$locationName])) {
+                    if (isset($value[$locationName]))
+                    {
                         $target[$name] = $this->parse($member, $value[$locationName]);
                     }
                 }
@@ -29,7 +34,8 @@ class JsonParser
             case 'list':
                 $member = $shape->getMember();
                 $target = [];
-                foreach ($value as $v) {
+                foreach ($value as $v)
+                {
                     $target[] = $this->parse($member, $v);
                 }
                 return $target;
@@ -37,14 +43,18 @@ class JsonParser
             case 'map':
                 $values = $shape->getValue();
                 $target = [];
-                foreach ($value as $k => $v) {
+                foreach ($value as $k => $v)
+                {
                     $target[$k] = $this->parse($values, $v);
                 }
                 return $target;
 
             case 'timestamp':
-                if (!empty($shape['timestampFormat'])
-                    && $shape['timestampFormat'] !== 'unixTimestamp') {
+                if (
+                    !empty($shape['timestampFormat'])
+                    && $shape['timestampFormat'] !== 'unixTimestamp'
+                )
+                {
                     return new DateTimeResult($value);
                 }
                 // The Unix epoch (or Unix time or POSIX time or Unix

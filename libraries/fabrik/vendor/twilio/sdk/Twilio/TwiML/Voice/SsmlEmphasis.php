@@ -11,24 +11,27 @@ namespace Twilio\TwiML\Voice;
 
 use Twilio\TwiML\TwiML;
 
-class SsmlEmphasis extends TwiML {
+class SsmlEmphasis extends TwiML
+{
     /**
      * SsmlEmphasis constructor.
-     * 
+     *
      * @param string $words Words to emphasize
      * @param array $attributes Optional attributes
      */
-    public function __construct($words, $attributes = array()) {
+    public function __construct($words, $attributes = [])
+    {
         parent::__construct('emphasis', $words, $attributes);
     }
 
     /**
      * Add Level attribute.
-     * 
+     *
      * @param ssmlEmphasis:Enum:Level $level Specify the degree of emphasis
      * @return $this
      */
-    public function setLevel($level) {
+    public function setLevel($level)
+    {
         return $this->setAttribute('level', $level);
     }
 }

@@ -34,7 +34,7 @@ class PartialDocument extends Document
      * @var    array
      * @since  11.1
      */
-    public $_links = array();
+    public $_links = [];
 
     /**
      * Array of custom tags
@@ -42,7 +42,7 @@ class PartialDocument extends Document
      * @var    array
      * @since  11.1
      */
-    public $_custom = array();
+    public $_custom = [];
 
     /**
      * Name of the template
@@ -90,7 +90,7 @@ class PartialDocument extends Document
      * @var    array
      * @since  11.1
      */
-    protected $_template_tags = array();
+    protected $_template_tags = [];
 
     /**
      * Integer with caching setting
@@ -113,11 +113,11 @@ class PartialDocument extends Document
     /**
      * Class constructor
      *
-     * @param   array  $options  Associative array of options
+     * @param array $options Associative array of options
      *
      * @since   11.1
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         parent::__construct($options);
 
@@ -137,18 +137,18 @@ class PartialDocument extends Document
      */
     public function getHeadData()
     {
-        $data = array();
-        $data['title']       = $this->title;
+        $data = [];
+        $data['title'] = $this->title;
         $data['description'] = $this->description;
-        $data['link']        = $this->link;
-        $data['metaTags']    = $this->_metaTags;
-        $data['links']       = $this->_links;
+        $data['link'] = $this->link;
+        $data['metaTags'] = $this->_metaTags;
+        $data['links'] = $this->_links;
         $data['styleSheets'] = $this->_styleSheets;
-        $data['style']       = $this->_style;
-        $data['scripts']     = $this->_scripts;
-        $data['script']      = $this->_script;
-        $data['custom']      = $this->_custom;
-        $data['scriptText']  = \JText::script();
+        $data['style'] = $this->_style;
+        $data['scripts'] = $this->_scripts;
+        $data['script'] = $this->_script;
+        $data['custom'] = $this->_custom;
+        $data['scriptText'] = \JText::script();
 
         return $data;
     }
@@ -156,7 +156,7 @@ class PartialDocument extends Document
     /**
      * Reset the HTML document head data
      *
-     * @param   mixed  $types  type or types of the heads elements to reset
+     * @param mixed $types type or types of the heads elements to reset
      *
      * @return  PartialDocument  instance of $this to allow chaining
      *
@@ -166,16 +166,16 @@ class PartialDocument extends Document
     {
         if (is_null($types))
         {
-            $this->title        = '';
-            $this->description  = '';
-            $this->link         = '';
-            $this->_metaTags    = array();
-            $this->_links       = array();
-            $this->_styleSheets = array();
-            $this->_style       = array();
-            $this->_scripts     = array();
-            $this->_script      = array();
-            $this->_custom      = array();
+            $this->title = '';
+            $this->description = '';
+            $this->link = '';
+            $this->_metaTags = [];
+            $this->_links = [];
+            $this->_styleSheets = [];
+            $this->_style = [];
+            $this->_scripts = [];
+            $this->_script = [];
+            $this->_custom = [];
         }
 
         if (is_array($types))
@@ -197,7 +197,7 @@ class PartialDocument extends Document
     /**
      * Reset a part the HTML document head data
      *
-     * @param   string  $type  type of the heads elements to reset
+     * @param string $type type of the heads elements to reset
      *
      * @return  void
      *
@@ -221,7 +221,7 @@ class PartialDocument extends Document
             case 'script':
             case 'custom':
                 $realType = '_' . $type;
-                $this->{$realType} = array();
+                $this->{$realType} = [];
                 break;
         }
     }
@@ -229,7 +229,7 @@ class PartialDocument extends Document
     /**
      * Set the HTML document head data
      *
-     * @param   array  $data  The document head data in array form
+     * @param array $data The document head data in array form
      *
      * @return  HtmlDocument|null instance of $this to allow chaining or null for empty input data
      *
@@ -242,16 +242,16 @@ class PartialDocument extends Document
             return;
         }
 
-        $this->title        = (isset($data['title']) && !empty($data['title'])) ? $data['title'] : $this->title;
-        $this->description  = (isset($data['description']) && !empty($data['description'])) ? $data['description'] : $this->description;
-        $this->link         = (isset($data['link']) && !empty($data['link'])) ? $data['link'] : $this->link;
-        $this->_metaTags    = (isset($data['metaTags']) && !empty($data['metaTags'])) ? $data['metaTags'] : $this->_metaTags;
-        $this->_links       = (isset($data['links']) && !empty($data['links'])) ? $data['links'] : $this->_links;
+        $this->title = (isset($data['title']) && !empty($data['title'])) ? $data['title'] : $this->title;
+        $this->description = (isset($data['description']) && !empty($data['description'])) ? $data['description'] : $this->description;
+        $this->link = (isset($data['link']) && !empty($data['link'])) ? $data['link'] : $this->link;
+        $this->_metaTags = (isset($data['metaTags']) && !empty($data['metaTags'])) ? $data['metaTags'] : $this->_metaTags;
+        $this->_links = (isset($data['links']) && !empty($data['links'])) ? $data['links'] : $this->_links;
         $this->_styleSheets = (isset($data['styleSheets']) && !empty($data['styleSheets'])) ? $data['styleSheets'] : $this->_styleSheets;
-        $this->_style       = (isset($data['style']) && !empty($data['style'])) ? $data['style'] : $this->_style;
-        $this->_scripts     = (isset($data['scripts']) && !empty($data['scripts'])) ? $data['scripts'] : $this->_scripts;
-        $this->_script      = (isset($data['script']) && !empty($data['script'])) ? $data['script'] : $this->_script;
-        $this->_custom      = (isset($data['custom']) && !empty($data['custom'])) ? $data['custom'] : $this->_custom;
+        $this->_style = (isset($data['style']) && !empty($data['style'])) ? $data['style'] : $this->_style;
+        $this->_scripts = (isset($data['scripts']) && !empty($data['scripts'])) ? $data['scripts'] : $this->_scripts;
+        $this->_script = (isset($data['script']) && !empty($data['script'])) ? $data['script'] : $this->_script;
+        $this->_custom = (isset($data['custom']) && !empty($data['custom'])) ? $data['custom'] : $this->_custom;
 
         if (isset($data['scriptText']) && !empty($data['scriptText']))
         {
@@ -267,7 +267,7 @@ class PartialDocument extends Document
     /**
      * Merge the HTML document head data
      *
-     * @param   array  $data  The document head data in array form
+     * @param array $data The document head data in array form
      *
      * @return  PartialDocument|null instance of $this to allow chaining or null for empty input data
      *
@@ -283,7 +283,8 @@ class PartialDocument extends Document
         $this->title = (isset($data['title']) && !empty($data['title']) && !stristr($this->title, $data['title']))
             ? $this->title . $data['title']
             : $this->title;
-        $this->description = (isset($data['description']) && !empty($data['description']) && !stristr($this->description, $data['description']))
+        $this->description = (isset($data['description']) && !empty($data['description']) && !stristr($this->description,
+                $data['description']))
             ? $this->description . $data['description']
             : $this->description;
         $this->link = (isset($data['link'])) ? $data['link'] : $this->link;
@@ -348,16 +349,16 @@ class PartialDocument extends Document
      * ('rev' refers to reverse relation, 'rel' indicates normal, forward relation.)
      * Typical tag: `<link href="index.php" rel="Start">`
      *
-     * @param   string  $href      The link that is being related.
-     * @param   string  $relation  Relation of link.
-     * @param   string  $relType   Relation type attribute.  Either rel or rev (default: 'rel').
-     * @param   array   $attribs   Associative array of remaining attributes.
+     * @param string $href The link that is being related.
+     * @param string $relation Relation of link.
+     * @param string $relType Relation type attribute.  Either rel or rev (default: 'rel').
+     * @param array $attribs Associative array of remaining attributes.
      *
      * @return  PartialDocument instance of $this to allow chaining
      *
      * @since   11.1
      */
-    public function addHeadLink($href, $relation, $relType = 'rel', $attribs = array())
+    public function addHeadLink($href, $relation, $relType = 'rel', $attribs = [])
     {
         $this->_links[$href]['relation'] = $relation;
         $this->_links[$href]['relType'] = $relType;
@@ -373,9 +374,9 @@ class PartialDocument extends Document
      * the left of the url in the address bar. Some browsers display
      * it on the tab, as well.
      *
-     * @param   string  $href      The link that is being related.
-     * @param   string  $type      File type
-     * @param   string  $relation  Relation of link
+     * @param string $href The link that is being related.
+     * @param string $type File type
+     * @param string $relation Relation of link
      *
      * @return  PartialDocument instance of $this to allow chaining
      *
@@ -384,7 +385,7 @@ class PartialDocument extends Document
     public function addFavicon($href, $type = 'image/vnd.microsoft.icon', $relation = 'shortcut icon')
     {
         $href = str_replace('\\', '/', $href);
-        $this->addHeadLink($href, $relation, 'rel', array('type' => $type));
+        $this->addHeadLink($href, $relation, 'rel', ['type' => $type]);
 
         return $this;
     }
@@ -392,7 +393,7 @@ class PartialDocument extends Document
     /**
      * Adds a custom HTML string to the head block
      *
-     * @param   string  $html  The HTML to add to the head
+     * @param string $html The HTML to add to the head
      *
      * @return  PartialDocument instance of $this to allow chaining
      *
@@ -420,7 +421,7 @@ class PartialDocument extends Document
     /**
      * Sets whether the document should be output as HTML5
      *
-     * @param   bool  $state  True when HTML5 should be output
+     * @param bool $state True when HTML5 should be output
      *
      * @return  void
      *
@@ -437,15 +438,15 @@ class PartialDocument extends Document
     /**
      * Get the contents of a document include
      *
-     * @param   string  $type     The type of renderer
-     * @param   string  $name     The name of the element to render
-     * @param   array   $attribs  Associative array of remaining attributes.
+     * @param string $type The type of renderer
+     * @param string $name The name of the element to render
+     * @param array $attribs Associative array of remaining attributes.
      *
      * @return  mixed|string The output of the renderer
      *
      * @since   11.1
      */
-    public function getBuffer($type = null, $name = null, $attribs = array())
+    public function getBuffer($type = null, $name = null, $attribs = [])
     {
         // If no type is specified, return the whole buffer
         if ($type === null)
@@ -465,16 +466,16 @@ class PartialDocument extends Document
         if ($this->_caching == true && $type == 'modules')
         {
             $cache = \JFactory::getCache('com_modules', '');
-            $hash = md5(serialize(array($name, $attribs, null, $renderer)));
+            $hash = md5(serialize([$name, $attribs, null, $renderer]));
             $cbuffer = $cache->get('cbuffer_' . $type);
 
             if (isset($cbuffer[$hash]))
             {
-                return Cache::getWorkarounds($cbuffer[$hash], array('mergehead' => 1));
+                return Cache::getWorkarounds($cbuffer[$hash], ['mergehead' => 1]);
             }
             else
             {
-                $options = array();
+                $options = [];
                 $options['nopathway'] = 1;
                 $options['nomodules'] = 1;
                 $options['modulemode'] = 1;
@@ -500,20 +501,20 @@ class PartialDocument extends Document
     /**
      * Set the contents a document includes
      *
-     * @param   string  $content  The content to be set in the buffer.
-     * @param   array   $options  Array of optional elements.
+     * @param string $content The content to be set in the buffer.
+     * @param array $options Array of optional elements.
      *
      * @return  PartialDocument instance of $this to allow chaining
      *
      * @since   11.1
      */
-    public function setBuffer($content, $options = array())
+    public function setBuffer($content, $options = [])
     {
         // The following code is just for backward compatibility.
         if (func_num_args() > 1 && !is_array($options))
         {
             $args = func_get_args();
-            $options = array();
+            $options = [];
             $options['type'] = $args[1];
             $options['name'] = (isset($args[2])) ? $args[2] : null;
             $options['title'] = (isset($args[3])) ? $args[3] : null;
@@ -527,13 +528,13 @@ class PartialDocument extends Document
     /**
      * Parses the template and populates the buffer
      *
-     * @param   array  $params  Parameters for fetching the template
+     * @param array $params Parameters for fetching the template
      *
      * @return  PartialDocument instance of $this to allow chaining
      *
      * @since   11.1
      */
-    public function parse($params = array())
+    public function parse($params = [])
     {
         return $this->_fetchTemplate($params)->_parseTemplate();
     }
@@ -541,14 +542,14 @@ class PartialDocument extends Document
     /**
      * Outputs the template to the browser.
      *
-     * @param   boolean  $caching  If true, cache the output
-     * @param   array    $params   Associative array of attributes
+     * @param boolean $caching If true, cache the output
+     * @param array $params Associative array of attributes
      *
      * @return  string The rendered data
      *
      * @since   11.1
      */
-    public function render($caching = false, $params = array())
+    public function render($caching = false, $params = [])
     {
         $this->_caching = $caching;
 
@@ -566,7 +567,7 @@ class PartialDocument extends Document
     /**
      * Count the modules based on the given condition
      *
-     * @param   string  $condition  The condition to use
+     * @param string $condition The condition to use
      *
      * @return  integer  Number of modules found
      *
@@ -639,8 +640,8 @@ class PartialDocument extends Document
     /**
      * Load a template file
      *
-     * @param   string  $directory  The name of the template
-     * @param   string  $filename   The actual filename
+     * @param string $directory The name of the template
+     * @param string $filename The actual filename
      *
      * @return  string  The contents of the template
      *
@@ -666,7 +667,7 @@ class PartialDocument extends Document
         // Try to find a favicon by checking the template and root folder
         $icon = '/favicon.ico';
 
-        foreach (array($directory, JPATH_BASE) as $dir)
+        foreach ([$directory, JPATH_BASE] as $dir)
         {
             if (file_exists($dir . $icon))
             {
@@ -683,13 +684,13 @@ class PartialDocument extends Document
     /**
      * Fetch the template, and initialise the params
      *
-     * @param   array  $params  Parameters to determine the template
+     * @param array $params Parameters to determine the template
      *
      * @return  PartialDocument instance of $this to allow chaining
      *
      * @since   11.1
      */
-    protected function _fetchTemplate($params = array())
+    protected function _fetchTemplate($params = [])
     {
         // Check
         $directory = isset($params['directory']) ? $params['directory'] : 'templates';
@@ -734,28 +735,28 @@ class PartialDocument extends Document
      */
     protected function _parseTemplate()
     {
-        $matches = array();
+        $matches = [];
 
         if (preg_match_all('#<jdoc:include\ type="([^"]+)"(.*)\/>#iU', $this->_template, $matches))
         {
-            $template_tags_first = array();
-            $template_tags_last = array();
+            $template_tags_first = [];
+            $template_tags_last = [];
 
             // Step through the jdocs in reverse order.
             for ($i = count($matches[0]) - 1; $i >= 0; $i--)
             {
                 $type = $matches[1][$i];
-                $attribs = empty($matches[2][$i]) ? array() : \JUtility::parseAttributes($matches[2][$i]);
+                $attribs = empty($matches[2][$i]) ? [] : \JUtility::parseAttributes($matches[2][$i]);
                 $name = isset($attribs['name']) ? $attribs['name'] : null;
 
                 // Separate buffers to be executed first and last
                 if ($type == 'module' || $type == 'modules')
                 {
-                    $template_tags_first[$matches[0][$i]] = array('type' => $type, 'name' => $name, 'attribs' => $attribs);
+                    $template_tags_first[$matches[0][$i]] = ['type' => $type, 'name' => $name, 'attribs' => $attribs];
                 }
                 else
                 {
-                    $template_tags_last[$matches[0][$i]] = array('type' => $type, 'name' => $name, 'attribs' => $attribs);
+                    $template_tags_last[$matches[0][$i]] = ['type' => $type, 'name' => $name, 'attribs' => $attribs];
                 }
             }
             // Reverse the last array so the jdocs are in forward order.
@@ -776,8 +777,8 @@ class PartialDocument extends Document
      */
     protected function _renderTemplate()
     {
-        $replace = array();
-        $with = array();
+        $replace = [];
+        $with = [];
 
         foreach ($this->_template_tags as $jdoc => $args)
         {

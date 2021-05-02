@@ -13,33 +13,36 @@ use Twilio\InstanceContext;
 use Twilio\Values;
 use Twilio\Version;
 
-class InviteContext extends InstanceContext {
+class InviteContext extends InstanceContext
+{
     /**
      * Initialize the InviteContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $serviceSid The service_sid
      * @param string $channelSid The channel_sid
      * @param string $sid The sid
-     * @return \Twilio\Rest\IpMessaging\V2\Service\Channel\InviteContext 
+     * @return \Twilio\Rest\IpMessaging\V2\Service\Channel\InviteContext
      */
-    public function __construct(Version $version, $serviceSid, $channelSid, $sid) {
+    public function __construct(Version $version, $serviceSid, $channelSid, $sid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('serviceSid' => $serviceSid, 'channelSid' => $channelSid, 'sid' => $sid, );
+        $this->solution = ['serviceSid' => $serviceSid, 'channelSid' => $channelSid, 'sid' => $sid,];
 
         $this->uri = '/Services/' . rawurlencode($serviceSid) . '/Channels/' . rawurlencode($channelSid) . '/Invites/' . rawurlencode($sid) . '';
     }
 
     /**
      * Fetch a InviteInstance
-     * 
+     *
      * @return InviteInstance Fetched InviteInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -58,22 +61,25 @@ class InviteContext extends InstanceContext {
 
     /**
      * Deletes the InviteInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->version->delete('delete', $this->uri);
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.IpMessaging.V2.InviteContext ' . implode(' ', $context) . ']';

@@ -23,144 +23,144 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-list.php';
  */
 class PlgFabrik_ListArticle extends PlgFabrik_List
 {
-	/**
-	 * Button prefix
-	 *
-	 * @var string
-	 */
-	protected $buttonPrefix = 'file';
+    /**
+     * Button prefix
+     *
+     * @var string
+     */
+    protected $buttonPrefix = 'file';
 
-	/**
-	 * Prep the button if needed
-	 *
-	 * @param   array  &$args  Arguments
-	 *
-	 * @return  bool;
-	 */
-	public function button(&$args)
-	{
-		parent::button($args);
+    /**
+     * Prep the button if needed
+     *
+     * @param array  &$args Arguments
+     *
+     * @return  bool;
+     */
+    public function button(&$args)
+    {
+        parent::button($args);
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Get the parameter name that defines the plugins acl access
-	 *
-	 * @return  string
-	 */
-	protected function getAclParam()
-	{
-		return 'access';
-	}
+    /**
+     * Get the parameter name that defines the plugins acl access
+     *
+     * @return  string
+     */
+    protected function getAclParam()
+    {
+        return 'access';
+    }
 
-	/**
-	 * Can the plug-in select list rows
-	 *
-	 * @return  bool
-	 */
-	public function canSelectRows()
-	{
-		return true;
-	}
+    /**
+     * Can the plug-in select list rows
+     *
+     * @return  bool
+     */
+    public function canSelectRows()
+    {
+        return true;
+    }
 
-	/**
-	 * Get the button label
-	 *
-	 * @return  string
-	 */
-	protected function buttonLabel()
-	{
-		return FText::_('PLG_LIST_ARTICLE_UPDATE_ARTICLE');
-	}
+    /**
+     * Get the button label
+     *
+     * @return  string
+     */
+    protected function buttonLabel()
+    {
+        return FText::_('PLG_LIST_ARTICLE_UPDATE_ARTICLE');
+    }
 
-	/**
-	 * Do the plug-in action
-	 *
-	 * @param   array  $opts  Custom options
-	 *
-	 * @return  bool
-	 */
-	public function process($opts = array())
-	{
-		/** @var FabrikFEModelList $model */
-		$model = $this->getModel();
-		$input = $this->app->input;
-		$ids = $input->get('ids', array(), 'array');
-		$origRowId = $input->get('rowid');
-		$pluginManager = JModelLegacy::getInstance('Pluginmanager', 'FabrikFEModel');
+    /**
+     * Do the plug-in action
+     *
+     * @param array $opts Custom options
+     *
+     * @return  bool
+     */
+    public function process($opts = [])
+    {
+        /** @var FabrikFEModelList $model */
+        $model = $this->getModel();
+        $input = $this->app->input;
+        $ids = $input->get('ids', [], 'array');
+        $origRowId = $input->get('rowid');
+        $pluginManager = JModelLegacy::getInstance('Pluginmanager', 'FabrikFEModel');
 
-		// Abstract version of the form article plugin
-		/** @var PlgFabrik_FormArticle $articlePlugin */
-		$articlePlugin = $pluginManager->getPlugin('article', 'form');
+        // Abstract version of the form article plugin
+        /** @var PlgFabrik_FormArticle $articlePlugin */
+        $articlePlugin = $pluginManager->getPlugin('article', 'form');
 
-		$formModel = $model->getFormModel();
-		$formParams = $formModel->getParams();
-		$plugins = $formParams->get('plugins');
+        $formModel = $model->getFormModel();
+        $formParams = $formModel->getParams();
+        $plugins = $formParams->get('plugins');
 
-		foreach ($plugins as $c => $type)
-		{
-			if ($type === 'article')
-			{
-				// Iterate over the records - load row & update articles
-				foreach ($ids as $id)
-				{
-					$input->set('rowid', $id);
-					$formModel->setRowId($id);
-					$formModel->unsetData();
-					$formModel->formData = $formModel->formDataWithTableName = $formModel->getData();
-					$articlePlugin->setModel($formModel);
-					$articlePlugin->setParams($formParams, $c);
-					unset($articlePlugin->images);
-					$articlePlugin->onAfterProcess();
-				}
-			}
-		}
+        foreach ($plugins as $c => $type)
+        {
+            if ($type === 'article')
+            {
+                // Iterate over the records - load row & update articles
+                foreach ($ids as $id)
+                {
+                    $input->set('rowid', $id);
+                    $formModel->setRowId($id);
+                    $formModel->unsetData();
+                    $formModel->formData = $formModel->formDataWithTableName = $formModel->getData();
+                    $articlePlugin->setModel($formModel);
+                    $articlePlugin->setParams($formParams, $c);
+                    unset($articlePlugin->images);
+                    $articlePlugin->onAfterProcess();
+                }
+            }
+        }
 
-		$input->set('rowid', $origRowId);
+        $input->set('rowid', $origRowId);
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Get the message generated in process()
-	 *
-	 * @param   int  $c  plugin render order
-	 *
-	 * @return  string
-	 */
-	public function process_result($c)
-	{
-		$input = $this->app->input;
-		$ids = $input->get('ids', array(), 'array');
+    /**
+     * Get the message generated in process()
+     *
+     * @param int $c plugin render order
+     *
+     * @return  string
+     */
+    public function process_result($c)
+    {
+        $input = $this->app->input;
+        $ids = $input->get('ids', [], 'array');
 
-		return JText::sprintf('PLG_LIST_ARTICLES_UPDATED', count($ids));
-	}
+        return JText::sprintf('PLG_LIST_ARTICLES_UPDATED', count($ids));
+    }
 
-	/**
-	 * Return the javascript to create an instance of the class defined in formJavascriptClass
-	 *
-	 * @param   array  $args  array [0] => string table's form id to contain plugin
-	 *
-	 * @return bool
-	 */
-	public function onLoadJavascriptInstance($args)
-	{
-		parent::onLoadJavascriptInstance($args);
-		$opts = $this->getElementJSOptions();
-		$opts = json_encode($opts);
-		$this->jsInstance = "new FbListArticle($opts)";
+    /**
+     * Return the javascript to create an instance of the class defined in formJavascriptClass
+     *
+     * @param array $args array [0] => string table's form id to contain plugin
+     *
+     * @return bool
+     */
+    public function onLoadJavascriptInstance($args)
+    {
+        parent::onLoadJavascriptInstance($args);
+        $opts = $this->getElementJSOptions();
+        $opts = json_encode($opts);
+        $this->jsInstance = "new FbListArticle($opts)";
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Load the AMD module class name
-	 *
-	 * @return string
-	 */
-	public function loadJavascriptClassName_result()
-	{
-		return 'FbListArticle';
-	}
+    /**
+     * Load the AMD module class name
+     *
+     * @return string
+     */
+    public function loadJavascriptClassName_result()
+    {
+        return 'FbListArticle';
+    }
 }

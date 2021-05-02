@@ -12,33 +12,36 @@ namespace Twilio\Rest\Studio\V1\Flow\Engagement\Step;
 use Twilio\ListResource;
 use Twilio\Version;
 
-class StepContextList extends ListResource {
+class StepContextList extends ListResource
+{
     /**
      * Construct the StepContextList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $flowSid Flow Sid.
      * @param string $engagementSid Engagement Sid.
      * @param string $stepSid Step Sid.
-     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\Step\StepContextList 
+     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\Step\StepContextList
      */
-    public function __construct(Version $version, $flowSid, $engagementSid, $stepSid) {
+    public function __construct(Version $version, $flowSid, $engagementSid, $stepSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array(
-            'flowSid' => $flowSid,
+        $this->solution = [
+            'flowSid'       => $flowSid,
             'engagementSid' => $engagementSid,
-            'stepSid' => $stepSid,
-        );
+            'stepSid'       => $stepSid,
+        ];
     }
 
     /**
      * Constructs a StepContextContext
-     * 
-     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\Step\StepContextContext 
+     *
+     * @return \Twilio\Rest\Studio\V1\Flow\Engagement\Step\StepContextContext
      */
-    public function getContext() {
+    public function getContext()
+    {
         return new StepContextContext(
             $this->version,
             $this->solution['flowSid'],
@@ -49,10 +52,11 @@ class StepContextList extends ListResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Studio.V1.StepContextList]';
     }
 }

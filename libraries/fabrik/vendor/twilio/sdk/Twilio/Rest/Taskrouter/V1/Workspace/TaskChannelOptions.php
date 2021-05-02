@@ -12,44 +12,52 @@ namespace Twilio\Rest\Taskrouter\V1\Workspace;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class TaskChannelOptions {
+abstract class TaskChannelOptions
+{
     /**
      * @param string $friendlyName Toggle the FriendlyName for the TaskChannel
      * @return UpdateTaskChannelOptions Options builder
      */
-    public static function update($friendlyName = Values::NONE) {
+    public static function update($friendlyName = Values::NONE)
+    {
         return new UpdateTaskChannelOptions($friendlyName);
     }
 }
 
-class UpdateTaskChannelOptions extends Options {
+class UpdateTaskChannelOptions extends Options
+{
     /**
      * @param string $friendlyName Toggle the FriendlyName for the TaskChannel
      */
-    public function __construct($friendlyName = Values::NONE) {
+    public function __construct($friendlyName = Values::NONE)
+    {
         $this->options['friendlyName'] = $friendlyName;
     }
 
     /**
      * Toggle the FriendlyName for the TaskChannel
-     * 
+     *
      * @param string $friendlyName Toggle the FriendlyName for the TaskChannel
      * @return $this Fluent Builder
      */
-    public function setFriendlyName($friendlyName) {
+    public function setFriendlyName($friendlyName)
+    {
         $this->options['friendlyName'] = $friendlyName;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

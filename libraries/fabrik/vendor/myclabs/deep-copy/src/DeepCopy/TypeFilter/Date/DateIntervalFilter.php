@@ -24,7 +24,8 @@ class DateIntervalFilter implements TypeFilter
     {
         $copy = new DateInterval('P0D');
 
-        foreach ($element as $propertyName => $propertyValue) {
+        foreach ($element as $propertyName => $propertyValue)
+        {
             $copy->{$propertyName} = $propertyValue;
         }
 

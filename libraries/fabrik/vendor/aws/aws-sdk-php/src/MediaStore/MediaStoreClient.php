@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\MediaStore;
 
 use Aws\AwsClient;
@@ -32,4 +33,6 @@ use Aws\AwsClient;
  * @method \Aws\Result putLifecyclePolicy(array $args = [])
  * @method \GuzzleHttp\Promise\Promise putLifecyclePolicyAsync(array $args = [])
  */
-class MediaStoreClient extends AwsClient {}
+class MediaStoreClient extends AwsClient
+{
+}

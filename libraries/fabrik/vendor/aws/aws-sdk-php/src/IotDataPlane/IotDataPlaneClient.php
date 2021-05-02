@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\IotDataPlane;
 
 use Aws\AwsClient;
@@ -15,4 +16,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateThingShadow(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateThingShadowAsync(array $args = [])
  */
-class IotDataPlaneClient extends AwsClient {}
+class IotDataPlaneClient extends AwsClient
+{
+}

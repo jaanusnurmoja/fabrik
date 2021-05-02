@@ -51,9 +51,11 @@ class ResponseBuilder
         $status = array_shift($headers);
         $this->setStatus($status);
 
-        foreach ($headers as $headerLine) {
+        foreach ($headers as $headerLine)
+        {
             $headerLine = trim($headerLine);
-            if ('' === $headerLine) {
+            if ('' === $headerLine)
+            {
                 continue;
             }
 
@@ -75,9 +77,11 @@ class ResponseBuilder
      */
     public function setHeadersFromString($headers)
     {
-        if (!(is_string($headers)
+        if (
+        !(is_string($headers)
             || (is_object($headers) && method_exists($headers, '__toString')))
-        ) {
+        )
+        {
             throw new \InvalidArgumentException(
                 sprintf(
                     '%s expects parameter 1 to be a string, %s given',
@@ -104,7 +108,8 @@ class ResponseBuilder
     public function setStatus($statusLine)
     {
         $parts = explode(' ', $statusLine, 3);
-        if (count($parts) < 2 || strpos(strtolower($parts[0]), 'http/') !== 0) {
+        if (count($parts) < 2 || strpos(strtolower($parts[0]), 'http/') !== 0)
+        {
             throw new \InvalidArgumentException(
                 sprintf('"%s" is not a valid HTTP status line', $statusLine)
             );
@@ -112,7 +117,7 @@ class ResponseBuilder
 
         $reasonPhrase = count($parts) > 2 ? $parts[2] : '';
         $this->response = $this->response
-            ->withStatus((int) $parts[1], $reasonPhrase)
+            ->withStatus((int)$parts[1], $reasonPhrase)
             ->withProtocolVersion(substr($parts[0], 5));
 
         return $this;
@@ -130,16 +135,20 @@ class ResponseBuilder
     public function addHeader($headerLine)
     {
         $parts = explode(':', $headerLine, 2);
-        if (count($parts) !== 2) {
+        if (count($parts) !== 2)
+        {
             throw new \InvalidArgumentException(
                 sprintf('"%s" is not a valid HTTP header line', $headerLine)
             );
         }
         $name = trim($parts[0]);
         $value = trim($parts[1]);
-        if ($this->response->hasHeader($name)) {
+        if ($this->response->hasHeader($name))
+        {
             $this->response = $this->response->withAddedHeader($name, $value);
-        } else {
+        }
+        else
+        {
             $this->response = $this->response->withHeader($name, $value);
         }
 

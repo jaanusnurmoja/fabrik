@@ -13,48 +13,51 @@
 defined('_JEXEC') or die('Restricted access');
 
 $group = $this->group;
-	if ($group->start) : 
+if ($group->start) :
 ?>
 <table class="table table-striped repeatGroupTable">
-	<thead>
-		<tr>
-	<?php
-	// Add in the table heading
-	$firstGroup = $group->subgroups[0];
-	foreach ($firstGroup as $el) :
-		$style = $el->hidden ? 'style="display:none"' : '';
-		?>
-		<th <?php echo $style; ?> class="<?php echo $el->containerClass?>">
-			<?php echo $el->label_raw?>
-		</th>
-		<?php
-	endforeach;
+    <thead>
+    <tr>
+        <?php
+        // Add in the table heading
+        $firstGroup = $group->subgroups[0];
+        foreach ($firstGroup as $el) :
+            $style = $el->hidden ? 'style="display:none"' : '';
+            ?>
+            <th <?php
+            echo $style; ?> class="<?php
+            echo $el->containerClass ?>">
+                <?php
+                echo $el->label_raw ?>
+            </th>
+        <?php
+        endforeach;
 
-	// This column will contain the add/delete buttons
-	if ($group->editable) : ?>
-	<th></th>
-	<?php
-	endif;
-	?>
-	</tr>
-	</thead>
-	<tbody>
-		<?php
-	endif;
+        // This column will contain the add/delete buttons
+        if ($group->editable) : ?>
+            <th></th>
+        <?php
+        endif;
+        ?>
+    </tr>
+    </thead>
+    <tbody>
+    <?php
+    endif;
 
-		if (!$group->newGroup) :
-			// Load each repeated group in a <tr>
-			$this->i = 0;
-			foreach ($group->subgroups as $subgroup) :
-				$this->elements = $subgroup;
-				echo $this->loadTemplate('repeatgroup_row');
-				$this->i ++;
-			endforeach;
-		endif;
-	if ($group->end) : 
-		?>
-	</tbody>
+    if (!$group->newGroup) :
+        // Load each repeated group in a <tr>
+        $this->i = 0;
+        foreach ($group->subgroups as $subgroup) :
+            $this->elements = $subgroup;
+            echo $this->loadTemplate('repeatgroup_row');
+            $this->i++;
+        endforeach;
+    endif;
+    if ($group->end) :
+    ?>
+    </tbody>
 </table>
-		<?php
-	endif;
+<?php
+endif;
 ?>

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Api\Parser\AbstractParser;
@@ -24,13 +25,16 @@ class GetBucketLocationParser extends AbstractParser
     public function __invoke(
         CommandInterface $command,
         ResponseInterface $response
-    ) {
+    )
+    {
         $fn = $this->parser;
         $result = $fn($command, $response);
 
-        if ($command->getName() === 'GetBucketLocation') {
+        if ($command->getName() === 'GetBucketLocation')
+        {
             $location = 'us-east-1';
-            if (preg_match('/>(.+?)<\/LocationConstraint>/', $response->getBody(), $matches)) {
+            if (preg_match('/>(.+?)<\/LocationConstraint>/', $response->getBody(), $matches))
+            {
                 $location = $matches[1] === 'EU' ? 'eu-west-1' : $matches[1];
             }
             $result['LocationConstraint'] = $location;
@@ -43,7 +47,8 @@ class GetBucketLocationParser extends AbstractParser
         StreamInterface $stream,
         StructureShape $member,
         $response
-    ) {
+    )
+    {
         return $this->parser->parseMemberFromStream($stream, $member, $response);
     }
 }

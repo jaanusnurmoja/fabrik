@@ -16,23 +16,23 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
          */
         options: {
             'dateTimeFormat': '',
-            'locale'        : 'en-GB',
-            'allowedDates'  : [],
+            'locale': 'en-GB',
+            'allowedDates': [],
             'allowedClasses': [],
-            'calendarSetup' : {
-                'eventName'   : 'click',
-                'ifFormat'    : '%Y/%m/%d',
-                'daFormat'    : '%Y/%m/%d',
-                'singleClick' : true,
-                'align'       : 'Tl',
-                'range'       : [1900, 2999],
-                'showsTime'   : false,
-                'timeFormat'  : '24',
-                'electric'    : true,
-                'step'        : 2,
-                'cache'       : false,
-                'showOthers'  : false,
-                'advanced'    : false
+            'calendarSetup': {
+                'eventName': 'click',
+                'ifFormat': '%Y/%m/%d',
+                'daFormat': '%Y/%m/%d',
+                'singleClick': true,
+                'align': 'Tl',
+                'range': [1900, 2999],
+                'showsTime': false,
+                'timeFormat': '24',
+                'electric': true,
+                'step': 2,
+                'cache': false,
+                'showOthers': false,
+                'advanced': false
             }
         },
 
@@ -68,8 +68,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                             // hoses up anything but standard 'db' format.  So we HAVE to use parseDate() here.
                             if (this.options.advanced) {
                                 d = Date.parseExact(date_str, Date.normalizeFormat(this.options.calendarSetup.ifFormat));
-                            }
-                            else {
+                            } else {
                                 d = Date.parseDate(date_str, this.options.calendarSetup.ifFormat);
                             }
                             //this.setTimeFromField(d);
@@ -78,8 +77,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                             // need to fire this to cook off anything observing this element
                             Fabrik.fireEvent('fabrik.date.select', this);
                             this.element.fireEvent('change', new Event.Mock(this.element, 'change'));
-                        }
-                        else {
+                        } else {
                             this.options.value = '';
                         }
                     }.bind(this));
@@ -88,8 +86,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 this.getDateField().onchange = function () {
                     if (jQuery(event.target).data('action') === 'clear') {
                         this.update('');
-                    }
-                    else {
+                    } else {
                         //this.calSelect();
                     }
                 }.bind(this);
@@ -99,7 +96,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     this.afterAjaxValidation();
                 }.bind(this));
 
-                Fabrik.addEvent('fabrik.form.page.change.end', function(form, dir) {
+                Fabrik.addEvent('fabrik.form.page.change.end', function (form, dir) {
                     // Fired when multipage form changes page
                     this.afterAjaxValidation();
                 }.bind(this));
@@ -183,7 +180,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             if (this.getJCal()) {
                 this.cal.show();
             }
-         },
+        },
 
         disableTyping: function () {
             if (typeOf(this.element) === 'null') {
@@ -255,8 +252,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                         typeOf(js) === 'function' ? js.delay(0, this, this) : eval(js);
                     }
                 }.bind(this));
-            }
-            else {
+            } else {
                 this.element.getElements('input').each(function (i) {
                     i.addEvent(action, function (e) {
                         if (typeOf(e) === 'event') {
@@ -308,16 +304,14 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                     }
 
                     return;
-                }
-                else {
+                } else {
                     /*
                      * Even though always standard format, need to use 'advanced' handling to work round a bug in
                      * the JoomlaFarsi implementation of the calendar JS which applies TZ offsets in parseDate()
                      */
                     if (this.options.advanced) {
                         date = Date.parseExact(val, Date.normalizeFormat('%Y-%m-%d %H:%M:%S'));
-                    }
-                    else {
+                    } else {
                         /*
                          * need to use parseDate() with a format string instead of just parse(), otherwise if advanced
                          * formats is enabled, parse() will overridden and use the "culture" specific parsing, and if
@@ -361,7 +355,8 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
                 // before cloned() method called
                 this.hour = date.get('hours');
                 this.minute = date.get('minutes');
-                this.second = date.get('seconds');;
+                this.second = date.get('seconds');
+                ;
             }
             //this.cal.date = date;
             this.getDateField().value = date.format(this.options.calendarSetup.ifFormat);
@@ -382,9 +377,9 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
 
             // Test the date is selectable...
             //if (calendar.dateClicked && this.dateSelect(calendar.date) !== true) {
-                this.update(this.getJCal().date.format('db'));
-                this.getDateField().fireEvent('change');
-                Fabrik.fireEvent('fabrik.date.select', this);
+            this.update(this.getJCal().date.format('db'));
+            this.getDateField().fireEvent('change');
+            Fabrik.fireEvent('fabrik.date.select', this);
             //}
         },
 

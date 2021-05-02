@@ -10,7 +10,7 @@ class HTML5_Data
     // codepoints
     // XXX: Not quite sure why it's named this; this is
     // actually the numeric entity dereference table.
-    protected static $realCodepointTable = array(
+    protected static $realCodepointTable = [
         0x00 => 0xFFFD, // REPLACEMENT CHARACTER
         0x0D => 0x000A, // LINE FEED (LF)
         0x80 => 0x20AC, // EURO SIGN ('€')
@@ -45,7 +45,7 @@ class HTML5_Data
         0x9D => 0x009D, // <control>
         0x9E => 0x017E, // LATIN SMALL LETTER Z WITH CARON ('ž')
         0x9F => 0x0178, // LATIN CAPITAL LETTER Y WITH DIAERESIS ('Ÿ')
-    );
+    ];
 
     protected static $namedCharacterReferences;
 
@@ -55,16 +55,22 @@ class HTML5_Data
      * Returns the "real" Unicode codepoint of a malformed character
      * reference.
      */
-    public static function getRealCodepoint($ref) {
-        if (!isset(self::$realCodepointTable[$ref])) {
+    public static function getRealCodepoint($ref)
+    {
+        if (!isset(self::$realCodepointTable[$ref]))
+        {
             return false;
-        } else {
+        }
+        else
+        {
             return self::$realCodepointTable[$ref];
         }
     }
 
-    public static function getNamedCharacterReferences() {
-        if (!self::$namedCharacterReferences) {
+    public static function getNamedCharacterReferences()
+    {
+        if (!self::$namedCharacterReferences)
+        {
             self::$namedCharacterReferences = unserialize(
                 file_get_contents(dirname(__FILE__) . '/named-character-references.ser'));
         }
@@ -76,7 +82,8 @@ class HTML5_Data
      * @note Shamelessly stolen from HTML Purifier, which is also
      *       shamelessly stolen from Feyd (which is in public domain).
      */
-    public static function utf8chr($code) {
+    public static function utf8chr($code)
+    {
         /* We don't care: we live dangerously
          * if($code > 0x10FFFF or $code < 0x0 or
           ($code >= 0xD800 and $code <= 0xDFFF) ) {
@@ -86,19 +93,28 @@ class HTML5_Data
           }*/
 
         $y = $z = $w = 0;
-        if ($code < 0x80) {
+        if ($code < 0x80)
+        {
             // regular ASCII character
             $x = $code;
-        } else {
+        }
+        else
+        {
             // set up bits for UTF-8
             $x = ($code & 0x3F) | 0x80;
-            if ($code < 0x800) {
-               $y = (($code & 0x7FF) >> 6) | 0xC0;
-            } else {
+            if ($code < 0x800)
+            {
+                $y = (($code & 0x7FF) >> 6) | 0xC0;
+            }
+            else
+            {
                 $y = (($code & 0xFC0) >> 6) | 0x80;
-                if ($code < 0x10000) {
+                if ($code < 0x10000)
+                {
                     $z = (($code >> 12) & 0x0F) | 0xE0;
-                } else {
+                }
+                else
+                {
                     $z = (($code >> 12) & 0x3F) | 0x80;
                     $w = (($code >> 18) & 0x07) | 0xF0;
                 }
@@ -106,13 +122,16 @@ class HTML5_Data
         }
         // set up the actual character
         $ret = '';
-        if ($w) {
+        if ($w)
+        {
             $ret .= chr($w);
         }
-        if ($z) {
+        if ($z)
+        {
             $ret .= chr($z);
         }
-        if ($y) {
+        if ($y)
+        {
             $ret .= chr($y);
         }
         $ret .= chr($x);

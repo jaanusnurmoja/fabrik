@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Handler;
 
 use GuzzleHttp\Psr7;
@@ -32,7 +33,8 @@ class CurlHandler
 
     public function __invoke(RequestInterface $request, array $options)
     {
-        if (isset($options['delay'])) {
+        if (isset($options['delay']))
+        {
             usleep($options['delay'] * 1000);
         }
 

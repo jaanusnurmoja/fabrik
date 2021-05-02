@@ -27,7 +27,7 @@ final class IndexResponse implements ApiResponse, PagingProvider
 
     /**
      * @param Bounce[] $items
-     * @param array    $paging
+     * @param array $paging
      */
     private function __construct(array $items, array $paging)
     {
@@ -43,8 +43,10 @@ final class IndexResponse implements ApiResponse, PagingProvider
     public static function create(array $data)
     {
         $bounces = [];
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $item) {
+        if (isset($data['items']))
+        {
+            foreach ($data['items'] as $item)
+            {
                 $bounces[] = Bounce::create($item);
             }
         }

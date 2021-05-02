@@ -43,37 +43,42 @@ $secret = '';
 $lang = 'en';
 ?>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <title>reCAPTCHA Example</title>
-        <link rel="shortcut icon" href="//www.gstatic.com/recaptcha/admin/favicon.ico" type="image/x-icon"/>
-        <style type="text/css">
-            body {
-                margin: 1em 5em 0 5em;
-                font-family: sans-serif;
-            }
-            fieldset {
-                display: inline;
-                padding: 1em;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>reCAPTCHA Example</h1>
-        <?php if ($siteKey === '' || $secret === ''): ?>
-            <h2>Add your keys</h2>
-            <p>If you do not have keys already then visit <kbd>
-            <a href = "https://www.google.com/recaptcha/admin">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>reCAPTCHA Example</title>
+    <link rel="shortcut icon" href="//www.gstatic.com/recaptcha/admin/favicon.ico" type="image/x-icon"/>
+    <style type="text/css">
+        body {
+            margin: 1em 5em 0 5em;
+            font-family: sans-serif;
+        }
+
+        fieldset {
+            display: inline;
+            padding: 1em;
+        }
+    </style>
+</head>
+<body>
+<h1>reCAPTCHA Example</h1>
+<?php
+if ($siteKey === '' || $secret === ''): ?>
+    <h2>Add your keys</h2>
+    <p>If you do not have keys already then visit <kbd>
+            <a href="https://www.google.com/recaptcha/admin">
                 https://www.google.com/recaptcha/admin</a></kbd> to generate them.
         Edit this file and set the respective keys in <kbd>$siteKey</kbd> and
         <kbd>$secret</kbd>. Reload the page after this.</p>
-    <?php
+<?php
 elseif (isset($_POST['g-recaptcha-response'])):
     // The POST data here is unfiltered because this is an example.
     // In production, *always* sanitise and validate your input'
     ?>
     <h2><kbd>POST</kbd> data</h2>
-    <kbd><pre><?php var_export($_POST); ?></pre></kbd>
+    <kbd>
+        <pre><?php
+            var_export($_POST); ?></pre>
+    </kbd>
     <?php
 // If the form submission includes the "g-captcha-response" field
 // Create an instance of the service using your secret
@@ -93,18 +98,21 @@ elseif (isset($_POST['g-recaptcha-response'])):
         <h2>Success!</h2>
         <p>That's it. Everything is working. Go integrate this into your real project.</p>
         <p><a href="/">Try again</a></p>
-        <?php
+    <?php
     else:
 // If it's not successful, then one or more error codes will be returned.
         ?>
         <h2>Something went wrong</h2>
         <p>The following error was returned: <?php
-            foreach ($resp->getErrorCodes() as $code) {
-                echo '<kbd>' , $code , '</kbd> ';
+            foreach ($resp->getErrorCodes() as $code)
+            {
+                echo '<kbd>', $code, '</kbd> ';
             }
             ?></p>
-        <p>Check the error code reference at <kbd><a href="https://developers.google.com/recaptcha/docs/verify#error-code-reference">https://developers.google.com/recaptcha/docs/verify#error-code-reference</a></kbd>.
-        <p><strong>Note:</strong> Error code <kbd>missing-input-response</kbd> may mean the user just didn't complete the reCAPTCHA.</p>
+        <p>Check the error code reference at <kbd><a
+                        href="https://developers.google.com/recaptcha/docs/verify#error-code-reference">https://developers.google.com/recaptcha/docs/verify#error-code-reference</a></kbd>.
+        <p><strong>Note:</strong> Error code <kbd>missing-input-response</kbd> may mean the user just didn't complete
+            the reCAPTCHA.</p>
         <p><a href="/">Try again</a></p>
     <?php
     endif;
@@ -118,13 +126,16 @@ else:
             <p>Example input A: <input type="text" name="ex-a" value="foo"></p>
             <p>Example input B: <input type="text" name="ex-b" value="bar"></p>
 
-            <div class="g-recaptcha" data-sitekey="<?php echo $siteKey; ?>"></div>
+            <div class="g-recaptcha" data-sitekey="<?php
+            echo $siteKey; ?>"></div>
             <script type="text/javascript"
-                    src="https://www.google.com/recaptcha/api.js?hl=<?php echo $lang; ?>">
+                    src="https://www.google.com/recaptcha/api.js?hl=<?php
+                    echo $lang; ?>">
             </script>
-            <p><input type="submit" value="Submit" /></p>
+            <p><input type="submit" value="Submit"/></p>
         </fieldset>
     </form>
-<?php endif; ?>
+<?php
+endif; ?>
 </body>
 </html>

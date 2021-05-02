@@ -5,6 +5,7 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
+
 namespace Dompdf\FrameReflower;
 
 use Dompdf\FrameDecorator\Block as BlockFrameDecorator;
@@ -35,7 +36,8 @@ class TableRow extends AbstractFrameReflower
     {
         $page = $this->_frame->get_root();
 
-        if ($page->is_full()) {
+        if ($page->is_full())
+        {
             return;
         }
 
@@ -43,8 +45,10 @@ class TableRow extends AbstractFrameReflower
         $style = $this->_frame->get_style();
         $cb = $this->_frame->get_containing_block();
 
-        foreach ($this->_frame->get_children() as $child) {
-            if ($page->is_full()) {
+        foreach ($this->_frame->get_children() as $child)
+        {
+            if ($page->is_full())
+            {
                 return;
             }
 
@@ -52,7 +56,8 @@ class TableRow extends AbstractFrameReflower
             $child->reflow();
         }
 
-        if ($page->is_full()) {
+        if ($page->is_full())
+        {
             return;
         }
 

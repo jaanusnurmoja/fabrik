@@ -10,7 +10,8 @@ use Psr\Http\Message\UriInterface;
  */
 trait RequestDecorator
 {
-    use MessageDecorator {
+    use MessageDecorator
+    {
         getMessage as getRequest;
     }
 

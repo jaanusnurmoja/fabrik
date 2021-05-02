@@ -23,24 +23,25 @@ namespace Clickatell;
  */
 class Event
 {
-    const SEND_MESSAGE        = 0;
-    const GET_BALANCE         = 1;
-    const STOP_MESSAGE        = 2;
-    const QUERY_MESSAGE       = 3;
-    const ROUTE_COVERAGE      = 4;
-    const GET_MESSAGE_CHARGE  = 5;
+    const SEND_MESSAGE = 0;
+    const GET_BALANCE = 1;
+    const STOP_MESSAGE = 2;
+    const QUERY_MESSAGE = 3;
+    const ROUTE_COVERAGE = 4;
+    const GET_MESSAGE_CHARGE = 5;
 
     /**
      * Construct a new event.
      *
      * @param string $event The event name
-     * @param array  $args  Associative array of arguments
+     * @param array $args Associative array of arguments
      */
     public function __construct($event, $args)
     {
         $this->event = $event;
 
-        foreach ($args as $key => $value) {
+        foreach ($args as $key => $value)
+        {
             $this->$key = $value;
         }
     }

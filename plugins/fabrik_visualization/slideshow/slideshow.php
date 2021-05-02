@@ -21,7 +21,6 @@ require_once COM_FABRIK_FRONTEND . '/models/visualization.php';
  * @subpackage  Fabrik.visualization.slideshow
  * @since       3.0
  */
-
 class PlgFabrik_VisualizationSlideshow extends FabrikPlugin
 {
 }

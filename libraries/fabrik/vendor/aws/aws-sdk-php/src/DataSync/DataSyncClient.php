@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DataSync;
 
 use Aws\AwsClient;
@@ -56,4 +57,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateTask(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateTaskAsync(array $args = [])
  */
-class DataSyncClient extends AwsClient {}
+class DataSyncClient extends AwsClient
+{
+}

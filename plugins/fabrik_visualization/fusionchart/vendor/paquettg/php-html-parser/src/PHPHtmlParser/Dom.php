@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser;
 
 use PHPHtmlParser\Dom\AbstractNode;
@@ -121,11 +122,13 @@ class Dom
     public function load($str, $options = [])
     {
         // check if it's a file
-        if (strpos($str, "\n") === false && is_file($str)) {
+        if (strpos($str, "\n") === false && is_file($str))
+        {
             return $this->loadFromFile($str, $options);
         }
         // check if it's a url
-        if (preg_match("/^https?:\/\//i", $str)) {
+        if (preg_match("/^https?:\/\//i", $str))
+        {
             return $this->loadFromUrl($str, $options);
         }
 
@@ -155,7 +158,8 @@ class Dom
      */
     public function loadFromUrl($url, $options = [], CurlInterface $curl = null)
     {
-        if (is_null($curl)) {
+        if (is_null($curl))
+        {
             // use the default curl interface
             $curl = new Curl;
         }
@@ -176,14 +180,14 @@ class Dom
     {
         $this->options = new Options;
         $this->options->setOptions($this->globalOptions)
-                      ->setOptions($option);
+            ->setOptions($option);
 
         $this->rawSize = strlen($str);
-        $this->raw     = $str;
+        $this->raw = $str;
 
         $html = $this->clean($str);
 
-        $this->size    = strlen($str);
+        $this->size = strlen($str);
         $this->content = new Content($html);
 
         $this->parse();
@@ -228,10 +232,12 @@ class Dom
      */
     public function addSelfClosingTag($tag)
     {
-        if ( ! is_array($tag)) {
+        if (!is_array($tag))
+        {
             $tag = [$tag];
         }
-        foreach ($tag as $value) {
+        foreach ($tag as $value)
+        {
             $this->selfClosing[] = $value;
         }
 
@@ -247,7 +253,8 @@ class Dom
      */
     public function removeSelfClosingTag($tag)
     {
-        if ( ! is_array($tag)) {
+        if (!is_array($tag))
+        {
             $tag = [$tag];
         }
         $this->selfClosing = array_diff($this->selfClosing, $tag);
@@ -302,7 +309,7 @@ class Dom
     {
         $this->isLoaded();
 
-        return $this->find('#'.$id, 0);
+        return $this->find('#' . $id, 0);
     }
 
     /**
@@ -330,7 +337,7 @@ class Dom
     {
         $this->isLoaded();
 
-        return $this->find('.'.$class);
+        return $this->find('.' . $class);
     }
 
     /**
@@ -340,7 +347,8 @@ class Dom
      */
     protected function isLoaded()
     {
-        if (is_null($this->content)) {
+        if (is_null($this->content))
+        {
             throw new NotLoadedException('Content is not loaded!');
         }
     }
@@ -353,7 +361,8 @@ class Dom
      */
     protected function clean($str)
     {
-        if ($this->options->get('cleanupInput') != true) {
+        if ($this->options->get('cleanupInput') != true)
+        {
             // skip entire cleanup step
             return $str;
         }
@@ -364,7 +373,8 @@ class Dom
 
         // clean out the \n\r
         $replace = ' ';
-        if ($this->options->get('preserveLineBreaks')) {
+        if ($this->options->get('preserveLineBreaks'))
+        {
             $replace = '&#10;';
         }
         $str = str_replace(["\r\n", "\r", "\n"], $replace, $str);
@@ -379,13 +389,15 @@ class Dom
         $str = mb_eregi_replace("<!\[CDATA\[(.*?)\]\]>", '', $str);
 
         // strip out <script> tags
-        if ($this->options->get('removeScripts') == true) {
+        if ($this->options->get('removeScripts') == true)
+        {
             $str = mb_eregi_replace("<\s*script[^>]*[^/]>(.*?)<\s*/\s*script\s*>", '', $str);
             $str = mb_eregi_replace("<\s*script\s*>(.*?)<\s*/\s*script\s*>", '', $str);
         }
 
         // strip out <style> tags
-        if ($this->options->get('removeStyles') == true) {
+        if ($this->options->get('removeStyles') == true)
+        {
             $str = mb_eregi_replace("<\s*style[^>]*[^/]>(.*?)<\s*/\s*style\s*>", '', $str);
             $str = mb_eregi_replace("<\s*style\s*>(.*?)<\s*/\s*style\s*>", '', $str);
         }
@@ -407,34 +419,42 @@ class Dom
         // add the root node
         $this->root = new HtmlNode('root');
         $activeNode = $this->root;
-        while ( ! is_null($activeNode)) {
+        while (!is_null($activeNode))
+        {
             $str = $this->content->copyUntil('<');
-            if ($str == '') {
+            if ($str == '')
+            {
                 $info = $this->parseTag();
-                if ( ! $info['status']) {
+                if (!$info['status'])
+                {
                     // we are done here
                     $activeNode = null;
                     continue;
                 }
 
                 // check if it was a closing tag
-                if ($info['closing']) {
+                if ($info['closing'])
+                {
                     $originalNode = $activeNode;
-                    while ($activeNode->getTag()->name() != $info['tag']) {
+                    while ($activeNode->getTag()->name() != $info['tag'])
+                    {
                         $activeNode = $activeNode->getParent();
-                        if (is_null($activeNode)) {
+                        if (is_null($activeNode))
+                        {
                             // we could not find opening tag
                             $activeNode = $originalNode;
                             break;
                         }
                     }
-                    if ( ! is_null($activeNode)) {
+                    if (!is_null($activeNode))
+                    {
                         $activeNode = $activeNode->getParent();
                     }
                     continue;
                 }
 
-                if ( ! isset($info['node'])) {
+                if (!isset($info['node']))
+                {
                     continue;
                 }
 
@@ -443,12 +463,16 @@ class Dom
                 $activeNode->addChild($node);
 
                 // check if node is self closing
-                if ( ! $node->getTag()->isSelfClosing()) {
+                if (!$node->getTag()->isSelfClosing())
+                {
                     $activeNode = $node;
                 }
-            } else if ($this->options->whitespaceTextNode ||
+            }
+            elseif (
+                $this->options->whitespaceTextNode ||
                 trim($str) != ''
-            ) {
+            )
+            {
                 // we found text we care about
                 $textNode = new TextNode($str);
                 $activeNode->addChild($textNode);
@@ -469,71 +493,83 @@ class Dom
             'closing' => false,
             'node'    => null,
         ];
-        if ($this->content->char() != '<') {
+        if ($this->content->char() != '<')
+        {
             // we are not at the beginning of a tag
             return $return;
         }
 
         // check if this is a closing tag
-        if ($this->content->fastForward(1)->char() == '/') {
+        if ($this->content->fastForward(1)->char() == '/')
+        {
             // end tag
             $tag = $this->content->fastForward(1)
-                                 ->copyByToken('slash', true);
+                ->copyByToken('slash', true);
             // move to end of tag
             $this->content->copyUntil('>');
             $this->content->fastForward(1);
 
             // check if this closing tag counts
             $tag = strtolower($tag);
-            if (in_array($tag, $this->selfClosing)) {
+            if (in_array($tag, $this->selfClosing))
+            {
                 $return['status'] = true;
 
                 return $return;
-            } else {
-                $return['status']  = true;
+            }
+            else
+            {
+                $return['status'] = true;
                 $return['closing'] = true;
-                $return['tag']     = strtolower($tag);
+                $return['tag'] = strtolower($tag);
             }
 
             return $return;
         }
 
-        $tag  = strtolower($this->content->copyByToken('slash', true));
+        $tag = strtolower($this->content->copyByToken('slash', true));
         $node = new HtmlNode($tag);
 
         // attributes
         while ($this->content->char() != '>' &&
-            $this->content->char() != '/') {
+            $this->content->char() != '/')
+        {
             $space = $this->content->skipByToken('blank', true);
-            if (empty($space)) {
+            if (empty($space))
+            {
                 $this->content->fastForward(1);
                 continue;
             }
 
             $name = $this->content->copyByToken('equal', true);
-            if ($name == '/') {
+            if ($name == '/')
+            {
                 break;
             }
 
-            if (empty($name)) {
+            if (empty($name))
+            {
                 $this->content->fastForward(1);
                 continue;
             }
 
             $this->content->skipByToken('blank');
-            if ($this->content->char() == '=') {
+            if ($this->content->char() == '=')
+            {
                 $attr = [];
                 $this->content->fastForward(1)
-                              ->skipByToken('blank');
-                switch ($this->content->char()) {
+                    ->skipByToken('blank');
+                switch ($this->content->char())
+                {
                     case '"':
                         $attr['doubleQuote'] = true;
                         $this->content->fastForward(1);
                         $string = $this->content->copyUntil('"', true, true);
-                        do {
+                        do
+                        {
                             $moreString = $this->content->copyUntilUnless('"', '=>');
                             $string .= $moreString;
-                        } while ( ! empty($moreString));
+                        } while (!empty($moreString));
                         $attr['value'] = $string;
                         $this->content->fastForward(1);
                         $node->getTag()->$name = $attr;
@@ -542,23 +578,27 @@ class Dom
                         $attr['doubleQuote'] = false;
                         $this->content->fastForward(1);
                         $string = $this->content->copyUntil("'", true, true);
-                        do {
+                        do
+                        {
                             $moreString = $this->content->copyUntilUnless("'", '=>');
                             $string .= $moreString;
-                        } while ( ! empty($moreString));
+                        } while (!empty($moreString));
                         $attr['value'] = $string;
                         $this->content->fastForward(1);
                         $node->getTag()->$name = $attr;
                         break;
                     default:
-                        $attr['doubleQuote']   = true;
-                        $attr['value']         = $this->content->copyByToken('attr', true);
+                        $attr['doubleQuote'] = true;
+                        $attr['value'] = $this->content->copyByToken('attr', true);
                         $node->getTag()->$name = $attr;
                         break;
                 }
-            } else {
+            }
+            else
+            {
                 // no value attribute
-                if ($this->options->strict) {
+                if ($this->options->strict)
+                {
                     // can't have this in strict html
                     $character = $this->content->getPosition();
                     throw new StrictException("Tag '$tag' has an attribute '$name' with out a value! (character #$character)");
@@ -567,21 +607,26 @@ class Dom
                     'value'       => null,
                     'doubleQuote' => true,
                 ];
-                if ($this->content->char() != '>') {
+                if ($this->content->char() != '>')
+                {
                     $this->content->rewind(1);
                 }
             }
         }
 
         $this->content->skipByToken('blank');
-        if ($this->content->char() == '/') {
+        if ($this->content->char() == '/')
+        {
             // self closing tag
             $node->getTag()->selfClosing();
             $this->content->fastForward(1);
-        } elseif (in_array($tag, $this->selfClosing)) {
+        }
+        elseif (in_array($tag, $this->selfClosing))
+        {
 
             // Should be a self closing tag, check if we are strict
-            if ($this->options->strict) {
+            if ($this->options->strict)
+            {
                 $character = $this->content->getPosition();
                 throw new StrictException("Tag '$tag' is not self closing! (character #$character)");
             }
@@ -593,7 +638,7 @@ class Dom
         $this->content->fastForward(1);
 
         $return['status'] = true;
-        $return['node']   = $node;
+        $return['node'] = $node;
 
         return $return;
     }
@@ -610,7 +655,8 @@ class Dom
         $encode->from($this->defaultCharset);
         $encode->to($this->defaultCharset);
 
-        if ( ! is_null($this->options->enforceEncoding)) {
+        if (!is_null($this->options->enforceEncoding))
+        {
             //  they want to enforce the given encoding
             $encode->from($this->options->enforceEncoding);
             $encode->to($this->options->enforceEncoding);
@@ -619,21 +665,24 @@ class Dom
         }
 
         $meta = $this->root->find('meta[http-equiv=Content-Type]', 0);
-        if (is_null($meta)) {
+        if (is_null($meta))
+        {
             // could not find meta tag
             $this->root->propagateEncoding($encode);
 
             return false;
         }
         $content = $meta->content;
-        if (empty($content)) {
+        if (empty($content))
+        {
             // could not find content
             $this->root->propagateEncoding($encode);
 
             return false;
         }
         $matches = [];
-        if (preg_match('/charset=(.+)/', $content, $matches)) {
+        if (preg_match('/charset=(.+)/', $content, $matches))
+        {
             $encode->from(trim($matches[1]));
             $this->root->propagateEncoding($encode);
 

@@ -10,14 +10,16 @@ namespace Twilio\Jwt\TaskRouter;
  * @author Justin Witz <justin.witz@twilio.com>
  * @license  http://creativecommons.org/licenses/MIT/ MIT
  */
-class Policy {
+class Policy
+{
     private $url;
     private $method;
     private $queryFilter;
     private $postFilter;
     private $allow;
 
-    public function __construct($url, $method, $queryFilter = array(), $postFilter = array(), $allow = true) {
+    public function __construct($url, $method, $queryFilter = [], $postFilter = [], $allow = true)
+    {
         $this->url = $url;
         $this->method = $method;
         $this->queryFilter = $queryFilter;
@@ -25,27 +27,38 @@ class Policy {
         $this->allow = $allow;
     }
 
-    public function addQueryFilter($queryFilter) {
+    public function addQueryFilter($queryFilter)
+    {
         array_push($this->queryFilter, $queryFilter);
     }
 
-    public function addPostFilter($postFilter) {
+    public function addPostFilter($postFilter)
+    {
         array_push($this->postFilter, $postFilter);
     }
 
-    public function toArray() {
-        $policy_array = array('url' => $this->url, 'method' => $this->method, 'allow' => $this->allow);
-        if (!is_null($this->queryFilter)) {
-            if (count($this->queryFilter) > 0) {
+    public function toArray()
+    {
+        $policy_array = ['url' => $this->url, 'method' => $this->method, 'allow' => $this->allow];
+        if (!is_null($this->queryFilter))
+        {
+            if (count($this->queryFilter) > 0)
+            {
                 $policy_array['query_filter'] = $this->queryFilter;
-            } else {
+            }
+            else
+            {
                 $policy_array['query_filter'] = new \stdClass();
             }
         }
-        if (!is_null($this->postFilter)) {
-            if (count($this->postFilter) > 0) {
+        if (!is_null($this->postFilter))
+        {
+            if (count($this->postFilter) > 0)
+            {
                 $policy_array['post_filter'] = $this->postFilter;
-            } else {
+            }
+            else
+            {
                 $policy_array['post_filter'] = new \stdClass();
             }
         }

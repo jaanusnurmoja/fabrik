@@ -70,117 +70,145 @@ class GMaps
      * @var string
      */
     private $_baseUrl;
+
     /**
      * Construct
      *
-* @param string $key
+     * @param string $key
      */
-    function __construct ($key='')
+    function __construct($key = '')
     {
-        $this->_key= $key;
-        $this->_baseUrl= "http://" . self::MAPS_HOST . "/maps/geo?output=xml&key=" . $this->_key;
+        $this->_key = $key;
+        $this->_baseUrl = "http://" . self::MAPS_HOST . "/maps/geo?output=xml&key=" . $this->_key;
     }
+
     /**
      * getInfoLocation
      *
-* @param string $address
-* @param string $city
-* @param string $state
+     * @param string $address
+     * @param string $city
+     * @param string $state
      * @return boolean
      */
-    public function getInfoLocation ($address) {
-        if (!empty($address)) {
+    public function getInfoLocation($address)
+    {
+        if (!empty($address))
+        {
             return $this->_connect($address);
         }
         return false;
     }
+
     /**
      * connect to Google Maps
      *
-* @param string $param
+     * @param string $param
      * @return boolean
      */
-    private function _connect($param) {
+    private function _connect($param)
+    {
         $request_url = $this->_baseUrl . "&oe=utf-8&q=" . urlencode($param);
         $xml = simplexml_load_file($request_url);
-        if (! empty($xml->Response)) {
-            $point= $xml->Response->Placemark->Point;
-            if (! empty($point)) {
+        if (!empty($xml->Response))
+        {
+            $point = $xml->Response->Placemark->Point;
+            if (!empty($point))
+            {
                 $coordinatesSplit = split(",", $point->coordinates);
                 // Format: Longitude, Latitude, Altitude
                 $this->_latitude = $coordinatesSplit[1];
                 $this->_longitude = $coordinatesSplit[0];
             }
-            $this->_address= $xml->Response->Placemark->address;
-            $this->_countryName= $xml->Response->Placemark->AddressDetails->Country->CountryName;
-            $this->_countryNameCode= $xml->Response->Placemark->AddressDetails->Country->CountryNameCode;
-            $this->_administrativeAreaName= $xml->Response->Placemark->AddressDetails->Country->AdministrativeArea->AdministrativeAreaName;
-            $administrativeArea= $xml->Response->Placemark->AddressDetails->Country->AdministrativeArea;
-            if (!empty($administrativeArea->SubAdministrativeArea)) {
-                $this->_postalCode= $administrativeArea->SubAdministrativeArea->Locality->PostalCode->PostalCodeNumber;
-            } elseif (!empty($administrativeArea->Locality)) {
-                $this->_postalCode= $administrativeArea->Locality->PostalCode->PostalCodeNumber;
+            $this->_address = $xml->Response->Placemark->address;
+            $this->_countryName = $xml->Response->Placemark->AddressDetails->Country->CountryName;
+            $this->_countryNameCode = $xml->Response->Placemark->AddressDetails->Country->CountryNameCode;
+            $this->_administrativeAreaName = $xml->Response->Placemark->AddressDetails->Country->AdministrativeArea->AdministrativeAreaName;
+            $administrativeArea = $xml->Response->Placemark->AddressDetails->Country->AdministrativeArea;
+            if (!empty($administrativeArea->SubAdministrativeArea))
+            {
+                $this->_postalCode = $administrativeArea->SubAdministrativeArea->Locality->PostalCode->PostalCodeNumber;
+            }
+            elseif (!empty($administrativeArea->Locality))
+            {
+                $this->_postalCode = $administrativeArea->Locality->PostalCode->PostalCodeNumber;
             }
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
+
     /**
      * get the Postal Code
      *
      * @return string
      */
-    public function getPostalCode () {
+    public function getPostalCode()
+    {
         return $this->_postalCode;
     }
-	/**
+
+    /**
      * get the Address
      *
      * @return string
      */
-    public function getAddress () {
+    public function getAddress()
+    {
         return $this->_address;
     }
-	/**
+
+    /**
      * get the Country name
      *
      * @return string
      */
-    public function getCountryName () {
+    public function getCountryName()
+    {
         return $this->_countryName;
     }
-	/**
+
+    /**
      * get the Country name code
      *
      * @return string
      */
-    public function getCountryNameCode () {
+    public function getCountryNameCode()
+    {
         return $this->_countryNameCode;
     }
-	/**
+
+    /**
      * get the Administrative area name
      *
      * @return string
      */
-    public function getAdministrativeAreaName () {
+    public function getAdministrativeAreaName()
+    {
         return $this->_administrativeAreaName;
     }
+
     /**
      * get the Latitude coordinate
      *
      * @return double
      */
-    public function getLatitude () {
+    public function getLatitude()
+    {
         return $this->_latitude;
     }
+
     /**
      * get the Longitude coordinate
      *
      * @return double
      */
-    public function getLongitude () {
+    public function getLongitude()
+    {
         return $this->_longitude;
     }
 }
+
 ?>

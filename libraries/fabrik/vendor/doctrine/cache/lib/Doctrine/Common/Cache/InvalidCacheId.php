@@ -8,17 +8,17 @@ use function sprintf;
 
 final class InvalidCacheId extends InvalidArgumentException
 {
-    public static function exceedsMaxLength($id, int $maxLength) : self
+    public static function exceedsMaxLength($id, int $maxLength): self
     {
         return new self(sprintf('Cache id "%s" exceeds maximum length %d', $id, $maxLength));
     }
 
-    public static function containsUnauthorizedCharacter($id, string $character) : self
+    public static function containsUnauthorizedCharacter($id, string $character): self
     {
         return new self(sprintf('Cache id "%s" contains unauthorized character "%s"', $id, $character));
     }
 
-    public static function containsControlCharacter($id) : self
+    public static function containsControlCharacter($id): self
     {
         return new self(sprintf('Cache id "%s" contains at least one control character', $id));
     }

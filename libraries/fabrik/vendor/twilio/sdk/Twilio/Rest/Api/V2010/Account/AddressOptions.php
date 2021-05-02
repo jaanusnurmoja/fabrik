@@ -12,7 +12,8 @@ namespace Twilio\Rest\Api\V2010\Account;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class AddressOptions {
+abstract class AddressOptions
+{
     /**
      * @param string $friendlyName A human-readable description of the new address.
      * @param boolean $emergencyEnabled The emergency_enabled
@@ -22,7 +23,8 @@ abstract class AddressOptions {
      *                                    auto-correct the address you provide.
      * @return CreateAddressOptions Options builder
      */
-    public static function create($friendlyName = Values::NONE, $emergencyEnabled = Values::NONE, $autoCorrectAddress = Values::NONE) {
+    public static function create($friendlyName = Values::NONE, $emergencyEnabled = Values::NONE, $autoCorrectAddress = Values::NONE)
+    {
         return new CreateAddressOptions($friendlyName, $emergencyEnabled, $autoCorrectAddress);
     }
 
@@ -44,8 +46,10 @@ abstract class AddressOptions {
      *                                    auto-correct the address you provide.
      * @return UpdateAddressOptions Options builder
      */
-    public static function update($friendlyName = Values::NONE, $customerName = Values::NONE, $street = Values::NONE, $city = Values::NONE, $region = Values::NONE, $postalCode = Values::NONE, $emergencyEnabled = Values::NONE, $autoCorrectAddress = Values::NONE) {
-        return new UpdateAddressOptions($friendlyName, $customerName, $street, $city, $region, $postalCode, $emergencyEnabled, $autoCorrectAddress);
+    public static function update($friendlyName = Values::NONE, $customerName = Values::NONE, $street = Values::NONE, $city = Values::NONE, $region = Values::NONE, $postalCode = Values::NONE, $emergencyEnabled = Values::NONE, $autoCorrectAddress = Values::NONE)
+    {
+        return new UpdateAddressOptions($friendlyName, $customerName, $street, $city, $region, $postalCode,
+            $emergencyEnabled, $autoCorrectAddress);
     }
 
     /**
@@ -56,12 +60,14 @@ abstract class AddressOptions {
      * @param string $isoCountry Only return the Address resources in this country.
      * @return ReadAddressOptions Options builder
      */
-    public static function read($customerName = Values::NONE, $friendlyName = Values::NONE, $isoCountry = Values::NONE) {
+    public static function read($customerName = Values::NONE, $friendlyName = Values::NONE, $isoCountry = Values::NONE)
+    {
         return new ReadAddressOptions($customerName, $friendlyName, $isoCountry);
     }
 }
 
-class CreateAddressOptions extends Options {
+class CreateAddressOptions extends Options
+{
     /**
      * @param string $friendlyName A human-readable description of the new address.
      * @param boolean $emergencyEnabled The emergency_enabled
@@ -70,7 +76,8 @@ class CreateAddressOptions extends Options {
      *                                    the system will, if necessary,
      *                                    auto-correct the address you provide.
      */
-    public function __construct($friendlyName = Values::NONE, $emergencyEnabled = Values::NONE, $autoCorrectAddress = Values::NONE) {
+    public function __construct($friendlyName = Values::NONE, $emergencyEnabled = Values::NONE, $autoCorrectAddress = Values::NONE)
+    {
         $this->options['friendlyName'] = $friendlyName;
         $this->options['emergencyEnabled'] = $emergencyEnabled;
         $this->options['autoCorrectAddress'] = $autoCorrectAddress;
@@ -78,49 +85,55 @@ class CreateAddressOptions extends Options {
 
     /**
      * A human-readable description of the new address. Maximum 64 characters.
-     * 
+     *
      * @param string $friendlyName A human-readable description of the new address.
      * @return $this Fluent Builder
      */
-    public function setFriendlyName($friendlyName) {
+    public function setFriendlyName($friendlyName)
+    {
         $this->options['friendlyName'] = $friendlyName;
         return $this;
     }
 
     /**
      * The emergency_enabled
-     * 
+     *
      * @param boolean $emergencyEnabled The emergency_enabled
      * @return $this Fluent Builder
      */
-    public function setEmergencyEnabled($emergencyEnabled) {
+    public function setEmergencyEnabled($emergencyEnabled)
+    {
         $this->options['emergencyEnabled'] = $emergencyEnabled;
         return $this;
     }
 
     /**
      * If you don't set a value for this parameter, or if you set it to `true`, then the system will, if necessary, auto-correct the address you provide. If you don't want the system to auto-correct the address, you will explicitly need to set this value to `false`.
-     * 
+     *
      * @param boolean $autoCorrectAddress If you don't set a value for this
      *                                    parameter, or if you set it to true, then
      *                                    the system will, if necessary,
      *                                    auto-correct the address you provide.
      * @return $this Fluent Builder
      */
-    public function setAutoCorrectAddress($autoCorrectAddress) {
+    public function setAutoCorrectAddress($autoCorrectAddress)
+    {
         $this->options['autoCorrectAddress'] = $autoCorrectAddress;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -128,7 +141,8 @@ class CreateAddressOptions extends Options {
     }
 }
 
-class UpdateAddressOptions extends Options {
+class UpdateAddressOptions extends Options
+{
     /**
      * @param string $friendlyName A human-readable description of the address.
      * @param string $customerName Your name or business name, or that of your
@@ -146,7 +160,8 @@ class UpdateAddressOptions extends Options {
      *                                    the system will, if necessary,
      *                                    auto-correct the address you provide.
      */
-    public function __construct($friendlyName = Values::NONE, $customerName = Values::NONE, $street = Values::NONE, $city = Values::NONE, $region = Values::NONE, $postalCode = Values::NONE, $emergencyEnabled = Values::NONE, $autoCorrectAddress = Values::NONE) {
+    public function __construct($friendlyName = Values::NONE, $customerName = Values::NONE, $street = Values::NONE, $city = Values::NONE, $region = Values::NONE, $postalCode = Values::NONE, $emergencyEnabled = Values::NONE, $autoCorrectAddress = Values::NONE)
+    {
         $this->options['friendlyName'] = $friendlyName;
         $this->options['customerName'] = $customerName;
         $this->options['street'] = $street;
@@ -159,108 +174,119 @@ class UpdateAddressOptions extends Options {
 
     /**
      * A human-readable description of the address. Maximum 64 characters.
-     * 
+     *
      * @param string $friendlyName A human-readable description of the address.
      * @return $this Fluent Builder
      */
-    public function setFriendlyName($friendlyName) {
+    public function setFriendlyName($friendlyName)
+    {
         $this->options['friendlyName'] = $friendlyName;
         return $this;
     }
 
     /**
      * Your name or business name, or that of your customer.
-     * 
+     *
      * @param string $customerName Your name or business name, or that of your
      *                             customer.
      * @return $this Fluent Builder
      */
-    public function setCustomerName($customerName) {
+    public function setCustomerName($customerName)
+    {
         $this->options['customerName'] = $customerName;
         return $this;
     }
 
     /**
      * The number and street address where you or your customer is located.
-     * 
+     *
      * @param string $street The number and street address where you or your
      *                       customer is located.
      * @return $this Fluent Builder
      */
-    public function setStreet($street) {
+    public function setStreet($street)
+    {
         $this->options['street'] = $street;
         return $this;
     }
 
     /**
      * The city in which you or your customer is located.
-     * 
+     *
      * @param string $city The city in which you or your customer is located.
      * @return $this Fluent Builder
      */
-    public function setCity($city) {
+    public function setCity($city)
+    {
         $this->options['city'] = $city;
         return $this;
     }
 
     /**
      * The state or region in which you or your customer is located.
-     * 
+     *
      * @param string $region The state or region in which you or your customer is
      *                       located.
      * @return $this Fluent Builder
      */
-    public function setRegion($region) {
+    public function setRegion($region)
+    {
         $this->options['region'] = $region;
         return $this;
     }
 
     /**
      * The postal code in which you or your customer is located.
-     * 
+     *
      * @param string $postalCode The postal code in which you or your customer is
      *                           located.
      * @return $this Fluent Builder
      */
-    public function setPostalCode($postalCode) {
+    public function setPostalCode($postalCode)
+    {
         $this->options['postalCode'] = $postalCode;
         return $this;
     }
 
     /**
      * The emergency_enabled
-     * 
+     *
      * @param boolean $emergencyEnabled The emergency_enabled
      * @return $this Fluent Builder
      */
-    public function setEmergencyEnabled($emergencyEnabled) {
+    public function setEmergencyEnabled($emergencyEnabled)
+    {
         $this->options['emergencyEnabled'] = $emergencyEnabled;
         return $this;
     }
 
     /**
      * If you don't set a value for this parameter, or if you set it to `true`, then the system will, if necessary, auto-correct the address you provide. If you don't want the system to auto-correct the address, you will explicitly need to set this value to `false`.
-     * 
+     *
      * @param boolean $autoCorrectAddress If you don't set a value for this
      *                                    parameter, or if you set it to true, then
      *                                    the system will, if necessary,
      *                                    auto-correct the address you provide.
      * @return $this Fluent Builder
      */
-    public function setAutoCorrectAddress($autoCorrectAddress) {
+    public function setAutoCorrectAddress($autoCorrectAddress)
+    {
         $this->options['autoCorrectAddress'] = $autoCorrectAddress;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -268,7 +294,8 @@ class UpdateAddressOptions extends Options {
     }
 }
 
-class ReadAddressOptions extends Options {
+class ReadAddressOptions extends Options
+{
     /**
      * @param string $customerName Only return the Address resources with customer
      *                             names that exactly match this name.
@@ -276,7 +303,8 @@ class ReadAddressOptions extends Options {
      *                             names that exactly match this name.
      * @param string $isoCountry Only return the Address resources in this country.
      */
-    public function __construct($customerName = Values::NONE, $friendlyName = Values::NONE, $isoCountry = Values::NONE) {
+    public function __construct($customerName = Values::NONE, $friendlyName = Values::NONE, $isoCountry = Values::NONE)
+    {
         $this->options['customerName'] = $customerName;
         $this->options['friendlyName'] = $friendlyName;
         $this->options['isoCountry'] = $isoCountry;
@@ -284,48 +312,54 @@ class ReadAddressOptions extends Options {
 
     /**
      * Only return the Address resources with customer names that exactly match this name.
-     * 
+     *
      * @param string $customerName Only return the Address resources with customer
      *                             names that exactly match this name.
      * @return $this Fluent Builder
      */
-    public function setCustomerName($customerName) {
+    public function setCustomerName($customerName)
+    {
         $this->options['customerName'] = $customerName;
         return $this;
     }
 
     /**
      * Only return the Address resources with friendly names that exactly match this name.
-     * 
+     *
      * @param string $friendlyName Only return the Address resources with friendly
      *                             names that exactly match this name.
      * @return $this Fluent Builder
      */
-    public function setFriendlyName($friendlyName) {
+    public function setFriendlyName($friendlyName)
+    {
         $this->options['friendlyName'] = $friendlyName;
         return $this;
     }
 
     /**
      * Only return the Address resources in this country.
-     * 
+     *
      * @param string $isoCountry Only return the Address resources in this country.
      * @return $this Fluent Builder
      */
-    public function setIsoCountry($isoCountry) {
+    public function setIsoCountry($isoCountry)
+    {
         $this->options['isoCountry'] = $isoCountry;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

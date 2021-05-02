@@ -28,7 +28,8 @@ class File extends ApiResource
     const OBJECT_NAME_ALT = "file_upload";
 
     use ApiOperations\All;
-    use ApiOperations\Create {
+    use ApiOperations\Create
+    {
         create as protected _create;
     }
     use ApiOperations\Retrieve;
@@ -47,7 +48,8 @@ class File extends ApiResource
     public static function create($params = null, $options = null)
     {
         $opts = \Stripe\Util\RequestOptions::parse($options);
-        if (is_null($opts->apiBase)) {
+        if (is_null($opts->apiBase))
+        {
             $opts->apiBase = Stripe::$apiUploadBase;
         }
         return static::_create($params, $opts);

@@ -1,15 +1,20 @@
 <?php
-abstract class ProcessRequest {
-	public $comments;
-	public $nextApproverIds;
+
+abstract class ProcessRequest
+{
+    public $comments;
+    public $nextApproverIds;
 }
 
-class ProcessSubmitRequest extends ProcessRequest {
-	public $objectId;
+class ProcessSubmitRequest extends ProcessRequest
+{
+    public $objectId;
 }
 
-class ProcessWorkitemRequest extends ProcessRequest {
-  public $action;
-  public $workitemId;
+class ProcessWorkitemRequest extends ProcessRequest
+{
+    public $action;
+    public $workitemId;
 }
+
 ?>

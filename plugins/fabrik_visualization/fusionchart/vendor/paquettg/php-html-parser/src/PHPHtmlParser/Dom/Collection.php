@@ -1,4 +1,5 @@
 <?php
+
 namespace PHPHtmlParser\Dom;
 
 use ArrayAccess;
@@ -34,9 +35,12 @@ class Collection implements IteratorAggregate, ArrayAccess, Countable
     public function __call($method, $arguments)
     {
         $node = reset($this->collection);
-        if ($node instanceof AbstractNode) {
+        if ($node instanceof AbstractNode)
+        {
             return call_user_func_array([$node, $method], $arguments);
-        } else {
+        }
+        else
+        {
             throw new EmptyCollectionException('The collection does not contain any Nodes.');
         }
     }
@@ -52,9 +56,12 @@ class Collection implements IteratorAggregate, ArrayAccess, Countable
     public function __get($key)
     {
         $node = reset($this->collection);
-        if ($node instanceof AbstractNode) {
+        if ($node instanceof AbstractNode)
+        {
             return $node->$key;
-        } else {
+        }
+        else
+        {
             throw new EmptyCollectionException('The collection does not contain any Nodes.');
         }
     }
@@ -69,9 +76,12 @@ class Collection implements IteratorAggregate, ArrayAccess, Countable
     public function __toString()
     {
         $node = reset($this->collection);
-        if ($node instanceof AbstractNode) {
+        if ($node instanceof AbstractNode)
+        {
             return (string)$node;
-        } else {
+        }
+        else
+        {
             throw new EmptyCollectionException('The collection does not contain any Nodes.');
         }
     }
@@ -104,9 +114,12 @@ class Collection implements IteratorAggregate, ArrayAccess, Countable
      */
     public function offsetSet($offset, $value)
     {
-        if (is_null($offset)) {
+        if (is_null($offset))
+        {
             $this->collection[] = $value;
-        } else {
+        }
+        else
+        {
             $this->collection[$offset] = $value;
         }
     }
@@ -161,7 +174,8 @@ class Collection implements IteratorAggregate, ArrayAccess, Countable
      */
     public function each($callback)
     {
-        foreach ($this->collection as $key => $value) {
+        foreach ($this->collection as $key => $value)
+        {
             $callback($value, $key);
         }
     }

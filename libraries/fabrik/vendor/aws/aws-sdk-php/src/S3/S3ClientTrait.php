@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\Api\Parser\PayloadParserTrait;
@@ -28,7 +29,8 @@ trait S3ClientTrait
         $body,
         $acl = 'private',
         array $options = []
-    ) {
+    )
+    {
         return $this
             ->uploadAsync($bucket, $key, $body, $acl, $options)
             ->wait();
@@ -43,7 +45,8 @@ trait S3ClientTrait
         $body,
         $acl = 'private',
         array $options = []
-    ) {
+    )
+    {
         return (new ObjectUploader($this, $bucket, $key, $body, $acl, $options))
             ->promise();
     }
@@ -58,7 +61,8 @@ trait S3ClientTrait
         $destK,
         $acl = 'private',
         array $opts = []
-    ) {
+    )
+    {
         return $this->copyAsync($fromB, $fromK, $destB, $destK, $acl, $opts)
             ->wait();
     }
@@ -73,17 +77,19 @@ trait S3ClientTrait
         $destK,
         $acl = 'private',
         array $opts = []
-    ) {
+    )
+    {
         $source = [
             'Bucket' => $fromB,
-            'Key' => $fromK,
+            'Key'    => $fromK,
         ];
-        if (isset($opts['version_id'])) {
+        if (isset($opts['version_id']))
+        {
             $source['VersionId'] = $opts['version_id'];
         }
         $destination = [
             'Bucket' => $destB,
-            'Key' => $destK
+            'Key'    => $destK
         ];
 
         return (new ObjectCopier($this, $source, $destination, $acl, $opts))
@@ -106,7 +112,8 @@ trait S3ClientTrait
         $prefix = '',
         $regex = '',
         array $options = []
-    ) {
+    )
+    {
         $this->deleteMatchingObjectsAsync($bucket, $prefix, $regex, $options)
             ->wait();
     }
@@ -119,8 +126,10 @@ trait S3ClientTrait
         $prefix = '',
         $regex = '',
         array $options = []
-    ) {
-        if (!$prefix && !$regex) {
+    )
+    {
+        if (!$prefix && !$regex)
+        {
             return new RejectedPromise(
                 new \RuntimeException('A prefix or regex is required.')
             );
@@ -129,8 +138,10 @@ trait S3ClientTrait
         $params = ['Bucket' => $bucket, 'Prefix' => $prefix];
         $iter = $this->getIterator('ListObjects', $params);
 
-        if ($regex) {
-            $iter = \Aws\filter($iter, function ($c) use ($regex) {
+        if ($regex)
+        {
+            $iter = \Aws\filter($iter, function ($c) use ($regex)
+            {
                 return preg_match($regex, $c['Key']);
             });
         }
@@ -147,7 +158,8 @@ trait S3ClientTrait
         $bucket,
         $keyPrefix = null,
         array $options = []
-    ) {
+    )
+    {
         $this->uploadDirectoryAsync($directory, $bucket, $keyPrefix, $options)
             ->wait();
     }
@@ -160,7 +172,8 @@ trait S3ClientTrait
         $bucket,
         $keyPrefix = null,
         array $options = []
-    ) {
+    )
+    {
         $d = "s3://$bucket" . ($keyPrefix ? '/' . ltrim($keyPrefix, '/') : '');
         return (new Transfer($this, $directory, $d, $options))->promise();
     }
@@ -173,7 +186,8 @@ trait S3ClientTrait
         $bucket,
         $keyPrefix = '',
         array $options = []
-    ) {
+    )
+    {
         $this->downloadBucketAsync($directory, $bucket, $keyPrefix, $options)
             ->wait();
     }
@@ -186,7 +200,8 @@ trait S3ClientTrait
         $bucket,
         $keyPrefix = '',
         array $options = []
-    ) {
+    )
+    {
         $s = "s3://$bucket" . ($keyPrefix ? '/' . ltrim($keyPrefix, '/') : '');
         return (new Transfer($this, $s, $directory, $options))->promise();
     }
@@ -200,11 +215,11 @@ trait S3ClientTrait
     }
 
     /**
-     * @see S3ClientInterface::determineBucketRegionAsync()
-     *
      * @param string $bucketName
      *
      * @return PromiseInterface
+     * @see S3ClientInterface::determineBucketRegionAsync()
+     *
      */
     public function determineBucketRegionAsync($bucketName)
     {
@@ -215,19 +230,24 @@ trait S3ClientTrait
         $handler = $handlerList->resolve();
 
         return $handler($command)
-            ->then(static function (ResultInterface $result) {
+            ->then(static function (ResultInterface $result)
+            {
                 return $result['@metadata']['headers']['x-amz-bucket-region'];
-            }, function (AwsException $e) {
+            }, function (AwsException $e)
+            {
                 $response = $e->getResponse();
-                if ($response === null) {
+                if ($response === null)
+                {
                     throw $e;
                 }
 
-                if ($e->getAwsErrorCode() === 'AuthorizationHeaderMalformed') {
+                if ($e->getAwsErrorCode() === 'AuthorizationHeaderMalformed')
+                {
                     $region = $this->determineBucketRegionFromExceptionBody(
                         $response
                     );
-                    if (!empty($region)) {
+                    if (!empty($region))
+                    {
                         return $region;
                     }
                     throw $e;
@@ -239,12 +259,16 @@ trait S3ClientTrait
 
     private function determineBucketRegionFromExceptionBody(ResponseInterface $response)
     {
-        try {
+        try
+        {
             $element = $this->parseXml($response->getBody(), $response);
-            if (!empty($element->Region)) {
+            if (!empty($element->Region))
+            {
                 return (string)$element->Region;
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             // Fallthrough on exceptions from parsing
         }
         return false;
@@ -283,14 +307,19 @@ trait S3ClientTrait
      */
     private function checkExistenceWithCommand(CommandInterface $command)
     {
-        try {
+        try
+        {
             $this->execute($command);
             return true;
-        } catch (S3Exception $e) {
-            if ($e->getAwsErrorCode() == 'AccessDenied') {
+        }
+        catch (S3Exception $e)
+        {
+            if ($e->getAwsErrorCode() == 'AccessDenied')
+            {
                 return true;
             }
-            if ($e->getStatusCode() >= 500) {
+            if ($e->getStatusCode() >= 500)
+            {
                 throw $e;
             }
             return false;
@@ -308,16 +337,16 @@ trait S3ClientTrait
     abstract public function getCommand($name, array $args = []);
 
     /**
+     * @return HandlerList
      * @see S3ClientInterface::getHandlerList()
      *
-     * @return HandlerList
      */
     abstract public function getHandlerList();
 
     /**
+     * @return \Iterator
      * @see S3ClientInterface::getIterator()
      *
-     * @return \Iterator
      */
     abstract public function getIterator($name, array $args = []);
 }

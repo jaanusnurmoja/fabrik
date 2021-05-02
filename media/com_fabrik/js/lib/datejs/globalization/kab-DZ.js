@@ -1,5 +1,5 @@
 Date.CultureInfo = {
-	/* Culture Name */
+    /* Culture Name */
     name: "kab",
     englishName: "Kabyle (Algaria)",
     nativeName: "Taqbaylit (Ledzayer)",
@@ -115,8 +115,8 @@ Date.CultureInfo = {
         millisecond: /^ms|milli(second)?s?/i,
         second: /^sec(ond)?s?/i,
         minute: /^mn|min(ute)?s?/i,
-		hour: /^h(our)?s?/i,
-		week: /^w(eek)?s?/i,
+        hour: /^h(our)?s?/i,
+        week: /^w(eek)?s?/i,
         month: /^m(onth)?s?/i,
         day: /^d(ay)?s?/i,
         year: /^y(ear)?s?/i,
@@ -128,7 +128,13 @@ Date.CultureInfo = {
         timeContext: /^\s*(\:|a(?!u|p)|p)/i
     },
 
-	timezones: [{name:"UTC", offset:"-000"}, {name:"GMT", offset:"-000"}, {name:"EST", offset:"-0500"}, {name:"EDT", offset:"-0400"}, {name:"CST", offset:"-0600"}, {name:"CDT", offset:"-0500"}, {name:"MST", offset:"-0700"}, {name:"MDT", offset:"-0600"}, {name:"PST", offset:"-0800"}, {name:"PDT", offset:"-0700"}]
+    timezones: [{name: "UTC", offset: "-000"}, {name: "GMT", offset: "-000"}, {
+        name: "EST",
+        offset: "-0500"
+    }, {name: "EDT", offset: "-0400"}, {name: "CST", offset: "-0600"}, {name: "CDT", offset: "-0500"}, {
+        name: "MST",
+        offset: "-0700"
+    }, {name: "MDT", offset: "-0600"}, {name: "PST", offset: "-0800"}, {name: "PDT", offset: "-0700"}]
 };
 
 /********************

@@ -50,12 +50,12 @@ class SQLite3Cache extends CacheProvider
     public function __construct(SQLite3 $sqlite, $table)
     {
         $this->sqlite = $sqlite;
-        $this->table  = (string) $table;
+        $this->table = (string)$table;
 
         $this->ensureTableExists();
     }
 
-    private function ensureTableExists() : void
+    private function ensureTableExists(): void
     {
         $this->sqlite->exec(
             sprintf(
@@ -75,7 +75,8 @@ class SQLite3Cache extends CacheProvider
     {
         $item = $this->findById($id);
 
-        if (! $item) {
+        if (!$item)
+        {
             return false;
         }
 
@@ -149,11 +150,12 @@ class SQLite3Cache extends CacheProvider
      *
      * @return array|null
      */
-    private function findById($id, bool $includeData = true) : ?array
+    private function findById($id, bool $includeData = true): ?array
     {
         [$idField] = $fields = $this->getFields();
 
-        if (! $includeData) {
+        if (!$includeData)
+        {
             $key = array_search(static::DATA_FIELD, $fields);
             unset($fields[$key]);
         }
@@ -169,11 +171,13 @@ class SQLite3Cache extends CacheProvider
 
         $item = $statement->execute()->fetchArray(SQLITE3_ASSOC);
 
-        if ($item === false) {
+        if ($item === false)
+        {
             return null;
         }
 
-        if ($this->isExpired($item)) {
+        if ($this->isExpired($item))
+        {
             $this->doDelete($id);
 
             return null;
@@ -187,7 +191,7 @@ class SQLite3Cache extends CacheProvider
      *
      * @return array
      */
-    private function getFields() : array
+    private function getFields(): array
     {
         return [static::ID_FIELD, static::DATA_FIELD, static::EXPIRATION_FIELD];
     }
@@ -197,7 +201,7 @@ class SQLite3Cache extends CacheProvider
      *
      * @param array $item
      */
-    private function isExpired(array $item) : bool
+    private function isExpired(array $item): bool
     {
         return isset($item[static::EXPIRATION_FIELD]) &&
             $item[self::EXPIRATION_FIELD] !== null &&

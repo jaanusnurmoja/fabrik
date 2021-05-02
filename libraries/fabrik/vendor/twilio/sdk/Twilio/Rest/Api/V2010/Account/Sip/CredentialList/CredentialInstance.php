@@ -25,10 +25,11 @@ use Twilio\Version;
  * @property \DateTime dateUpdated
  * @property string uri
  */
-class CredentialInstance extends InstanceResource {
+class CredentialInstance extends InstanceResource
+{
     /**
      * Initialize the CredentialInstance
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
      * @param string $accountSid The unique id of the Account that is responsible
@@ -37,37 +38,40 @@ class CredentialInstance extends InstanceResource {
      *                                  credential list that includes this
      *                                  credential
      * @param string $sid The unique id that identifies the resource to fetch.
-     * @return \Twilio\Rest\Api\V2010\Account\Sip\CredentialList\CredentialInstance 
+     * @return \Twilio\Rest\Api\V2010\Account\Sip\CredentialList\CredentialInstance
      */
-    public function __construct(Version $version, array $payload, $accountSid, $credentialListSid, $sid = null) {
+    public function __construct(Version $version, array $payload, $accountSid, $credentialListSid, $sid = null)
+    {
         parent::__construct($version);
 
         // Marshaled Properties
-        $this->properties = array(
-            'sid' => Values::array_get($payload, 'sid'),
-            'accountSid' => Values::array_get($payload, 'account_sid'),
+        $this->properties = [
+            'sid'               => Values::array_get($payload, 'sid'),
+            'accountSid'        => Values::array_get($payload, 'account_sid'),
             'credentialListSid' => Values::array_get($payload, 'credential_list_sid'),
-            'username' => Values::array_get($payload, 'username'),
-            'dateCreated' => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
-            'dateUpdated' => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
-            'uri' => Values::array_get($payload, 'uri'),
-        );
+            'username'          => Values::array_get($payload, 'username'),
+            'dateCreated'       => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
+            'dateUpdated'       => Deserialize::dateTime(Values::array_get($payload, 'date_updated')),
+            'uri'               => Values::array_get($payload, 'uri'),
+        ];
 
-        $this->solution = array(
-            'accountSid' => $accountSid,
+        $this->solution = [
+            'accountSid'        => $accountSid,
             'credentialListSid' => $credentialListSid,
-            'sid' => $sid ?: $this->properties['sid'],
-        );
+            'sid'               => $sid ?: $this->properties['sid'],
+        ];
     }
 
     /**
      * Generate an instance context for the instance, the context is capable of
      * performing various actions.  All instance actions are proxied to the context
-     * 
+     *
      * @return \Twilio\Rest\Api\V2010\Account\Sip\CredentialList\CredentialContext Context for this CredentialInstance
      */
-    protected function proxy() {
-        if (!$this->context) {
+    protected function proxy()
+    {
+        if (!$this->context)
+        {
             $this->context = new CredentialContext(
                 $this->version,
                 $this->solution['accountSid'],
@@ -81,48 +85,54 @@ class CredentialInstance extends InstanceResource {
 
     /**
      * Fetch a CredentialInstance
-     * 
+     *
      * @return CredentialInstance Fetched CredentialInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
+    public function fetch()
+    {
         return $this->proxy()->fetch();
     }
 
     /**
      * Update the CredentialInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return CredentialInstance Updated CredentialInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($options = array()) {
+    public function update($options = [])
+    {
         return $this->proxy()->update($options);
     }
 
     /**
      * Deletes the CredentialInstance
-     * 
+     *
      * @return boolean True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete() {
+    public function delete()
+    {
         return $this->proxy()->delete();
     }
 
     /**
      * Magic getter to access properties
-     * 
+     *
      * @param string $name Property to access
      * @return mixed The requested property
      * @throws TwilioException For unknown properties
      */
-    public function __get($name) {
-        if (array_key_exists($name, $this->properties)) {
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->properties))
+        {
             return $this->properties[$name];
         }
 
-        if (property_exists($this, '_' . $name)) {
+        if (property_exists($this, '_' . $name))
+        {
             $method = 'get' . ucfirst($name);
             return $this->$method();
         }
@@ -132,12 +142,14 @@ class CredentialInstance extends InstanceResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Api.V2010.CredentialInstance ' . implode(' ', $context) . ']';

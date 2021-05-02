@@ -1,12 +1,11 @@
-
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbAttending = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.parent(element, options);
             this.watchJoin();
             this.spinner = new Asset.image(Fabrik.liveSite + 'media/com_fabrik/images/ajax-loader.gif', {
-                'alt'  : 'loading',
+                'alt': 'loading',
                 'class': 'ajax-loader'
             });
             this.message = jQuery(this.element).find('.msg');
@@ -40,23 +39,23 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
             this.spinner.inject(this.message);
             var self = this,
                 data = {
-                    'option'     : 'com_fabrik',
-                    'format'     : 'raw',
-                    'task'       : 'plugin.pluginAjax',
-                    'plugin'     : 'attending',
-                    'method'     : state,
-                    'g'          : 'element',
-                    'element_id' : this.options.elid,
-                    'formid'     : this.options.formid,
-                    'row_id'     : this.options.row_id,
+                    'option': 'com_fabrik',
+                    'format': 'raw',
+                    'task': 'plugin.pluginAjax',
+                    'plugin': 'attending',
+                    'method': state,
+                    'g': 'element',
+                    'element_id': this.options.elid,
+                    'formid': this.options.formid,
+                    'row_id': this.options.row_id,
                     'elementname': this.options.elid,
-                    'userid'     : this.options.userid,
-                    'rating'     : this.rating,
-                    'listid'     : this.options.listid
+                    'userid': this.options.userid,
+                    'rating': this.rating,
+                    'listid': this.options.listid
                 };
 
             jQuery.ajax({
-                url   : '',
+                url: '',
                 'data': data,
             }).done(function () {
                 self.spinner.remove();

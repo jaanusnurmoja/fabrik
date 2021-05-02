@@ -66,9 +66,9 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
     // Since jQuery really isn't required for this plugin, use `jQuery` as the
     // namespace only if it already exists, otherwise use the `Cowboy` namespace,
     // creating it if necessary.
-    var $ = window.jQuery || window.Cowboy || ( window.Cowboy = {} ),
+    var $ = window.jQuery || window.Cowboy || (window.Cowboy = {}),
 
-    // Internal method reference.
+        // Internal method reference.
         jq_throttle;
 
     // Method: jQuery.throttle
@@ -125,7 +125,7 @@ define(['jquery', 'fab/fabrik'], function (jQuery, Fabrik) {
         // debounce modes.
         var timeout_id,
 
-        // Keep track of the last time `callback` was executed.
+            // Keep track of the last time `callback` was executed.
             last_exec = 0;
 
         // `no_trailing` defaults to falsy.

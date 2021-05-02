@@ -27,10 +27,10 @@ class BufferedStream implements StreamInterface
     private $written = 0;
 
     /**
-     * @param StreamInterface $stream        Decorated stream
-     * @param bool            $useFileBuffer Whether to use a file buffer (write to a file, if data exceed a certain size)
+     * @param StreamInterface $stream Decorated stream
+     * @param bool $useFileBuffer Whether to use a file buffer (write to a file, if data exceed a certain size)
      *                                       by default, set this to false to only use memory
-     * @param int             $memoryBuffer  In conjunction with using file buffer, limit (in bytes) from which it begins to buffer
+     * @param int $memoryBuffer In conjunction with using file buffer, limit (in bytes) from which it begins to buffer
      *                                       the data in a file
      */
     public function __construct(StreamInterface $stream, $useFileBuffer = true, $memoryBuffer = 2097152)
@@ -38,13 +38,17 @@ class BufferedStream implements StreamInterface
         $this->stream = $stream;
         $this->size = $stream->getSize();
 
-        if ($useFileBuffer) {
-            $this->resource = fopen('php://temp/maxmemory:'.$memoryBuffer, 'rw+');
-        } else {
+        if ($useFileBuffer)
+        {
+            $this->resource = fopen('php://temp/maxmemory:' . $memoryBuffer, 'rw+');
+        }
+        else
+        {
             $this->resource = fopen('php://memory', 'rw+');
         }
 
-        if (false === $this->resource) {
+        if (false === $this->resource)
+        {
             throw new \RuntimeException('Cannot create a resource over temp or memory implementation');
         }
     }
@@ -54,13 +58,18 @@ class BufferedStream implements StreamInterface
      */
     public function __toString()
     {
-        try {
+        try
+        {
             $this->rewind();
 
             return $this->getContents();
-        } catch (\Throwable $throwable) {
+        }
+        catch (\Throwable $throwable)
+        {
             return '';
-        } catch (\Exception $exception) { // Layer to be BC with PHP 5, remove this when we only support PHP 7+
+        }
+        catch (\Exception $exception)
+        { // Layer to be BC with PHP 5, remove this when we only support PHP 7+
             return '';
         }
     }
@@ -70,7 +79,8 @@ class BufferedStream implements StreamInterface
      */
     public function close()
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             throw new \RuntimeException('Cannot close on a detached stream');
         }
 
@@ -83,7 +93,8 @@ class BufferedStream implements StreamInterface
      */
     public function detach()
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             return;
         }
 
@@ -103,11 +114,13 @@ class BufferedStream implements StreamInterface
      */
     public function getSize()
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             return;
         }
 
-        if (null === $this->size && $this->stream->eof()) {
+        if (null === $this->size && $this->stream->eof())
+        {
             return $this->written;
         }
 
@@ -119,7 +132,8 @@ class BufferedStream implements StreamInterface
      */
     public function tell()
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             throw new \RuntimeException('Cannot tell on a detached stream');
         }
 
@@ -131,7 +145,8 @@ class BufferedStream implements StreamInterface
      */
     public function eof()
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             throw new \RuntimeException('Cannot call eof on a detached stream');
         }
 
@@ -152,7 +167,8 @@ class BufferedStream implements StreamInterface
      */
     public function seek($offset, $whence = SEEK_SET)
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             throw new \RuntimeException('Cannot seek on a detached stream');
         }
 
@@ -164,7 +180,8 @@ class BufferedStream implements StreamInterface
      */
     public function rewind()
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             throw new \RuntimeException('Cannot rewind on a detached stream');
         }
 
@@ -200,20 +217,23 @@ class BufferedStream implements StreamInterface
      */
     public function read($length)
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             throw new \RuntimeException('Cannot read on a detached stream');
         }
 
         $read = '';
 
         // First read from the resource
-        if (ftell($this->resource) !== $this->written) {
+        if (ftell($this->resource) !== $this->written)
+        {
             $read = fread($this->resource, $length);
         }
 
         $bytesRead = strlen($read);
 
-        if ($bytesRead < $length) {
+        if ($bytesRead < $length)
+        {
             $streamRead = $this->stream->read($length - $bytesRead);
 
             // Write on the underlying stream what we read
@@ -229,13 +249,15 @@ class BufferedStream implements StreamInterface
      */
     public function getContents()
     {
-        if (null === $this->resource) {
+        if (null === $this->resource)
+        {
             throw new \RuntimeException('Cannot read on a detached stream');
         }
 
         $read = '';
 
-        while (!$this->eof()) {
+        while (!$this->eof())
+        {
             $read .= $this->read(8192);
         }
 
@@ -247,8 +269,10 @@ class BufferedStream implements StreamInterface
      */
     public function getMetadata($key = null)
     {
-        if (null === $this->resource) {
-            if (null === $key) {
+        if (null === $this->resource)
+        {
+            if (null === $key)
+            {
                 return [];
             }
 
@@ -257,11 +281,13 @@ class BufferedStream implements StreamInterface
 
         $metadata = stream_get_meta_data($this->resource);
 
-        if (null === $key) {
+        if (null === $key)
+        {
             return $metadata;
         }
 
-        if (!array_key_exists($key, $metadata)) {
+        if (!array_key_exists($key, $metadata))
+        {
             return;
         }
 

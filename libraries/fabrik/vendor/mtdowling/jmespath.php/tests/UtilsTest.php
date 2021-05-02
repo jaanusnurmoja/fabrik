@@ -1,4 +1,5 @@
 <?php
+
 namespace JmesPath\Tests;
 
 use JmesPath\Utils;
@@ -17,7 +18,11 @@ class UtilsTest extends \PHPUnit_Framework_TestCase
             [[1, 2], 'array'],
             [['a' => 1], 'object'],
             [new \stdClass(), 'object'],
-            [function () {}, 'expression'],
+            [
+                function ()
+                {
+                }, 'expression'
+            ],
             [new \ArrayObject(), 'array'],
             [new \ArrayObject([1, 2]), 'array'],
             [new \ArrayObject(['foo' => 'bar']), 'object'],
@@ -86,9 +91,10 @@ class UtilsTest extends \PHPUnit_Framework_TestCase
     public function testHasStableSort()
     {
         $data = [new _TestStr(), new _TestStr(), 0, 10, 2];
-        $result = Utils::stableSort($data, function ($a, $b) {
-            $a = (int) (string) $a;
-            $b = (int) (string) $b;
+        $result = Utils::stableSort($data, function ($a, $b)
+        {
+            $a = (int)(string)$a;
+            $b = (int)(string)$b;
             return $a > $b ? -1 : ($a == $b ? 0 : 1);
         });
         $this->assertSame($data[0], $result[0]);
@@ -115,10 +121,21 @@ class UtilsTest extends \PHPUnit_Framework_TestCase
 
 class _TestClass implements \ArrayAccess
 {
-    public function offsetExists($offset) {}
-    public function offsetGet($offset) {}
-    public function offsetSet($offset, $value) {}
-    public function offsetUnset($offset) {}
+    public function offsetExists($offset)
+    {
+    }
+
+    public function offsetGet($offset)
+    {
+    }
+
+    public function offsetSet($offset, $value)
+    {
+    }
+
+    public function offsetUnset($offset)
+    {
+    }
 }
 
 class _TestStr

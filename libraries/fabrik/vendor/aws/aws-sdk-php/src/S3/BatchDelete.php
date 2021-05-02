@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\AwsClientInterface;
@@ -46,16 +47,16 @@ class BatchDelete implements PromisorInterface
     /** @var callable */
     private $promiseCreator;
     private $batchSize = 1000;
-    private $queue = [];
+    private $queue     = [];
 
     /**
      * Creates a BatchDelete object from all of the paginated results of a
      * ListObjects operation. Each result that is returned by the ListObjects
      * operation will be deleted.
      *
-     * @param AwsClientInterface $client            AWS Client to use.
-     * @param array              $listObjectsParams ListObjects API parameters
-     * @param array              $options           BatchDelete options.
+     * @param AwsClientInterface $client AWS Client to use.
+     * @param array $listObjectsParams ListObjects API parameters
+     * @param array $options BatchDelete options.
      *
      * @return BatchDelete
      */
@@ -63,15 +64,21 @@ class BatchDelete implements PromisorInterface
         AwsClientInterface $client,
         array $listObjectsParams,
         array $options = []
-    ) {
+    )
+    {
         $iter = $client->getPaginator('ListObjects', $listObjectsParams);
         $bucket = $listObjectsParams['Bucket'];
-        $fn = function (BatchDelete $that) use ($iter) {
-            return $iter->each(function ($result) use ($that) {
+        $fn = function (BatchDelete $that) use ($iter)
+        {
+            return $iter->each(function ($result) use ($that)
+            {
                 $promises = [];
-                if (is_array($result['Contents'])) {
-                    foreach ($result['Contents'] as $object) {
-                        if ($promise = $that->enqueue($object)) {
+                if (is_array($result['Contents']))
+                {
+                    foreach ($result['Contents'] as $object)
+                    {
+                        if ($promise = $that->enqueue($object))
+                        {
                             $promises[] = $promise;
                         }
                     }
@@ -86,10 +93,10 @@ class BatchDelete implements PromisorInterface
     /**
      * Creates a BatchDelete object from an iterator that yields results.
      *
-     * @param AwsClientInterface $client  AWS Client to use to execute commands
-     * @param string             $bucket  Bucket where the objects are stored
-     * @param \Iterator          $iter    Iterator that yields assoc arrays
-     * @param array              $options BatchDelete options
+     * @param AwsClientInterface $client AWS Client to use to execute commands
+     * @param string $bucket Bucket where the objects are stored
+     * @param \Iterator $iter Iterator that yields assoc arrays
+     * @param array $options BatchDelete options
      *
      * @return BatchDelete
      */
@@ -98,11 +105,16 @@ class BatchDelete implements PromisorInterface
         $bucket,
         \Iterator $iter,
         array $options = []
-    ) {
-        $fn = function (BatchDelete $that) use ($iter) {
-            return Promise\coroutine(function () use ($that, $iter) {
-                foreach ($iter as $obj) {
-                    if ($promise = $that->enqueue($obj)) {
+    )
+    {
+        $fn = function (BatchDelete $that) use ($iter)
+        {
+            return Promise\coroutine(function () use ($that, $iter)
+            {
+                foreach ($iter as $obj)
+                {
+                    if ($promise = $that->enqueue($obj))
+                    {
                         yield $promise;
                     }
                 }
@@ -114,7 +126,8 @@ class BatchDelete implements PromisorInterface
 
     public function promise()
     {
-        if (!$this->cachedPromise) {
+        if (!$this->cachedPromise)
+        {
             $this->cachedPromise = $this->createPromise();
         }
 
@@ -132,10 +145,10 @@ class BatchDelete implements PromisorInterface
     }
 
     /**
-     * @param AwsClientInterface $client    Client used to transfer the requests
-     * @param string             $bucket    Bucket to delete from.
-     * @param callable           $promiseFn Creates a promise.
-     * @param array              $options   Hash of options used with the batch
+     * @param AwsClientInterface $client Client used to transfer the requests
+     * @param string $bucket Bucket to delete from.
+     * @param callable $promiseFn Creates a promise.
+     * @param array $options Hash of options used with the batch
      *
      * @throws \InvalidArgumentException if the provided batch_size is <= 0
      */
@@ -144,20 +157,25 @@ class BatchDelete implements PromisorInterface
         $bucket,
         callable $promiseFn,
         array $options = []
-    ) {
+    )
+    {
         $this->client = $client;
         $this->bucket = $bucket;
         $this->promiseCreator = $promiseFn;
 
-        if (isset($options['before'])) {
-            if (!is_callable($options['before'])) {
+        if (isset($options['before']))
+        {
+            if (!is_callable($options['before']))
+            {
                 throw new \InvalidArgumentException('before must be callable');
             }
             $this->before = $options['before'];
         }
 
-        if (isset($options['batch_size'])) {
-            if ($options['batch_size'] <= 0) {
+        if (isset($options['batch_size']))
+        {
+            if ($options['batch_size'] <= 0)
+            {
                 throw new \InvalidArgumentException('batch_size is not > 0');
             }
             $this->batchSize = min($options['batch_size'], 1000);
@@ -176,12 +194,14 @@ class BatchDelete implements PromisorInterface
     {
         static $validKeys = ['Key' => true, 'VersionId' => true];
 
-        if (count($this->queue) === 0) {
+        if (count($this->queue) === 0)
+        {
             return null;
         }
 
         $batch = [];
-        while ($obj = array_shift($this->queue)) {
+        while ($obj = array_shift($this->queue))
+        {
             $batch[] = array_intersect_key($obj, $validKeys);
         }
 
@@ -190,13 +210,16 @@ class BatchDelete implements PromisorInterface
             'Delete' => ['Objects' => $batch]
         ]);
 
-        if ($this->before) {
+        if ($this->before)
+        {
             call_user_func($this->before, $command);
         }
 
         return $this->client->executeAsync($command)
-            ->then(function ($result) {
-                if (!empty($result['Errors'])) {
+            ->then(function ($result)
+            {
+                if (!empty($result['Errors']))
+                {
                     throw new DeleteMultipleObjectsException(
                         $result['Deleted'] ?: [],
                         $result['Errors']
@@ -218,17 +241,20 @@ class BatchDelete implements PromisorInterface
         $this->promiseCreator = null;
 
         // Cleans up the promise state and references.
-        $cleanup = function () {
+        $cleanup = function ()
+        {
             $this->before = $this->client = $this->queue = null;
         };
 
         // When done, ensure cleanup and that any remaining are processed.
         return $promise->then(
-            function () use ($cleanup)  {
+            function () use ($cleanup)
+            {
                 return Promise\promise_for($this->flushQueue())
                     ->then($cleanup);
             },
-            function ($reason) use ($cleanup)  {
+            function ($reason) use ($cleanup)
+            {
                 $cleanup();
                 return Promise\rejection_for($reason);
             }

@@ -13,37 +13,40 @@ use Twilio\InstanceContext;
 use Twilio\Values;
 use Twilio\Version;
 
-class MemberContext extends InstanceContext {
+class MemberContext extends InstanceContext
+{
     /**
      * Initialize the MemberContext
-     * 
+     *
      * @param \Twilio\Version $version Version that contains the resource
      * @param string $accountSid The account_sid
      * @param string $queueSid The Queue in which to find the members
      * @param string $callSid The call_sid
-     * @return \Twilio\Rest\Api\V2010\Account\Queue\MemberContext 
+     * @return \Twilio\Rest\Api\V2010\Account\Queue\MemberContext
      */
-    public function __construct(Version $version, $accountSid, $queueSid, $callSid) {
+    public function __construct(Version $version, $accountSid, $queueSid, $callSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array(
+        $this->solution = [
             'accountSid' => $accountSid,
-            'queueSid' => $queueSid,
-            'callSid' => $callSid,
-        );
+            'queueSid'   => $queueSid,
+            'callSid'    => $callSid,
+        ];
 
         $this->uri = '/Accounts/' . rawurlencode($accountSid) . '/Queues/' . rawurlencode($queueSid) . '/Members/' . rawurlencode($callSid) . '.json';
     }
 
     /**
      * Fetch a MemberInstance
-     * 
+     *
      * @return MemberInstance Fetched MemberInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch() {
-        $params = Values::of(array());
+    public function fetch()
+    {
+        $params = Values::of([]);
 
         $payload = $this->version->fetch(
             'GET',
@@ -62,19 +65,20 @@ class MemberContext extends InstanceContext {
 
     /**
      * Update the MemberInstance
-     * 
+     *
      * @param string $url The url
      * @param string $method The method
      * @return MemberInstance Updated MemberInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function update($url, $method) {
-        $data = Values::of(array('Url' => $url, 'Method' => $method, ));
+    public function update($url, $method)
+    {
+        $data = Values::of(['Url' => $url, 'Method' => $method,]);
 
         $payload = $this->version->update(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -89,12 +93,14 @@ class MemberContext extends InstanceContext {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $context = array();
-        foreach ($this->solution as $key => $value) {
+    public function __toString()
+    {
+        $context = [];
+        foreach ($this->solution as $key => $value)
+        {
             $context[] = "$key=$value";
         }
         return '[Twilio.Api.V2010.MemberContext ' . implode(' ', $context) . ']';

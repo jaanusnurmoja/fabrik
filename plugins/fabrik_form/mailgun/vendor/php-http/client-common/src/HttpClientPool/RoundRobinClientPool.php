@@ -19,19 +19,23 @@ final class RoundRobinClientPool extends HttpClientPool
     {
         $last = current($this->clientPool);
 
-        do {
+        do
+        {
             $client = next($this->clientPool);
 
-            if (false === $client) {
+            if (false === $client)
+            {
                 $client = reset($this->clientPool);
 
-                if (false === $client) {
+                if (false === $client)
+                {
                     throw new HttpClientNotFoundException('Cannot choose a http client as there is no one present in the pool');
                 }
             }
 
             // Case when there is only one and the last one has been disabled
-            if ($last === $client && $client->isDisabled()) {
+            if ($last === $client && $client->isDisabled())
+            {
                 throw new HttpClientNotFoundException('Cannot choose a http client as there is no one enabled in the pool');
             }
         } while ($client->isDisabled());

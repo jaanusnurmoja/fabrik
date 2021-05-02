@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\AwsClientInterface;
@@ -12,7 +13,7 @@ interface S3ClientInterface extends AwsClientInterface
     /**
      * Create a pre-signed URL for the given S3 command object.
      *
-     * @param CommandInterface $command     Command to create a pre-signed
+     * @param CommandInterface $command Command to create a pre-signed
      *                                      URL for.
      * @param int|string|\DateTime $expires The time at which the URL should
      *                                      expire. This can be a Unix
@@ -32,8 +33,8 @@ interface S3ClientInterface extends AwsClientInterface
      * use the {@see \Aws\S3\S3Client::createPresignedRequest} method and get
      * the URI of the signed request.
      *
-     * @param string $bucket  The name of the bucket where the object is located
-     * @param string $key     The key of the object
+     * @param string $bucket The name of the bucket where the object is located
+     * @param string $key The key of the object
      *
      * @return string The URL to the object
      */
@@ -42,7 +43,7 @@ interface S3ClientInterface extends AwsClientInterface
     /**
      * Determines whether or not a bucket exists by name.
      *
-     * @param string $bucket  The name of the bucket
+     * @param string $bucket The name of the bucket
      *
      * @return bool
      */
@@ -51,9 +52,9 @@ interface S3ClientInterface extends AwsClientInterface
     /**
      * Determines whether or not an object exists by name.
      *
-     * @param string $bucket  The name of the bucket
-     * @param string $key     The key of the object
-     * @param array  $options Additional options available in the HeadObject
+     * @param string $bucket The name of the bucket
+     * @param string $key The key of the object
+     * @param array $options Additional options available in the HeadObject
      *                        operation (e.g., VersionId).
      *
      * @return bool
@@ -70,13 +71,13 @@ interface S3ClientInterface extends AwsClientInterface
      * operation. For example, this allows you to do things like delete all
      * objects that match a specific key prefix.
      *
-     * @param string $bucket  Bucket that contains the object keys
-     * @param string $prefix  Optionally delete only objects under this key prefix
-     * @param string $regex   Delete only objects that match this regex
-     * @param array  $options Aws\S3\BatchDelete options array.
+     * @param string $bucket Bucket that contains the object keys
+     * @param string $prefix Optionally delete only objects under this key prefix
+     * @param string $regex Delete only objects that match this regex
+     * @param array $options Aws\S3\BatchDelete options array.
      *
-     * @see Aws\S3\S3Client::listObjects
      * @throws \RuntimeException if no prefix and no regex is given
+     * @see Aws\S3\S3Client::listObjects
      */
     public function deleteMatchingObjects(
         $bucket,
@@ -90,15 +91,15 @@ interface S3ClientInterface extends AwsClientInterface
      * operation. For example, this allows you to do things like delete all
      * objects that match a specific key prefix.
      *
-     * @param string $bucket  Bucket that contains the object keys
-     * @param string $prefix  Optionally delete only objects under this key prefix
-     * @param string $regex   Delete only objects that match this regex
-     * @param array  $options Aws\S3\BatchDelete options array.
-     *
-     * @see Aws\S3\S3Client::listObjects
+     * @param string $bucket Bucket that contains the object keys
+     * @param string $prefix Optionally delete only objects under this key prefix
+     * @param string $regex Delete only objects that match this regex
+     * @param array $options Aws\S3\BatchDelete options array.
      *
      * @return PromiseInterface     A promise that is settled when matching
      *                              objects are deleted.
+     * @see Aws\S3\S3Client::listObjects
+     *
      */
     public function deleteMatchingObjectsAsync(
         $bucket,
@@ -128,16 +129,16 @@ interface S3ClientInterface extends AwsClientInterface
      *   parameters of the `CreateMultipartUpload` operation.
      * - part_size: (int) Part size to use when doing a multipart upload.
      *
-     * @param string $bucket  Bucket to upload the object.
-     * @param string $key     Key of the object.
-     * @param mixed  $body    Object data to upload. Can be a
+     * @param string $bucket Bucket to upload the object.
+     * @param string $key Key of the object.
+     * @param mixed $body Object data to upload. Can be a
      *                        StreamInterface, PHP stream resource, or a
      *                        string of data to upload.
-     * @param string $acl     ACL to apply to the object (default: private).
-     * @param array  $options Options used to configure the upload process.
+     * @param string $acl ACL to apply to the object (default: private).
+     * @param array $options Options used to configure the upload process.
      *
-     * @see Aws\S3\MultipartUploader for more info about multipart uploads.
      * @return ResultInterface Returns the result of the upload.
+     * @see Aws\S3\MultipartUploader for more info about multipart uploads.
      */
     public function upload(
         $bucket,
@@ -150,17 +151,17 @@ interface S3ClientInterface extends AwsClientInterface
     /**
      * Upload a file, stream, or string to a bucket asynchronously.
      *
-     * @param string $bucket  Bucket to upload the object.
-     * @param string $key     Key of the object.
-     * @param mixed  $body    Object data to upload. Can be a
+     * @param string $bucket Bucket to upload the object.
+     * @param string $key Key of the object.
+     * @param mixed $body Object data to upload. Can be a
      *                        StreamInterface, PHP stream resource, or a
      *                        string of data to upload.
-     * @param string $acl     ACL to apply to the object (default: private).
-     * @param array  $options Options used to configure the upload process.
+     * @param string $acl ACL to apply to the object (default: private).
+     * @param array $options Options used to configure the upload process.
      *
-     * @see self::upload
      * @return PromiseInterface     Returns a promise that will be fulfilled
      *                              with the result of the upload.
+     * @see self::upload
      */
     public function uploadAsync(
         $bucket,
@@ -189,15 +190,15 @@ interface S3ClientInterface extends AwsClientInterface
      *   parameters of the `CreateMultipartUpload` operation.
      * - part_size: (int) Part size to use when doing a multipart upload.
      *
-     * @param string $fromBucket    Bucket where the copy source resides.
-     * @param string $fromKey       Key of the copy source.
-     * @param string $destBucket    Bucket to which to copy the object.
-     * @param string $destKey       Key to which to copy the object.
-     * @param string $acl           ACL to apply to the copy (default: private).
-     * @param array  $options       Options used to configure the upload process.
+     * @param string $fromBucket Bucket where the copy source resides.
+     * @param string $fromKey Key of the copy source.
+     * @param string $destBucket Bucket to which to copy the object.
+     * @param string $destKey Key to which to copy the object.
+     * @param string $acl ACL to apply to the copy (default: private).
+     * @param array $options Options used to configure the upload process.
      *
-     * @see Aws\S3\MultipartCopy for more info about multipart uploads.
      * @return ResultInterface Returns the result of the copy.
+     * @see Aws\S3\MultipartCopy for more info about multipart uploads.
      */
     public function copy(
         $fromBucket,
@@ -211,16 +212,16 @@ interface S3ClientInterface extends AwsClientInterface
     /**
      * Copy an object of any size to a different location asynchronously.
      *
-     * @param string $fromBucket    Bucket where the copy source resides.
-     * @param string $fromKey       Key of the copy source.
-     * @param string $destBucket    Bucket to which to copy the object.
-     * @param string $destKey       Key to which to copy the object.
-     * @param string $acl           ACL to apply to the copy (default: private).
-     * @param array  $options       Options used to configure the upload process.
+     * @param string $fromBucket Bucket where the copy source resides.
+     * @param string $fromKey Key of the copy source.
+     * @param string $destBucket Bucket to which to copy the object.
+     * @param string $destKey Key to which to copy the object.
+     * @param string $acl ACL to apply to the copy (default: private).
+     * @param array $options Options used to configure the upload process.
      *
-     * @see self::copy for more info about the parameters above.
      * @return PromiseInterface     Returns a promise that will be fulfilled
      *                              with the result of the copy.
+     * @see self::copy for more info about the parameters above.
      */
     public function copyAsync(
         $fromBucket,
@@ -235,9 +236,9 @@ interface S3ClientInterface extends AwsClientInterface
      * Recursively uploads all files in a given directory to a given bucket.
      *
      * @param string $directory Full path to a directory to upload
-     * @param string $bucket    Name of the bucket
+     * @param string $bucket Name of the bucket
      * @param string $keyPrefix Virtual directory key prefix to add to each upload
-     * @param array  $options   Options available in Aws\S3\Transfer::__construct
+     * @param array $options Options available in Aws\S3\Transfer::__construct
      *
      * @see Aws\S3\Transfer for more options and customization
      */
@@ -252,14 +253,14 @@ interface S3ClientInterface extends AwsClientInterface
      * Recursively uploads all files in a given directory to a given bucket.
      *
      * @param string $directory Full path to a directory to upload
-     * @param string $bucket    Name of the bucket
+     * @param string $bucket Name of the bucket
      * @param string $keyPrefix Virtual directory key prefix to add to each upload
-     * @param array  $options   Options available in Aws\S3\Transfer::__construct
-     *
-     * @see Aws\S3\Transfer for more options and customization
+     * @param array $options Options available in Aws\S3\Transfer::__construct
      *
      * @return PromiseInterface A promise that is settled when the upload is
      *                          complete.
+     * @see Aws\S3\Transfer for more options and customization
+     *
      */
     public function uploadDirectoryAsync(
         $directory,
@@ -272,9 +273,9 @@ interface S3ClientInterface extends AwsClientInterface
      * Downloads a bucket to the local filesystem
      *
      * @param string $directory Directory to download to
-     * @param string $bucket    Bucket to download from
+     * @param string $bucket Bucket to download from
      * @param string $keyPrefix Only download objects that use this key prefix
-     * @param array  $options   Options available in Aws\S3\Transfer::__construct
+     * @param array $options Options available in Aws\S3\Transfer::__construct
      */
     public function downloadBucket(
         $directory,
@@ -287,9 +288,9 @@ interface S3ClientInterface extends AwsClientInterface
      * Downloads a bucket to the local filesystem
      *
      * @param string $directory Directory to download to
-     * @param string $bucket    Bucket to download from
+     * @param string $bucket Bucket to download from
      * @param string $keyPrefix Only download objects that use this key prefix
-     * @param array  $options   Options available in Aws\S3\Transfer::__construct
+     * @param array $options Options available in Aws\S3\Transfer::__construct
      *
      * @return PromiseInterface A promise that is settled when the download is
      *                          complete.

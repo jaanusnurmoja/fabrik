@@ -12,7 +12,8 @@ namespace Twilio\Rest\Api\V2010\Account\Call;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class RecordingOptions {
+abstract class RecordingOptions
+{
     /**
      * @param string $recordingStatusCallbackEvent The recording status changes
      *                                             that should generate a callback
@@ -25,8 +26,10 @@ abstract class RecordingOptions {
      *                                  recording will be configured with
      * @return CreateRecordingOptions Options builder
      */
-    public static function create($recordingStatusCallbackEvent = Values::NONE, $recordingStatusCallback = Values::NONE, $recordingStatusCallbackMethod = Values::NONE, $trim = Values::NONE, $recordingChannels = Values::NONE) {
-        return new CreateRecordingOptions($recordingStatusCallbackEvent, $recordingStatusCallback, $recordingStatusCallbackMethod, $trim, $recordingChannels);
+    public static function create($recordingStatusCallbackEvent = Values::NONE, $recordingStatusCallback = Values::NONE, $recordingStatusCallbackMethod = Values::NONE, $trim = Values::NONE, $recordingChannels = Values::NONE)
+    {
+        return new CreateRecordingOptions($recordingStatusCallbackEvent, $recordingStatusCallback,
+            $recordingStatusCallbackMethod, $trim, $recordingChannels);
     }
 
     /**
@@ -34,7 +37,8 @@ abstract class RecordingOptions {
      *                              period.
      * @return UpdateRecordingOptions Options builder
      */
-    public static function update($pauseBehavior = Values::NONE) {
+    public static function update($pauseBehavior = Values::NONE)
+    {
         return new UpdateRecordingOptions($pauseBehavior);
     }
 
@@ -44,12 +48,14 @@ abstract class RecordingOptions {
      * @param string $dateCreatedAfter Filter by date created
      * @return ReadRecordingOptions Options builder
      */
-    public static function read($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE) {
+    public static function read($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE)
+    {
         return new ReadRecordingOptions($dateCreatedBefore, $dateCreated, $dateCreatedAfter);
     }
 }
 
-class CreateRecordingOptions extends Options {
+class CreateRecordingOptions extends Options
+{
     /**
      * @param string $recordingStatusCallbackEvent The recording status changes
      *                                             that should generate a callback
@@ -61,7 +67,8 @@ class CreateRecordingOptions extends Options {
      * @param string $recordingChannels The number of channels that the output
      *                                  recording will be configured with
      */
-    public function __construct($recordingStatusCallbackEvent = Values::NONE, $recordingStatusCallback = Values::NONE, $recordingStatusCallbackMethod = Values::NONE, $trim = Values::NONE, $recordingChannels = Values::NONE) {
+    public function __construct($recordingStatusCallbackEvent = Values::NONE, $recordingStatusCallback = Values::NONE, $recordingStatusCallbackMethod = Values::NONE, $trim = Values::NONE, $recordingChannels = Values::NONE)
+    {
         $this->options['recordingStatusCallbackEvent'] = $recordingStatusCallbackEvent;
         $this->options['recordingStatusCallback'] = $recordingStatusCallback;
         $this->options['recordingStatusCallbackMethod'] = $recordingStatusCallbackMethod;
@@ -71,72 +78,80 @@ class CreateRecordingOptions extends Options {
 
     /**
      * The recording status changes that should generate a request to the URL specified in RecordingStatusCallback. Possible values: `in-progress`, `completed` and `absent`. To specify multiple values separate them with a space. Defaults to `completed`.
-     * 
+     *
      * @param string $recordingStatusCallbackEvent The recording status changes
      *                                             that should generate a callback
      * @return $this Fluent Builder
      */
-    public function setRecordingStatusCallbackEvent($recordingStatusCallbackEvent) {
+    public function setRecordingStatusCallbackEvent($recordingStatusCallbackEvent)
+    {
         $this->options['recordingStatusCallbackEvent'] = $recordingStatusCallbackEvent;
         return $this;
     }
 
     /**
      * The URL which Twilio will make its GET or POST request to for the recording events specified in parameter RecordingStatusCallbackEvent. See [RecordingStatusCallback parameters](https://www.twilio.com/docs/voice/api/recording#recordingstatuscallback) for more details.
-     * 
+     *
      * @param string $recordingStatusCallback The callback URL for recording actions
      * @return $this Fluent Builder
      */
-    public function setRecordingStatusCallback($recordingStatusCallback) {
+    public function setRecordingStatusCallback($recordingStatusCallback)
+    {
         $this->options['recordingStatusCallback'] = $recordingStatusCallback;
         return $this;
     }
 
     /**
      * The HTTP method Twilio should use when making a request to the RecordingStatusCallback URL. Possible values: `GET`, `POST`. Defaults to `POST`.
-     * 
+     *
      * @param string $recordingStatusCallbackMethod The HTTP method Twilio should
      *                                              use when making a request to
      *                                              the RecordingStatusCallback URL
      * @return $this Fluent Builder
      */
-    public function setRecordingStatusCallbackMethod($recordingStatusCallbackMethod) {
+    public function setRecordingStatusCallbackMethod($recordingStatusCallbackMethod)
+    {
         $this->options['recordingStatusCallbackMethod'] = $recordingStatusCallbackMethod;
         return $this;
     }
 
     /**
      * Possible values: `trim-silence` or `do-not-trim`. `trim-silence` will trim the silence from the beginning and end of the recording. `do-not-trim` will not trim the silence. Defaults to `do-not-trim`
-     * 
+     *
      * @param string $trim Whether to trim the silence in the recording
      * @return $this Fluent Builder
      */
-    public function setTrim($trim) {
+    public function setTrim($trim)
+    {
         $this->options['trim'] = $trim;
         return $this;
     }
 
     /**
      * Possible values: `mono` or `dual`. `mono` records all parties of your call into one channel. `dual` records a 2 party call into separate channels. Defaults to `mono`.
-     * 
+     *
      * @param string $recordingChannels The number of channels that the output
      *                                  recording will be configured with
      * @return $this Fluent Builder
      */
-    public function setRecordingChannels($recordingChannels) {
+    public function setRecordingChannels($recordingChannels)
+    {
         $this->options['recordingChannels'] = $recordingChannels;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -144,36 +159,42 @@ class CreateRecordingOptions extends Options {
     }
 }
 
-class UpdateRecordingOptions extends Options {
+class UpdateRecordingOptions extends Options
+{
     /**
      * @param string $pauseBehavior Whether to record or not during the pause
      *                              period.
      */
-    public function __construct($pauseBehavior = Values::NONE) {
+    public function __construct($pauseBehavior = Values::NONE)
+    {
         $this->options['pauseBehavior'] = $pauseBehavior;
     }
 
     /**
      * Only applicable when setting Status parameter to `paused`. Possible values: `skip` or `silence`. `skip` will result in no recording at all during the pause period. `silence` will replace the actual audio of the call with silence during the pause period.  Defaults to `silence`
-     * 
+     *
      * @param string $pauseBehavior Whether to record or not during the pause
      *                              period.
      * @return $this Fluent Builder
      */
-    public function setPauseBehavior($pauseBehavior) {
+    public function setPauseBehavior($pauseBehavior)
+    {
         $this->options['pauseBehavior'] = $pauseBehavior;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }
@@ -181,13 +202,15 @@ class UpdateRecordingOptions extends Options {
     }
 }
 
-class ReadRecordingOptions extends Options {
+class ReadRecordingOptions extends Options
+{
     /**
      * @param string $dateCreatedBefore Filter by date created
      * @param string $dateCreated Filter by date created
      * @param string $dateCreatedAfter Filter by date created
      */
-    public function __construct($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE) {
+    public function __construct($dateCreatedBefore = Values::NONE, $dateCreated = Values::NONE, $dateCreatedAfter = Values::NONE)
+    {
         $this->options['dateCreatedBefore'] = $dateCreatedBefore;
         $this->options['dateCreated'] = $dateCreated;
         $this->options['dateCreatedAfter'] = $dateCreatedAfter;
@@ -195,46 +218,52 @@ class ReadRecordingOptions extends Options {
 
     /**
      * Only show recordings created on the given date. Should be formatted as `YYYY-MM-DD`. You can also specify inequality, such as `DateCreated<=YYYY-MM-DD` for recordings generated at or before midnight on a date, and `DateCreated>=YYYY-MM-DD` for recordings generated at or after midnight on a date.
-     * 
+     *
      * @param string $dateCreatedBefore Filter by date created
      * @return $this Fluent Builder
      */
-    public function setDateCreatedBefore($dateCreatedBefore) {
+    public function setDateCreatedBefore($dateCreatedBefore)
+    {
         $this->options['dateCreatedBefore'] = $dateCreatedBefore;
         return $this;
     }
 
     /**
      * Only show recordings created on the given date. Should be formatted as `YYYY-MM-DD`. You can also specify inequality, such as `DateCreated<=YYYY-MM-DD` for recordings generated at or before midnight on a date, and `DateCreated>=YYYY-MM-DD` for recordings generated at or after midnight on a date.
-     * 
+     *
      * @param string $dateCreated Filter by date created
      * @return $this Fluent Builder
      */
-    public function setDateCreated($dateCreated) {
+    public function setDateCreated($dateCreated)
+    {
         $this->options['dateCreated'] = $dateCreated;
         return $this;
     }
 
     /**
      * Only show recordings created on the given date. Should be formatted as `YYYY-MM-DD`. You can also specify inequality, such as `DateCreated<=YYYY-MM-DD` for recordings generated at or before midnight on a date, and `DateCreated>=YYYY-MM-DD` for recordings generated at or after midnight on a date.
-     * 
+     *
      * @param string $dateCreatedAfter Filter by date created
      * @return $this Fluent Builder
      */
-    public function setDateCreatedAfter($dateCreatedAfter) {
+    public function setDateCreatedAfter($dateCreatedAfter)
+    {
         $this->options['dateCreatedAfter'] = $dateCreatedAfter;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

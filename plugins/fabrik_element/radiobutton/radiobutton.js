@@ -149,16 +149,14 @@ define(['jquery', 'fab/elementlist'], function (jQuery, FbElementList) {
             this._getSubElements().each(function (sub) {
                 if (sub.value === v) {
                     sub.set('checked', true);
-                }
-                else {
+                } else {
                     sub.set('checked', false);
                 }
             });
         },
 
         update: function (val) {
-            if (typeOf(val) === 'array')
-            {
+            if (typeOf(val) === 'array') {
                 val = val.shift();
             }
             this.setValue(val);

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Signature;
 
 use Aws\Credentials\CredentialsInterface;
@@ -15,7 +16,7 @@ interface SignatureInterface
      * provided AWS account credentials and adding the required headers to the
      * request.
      *
-     * @param RequestInterface     $request     Request to sign
+     * @param RequestInterface $request Request to sign
      * @param CredentialsInterface $credentials Signing credentials
      *
      * @return RequestInterface Returns the modified request.
@@ -28,7 +29,7 @@ interface SignatureInterface
     /**
      * Create a pre-signed request.
      *
-     * @param RequestInterface     $request     Request to sign
+     * @param RequestInterface $request Request to sign
      * @param CredentialsInterface $credentials Credentials used to sign
      * @param int|string|\DateTime $expires The time at which the URL should
      *     expire. This can be a Unix timestamp, a PHP DateTime object, or a

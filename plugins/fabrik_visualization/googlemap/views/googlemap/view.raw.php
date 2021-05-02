@@ -20,34 +20,33 @@ jimport('joomla.application.component.view');
  * @subpackage  Fabrik.visualization.googlemap
  * @since       3.0
  */
-
 class FabrikViewGooglemap extends JViewLegacy
 {
-	/**
-	 * Display the view
-	 *
-	 * @param   string  $tmpl  template
-	 *
-	 * @return void
-	 */
+    /**
+     * Display the view
+     *
+     * @param string $tmpl template
+     *
+     * @return void
+     */
 
-	public function display($tmpl = 'default')
-	{
-		$document = JFactory::getDocument();
-		$app = JFactory::getApplication();
-		$input = $app->input;
-		$usersConfig = JComponentHelper::getParams('com_fabrik');
-		$model = $this->getModel();
-		$model->setId($input->getInt('id', $usersConfig->get('visualizationid', $input->getInt('visualizationid', 0))));
-		$this->row = $model->getVisualization();
+    public function display($tmpl = 'default')
+    {
+        $document = JFactory::getDocument();
+        $app = JFactory::getApplication();
+        $input = $app->input;
+        $usersConfig = JComponentHelper::getParams('com_fabrik');
+        $model = $this->getModel();
+        $model->setId($input->getInt('id', $usersConfig->get('visualizationid', $input->getInt('visualizationid', 0))));
+        $this->row = $model->getVisualization();
 
-		if (!$model->canView())
-		{
-			echo FText::_('JERROR_ALERTNOAUTHOR');
+        if (!$model->canView())
+        {
+            echo FText::_('JERROR_ALERTNOAUTHOR');
 
-			return false;
-		}
+            return false;
+        }
 
-		echo $model->getJSIcons();
-	}
+        echo $model->getJSIcons();
+    }
 }

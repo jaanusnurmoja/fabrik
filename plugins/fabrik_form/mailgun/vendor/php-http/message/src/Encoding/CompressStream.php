@@ -13,11 +13,12 @@ class CompressStream extends FilteredStream
 {
     /**
      * @param StreamInterface $stream
-     * @param int             $level
+     * @param int $level
      */
     public function __construct(StreamInterface $stream, $level = -1)
     {
-        if (!extension_loaded('zlib')) {
+        if (!extension_loaded('zlib'))
+        {
             throw new \RuntimeException('The zlib extension must be enabled to use this stream');
         }
 

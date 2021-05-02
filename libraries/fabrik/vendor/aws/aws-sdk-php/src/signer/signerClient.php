@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\signer;
 
 use Aws\AwsClient;
@@ -24,4 +25,6 @@ use Aws\AwsClient;
  * @method \Aws\Result startSigningJob(array $args = [])
  * @method \GuzzleHttp\Promise\Promise startSigningJobAsync(array $args = [])
  */
-class signerClient extends AwsClient {}
+class signerClient extends AwsClient
+{
+}

@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Aws\Api\ApiProvider;
@@ -38,7 +39,7 @@ class AwsClient implements AwsClientInterface
     /** @var HandlerList */
     private $handlerList;
 
-    /** @var array*/
+    /** @var array */
     private $defaultRequestOptions;
 
     /**
@@ -154,10 +155,12 @@ class AwsClient implements AwsClientInterface
     public function __construct(array $args)
     {
         list($service, $exceptionClass) = $this->parseClass();
-        if (!isset($args['service'])) {
+        if (!isset($args['service']))
+        {
             $args['service'] = manifest($service)['endpoint'];
         }
-        if (!isset($args['exception_class'])) {
+        if (!isset($args['exception_class']))
+        {
             $args['exception_class'] = $exceptionClass;
         }
 
@@ -176,7 +179,8 @@ class AwsClient implements AwsClientInterface
         $this->addClientSideMonitoring($args);
         $this->addEndpointParameterMiddleware($args);
 
-        if (isset($args['with_resolved'])) {
+        if (isset($args['with_resolved']))
+        {
             $args['with_resolved']($config);
         }
     }
@@ -219,16 +223,21 @@ class AwsClient implements AwsClientInterface
     public function getCommand($name, array $args = [])
     {
         // Fail fast if the command cannot be found in the description.
-        if (!isset($this->getApi()['operations'][$name])) {
+        if (!isset($this->getApi()['operations'][$name]))
+        {
             $name = ucfirst($name);
-            if (!isset($this->getApi()['operations'][$name])) {
+            if (!isset($this->getApi()['operations'][$name]))
+            {
                 throw new \InvalidArgumentException("Operation not found: $name");
             }
         }
 
-        if (!isset($args['@http'])) {
+        if (!isset($args['@http']))
+        {
             $args['@http'] = $this->defaultRequestOptions;
-        } else {
+        }
+        else
+        {
             $args['@http'] += $this->defaultRequestOptions;
         }
 
@@ -261,7 +270,8 @@ class AwsClient implements AwsClientInterface
     {
         $klass = get_class($this);
 
-        if ($klass === __CLASS__) {
+        if ($klass === __CLASS__)
+        {
             return ['', 'Aws\Exception\AwsException'];
         }
 
@@ -275,7 +285,8 @@ class AwsClient implements AwsClientInterface
 
     private function addEndpointParameterMiddleware($args)
     {
-        if (empty($args['disable_host_prefix_injection'])) {
+        if (empty($args['disable_host_prefix_injection']))
+        {
             $list = $this->getHandlerList();
             $list->appendBuild(
                 EndpointParameterMiddleware::wrap(
@@ -296,9 +307,11 @@ class AwsClient implements AwsClientInterface
 
         $resolver = static function (
             CommandInterface $c
-        ) use ($api, $provider, $name, $region, $version) {
+        ) use ($api, $provider, $name, $region, $version)
+        {
             $authType = $api->getOperation($c->getName())['authtype'];
-            switch ($authType){
+            switch ($authType)
+            {
                 case 'none':
                     $version = 'anonymous';
                     break;
@@ -340,7 +353,7 @@ class AwsClient implements AwsClientInterface
             $this->region,
             $this->getApi()->getServiceId()
         );
-        $this->handlerList->appendAttempt (
+        $this->handlerList->appendAttempt(
             $callAttemptMiddleware,
             'ApiCallAttemptMonitoringMiddleware'
         );
@@ -350,7 +363,7 @@ class AwsClient implements AwsClientInterface
      * Returns a service model and doc model with any necessary changes
      * applied.
      *
-     * @param array $api  Array of service data being documented.
+     * @param array $api Array of service data being documented.
      * @param array $docs Array of doc model data.
      *
      * @return array Tuple containing a [Service, DocModel]
@@ -367,8 +380,8 @@ class AwsClient implements AwsClientInterface
     }
 
     /**
-     * @deprecated
      * @return static
+     * @deprecated
      */
     public static function factory(array $config = [])
     {

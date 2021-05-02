@@ -24,7 +24,7 @@ final class AutoBasicAuth implements Authentication
      */
     public function __construct($shouldRremoveUserInfo = true)
     {
-        $this->shouldRemoveUserInfo = (bool) $shouldRremoveUserInfo;
+        $this->shouldRemoveUserInfo = (bool)$shouldRremoveUserInfo;
     }
 
     /**
@@ -35,8 +35,10 @@ final class AutoBasicAuth implements Authentication
         $uri = $request->getUri();
         $userInfo = $uri->getUserInfo();
 
-        if (!empty($userInfo)) {
-            if ($this->shouldRemoveUserInfo) {
+        if (!empty($userInfo))
+        {
+            if ($this->shouldRemoveUserInfo)
+            {
                 $request = $request->withUri($uri->withUserInfo(''));
             }
 

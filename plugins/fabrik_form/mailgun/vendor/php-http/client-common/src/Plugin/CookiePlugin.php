@@ -38,40 +38,50 @@ final class CookiePlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        foreach ($this->cookieJar->getCookies() as $cookie) {
-            if ($cookie->isExpired()) {
+        foreach ($this->cookieJar->getCookies() as $cookie)
+        {
+            if ($cookie->isExpired())
+            {
                 continue;
             }
 
-            if (!$cookie->matchDomain($request->getUri()->getHost())) {
+            if (!$cookie->matchDomain($request->getUri()->getHost()))
+            {
                 continue;
             }
 
-            if (!$cookie->matchPath($request->getUri()->getPath())) {
+            if (!$cookie->matchPath($request->getUri()->getPath()))
+            {
                 continue;
             }
 
-            if ($cookie->isSecure() && ('https' !== $request->getUri()->getScheme())) {
+            if ($cookie->isSecure() && ('https' !== $request->getUri()->getScheme()))
+            {
                 continue;
             }
 
             $request = $request->withAddedHeader('Cookie', sprintf('%s=%s', $cookie->getName(), $cookie->getValue()));
         }
 
-        return $next($request)->then(function (ResponseInterface $response) use ($request) {
-            if ($response->hasHeader('Set-Cookie')) {
+        return $next($request)->then(function (ResponseInterface $response) use ($request)
+        {
+            if ($response->hasHeader('Set-Cookie'))
+            {
                 $setCookies = $response->getHeader('Set-Cookie');
 
-                foreach ($setCookies as $setCookie) {
+                foreach ($setCookies as $setCookie)
+                {
                     $cookie = $this->createCookie($request, $setCookie);
 
                     // Cookie invalid do not use it
-                    if (null === $cookie) {
+                    if (null === $cookie)
+                    {
                         continue;
                     }
 
                     // Restrict setting cookie from another domain
-                    if (!preg_match("/\.{$cookie->getDomain()}$/", '.'.$request->getUri()->getHost())) {
+                    if (!preg_match("/\.{$cookie->getDomain()}$/", '.' . $request->getUri()->getHost()))
+                    {
                         continue;
                     }
 
@@ -97,7 +107,8 @@ final class CookiePlugin implements Plugin
     {
         $parts = array_map('trim', explode(';', $setCookie));
 
-        if (empty($parts) || !strpos($parts[0], '=')) {
+        if (empty($parts) || !strpos($parts[0], '='))
+        {
             return;
         }
 
@@ -111,14 +122,19 @@ final class CookiePlugin implements Plugin
         $httpOnly = false;
 
         // Add the cookie pieces into the parsed data array
-        foreach ($parts as $part) {
+        foreach ($parts as $part)
+        {
             list($key, $value) = $this->createValueKey($part);
 
-            switch (strtolower($key)) {
+            switch (strtolower($key))
+            {
                 case 'expires':
-                    try {
+                    try
+                    {
                         $expires = CookieUtil::parseDate($value);
-                    } catch (UnexpectedValueException $e) {
+                    }
+                    catch (UnexpectedValueException $e)
+                    {
                         throw new TransferException(
                             sprintf(
                                 'Cookie header `%s` expires value `%s` could not be converted to date',
@@ -133,7 +149,7 @@ final class CookiePlugin implements Plugin
                     break;
 
                 case 'max-age':
-                    $maxAge = (int) $value;
+                    $maxAge = (int)$value;
 
                     break;
 

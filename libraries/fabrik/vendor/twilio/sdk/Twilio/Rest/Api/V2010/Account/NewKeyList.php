@@ -14,40 +14,43 @@ use Twilio\Options;
 use Twilio\Values;
 use Twilio\Version;
 
-class NewKeyList extends ListResource {
+class NewKeyList extends ListResource
+{
     /**
      * Construct the NewKeyList
-     * 
+     *
      * @param Version $version Version that contains the resource
      * @param string $accountSid A 34 character string that uniquely identifies
      *                           this resource.
-     * @return \Twilio\Rest\Api\V2010\Account\NewKeyList 
+     * @return \Twilio\Rest\Api\V2010\Account\NewKeyList
      */
-    public function __construct(Version $version, $accountSid) {
+    public function __construct(Version $version, $accountSid)
+    {
         parent::__construct($version);
 
         // Path Solution
-        $this->solution = array('accountSid' => $accountSid, );
+        $this->solution = ['accountSid' => $accountSid,];
 
         $this->uri = '/Accounts/' . rawurlencode($accountSid) . '/Keys.json';
     }
 
     /**
      * Create a new NewKeyInstance
-     * 
+     *
      * @param array|Options $options Optional Arguments
      * @return NewKeyInstance Newly created NewKeyInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function create($options = array()) {
+    public function create($options = [])
+    {
         $options = new Values($options);
 
-        $data = Values::of(array('FriendlyName' => $options['friendlyName'], ));
+        $data = Values::of(['FriendlyName' => $options['friendlyName'],]);
 
         $payload = $this->version->create(
             'POST',
             $this->uri,
-            array(),
+            [],
             $data
         );
 
@@ -56,10 +59,11 @@ class NewKeyList extends ListResource {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Api.V2010.NewKeyList]';
     }
 }

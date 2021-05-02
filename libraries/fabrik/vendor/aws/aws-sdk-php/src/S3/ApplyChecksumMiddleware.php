@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\CommandInterface;
@@ -41,7 +42,8 @@ class ApplyChecksumMiddleware
      */
     public static function wrap()
     {
-        return function (callable $handler) {
+        return function (callable $handler)
+        {
             return new self($handler);
         };
     }
@@ -54,18 +56,22 @@ class ApplyChecksumMiddleware
     public function __invoke(
         CommandInterface $command,
         RequestInterface $request
-    ) {
+    )
+    {
         $next = $this->nextHandler;
         $name = $command->getName();
         $body = $request->getBody();
 
-        if (in_array($name, self::$md5) && !$request->hasHeader('Content-MD5')) {
+        if (in_array($name, self::$md5) && !$request->hasHeader('Content-MD5'))
+        {
             // Set the content MD5 header for operations that require it.
             $request = $request->withHeader(
                 'Content-MD5',
                 base64_encode(Psr7\hash($body, 'md5', true))
             );
-        } elseif (in_array($name, self::$sha256) && $command['ContentSHA256']) {
+        }
+        elseif (in_array($name, self::$sha256) && $command['ContentSHA256'])
+        {
             // Set the content hash header if provided in the parameters.
             $request = $request->withHeader(
                 'X-Amz-Content-Sha256',

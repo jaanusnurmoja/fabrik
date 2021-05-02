@@ -51,7 +51,8 @@ class OptInHandler
         $decodedInnerPayload = json_decode(base64_decode($innerPayload), true);
         $computedInnerHash = hash_hmac('sha1', $innerPayload, $secretAppId);
 
-        if ($computedInnerHash == $decodedHash) {
+        if ($computedInnerHash == $decodedHash)
+        {
             return ['recipientAddress' => $decodedInnerPayload['r'], 'mailingList' => $decodedInnerPayload['l']];
         }
 

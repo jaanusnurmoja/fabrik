@@ -64,12 +64,12 @@ final class DnsRecord
     }
 
     /**
-     * @param string|null $name     Name of the record, as used in CNAME, etc.
-     * @param string      $type     DNS record type
-     * @param string      $value    DNS record value
+     * @param string|null $name Name of the record, as used in CNAME, etc.
+     * @param string $type DNS record type
+     * @param string $value DNS record value
      * @param string|null $priority Record priority, used for MX
-     * @param string      $valid    DNS record has been added to domain DNS?
-     * @param array       $cached   DNS record current value
+     * @param string $valid DNS record has been added to domain DNS?
+     * @param array $cached DNS record current value
      */
     private function __construct($name, $type, $value, $priority, $valid, $cached)
     {

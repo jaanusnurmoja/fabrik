@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Kafka;
 
 use Aws\AwsClient;
@@ -18,4 +19,6 @@ use Aws\AwsClient;
  * @method \Aws\Result listNodes(array $args = [])
  * @method \GuzzleHttp\Promise\Promise listNodesAsync(array $args = [])
  */
-class KafkaClient extends AwsClient {}
+class KafkaClient extends AwsClient
+{
+}

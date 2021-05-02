@@ -24,13 +24,12 @@ require_once JPATH_SITE . '/components/com_fabrik/views/list/view.base.php';
  * @subpackage  Fabrik
  * @since       3.0
  */
-
 class FabrikViewList extends FabrikViewListBase
 {
     /**
      * Display the Feed
      *
-     * @param   sting  $tpl  template
+     * @param sting $tpl template
      *
      * @return void
      */
@@ -48,7 +47,7 @@ class FabrikViewList extends FabrikViewListBase
             exit;
         }
 
-        $this->doc->_itemTags = array();
+        $this->doc->_itemTags = [];
 
         // $$$ hugh - modified this so you can enable QS filters on RSS links
         // by setting &incfilters=1
@@ -67,10 +66,10 @@ class FabrikViewList extends FabrikViewListBase
         $aJoinsToThisKey = $model->getJoinsToThisKey();
 
         // Get headings
-        $aTableHeadings = array();
+        $aTableHeadings = [];
         $groupModels = $formModel->getGroupsHiarachy();
         $titleEl = $params->get('feed_title');
-        $dateEl = (int) $params->get('feed_date');
+        $dateEl = (int)$params->get('feed_date');
 
         //$imageEl = $formModel->getElement($imageEl, true);
         $titleEl = $formModel->getElement($titleEl, true);
@@ -153,8 +152,10 @@ class FabrikViewList extends FabrikViewListBase
         $w = new FabrikWorker;
         $rows = $model->getData();
 
-        $this->doc->title = htmlspecialchars($w->parseMessageForPlaceHolder($table->label, $_REQUEST), ENT_COMPAT, 'UTF-8');
-        $this->doc->description = htmlspecialchars(trim(strip_tags($w->parseMessageForPlaceHolder($table->introduction, $_REQUEST))));
+        $this->doc->title = htmlspecialchars($w->parseMessageForPlaceHolder($table->label, $_REQUEST), ENT_COMPAT,
+            'UTF-8');
+        $this->doc->description = htmlspecialchars(trim(strip_tags($w->parseMessageForPlaceHolder($table->introduction,
+            $_REQUEST))));
         $this->doc->link = JRoute::_('index.php?option=com_' . $this->package . '&view=list&listid=' . $table->id . '&Itemid=' . $itemId);
 
         $this->addImage($params);
@@ -172,9 +173,9 @@ class FabrikViewList extends FabrikViewListBase
 
         // List of tags to look for in the row data
         // If they are there don't put them in the desc but put them in as a separate item param
-        $rssTags = array(
+        $rssTags = [
             '<georss:point>' => 'xmlns:georss="http://www.georss.org/georss"'
-        );
+        ];
 
         foreach ($rows as $group)
         {
@@ -186,7 +187,7 @@ class FabrikViewList extends FabrikViewListBase
                 $tStart = '<table style="margin-top:10px;padding-top:10px;">';
                 $title = '';
                 $item = new FeedItem();
-                $enclosures = array();
+                $enclosures = [];
 
                 foreach ($aTableHeadings as $heading => $dbColName)
                 {
@@ -314,7 +315,8 @@ class FabrikViewList extends FabrikViewListBase
                 // Strip html from feed item description text
                 $author = @$row->created_by_alias ? @$row->created_by_alias : @$row->author;
 
-                $item->date = isset($row->$dateElName) && $row->$dateElName ? date('r', strtotime(@$row->$dateElNameRaw)) : '';
+                $item->date = isset($row->$dateElName) && $row->$dateElName ? date('r',
+                    strtotime(@$row->$dateElNameRaw)) : '';
 
                 // Load individual item creator class
 
@@ -340,7 +342,7 @@ class FabrikViewList extends FabrikViewListBase
     /**
      * Add <image> to document
      *
-     * @param   object  $params    Registry list parameters
+     * @param object $params Registry list parameters
      *
      * @return  document
      */
@@ -366,8 +368,8 @@ class FabrikViewList extends FabrikViewListBase
     /**
      * Get file size
      *
-     * @param   string  $path    File path
-     * @param   bool    $remote  Remote file, if true attempt to load file via Curl
+     * @param string $path File path
+     * @param bool $remote Remote file, if true attempt to load file via Curl
      *
      * @return mixed|number
      */

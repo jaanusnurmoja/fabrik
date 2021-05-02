@@ -31,80 +31,94 @@ use Twilio\Version;
  * @method \Twilio\Rest\Video\V1\CompositionContext compositions(string $sid)
  * @method \Twilio\Rest\Video\V1\RoomContext rooms(string $sid)
  */
-class V1 extends Version {
-    protected $_compositionHooks = null;
+class V1 extends Version
+{
+    protected $_compositionHooks    = null;
     protected $_compositionSettings = null;
-    protected $_recordings = null;
-    protected $_recordingSettings = null;
-    protected $_compositions = null;
-    protected $_rooms = null;
+    protected $_recordings          = null;
+    protected $_recordingSettings   = null;
+    protected $_compositions        = null;
+    protected $_rooms               = null;
 
     /**
      * Construct the V1 version of Video
-     * 
+     *
      * @param \Twilio\Domain $domain Domain that contains the version
      * @return \Twilio\Rest\Video\V1 V1 version of Video
      */
-    public function __construct(Domain $domain) {
+    public function __construct(Domain $domain)
+    {
         parent::__construct($domain);
         $this->version = 'v1';
     }
 
     /**
-     * @return \Twilio\Rest\Video\V1\CompositionHookList 
+     * @return \Twilio\Rest\Video\V1\CompositionHookList
      */
-    protected function getCompositionHooks() {
-        if (!$this->_compositionHooks) {
+    protected function getCompositionHooks()
+    {
+        if (!$this->_compositionHooks)
+        {
             $this->_compositionHooks = new CompositionHookList($this);
         }
         return $this->_compositionHooks;
     }
 
     /**
-     * @return \Twilio\Rest\Video\V1\CompositionSettingsList 
+     * @return \Twilio\Rest\Video\V1\CompositionSettingsList
      */
-    protected function getCompositionSettings() {
-        if (!$this->_compositionSettings) {
+    protected function getCompositionSettings()
+    {
+        if (!$this->_compositionSettings)
+        {
             $this->_compositionSettings = new CompositionSettingsList($this);
         }
         return $this->_compositionSettings;
     }
 
     /**
-     * @return \Twilio\Rest\Video\V1\RecordingList 
+     * @return \Twilio\Rest\Video\V1\RecordingList
      */
-    protected function getRecordings() {
-        if (!$this->_recordings) {
+    protected function getRecordings()
+    {
+        if (!$this->_recordings)
+        {
             $this->_recordings = new RecordingList($this);
         }
         return $this->_recordings;
     }
 
     /**
-     * @return \Twilio\Rest\Video\V1\RecordingSettingsList 
+     * @return \Twilio\Rest\Video\V1\RecordingSettingsList
      */
-    protected function getRecordingSettings() {
-        if (!$this->_recordingSettings) {
+    protected function getRecordingSettings()
+    {
+        if (!$this->_recordingSettings)
+        {
             $this->_recordingSettings = new RecordingSettingsList($this);
         }
         return $this->_recordingSettings;
     }
 
     /**
-     * @return \Twilio\Rest\Video\V1\CompositionList 
+     * @return \Twilio\Rest\Video\V1\CompositionList
      */
-    protected function getCompositions() {
-        if (!$this->_compositions) {
+    protected function getCompositions()
+    {
+        if (!$this->_compositions)
+        {
             $this->_compositions = new CompositionList($this);
         }
         return $this->_compositions;
     }
 
     /**
-     * @return \Twilio\Rest\Video\V1\RoomList 
+     * @return \Twilio\Rest\Video\V1\RoomList
      */
-    protected function getRooms() {
-        if (!$this->_rooms) {
+    protected function getRooms()
+    {
+        if (!$this->_rooms)
+        {
             $this->_rooms = new RoomList($this);
         }
         return $this->_rooms;
@@ -112,14 +126,16 @@ class V1 extends Version {
 
     /**
      * Magic getter to lazy load root resources
-     * 
+     *
      * @param string $name Resource to return
      * @return \Twilio\ListResource The requested resource
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __get($name) {
+    public function __get($name)
+    {
         $method = 'get' . ucfirst($name);
-        if (method_exists($this, $method)) {
+        if (method_exists($this, $method))
+        {
             return $this->$method();
         }
 
@@ -128,16 +144,18 @@ class V1 extends Version {
 
     /**
      * Magic caller to get resource contexts
-     * 
+     *
      * @param string $name Resource to return
      * @param array $arguments Context parameters
      * @return \Twilio\InstanceContext The requested resource context
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         $property = $this->$name;
-        if (method_exists($property, 'getContext')) {
-            return call_user_func_array(array($property, 'getContext'), $arguments);
+        if (method_exists($property, 'getContext'))
+        {
+            return call_user_func_array([$property, 'getContext'], $arguments);
         }
 
         throw new TwilioException('Resource does not have a context');
@@ -145,10 +163,11 @@ class V1 extends Version {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Video.V1]';
     }
 }

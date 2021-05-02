@@ -13,11 +13,11 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
         Binds: [],
 
         options: {
-            'container'     : '',
-            'filters'       : [],
-            'type'          : 'list',
-            'id'            : '',
-            'ref'           : '',
+            'container': '',
+            'filters': [],
+            'type': 'list',
+            'id': '',
+            'ref': '',
             'advancedSearch': {
                 'controller': 'list'
             }
@@ -71,15 +71,15 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
                 var url = a.prop('href');
                 url += '&listref=' + self.options.ref;
                 windowopts = {
-                    id             : 'advanced-search-win' + self.options.ref,
-                    modalId        : 'advanced-filter',
-                    title          : Joomla.JText._('COM_FABRIK_ADVANCED_SEARCH'),
-                    loadMethod     : 'xhr',
-                    evalScripts    : true,
-                    contentURL     : url,
-                    width          : 710,
-                    height         : 340,
-                    y              : self.options.popwiny,
+                    id: 'advanced-search-win' + self.options.ref,
+                    modalId: 'advanced-filter',
+                    title: Joomla.JText._('COM_FABRIK_ADVANCED_SEARCH'),
+                    loadMethod: 'xhr',
+                    evalScripts: true,
+                    contentURL: url,
+                    width: 710,
+                    height: 340,
+                    y: self.options.popwiny,
                     onContentLoaded: function () {
                         var list = Fabrik.blocks['list_' + self.options.ref];
                         if (list === undefined) {
@@ -195,8 +195,7 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
                         f.val('');
                     }
                 }
-                if (f.hasClass('advancedSelect'))
-                {
+                if (f.hasClass('advancedSelect')) {
                     f.trigger('liszt:updated');
                 }
             }
@@ -221,9 +220,9 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
             var injectForm = this.container.prop('tagName') === 'FORM' ? this.container :
                 this.container.find('form');
             jQuery('<input />').attr({
-                'name' : 'resetfilters',
+                'name': 'resetfilters',
                 'value': 1,
-                'type' : 'hidden'
+                'type': 'hidden'
             }).appendTo(injectForm);
             if (this.options.type === 'list') {
                 this.list.submit('list.clearfilter');
@@ -252,7 +251,7 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
             });
         },
 
-	    /**
+        /**
          * Used when filters are in a pop up window
          */
         showFilterState: function () {
@@ -292,13 +291,12 @@ define(['jquery', 'fab/fabrik', 'fab/advanced-search'], function (jQuery, Fabrik
         /**
          * Update CSS after an AJAX filter
          */
-        updateFilterCSS: function(data) {
+        updateFilterCSS: function (data) {
             var c = this.container.find('.clearFilters');
             if (c) {
                 if (data.hasFilters) {
                     c.addClass('hasFilters');
-                }
-                else {
+                } else {
                     c.removeClass('hasFilters');
                 }
             }

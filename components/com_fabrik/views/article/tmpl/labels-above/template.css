@@ -1,21 +1,22 @@
-.fabrikLabel{
-	padding-right:15px;
-	display:inline;
+.fabrikLabel {
+    padding-right: 15px;
+    display: inline;
 }
 
-.fabrikGroupRepeater{
-	float:left;
-	width:19%;
+.fabrikGroupRepeater {
+    float: left;
+    width: 19%;
 }
 
-.fabrikSubGroup{
-	clear:both;
-}
-.fabrikSubGroupElements{
-	width:80%;
-	float:left;
+.fabrikSubGroup {
+    clear: both;
 }
 
-.fabrikElement{
-	margin-right:0;
+.fabrikSubGroupElements {
+    width: 80%;
+    float: left;
+}
+
+.fabrikElement {
+    margin-right: 0;
 }

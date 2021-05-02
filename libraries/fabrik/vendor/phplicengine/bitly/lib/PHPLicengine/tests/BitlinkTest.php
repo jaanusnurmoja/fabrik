@@ -35,13 +35,13 @@ class BitlinkTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test/referrers_by_domains'),                    
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test/referrers_by_domains'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Bitlink($mock);
         $bitlink->getMetricsForBitlinkByReferrersByDomains('test', ['key' => 'value']);
-    }    
-    
+    }
+
     public function testGetMetricsForBitlinkByCountries()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -49,12 +49,12 @@ class BitlinkTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test/countries'),                    
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test/countries'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Bitlink($mock);
         $bitlink->getMetricsForBitlinkByCountries('test', ['key' => 'value']);
-    }        
+    }
 
     public function testGetClicksForBitlink()
     {
@@ -63,12 +63,12 @@ class BitlinkTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test/clicks'),                    
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test/clicks'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Bitlink($mock);
         $bitlink->getClicksForBitlink('test', ['key' => 'value']);
-    }        
+    }
 
     public function testExpandBitlink()
     {
@@ -77,12 +77,12 @@ class BitlinkTest extends TestCase
             ->expects($this->once())
             ->method('post')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/expand'),      
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/expand'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Bitlink($mock);
         $bitlink->expandBitlink(['key' => 'value']);
-    }        
+    }
 
     public function testGetMetricsForBitlinkByReferrers()
     {
@@ -91,12 +91,12 @@ class BitlinkTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test/referrers'),      
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test/referrers'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Bitlink($mock);
         $bitlink->getMetricsForBitlinkByReferrers('test', ['key' => 'value']);
-    }        
+    }
 
     public function testCreateFullBitlink()
     {
@@ -105,12 +105,12 @@ class BitlinkTest extends TestCase
             ->expects($this->once())
             ->method('post')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Bitlink($mock);
         $bitlink->createFullBitlink(['key' => 'value']);
-    }        
+    }
 
     public function testUpdateBitlink()
     {
@@ -119,12 +119,12 @@ class BitlinkTest extends TestCase
             ->expects($this->once())
             ->method('patch')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/bitlinks/test'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Bitlink($mock);
         $bitlink->updateBitlink('test', ['key' => 'value']);
-    }        
+    }
 
     public function testGetBitlink()
     {
@@ -149,8 +149,8 @@ class BitlinkTest extends TestCase
             );
         $bitlink = new Bitlink($mock);
         $bitlink->getClicksSummaryForBitlink('test', ['key' => 'value']);
-    }    
-    
+    }
+
     public function testCreateBitlink()
     {
         $mock = $this->createMock(ApiInterface::class);
@@ -158,12 +158,12 @@ class BitlinkTest extends TestCase
             ->expects($this->once())
             ->method('post')
             ->with(
-                    $this->equalTo('https://api-ssl.bitly.com/v4/shorten'),
-                    $this->identicalTo(['key' => 'value'])
-                    );
+                $this->equalTo('https://api-ssl.bitly.com/v4/shorten'),
+                $this->identicalTo(['key' => 'value'])
+            );
         $bitlink = new Bitlink($mock);
         $bitlink->createBitlink(['key' => 'value']);
-    }            
+    }
 
     public function testGetMetricsForBitlinkByReferringDomains()
     {
@@ -177,6 +177,6 @@ class BitlinkTest extends TestCase
             );
         $bitlink = new Bitlink($mock);
         $bitlink->getMetricsForBitlinkByReferringDomains('test', ['key' => 'value']);
-    }    
+    }
 
 }

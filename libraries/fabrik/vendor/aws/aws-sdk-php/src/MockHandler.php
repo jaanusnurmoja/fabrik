@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use Aws\Exception\AwsException;
@@ -23,19 +24,21 @@ class MockHandler implements \Countable
      * {@see AwsException} objects that acts as a queue of results or
      * exceptions to return each time the handler is invoked.
      *
-     * @param array    $resultOrQueue
+     * @param array $resultOrQueue
      * @param callable $onFulfilled Callback to invoke when the return value is fulfilled.
-     * @param callable $onRejected  Callback to invoke when the return value is rejected.
+     * @param callable $onRejected Callback to invoke when the return value is rejected.
      */
     public function __construct(
         array $resultOrQueue = [],
         callable $onFulfilled = null,
         callable $onRejected = null
-    ) {
+    )
+    {
         $this->onFulfilled = $onFulfilled;
         $this->onRejected = $onRejected;
 
-        if ($resultOrQueue) {
+        if ($resultOrQueue)
+        {
             call_user_func_array([$this, 'append'], $resultOrQueue);
         }
     }
@@ -46,13 +49,18 @@ class MockHandler implements \Countable
      */
     public function append()
     {
-        foreach (func_get_args() as $value) {
-            if ($value instanceof ResultInterface
+        foreach (func_get_args() as $value)
+        {
+            if (
+                $value instanceof ResultInterface
                 || $value instanceof AwsException
                 || is_callable($value)
-            ) {
+            )
+            {
                 $this->queue[] = $value;
-            } else {
+            }
+            else
+            {
                 throw new \InvalidArgumentException('Expected an Aws\ResultInterface or Aws\Exception\AwsException.');
             }
         }
@@ -63,10 +71,14 @@ class MockHandler implements \Countable
      */
     public function appendException()
     {
-        foreach (func_get_args() as $value) {
-            if ($value instanceof \Exception || $value instanceof \Throwable) {
+        foreach (func_get_args() as $value)
+        {
+            if ($value instanceof \Exception || $value instanceof \Throwable)
+            {
                 $this->queue[] = $value;
-            } else {
+            }
+            else
+            {
                 throw new \InvalidArgumentException('Expected an \Exception or \Throwable.');
             }
         }
@@ -75,8 +87,10 @@ class MockHandler implements \Countable
     public function __invoke(
         CommandInterface $command,
         RequestInterface $request
-    ) {
-        if (!$this->queue) {
+    )
+    {
+        if (!$this->queue)
+        {
             $last = $this->lastCommand
                 ? ' The last command sent was ' . $this->lastCommand->getName() . '.'
                 : '';
@@ -89,19 +103,25 @@ class MockHandler implements \Countable
 
         $result = array_shift($this->queue);
 
-        if (is_callable($result)) {
+        if (is_callable($result))
+        {
             $result = $result($command, $request);
         }
 
-        if ($result instanceof \Exception) {
+        if ($result instanceof \Exception)
+        {
             $result = new RejectedPromise($result);
-        } else {
+        }
+        else
+        {
             // Add an effective URI and statusCode if not present.
             $meta = $result['@metadata'];
-            if (!isset($meta['effectiveUri'])) {
-                $meta['effectiveUri'] = (string) $request->getUri();
+            if (!isset($meta['effectiveUri']))
+            {
+                $meta['effectiveUri'] = (string)$request->getUri();
             }
-            if (!isset($meta['statusCode'])) {
+            if (!isset($meta['statusCode']))
+            {
                 $meta['statusCode'] = 200;
             }
             $result['@metadata'] = $meta;

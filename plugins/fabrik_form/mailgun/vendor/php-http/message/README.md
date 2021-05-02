@@ -9,7 +9,6 @@
 
 **HTTP Message related tools.**
 
-
 ## Install
 
 Via Composer
@@ -17,7 +16,6 @@ Via Composer
 ``` bash
 $ composer require php-http/message
 ```
-
 
 ## Intro
 
@@ -30,18 +28,15 @@ This package contains various PSR-7 tools which might be useful in an HTTP workf
 - Cookie implementation
 - Request matchers
 
-
 ## Documentation
 
 Please see the [official documentation](http://docs.php-http.org/en/latest/message.html).
-
 
 ## Testing
 
 ``` bash
 $ composer test
 ```
-
 
 ## Contributing
 
@@ -54,7 +49,6 @@ Thanks to [Cuzzle](https://github.com/namshi/cuzzle) for inpiration for the `Cur
 ## Security
 
 If you discover any security related issues, please contact us at [security@php-http.org](mailto:security@php-http.org).
-
 
 ## License
 

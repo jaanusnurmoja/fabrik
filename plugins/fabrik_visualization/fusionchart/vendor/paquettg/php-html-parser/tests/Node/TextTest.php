@@ -2,7 +2,8 @@
 
 use PHPHtmlParser\Dom\TextNode;
 
-class NodeTextTest extends PHPUnit_Framework_TestCase {
+class NodeTextTest extends PHPUnit_Framework_TestCase
+{
 
     public function testText()
     {

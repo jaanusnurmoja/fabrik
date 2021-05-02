@@ -12,7 +12,8 @@ namespace Twilio\Rest\Monitor\V1;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class EventOptions {
+abstract class EventOptions
+{
     /**
      * @param string $actorSid Only include Events initiated by this Actor
      * @param string $eventType Only include Events of this EventType
@@ -23,12 +24,14 @@ abstract class EventOptions {
      * @param \DateTime $endDate Only show events on or before this date
      * @return ReadEventOptions Options builder
      */
-    public static function read($actorSid = Values::NONE, $eventType = Values::NONE, $resourceSid = Values::NONE, $sourceIpAddress = Values::NONE, $startDate = Values::NONE, $endDate = Values::NONE) {
+    public static function read($actorSid = Values::NONE, $eventType = Values::NONE, $resourceSid = Values::NONE, $sourceIpAddress = Values::NONE, $startDate = Values::NONE, $endDate = Values::NONE)
+    {
         return new ReadEventOptions($actorSid, $eventType, $resourceSid, $sourceIpAddress, $startDate, $endDate);
     }
 }
 
-class ReadEventOptions extends Options {
+class ReadEventOptions extends Options
+{
     /**
      * @param string $actorSid Only include Events initiated by this Actor
      * @param string $eventType Only include Events of this EventType
@@ -38,7 +41,8 @@ class ReadEventOptions extends Options {
      * @param \DateTime $startDate Only show events on or after this date
      * @param \DateTime $endDate Only show events on or before this date
      */
-    public function __construct($actorSid = Values::NONE, $eventType = Values::NONE, $resourceSid = Values::NONE, $sourceIpAddress = Values::NONE, $startDate = Values::NONE, $endDate = Values::NONE) {
+    public function __construct($actorSid = Values::NONE, $eventType = Values::NONE, $resourceSid = Values::NONE, $sourceIpAddress = Values::NONE, $startDate = Values::NONE, $endDate = Values::NONE)
+    {
         $this->options['actorSid'] = $actorSid;
         $this->options['eventType'] = $eventType;
         $this->options['resourceSid'] = $resourceSid;
@@ -49,80 +53,89 @@ class ReadEventOptions extends Options {
 
     /**
      * Only include Events initiated by this Actor. Useful for auditing actions taken by specific users or API credentials.
-     * 
+     *
      * @param string $actorSid Only include Events initiated by this Actor
      * @return $this Fluent Builder
      */
-    public function setActorSid($actorSid) {
+    public function setActorSid($actorSid)
+    {
         $this->options['actorSid'] = $actorSid;
         return $this;
     }
 
     /**
      * Only include Events of this EventType.
-     * 
+     *
      * @param string $eventType Only include Events of this EventType
      * @return $this Fluent Builder
      */
-    public function setEventType($eventType) {
+    public function setEventType($eventType)
+    {
         $this->options['eventType'] = $eventType;
         return $this;
     }
 
     /**
      * Only include Events referring to this resource. Useful for discovering the history of a specific resource.
-     * 
+     *
      * @param string $resourceSid Only include Events referring to this resource
      * @return $this Fluent Builder
      */
-    public function setResourceSid($resourceSid) {
+    public function setResourceSid($resourceSid)
+    {
         $this->options['resourceSid'] = $resourceSid;
         return $this;
     }
 
     /**
      * Only include Events that originated from this IP address. Useful for tracking suspicious activity originating from the API or the Twilio Console.
-     * 
+     *
      * @param string $sourceIpAddress Only include Events that originated from this
      *                                IP address
      * @return $this Fluent Builder
      */
-    public function setSourceIpAddress($sourceIpAddress) {
+    public function setSourceIpAddress($sourceIpAddress)
+    {
         $this->options['sourceIpAddress'] = $sourceIpAddress;
         return $this;
     }
 
     /**
      * Only show events on or after this date. Useful in combination with `EndDate` to define a date-range of events. Input is a [UTC ISO 8601 Timestamp](http://en.wikipedia.org/wiki/ISO_8601#UTC), but time of day is ignored by the filter.
-     * 
+     *
      * @param \DateTime $startDate Only show events on or after this date
      * @return $this Fluent Builder
      */
-    public function setStartDate($startDate) {
+    public function setStartDate($startDate)
+    {
         $this->options['startDate'] = $startDate;
         return $this;
     }
 
     /**
      * Only show events on or before this date. Useful in combination with `StartDate` to define a date-range of events. Input is a [UTC ISO 8601 Timestamp](http://en.wikipedia.org/wiki/ISO_8601#UTC), but time of day is ignored by the filter.
-     * 
+     *
      * @param \DateTime $endDate Only show events on or before this date
      * @return $this Fluent Builder
      */
-    public function setEndDate($endDate) {
+    public function setEndDate($endDate)
+    {
         $this->options['endDate'] = $endDate;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

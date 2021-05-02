@@ -2,7 +2,8 @@
 
 use PHPHtmlParser\StaticDom;
 
-class StaticDomTest extends PHPUnit_Framework_TestCase {
+class StaticDomTest extends PHPUnit_Framework_TestCase
+{
 
     public function setUp()
     {
@@ -26,7 +27,8 @@ class StaticDomTest extends PHPUnit_Framework_TestCase {
     {
         $dom = Dom::load('<div class="all"><p>Hey bro, <a href="google.com">click here</a><br /> :)</p></div>');
         $div = $dom->find('div', 0);
-        $this->assertEquals('<div class="all"><p>Hey bro, <a href="google.com">click here</a><br /> :)</p></div>', $div->outerHtml);
+        $this->assertEquals('<div class="all"><p>Hey bro, <a href="google.com">click here</a><br /> :)</p></div>',
+            $div->outerHtml);
     }
 
     public function testLoadWithFile()
@@ -44,7 +46,8 @@ class StaticDomTest extends PHPUnit_Framework_TestCase {
     public function testFind()
     {
         Dom::load('tests/files/horrible.html');
-        $this->assertEquals('<input type="submit" tabindex="0" name="submit" value="Информации" />', Dom::find('table input', 1)->outerHtml);
+        $this->assertEquals('<input type="submit" tabindex="0" name="submit" value="Информации" />',
+            Dom::find('table input', 1)->outerHtml);
     }
 
     /**
@@ -65,9 +68,9 @@ class StaticDomTest extends PHPUnit_Framework_TestCase {
     {
         $curl = Mockery::mock('PHPHtmlParser\CurlInterface');
         $curl->shouldReceive('get')
-             ->once()
-             ->with('http://google.com')
-             ->andReturn(file_get_contents('tests/files/small.html'));
+            ->once()
+            ->with('http://google.com')
+            ->andReturn(file_get_contents('tests/files/small.html'));
 
         Dom::loadFromUrl('http://google.com', [], $curl);
         $this->assertEquals('VonBurgermeister', Dom::find('.post-row div .post-user font', 0)->text);

@@ -2,7 +2,8 @@
 
 use PHPHtmlParser\Options;
 
-class OptionsTest extends PHPUnit_Framework_TestCase {
+class OptionsTest extends PHPUnit_Framework_TestCase
+{
 
     public function testDefaultWhitespaceTextNode()
     {
@@ -27,7 +28,7 @@ class OptionsTest extends PHPUnit_Framework_TestCase {
         $options->setOptions([
             'test' => false,
         ])->setOptions([
-            'test' => true,
+            'test'               => true,
             'whitespaceTextNode' => false,
         ]);
 

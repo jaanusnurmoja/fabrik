@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api;
 
 /**
@@ -14,11 +15,13 @@ class Operation extends AbstractModel
     {
         $definition['type'] = 'structure';
 
-        if (!isset($definition['http']['method'])) {
+        if (!isset($definition['http']['method']))
+        {
             $definition['http']['method'] = 'POST';
         }
 
-        if (!isset($definition['http']['requestUri'])) {
+        if (!isset($definition['http']['requestUri']))
+        {
             $definition['http']['requestUri'] = '/';
         }
 
@@ -45,10 +48,14 @@ class Operation extends AbstractModel
      */
     public function getInput()
     {
-        if (!$this->input) {
-            if ($input = $this['input']) {
+        if (!$this->input)
+        {
+            if ($input = $this['input'])
+            {
                 $this->input = $this->shapeFor($input);
-            } else {
+            }
+            else
+            {
                 $this->input = new StructureShape([], $this->shapeMap);
             }
         }
@@ -63,10 +70,14 @@ class Operation extends AbstractModel
      */
     public function getOutput()
     {
-        if (!$this->output) {
-            if ($output = $this['output']) {
+        if (!$this->output)
+        {
+            if ($output = $this['output'])
+            {
                 $this->output = $this->shapeFor($output);
-            } else {
+            }
+            else
+            {
                 $this->output = new StructureShape([], $this->shapeMap);
             }
         }
@@ -81,13 +92,18 @@ class Operation extends AbstractModel
      */
     public function getErrors()
     {
-        if ($this->errors === null) {
-            if ($errors = $this['errors']) {
-                foreach ($errors as $key => $error) {
+        if ($this->errors === null)
+        {
+            if ($errors = $this['errors'])
+            {
+                foreach ($errors as $key => $error)
+                {
                     $errors[$key] = $this->shapeFor($error);
                 }
                 $this->errors = $errors;
-            } else {
+            }
+            else
+            {
                 $this->errors = [];
             }
         }

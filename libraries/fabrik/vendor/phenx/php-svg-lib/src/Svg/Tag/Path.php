@@ -2,7 +2,7 @@
 /**
  * @package php-svg-lib
  * @link    http://github.com/PhenX/php-svg-lib
- * @author  Fabien Ménager <fabien.menager@gmail.com>
+ * @author  Fabien Mï¿½nager <fabien.menager@gmail.com>
  * @license GNU LGPLv3+ http://www.gnu.org/copyleft/lesser.html
  */
 
@@ -12,7 +12,7 @@ use Svg\Surface\SurfaceInterface;
 
 class Path extends Shape
 {
-    static $commandLengths = array(
+    static $commandLengths = [
         'm' => 2,
         'l' => 2,
         'h' => 1,
@@ -22,29 +22,33 @@ class Path extends Shape
         'q' => 4,
         't' => 2,
         'a' => 7,
-    );
+    ];
 
-    static $repeatedCommands = array(
+    static $repeatedCommands = [
         'm' => 'l',
         'M' => 'L',
-    );
+    ];
 
     public function start($attributes)
     {
-        if (!isset($attributes['d'])) {
+        if (!isset($attributes['d']))
+        {
             $this->hasShape = false;
 
             return;
         }
 
-        $commands = array();
+        $commands = [];
         preg_match_all('/([MZLHVCSQTAmzlhvcsqta])([eE ,\-.\d]+)*/', $attributes['d'], $commands, PREG_SET_ORDER);
 
-        $path = array();
-        foreach ($commands as $c) {
-            if (count($c) == 3) {
-                $arguments = array();
-                preg_match_all('/([-+]?((\d+\.\d+)|((\d+)|(\.\d+)))(?:e[-+]?\d+)?)/i', $c[2], $arguments, PREG_PATTERN_ORDER);
+        $path = [];
+        foreach ($commands as $c)
+        {
+            if (count($c) == 3)
+            {
+                $arguments = [];
+                preg_match_all('/([-+]?((\d+\.\d+)|((\d+)|(\.\d+)))(?:e[-+]?\d+)?)/i', $c[2], $arguments,
+                    PREG_PATTERN_ORDER);
                 $item = $arguments[0];
                 $commandLower = strtolower($c[1]);
 
@@ -52,24 +56,30 @@ class Path extends Shape
                     isset(self::$commandLengths[$commandLower]) &&
                     ($commandLength = self::$commandLengths[$commandLower]) &&
                     count($item) > $commandLength
-                ) {
+                )
+                {
                     $repeatedCommand = isset(self::$repeatedCommands[$c[1]]) ? self::$repeatedCommands[$c[1]] : $c[1];
                     $command = $c[1];
 
-                    for ($k = 0, $klen = count($item); $k < $klen; $k += $commandLength) {
+                    for ($k = 0, $klen = count($item); $k < $klen; $k += $commandLength)
+                    {
                         $_item = array_slice($item, $k, $k + $commandLength);
                         array_unshift($_item, $command);
                         $path[] = $_item;
 
                         $command = $repeatedCommand;
                     }
-                } else {
+                }
+                else
+                {
                     array_unshift($item, $c[1]);
                     $path[] = $item;
                 }
 
-            } else {
-                $item = array($c[1]);
+            }
+            else
+            {
+                $item = [$c[1]];
 
                 $path[] = $item;
             }
@@ -94,8 +104,10 @@ class Path extends Shape
         $t = 0; //-((this.height / 2) + $this.pathOffset.y),
         $methodName = null;
 
-        foreach ($path as $current) {
-            switch ($current[0]) { // first letter
+        foreach ($path as $current)
+        {
+            switch ($current[0])
+            { // first letter
                 case 'l': // lineto, relative
                     $x += $current[1];
                     $y += $current[2];
@@ -182,12 +194,15 @@ class Path extends Shape
                     $tempX = $x + $current[3];
                     $tempY = $y + $current[4];
 
-                    if (!preg_match('/[CcSs]/', $previous[0])) {
+                    if (!preg_match('/[CcSs]/', $previous[0]))
+                    {
                         // If there is no previous command or if the previous command was not a C, c, S, or s,
                         // the control point is coincident with the current point
                         $controlX = $x;
                         $controlY = $y;
-                    } else {
+                    }
+                    else
+                    {
                         // calculate reflection of previous control points
                         $controlX = 2 * $x - $controlX;
                         $controlY = 2 * $y - $controlY;
@@ -216,12 +231,15 @@ class Path extends Shape
                     $tempX = $current[3];
                     $tempY = $current[4];
 
-                    if (!preg_match('/[CcSs]/', $previous[0])) {
+                    if (!preg_match('/[CcSs]/', $previous[0]))
+                    {
                         // If there is no previous command or if the previous command was not a C, c, S, or s,
                         // the control point is coincident with the current point
                         $controlX = $x;
                         $controlY = $y;
-                    } else {
+                    }
+                    else
+                    {
                         // calculate reflection of previous control points
                         $controlX = 2 * $x - $controlX;
                         $controlY = 2 * $y - $controlY;
@@ -287,18 +305,25 @@ class Path extends Shape
                     $tempX = $x + $current[1];
                     $tempY = $y + $current[2];
 
-                    if (preg_match("/[QqTt]/", $previous[0])) {
+                    if (preg_match("/[QqTt]/", $previous[0]))
+                    {
                         // If there is no previous command or if the previous command was not a Q, q, T or t,
                         // assume the control point is coincident with the current point
                         $controlX = $x;
                         $controlY = $y;
-                    } else {
-                        if ($previous[0] === 't') {
+                    }
+                    else
+                    {
+                        if ($previous[0] === 't')
+                        {
                             // calculate reflection of previous control points for t
                             $controlX = 2 * $x - $tempControlX;
                             $controlY = 2 * $y - $tempControlY;
-                        } else {
-                            if ($previous[0] === 'q') {
+                        }
+                        else
+                        {
+                            if ($previous[0] === 'q')
+                            {
                                 // calculate reflection of previous control points for q
                                 $controlX = 2 * $x - $controlX;
                                 $controlY = 2 * $y - $controlY;
@@ -344,7 +369,7 @@ class Path extends Shape
                         $surface,
                         $x + $l,
                         $y + $t,
-                        array(
+                        [
                             $current[1],
                             $current[2],
                             $current[3],
@@ -352,7 +377,7 @@ class Path extends Shape
                             $current[5],
                             $current[6] + $x + $l,
                             $current[7] + $y + $t
-                        )
+                        ]
                     );
                     $x += $current[6];
                     $y += $current[7];
@@ -364,7 +389,7 @@ class Path extends Shape
                         $surface,
                         $x + $l,
                         $y + $t,
-                        array(
+                        [
                             $current[1],
                             $current[2],
                             $current[3],
@@ -372,7 +397,7 @@ class Path extends Shape
                             $current[5],
                             $current[6] + $l,
                             $current[7] + $t
-                        )
+                        ]
                     );
                     $x = $current[6];
                     $y = $current[7];
@@ -398,16 +423,17 @@ class Path extends Shape
         $sweep = $coords[4];
         $tx = $coords[5];
         $ty = $coords[6];
-        $segs = array(
-            array(),
-            array(),
-            array(),
-            array(),
-        );
+        $segs = [
+            [],
+            [],
+            [],
+            [],
+        ];
 
         $segsNorm = $this->arcToSegments($tx - $fx, $ty - $fy, $rx, $ry, $large, $sweep, $rot);
 
-        for ($i = 0, $len = count($segsNorm); $i < $len; $i++) {
+        for ($i = 0, $len = count($segsNorm); $i < $len; $i++)
+        {
             $segs[$i][0] = $segsNorm[$i][0] + $fx;
             $segs[$i][1] = $segsNorm[$i][1] + $fy;
             $segs[$i][2] = $segsNorm[$i][2] + $fx;
@@ -415,7 +441,7 @@ class Path extends Shape
             $segs[$i][4] = $segsNorm[$i][4] + $fx;
             $segs[$i][5] = $segsNorm[$i][5] + $fy;
 
-            call_user_func_array(array($surface, "bezierCurveTo"), $segs[$i]);
+            call_user_func_array([$surface, "bezierCurveTo"], $segs[$i]);
         }
     }
 
@@ -439,11 +465,14 @@ class Path extends Shape
         $pl = $rx2 * $ry2 - $rx2 * $py2 - $ry2 * $px2;
         $root = 0;
 
-        if ($pl < 0) {
+        if ($pl < 0)
+        {
             $s = sqrt(1 - $pl / ($rx2 * $ry2));
             $rx *= $s;
             $ry *= $s;
-        } else {
+        }
+        else
+        {
             $root = ($large == $sweep ? -1.0 : 1.0) * sqrt($pl / ($rx2 * $py2 + $ry2 * $px2));
         }
 
@@ -454,22 +483,27 @@ class Path extends Shape
         $mTheta = $this->calcVectorAngle(1, 0, ($px - $cx) / $rx, ($py - $cy) / $ry);
         $dtheta = $this->calcVectorAngle(($px - $cx) / $rx, ($py - $cy) / $ry, (-$px - $cx) / $rx, (-$py - $cy) / $ry);
 
-        if ($sweep == 0 && $dtheta > 0) {
+        if ($sweep == 0 && $dtheta > 0)
+        {
             $dtheta -= 2 * M_PI;
-        } else {
-            if ($sweep == 1 && $dtheta < 0) {
+        }
+        else
+        {
+            if ($sweep == 1 && $dtheta < 0)
+            {
                 $dtheta += 2 * M_PI;
             }
         }
 
         // $Convert $into $cubic $bezier $segments <= 90deg
         $segments = ceil(abs($dtheta / M_PI * 2));
-        $result = array();
+        $result = [];
         $mDelta = $dtheta / $segments;
         $mT = 8 / 3 * sin($mDelta / 4) * sin($mDelta / 4) / sin($mDelta / 2);
         $th3 = $mTheta + $mDelta;
 
-        for ($i = 0; $i < $segments; $i++) {
+        for ($i = 0; $i < $segments; $i++)
+        {
             $result[$i] = $this->segmentToBezier(
                 $mTheta,
                 $th3,
@@ -505,23 +539,26 @@ class Path extends Shape
         $cp2X = $toX + $mT * ($cosTh * $rx * $sinth3 + $sinTh * $ry * $costh3);
         $cp2Y = $toY + $mT * ($sinTh * $rx * $sinth3 - $cosTh * $ry * $costh3);
 
-        return array(
+        return [
             $cp1X,
             $cp1Y,
             $cp2X,
             $cp2Y,
             $toX,
             $toY
-        );
+        ];
     }
 
     function calcVectorAngle($ux, $uy, $vx, $vy)
     {
         $ta = atan2($uy, $ux);
         $tb = atan2($vy, $vx);
-        if ($tb >= $ta) {
+        if ($tb >= $ta)
+        {
             return $tb - $ta;
-        } else {
+        }
+        else
+        {
             return 2 * M_PI - ($ta - $tb);
         }
     }

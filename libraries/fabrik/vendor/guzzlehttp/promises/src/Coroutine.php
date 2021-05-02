@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Promise;
 
 use Exception;
@@ -60,8 +61,10 @@ final class Coroutine implements PromiseInterface
     public function __construct(callable $generatorFn)
     {
         $this->generator = $generatorFn();
-        $this->result = new Promise(function () {
-            while (isset($this->currentPromise)) {
+        $this->result = new Promise(function ()
+        {
+            while (isset($this->currentPromise))
+            {
                 $this->currentPromise->wait();
             }
         });
@@ -71,7 +74,8 @@ final class Coroutine implements PromiseInterface
     public function then(
         callable $onFulfilled = null,
         callable $onRejected = null
-    ) {
+    )
+    {
         return $this->result->then($onFulfilled, $onRejected);
     }
 
@@ -118,16 +122,24 @@ final class Coroutine implements PromiseInterface
     public function _handleSuccess($value)
     {
         unset($this->currentPromise);
-        try {
+        try
+        {
             $next = $this->generator->send($value);
-            if ($this->generator->valid()) {
+            if ($this->generator->valid())
+            {
                 $this->nextCoroutine($next);
-            } else {
+            }
+            else
+            {
                 $this->result->resolve($value);
             }
-        } catch (Exception $exception) {
+        }
+        catch (Exception $exception)
+        {
             $this->result->reject($exception);
-        } catch (Throwable $throwable) {
+        }
+        catch (Throwable $throwable)
+        {
             $this->result->reject($throwable);
         }
     }
@@ -138,13 +150,18 @@ final class Coroutine implements PromiseInterface
     public function _handleFailure($reason)
     {
         unset($this->currentPromise);
-        try {
+        try
+        {
             $nextYield = $this->generator->throw(exception_for($reason));
             // The throw was caught, so keep iterating on the coroutine
             $this->nextCoroutine($nextYield);
-        } catch (Exception $exception) {
+        }
+        catch (Exception $exception)
+        {
             $this->result->reject($exception);
-        } catch (Throwable $throwable) {
+        }
+        catch (Throwable $throwable)
+        {
             $this->result->reject($throwable);
         }
     }

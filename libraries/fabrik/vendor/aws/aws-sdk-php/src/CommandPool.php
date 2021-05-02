@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws;
 
 use GuzzleHttp\Promise\PromisorInterface;
@@ -37,32 +38,41 @@ class CommandPool implements PromisorInterface
      * - preserve_iterator_keys: (bool) Retain the iterator key when generating
      *   the commands.
      *
-     * @param AwsClientInterface $client   Client used to execute commands.
-     * @param array|\Iterator    $commands Iterable that yields commands.
-     * @param array              $config   Associative array of options.
+     * @param AwsClientInterface $client Client used to execute commands.
+     * @param array|\Iterator $commands Iterable that yields commands.
+     * @param array $config Associative array of options.
      */
     public function __construct(
         AwsClientInterface $client,
         $commands,
         array $config = []
-    ) {
-        if (!isset($config['concurrency'])) {
+    )
+    {
+        if (!isset($config['concurrency']))
+        {
             $config['concurrency'] = 25;
         }
 
         $before = $this->getBefore($config);
-        $mapFn = function ($commands) use ($client, $before, $config) {
-            foreach ($commands as $key => $command) {
-                if (!($command instanceof CommandInterface)) {
+        $mapFn = function ($commands) use ($client, $before, $config)
+        {
+            foreach ($commands as $key => $command)
+            {
+                if (!($command instanceof CommandInterface))
+                {
                     throw new \InvalidArgumentException('Each value yielded by '
                         . 'the iterator must be an Aws\CommandInterface.');
                 }
-                if ($before) {
+                if ($before)
+                {
                     $before($command, $key);
                 }
-                if (!empty($config['preserve_iterator_keys'])) {
+                if (!empty($config['preserve_iterator_keys']))
+                {
                     yield $key => $client->executeAsync($command);
-                } else {
+                }
+                else
+                {
                     yield $client->executeAsync($command);
                 }
             }
@@ -83,9 +93,9 @@ class CommandPool implements PromisorInterface
      * Executes a pool synchronously and aggregates the results of the pool
      * into an indexed array in the same order as the passed in array.
      *
-     * @param AwsClientInterface $client   Client used to execute commands.
-     * @param mixed              $commands Iterable that yields commands.
-     * @param array              $config   Configuration options.
+     * @param AwsClientInterface $client Client used to execute commands.
+     * @param mixed $commands Iterable that yields commands.
+     * @param array $config Configuration options.
      *
      * @return array
      * @see \Aws\CommandPool::__construct for available configuration options.
@@ -94,14 +104,16 @@ class CommandPool implements PromisorInterface
         AwsClientInterface $client,
         $commands,
         array $config = []
-    ) {
+    )
+    {
         $results = [];
         self::cmpCallback($config, 'fulfilled', $results);
         self::cmpCallback($config, 'rejected', $results);
 
         return (new self($client, $commands, $config))
             ->promise()
-            ->then(static function () use (&$results) {
+            ->then(static function () use (&$results)
+            {
                 ksort($results);
                 return $results;
             })
@@ -113,11 +125,13 @@ class CommandPool implements PromisorInterface
      */
     private function getBefore(array $config)
     {
-        if (!isset($config['before'])) {
+        if (!isset($config['before']))
+        {
             return null;
         }
 
-        if (is_callable($config['before'])) {
+        if (is_callable($config['before']))
+        {
             return $config['before'];
         }
 
@@ -135,13 +149,18 @@ class CommandPool implements PromisorInterface
      */
     private static function cmpCallback(array &$config, $name, array &$results)
     {
-        if (!isset($config[$name])) {
-            $config[$name] = function ($v, $k) use (&$results) {
+        if (!isset($config[$name]))
+        {
+            $config[$name] = function ($v, $k) use (&$results)
+            {
                 $results[$k] = $v;
             };
-        } else {
+        }
+        else
+        {
             $currentFn = $config[$name];
-            $config[$name] = function ($v, $k) use (&$results, $currentFn) {
+            $config[$name] = function ($v, $k) use (&$results, $currentFn)
+            {
                 $currentFn($v, $k);
                 $results[$k] = $v;
             };

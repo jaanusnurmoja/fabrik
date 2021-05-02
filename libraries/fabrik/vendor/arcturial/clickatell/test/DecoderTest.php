@@ -1,4 +1,5 @@
 <?php
+
 namespace Clickatell;
 
 use PHPUnit_Framework_TestCase;
@@ -17,9 +18,9 @@ class DecoderTest extends PHPUnit_Framework_TestCase
     public function testDecodeRest()
     {
         $body = json_encode(
-            array(
+            [
                 'data' => true
-            )
+            ]
         );
 
         $clickatell = new Decoder($body, 200);
@@ -27,12 +28,12 @@ class DecoderTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($return);
 
         $body = json_encode(
-            array(
-                'error' => array(
+            [
+                'error' => [
                     'description' => 'Some Error',
-                    'code' => 301
-                )
-            )
+                    'code'        => 301
+                ]
+            ]
         );
 
         $clickatell = new Decoder($body, 200);

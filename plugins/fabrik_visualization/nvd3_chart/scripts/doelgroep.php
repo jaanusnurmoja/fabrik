@@ -17,32 +17,32 @@ $labels = array_combine($sub_values, $sub_labels);
 $query->clear();
 $query->select('doelgroep')->from('fab_userinfo');
 $db->setQuery($query);
-$data = array();
+$data = [];
 $rows = $db->loadColumn();
 foreach ($rows as $row)
 {
-	$vals = json_decode($row);
-	foreach ($vals as $val)
-	{
-		if (!array_key_exists($val, $data))
-		{
-			$o = new stdClass;
-			$o->label = $labels[$val];
-			$o->value = 1;
-			$data[$val] = $o;
-		}
-		else
-		{
-			$data[$val]->value ++;
-		}
-	}
+    $vals = json_decode($row);
+    foreach ($vals as $val)
+    {
+        if (!array_key_exists($val, $data))
+        {
+            $o = new stdClass;
+            $o->label = $labels[$val];
+            $o->value = 1;
+            $data[$val] = $o;
+        }
+        else
+        {
+            $data[$val]->value++;
+        }
+    }
 }
 $this->data = new stdClass;
 $this->data->key = 'todo2';
-$this->data->values = array();
+$this->data->values = [];
 
 foreach ($data as $data)
 {
-	$this->data->values[] = $data;
+    $this->data->values[] = $data;
 }
-$this->data = array($this->data);
+$this->data = [$this->data];

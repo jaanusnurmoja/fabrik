@@ -17,25 +17,29 @@ use Twilio\Version;
 /**
  * @property \Twilio\Rest\Voice\V1\VoicePermissionList voicePermissions
  */
-class V1 extends Version {
+class V1 extends Version
+{
     protected $_voicePermissions = null;
 
     /**
      * Construct the V1 version of Voice
-     * 
+     *
      * @param \Twilio\Domain $domain Domain that contains the version
      * @return \Twilio\Rest\Voice\V1 V1 version of Voice
      */
-    public function __construct(Domain $domain) {
+    public function __construct(Domain $domain)
+    {
         parent::__construct($domain);
         $this->version = 'v1';
     }
 
     /**
-     * @return \Twilio\Rest\Voice\V1\VoicePermissionList 
+     * @return \Twilio\Rest\Voice\V1\VoicePermissionList
      */
-    protected function getVoicePermissions() {
-        if (!$this->_voicePermissions) {
+    protected function getVoicePermissions()
+    {
+        if (!$this->_voicePermissions)
+        {
             $this->_voicePermissions = new VoicePermissionList($this);
         }
         return $this->_voicePermissions;
@@ -43,14 +47,16 @@ class V1 extends Version {
 
     /**
      * Magic getter to lazy load root resources
-     * 
+     *
      * @param string $name Resource to return
      * @return \Twilio\ListResource The requested resource
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __get($name) {
+    public function __get($name)
+    {
         $method = 'get' . ucfirst($name);
-        if (method_exists($this, $method)) {
+        if (method_exists($this, $method))
+        {
             return $this->$method();
         }
 
@@ -59,16 +65,18 @@ class V1 extends Version {
 
     /**
      * Magic caller to get resource contexts
-     * 
+     *
      * @param string $name Resource to return
      * @param array $arguments Context parameters
      * @return \Twilio\InstanceContext The requested resource context
      * @throws \Twilio\Exceptions\TwilioException For unknown resource
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         $property = $this->$name;
-        if (method_exists($property, 'getContext')) {
-            return call_user_func_array(array($property, 'getContext'), $arguments);
+        if (method_exists($property, 'getContext'))
+        {
+            return call_user_func_array([$property, 'getContext'], $arguments);
         }
 
         throw new TwilioException('Resource does not have a context');
@@ -76,10 +84,11 @@ class V1 extends Version {
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
+    public function __toString()
+    {
         return '[Twilio.Voice.V1]';
     }
 }

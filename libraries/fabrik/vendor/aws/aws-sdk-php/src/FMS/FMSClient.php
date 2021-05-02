@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\FMS;
 
 use Aws\AwsClient;
@@ -32,4 +33,6 @@ use Aws\AwsClient;
  * @method \Aws\Result putPolicy(array $args = [])
  * @method \GuzzleHttp\Promise\Promise putPolicyAsync(array $args = [])
  */
-class FMSClient extends AwsClient {}
+class FMSClient extends AwsClient
+{
+}

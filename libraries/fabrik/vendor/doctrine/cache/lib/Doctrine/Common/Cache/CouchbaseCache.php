@@ -60,11 +60,12 @@ class CouchbaseCache extends CacheProvider
      */
     protected function doSave($id, $data, $lifeTime = 0)
     {
-        if ($lifeTime > 30 * 24 * 3600) {
+        if ($lifeTime > 30 * 24 * 3600)
+        {
             $lifeTime = time() + $lifeTime;
         }
 
-        return $this->couchbase->set($id, $data, (int) $lifeTime);
+        return $this->couchbase->set($id, $data, (int)$lifeTime);
     }
 
     /**
@@ -88,16 +89,16 @@ class CouchbaseCache extends CacheProvider
      */
     protected function doGetStats()
     {
-        $stats   = $this->couchbase->getStats();
+        $stats = $this->couchbase->getStats();
         $servers = $this->couchbase->getServers();
-        $server  = explode(':', $servers[0]);
-        $key     = $server[0] . ':11210';
-        $stats   = $stats[$key];
+        $server = explode(':', $servers[0]);
+        $key = $server[0] . ':11210';
+        $stats = $stats[$key];
 
         return [
-            Cache::STATS_HITS   => $stats['get_hits'],
-            Cache::STATS_MISSES => $stats['get_misses'],
-            Cache::STATS_UPTIME => $stats['uptime'],
+            Cache::STATS_HITS             => $stats['get_hits'],
+            Cache::STATS_MISSES           => $stats['get_misses'],
+            Cache::STATS_UPTIME           => $stats['uptime'],
             Cache::STATS_MEMORY_USAGE     => $stats['bytes'],
             Cache::STATS_MEMORY_AVAILABLE => $stats['limit_maxbytes'],
         ];

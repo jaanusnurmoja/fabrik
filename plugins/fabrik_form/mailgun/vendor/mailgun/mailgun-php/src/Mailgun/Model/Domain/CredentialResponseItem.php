@@ -50,10 +50,10 @@ final class CredentialResponseItem
     }
 
     /**
-     * @param int       $sizeBytes
+     * @param int $sizeBytes
      * @param \DateTime $createdAt
-     * @param string    $mailbox
-     * @param string    $login
+     * @param string $mailbox
+     * @param string $login
      */
     private function __construct($sizeBytes, \DateTime $createdAt, $mailbox, $login)
     {

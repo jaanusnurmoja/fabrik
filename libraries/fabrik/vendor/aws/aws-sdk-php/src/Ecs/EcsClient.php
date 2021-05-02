@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Ecs;
 
 use Aws\AwsClient;
@@ -81,4 +82,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateService(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateServiceAsync(array $args = [])
  */
-class EcsClient extends AwsClient {}
+class EcsClient extends AwsClient
+{
+}

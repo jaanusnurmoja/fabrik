@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Api\Parser;
 
 use Aws\Api\StructureShape;
@@ -16,7 +17,7 @@ class JsonRpcParser extends AbstractParser
     use PayloadParserTrait;
 
     /**
-     * @param Service    $api    Service description
+     * @param Service $api Service description
      * @param JsonParser $parser JSON body builder
      */
     public function __construct(Service $api, JsonParser $parser = null)
@@ -28,7 +29,8 @@ class JsonRpcParser extends AbstractParser
     public function __invoke(
         CommandInterface $command,
         ResponseInterface $response
-    ) {
+    )
+    {
         $operation = $this->api->getOperation($command->getName());
         $result = null === $operation['output']
             ? null
@@ -45,7 +47,8 @@ class JsonRpcParser extends AbstractParser
         StreamInterface $stream,
         StructureShape $member,
         $response
-    ) {
+    )
+    {
         return $this->parser->parse($member, $this->parseJson($stream, $response));
     }
 }

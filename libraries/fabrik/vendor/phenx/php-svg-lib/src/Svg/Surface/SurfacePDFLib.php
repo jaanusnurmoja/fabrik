@@ -31,7 +31,8 @@ class SurfacePDFLib implements SurfaceInterface
         $w = $dimensions["width"];
         $h = $dimensions["height"];
 
-        if (!$canvas) {
+        if (!$canvas)
+        {
             $canvas = new \PDFlib();
 
             /* all strings are expected as utf8 */
@@ -39,7 +40,8 @@ class SurfacePDFLib implements SurfaceInterface
             $canvas->set_option("errorpolicy=return");
 
             /*  open new PDF file; insert a file name to create the PDF on disk */
-            if ($canvas->begin_document("", "") == 0) {
+            if ($canvas->begin_document("", "") == 0)
+            {
                 die("Error: " . $canvas->get_errmsg());
             }
             $canvas->set_info("Creator", "PDFlib starter sample");
@@ -56,7 +58,7 @@ class SurfacePDFLib implements SurfaceInterface
             0, $h
         );
 
-        $this->width  = $w;
+        $this->width = $w;
         $this->height = $h;
 
         $this->canvas = $canvas;
@@ -149,13 +151,16 @@ class SurfacePDFLib implements SurfaceInterface
     {
         if (self::DEBUG) echo __FUNCTION__ . "\n";
 
-        if (strpos($image, "data:") === 0) {
+        if (strpos($image, "data:") === 0)
+        {
             $data = substr($image, strpos($image, ";") + 1);
-            if (strpos($data, "base64") === 0) {
+            if (strpos($data, "base64") === 0)
+            {
                 $data = base64_decode(substr($data, 7));
             }
         }
-        else {
+        else
+        {
             $data = file_get_contents($image);
         }
 
@@ -232,7 +237,8 @@ class SurfacePDFLib implements SurfaceInterface
 
         $canvas = $this->canvas;
 
-        if ($rx <= 0.000001/* && $ry <= 0.000001*/) {
+        if ($rx <= 0.000001/* && $ry <= 0.000001*/)
+        {
             $canvas->rect($x, $y, $w, $h);
 
             return;
@@ -250,7 +256,7 @@ class SurfacePDFLib implements SurfaceInterface
         $canvas->arc($x + $w - $rx, $y + $rx, $rx, 270, 360);
 
         /* Start of the arc segment in the upper right corner */
-        $canvas->lineto($x + $w, $y + $h - $rx );
+        $canvas->lineto($x + $w, $y + $h - $rx);
 
         /* Arc segment in the upper right corner */
         $canvas->arc($x + $w - $rx, $y + $h - $rx, $rx, 0, 90);
@@ -262,7 +268,7 @@ class SurfacePDFLib implements SurfaceInterface
         $canvas->arc($x + $rx, $y + $h - $rx, $rx, 90, 180);
 
         /* Start of the arc segment in the lower left corner */
-        $canvas->lineto($x , $y + $rx);
+        $canvas->lineto($x, $y + $rx);
 
         /* Arc segment in the lower left corner */
         $canvas->arc($x + $rx, $y + $rx, $rx, 180, 270);
@@ -315,7 +321,8 @@ class SurfacePDFLib implements SurfaceInterface
         $this->style = $style;
         $canvas = $this->canvas;
 
-        if ($stroke = $style->stroke && is_array($style->stroke)) {
+        if ($stroke = $style->stroke && is_array($style->stroke))
+        {
             $canvas->setcolor(
                 "stroke",
                 "rgb",
@@ -326,7 +333,8 @@ class SurfacePDFLib implements SurfaceInterface
             );
         }
 
-        if ($fill = $style->fill && is_array($style->fill)) {
+        if ($fill = $style->fill && is_array($style->fill))
+        {
             $canvas->setcolor(
                 "fill",
                 "rgb",
@@ -337,78 +345,90 @@ class SurfacePDFLib implements SurfaceInterface
             );
         }
 
-        if ($fillRule = strtolower($style->fillRule)) {
-            $map = array(
+        if ($fillRule = strtolower($style->fillRule))
+        {
+            $map = [
                 "nonzero" => "winding",
                 "evenodd" => "evenodd",
-            );
+            ];
 
-            if (isset($map[$fillRule])) {
+            if (isset($map[$fillRule]))
+            {
                 $fillRule = $map[$fillRule];
 
                 $canvas->set_parameter("fillrule", $fillRule);
             }
         }
 
-        $opts = array();
-        if ($style->strokeWidth > 0.000001) {
+        $opts = [];
+        if ($style->strokeWidth > 0.000001)
+        {
             $opts[] = "linewidth=$style->strokeWidth";
         }
 
-        if (in_array($style->strokeLinecap, array("butt", "round", "projecting"))) {
+        if (in_array($style->strokeLinecap, ["butt", "round", "projecting"]))
+        {
             $opts[] = "linecap=$style->strokeLinecap";
         }
 
-        if (in_array($style->strokeLinejoin, array("miter", "round", "bevel"))) {
+        if (in_array($style->strokeLinejoin, ["miter", "round", "bevel"]))
+        {
             $opts[] = "linejoin=$style->strokeLinejoin";
         }
 
         $canvas->set_graphics_option(implode(" ", $opts));
 
-        $opts = array();
+        $opts = [];
         $opacity = $style->opacity;
-        if ($opacity !== null && $opacity < 1.0) {
+        if ($opacity !== null && $opacity < 1.0)
+        {
             $opts[] = "opacityfill=$opacity";
             $opts[] = "opacitystroke=$opacity";
         }
-        else {
+        else
+        {
             $fillOpacity = $style->fillOpacity;
-            if ($fillOpacity !== null && $fillOpacity < 1.0) {
+            if ($fillOpacity !== null && $fillOpacity < 1.0)
+            {
                 $opts[] = "opacityfill=$fillOpacity";
             }
 
             $strokeOpacity = $style->strokeOpacity;
-            if ($strokeOpacity !== null && $strokeOpacity < 1.0) {
+            if ($strokeOpacity !== null && $strokeOpacity < 1.0)
+            {
                 $opts[] = "opacitystroke=$strokeOpacity";
             }
         }
 
-        if (count($opts)) {
+        if (count($opts))
+        {
             $gs = $canvas->create_gstate(implode(" ", $opts));
             $canvas->set_gstate($gs);
         }
 
         $font = $this->getFont($style->fontFamily, $style->fontStyle);
-        if ($font) {
+        if ($font)
+        {
             $canvas->setfont($font, $style->fontSize);
         }
     }
 
     private function getFont($family, $style)
     {
-        $map = array(
+        $map = [
             "serif"      => "Times",
             "sans-serif" => "Helvetica",
             "fantasy"    => "Symbol",
             "cursive"    => "Times",
             "monospace"  => "Courier",
 
-            "arial"      => "Helvetica",
-            "verdana"    => "Helvetica",
-        );
+            "arial"   => "Helvetica",
+            "verdana" => "Helvetica",
+        ];
 
         $family = strtolower($family);
-        if (isset($map[$family])) {
+        if (isset($map[$family]))
+        {
             $family = $map[$family];
         }
 

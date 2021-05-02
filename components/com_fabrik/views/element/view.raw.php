@@ -22,50 +22,50 @@ jimport('joomla.application.component.view');
  */
 class FabrikViewElement extends FabrikView
 {
-	/**
-	 * Element id (not used?)
-	 *
-	 * @var int
-	 */
-	protected $id = null;
+    /**
+     * Element id (not used?)
+     *
+     * @var int
+     */
+    protected $id = null;
 
-	/**
-	 * Is mambot (not used?)
-	 *
-	 * @var bool
-	 */
-	public $isMambot = null;
+    /**
+     * Is mambot (not used?)
+     *
+     * @var bool
+     */
+    public $isMambot = null;
 
-	/**
-	 * Set id
-	 *
-	 * @param   int  $id  Element id
-	 *
-	 * @deprecated ?
-	 *
-	 * @return  void
-	 */
-	public function setId($id)
-	{
-		$this->id = $id;
-	}
+    /**
+     * Set id
+     *
+     * @param int $id Element id
+     *
+     * @return  void
+     * @deprecated ?
+     *
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
 
-	/**
-	 * Display the template
-	 *
-	 * @param   string  $tpl  Template
-	 *
-	 * @return void
-	 */
-	public function display($tpl = null)
-	{
-		$input = $this->app->input;
-		$pluginManager = JModelLegacy::getInstance('Pluginmanager', 'FabrikFEModel');
-		$ids = $input->get('plugin', array(), 'array');
+    /**
+     * Display the template
+     *
+     * @param string $tpl Template
+     *
+     * @return void
+     */
+    public function display($tpl = null)
+    {
+        $input = $this->app->input;
+        $pluginManager = JModelLegacy::getInstance('Pluginmanager', 'FabrikFEModel');
+        $ids = $input->get('plugin', [], 'array');
 
-		foreach ($ids as $id)
-		{
-			$plugin = $pluginManager->getElementPlugin($id);
-		}
-	}
+        foreach ($ids as $id)
+        {
+            $plugin = $pluginManager->getElementPlugin($id);
+        }
+    }
 }

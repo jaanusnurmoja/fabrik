@@ -7,7 +7,7 @@
 
 define(['jquery', 'fab/element'], function (jQuery, FbElement) {
     window.FbBirthday = new Class({
-        Extends   : FbElement,
+        Extends: FbElement,
         initialize: function (element, options) {
             this.setPlugin('birthday');
             this.default_sepchar = '-';
@@ -21,7 +21,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
         getFocusEvent: function () {
             return 'click';
         },
-        
+
         getValue: function () {
             var v = [];
             if (!this.options.editable) {
@@ -37,7 +37,7 @@ define(['jquery', 'fab/element'], function (jQuery, FbElement) {
 
         update: function (val) {
             var sepChar;
-            if (typeof(val) === 'string') {
+            if (typeof (val) === 'string') {
                 sepChar = this.options.separator;
                 if (val.indexOf(sepChar) === -1) {
                     sepChar = this.default_sepchar;

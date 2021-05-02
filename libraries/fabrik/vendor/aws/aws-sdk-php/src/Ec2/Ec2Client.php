@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Ec2;
 
 use Aws\AwsClient;
@@ -635,16 +636,17 @@ class Ec2Client extends AwsClient
 {
     public function __construct(array $args)
     {
-        $args['with_resolved'] = function (array $args) {
+        $args['with_resolved'] = function (array $args)
+        {
             $this->getHandlerList()->appendInit(
                 PresignUrlMiddleware::wrap(
                     $this,
                     $args['endpoint_provider'],
                     [
-                        'operations' => [
+                        'operations'    => [
                             'CopySnapshot',
                         ],
-                        'service' => 'ec2',
+                        'service'       => 'ec2',
                         'presign_param' => 'PresignedUrl',
                     ]
                 ),

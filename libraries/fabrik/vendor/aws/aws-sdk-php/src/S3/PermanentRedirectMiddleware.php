@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\S3;
 
 use Aws\CommandInterface;
@@ -14,7 +15,7 @@ use Psr\Http\Message\RequestInterface;
  */
 class PermanentRedirectMiddleware
 {
-    /** @var callable  */
+    /** @var callable */
     private $nextHandler;
 
     /**
@@ -24,7 +25,8 @@ class PermanentRedirectMiddleware
      */
     public static function wrap()
     {
-        return function (callable $handler) {
+        return function (callable $handler)
+        {
             return new self($handler);
         };
     }
@@ -41,11 +43,13 @@ class PermanentRedirectMiddleware
     {
         $next = $this->nextHandler;
         return $next($command, $request)->then(
-            function (ResultInterface $result) use ($command) {
+            function (ResultInterface $result) use ($command)
+            {
                 $status = isset($result['@metadata']['statusCode'])
                     ? $result['@metadata']['statusCode']
                     : null;
-                if ($status == 301) {
+                if ($status == 301)
+                {
                     throw new PermanentRedirectException(
                         'Encountered a permanent redirect while requesting '
                         . $result->search('"@metadata".effectiveUri') . '. '

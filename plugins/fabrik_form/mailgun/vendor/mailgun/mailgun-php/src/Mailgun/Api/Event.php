@@ -23,7 +23,7 @@ class Event extends HttpApi
 
     /**
      * @param string $domain
-     * @param array  $params
+     * @param array $params
      *
      * @return EventResponse
      */

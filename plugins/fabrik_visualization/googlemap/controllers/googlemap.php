@@ -22,19 +22,19 @@ jimport('joomla.application.component.controller');
  */
 class FabrikControllerVisualizationgooglemap extends FabrikControllerVisualization
 {
-	/**
-	 * Ajax markers
-	 *
-	 * @param   string $tmpl Template
-	 *
-	 * @return  void
-	 */
-	public function ajax_getMarkers($tmpl = 'default')
-	{
-		$viewName = 'googlemap';
-		$model    = $this->getModel($viewName);
-		$id       = $this->input->getInt('visualizationid', 0);
-		$model->setId($id);
-		$model->onAjax_getMarkers();
-	}
+    /**
+     * Ajax markers
+     *
+     * @param string $tmpl Template
+     *
+     * @return  void
+     */
+    public function ajax_getMarkers($tmpl = 'default')
+    {
+        $viewName = 'googlemap';
+        $model = $this->getModel($viewName);
+        $id = $this->input->getInt('visualizationid', 0);
+        $model->setId($id);
+        $model->onAjax_getMarkers();
+    }
 }

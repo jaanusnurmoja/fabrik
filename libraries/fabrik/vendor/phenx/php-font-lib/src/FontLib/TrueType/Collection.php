@@ -18,83 +18,96 @@ use OutOfBoundsException;
  *
  * @package php-font-lib
  */
-class Collection extends BinaryStream implements Iterator, Countable {
-  /**
-   * Current iterator position.
-   *
-   * @var integer
-   */
-  private $position = 0;
+class Collection extends BinaryStream implements Iterator, Countable
+{
+    /**
+     * Current iterator position.
+     *
+     * @var integer
+     */
+    private $position = 0;
 
-  protected $collectionOffsets = array();
-  protected $collection = array();
-  protected $version;
-  protected $numFonts;
+    protected $collectionOffsets = [];
+    protected $collection        = [];
+    protected $version;
+    protected $numFonts;
 
-  function parse() {
-    if (isset($this->numFonts)) {
-      return;
+    function parse()
+    {
+        if (isset($this->numFonts))
+        {
+            return;
+        }
+
+        $this->read(4); // tag name
+
+        $this->version = $this->readFixed();
+        $this->numFonts = $this->readUInt32();
+
+        for ($i = 0; $i < $this->numFonts; $i++)
+        {
+            $this->collectionOffsets[] = $this->readUInt32();
+        }
     }
 
-    $this->read(4); // tag name
+    /**
+     * @param int $fontId
+     *
+     * @return File
+     * @throws OutOfBoundsException
+     */
+    function getFont($fontId)
+    {
+        $this->parse();
 
-    $this->version  = $this->readFixed();
-    $this->numFonts = $this->readUInt32();
+        if (!isset($this->collectionOffsets[$fontId]))
+        {
+            throw new OutOfBoundsException();
+        }
 
-    for ($i = 0; $i < $this->numFonts; $i++) {
-      $this->collectionOffsets[] = $this->readUInt32();
+        if (isset($this->collection[$fontId]))
+        {
+            return $this->collection[$fontId];
+        }
+
+        $font = new File();
+        $font->f = $this->f;
+        $font->setTableOffset($this->collectionOffsets[$fontId]);
+
+        return $this->collection[$fontId] = $font;
     }
-  }
 
-  /**
-   * @param int $fontId
-   *
-   * @throws OutOfBoundsException
-   * @return File
-   */
-  function getFont($fontId) {
-    $this->parse();
-
-    if (!isset($this->collectionOffsets[$fontId])) {
-      throw new OutOfBoundsException();
+    function current()
+    {
+        return $this->getFont($this->position);
     }
 
-    if (isset($this->collection[$fontId])) {
-      return $this->collection[$fontId];
+    function key()
+    {
+        return $this->position;
     }
 
-    $font    = new File();
-    $font->f = $this->f;
-    $font->setTableOffset($this->collectionOffsets[$fontId]);
+    function next()
+    {
+        return ++$this->position;
+    }
 
-    return $this->collection[$fontId] = $font;
-  }
+    function rewind()
+    {
+        $this->position = 0;
+    }
 
-  function current() {
-    return $this->getFont($this->position);
-  }
+    function valid()
+    {
+        $this->parse();
 
-  function key() {
-    return $this->position;
-  }
+        return isset($this->collectionOffsets[$this->position]);
+    }
 
-  function next() {
-    return ++$this->position;
-  }
+    function count()
+    {
+        $this->parse();
 
-  function rewind() {
-    $this->position = 0;
-  }
-
-  function valid() {
-    $this->parse();
-
-    return isset($this->collectionOffsets[$this->position]);
-  }
-
-  function count() {
-    $this->parse();
-
-    return $this->numFonts;
-  }
+        return $this->numFonts;
+    }
 }

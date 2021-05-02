@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\DynamoDb;
 
 /**
@@ -20,7 +21,7 @@ namespace Aws\DynamoDb;
  */
 class SessionHandler implements \SessionHandlerInterface
 {
-    /** @var SessionConnectionInterface Session save logic.*/
+    /** @var SessionConnectionInterface Session save logic. */
     private $connection;
 
     /** @var string Session save path. */
@@ -53,16 +54,19 @@ class SessionHandler implements \SessionHandlerInterface
      * - max_lock_retry_microtime: Max time (µs) to wait between lock attempts.
      *
      * @param DynamoDbClient $client Client for doing DynamoDB operations
-     * @param array          $config Configuration for the Session Handler
+     * @param array $config Configuration for the Session Handler
      *
      * @return SessionHandler
      */
     public static function fromClient(DynamoDbClient $client, array $config = [])
     {
         $config += ['locking' => false];
-        if ($config['locking']) {
+        if ($config['locking'])
+        {
             $connection = new LockingSessionConnection($client, $config);
-        } else {
+        }
+        else
+        {
             $connection = new StandardSessionConnection($client, $config);
         }
 
@@ -85,13 +89,13 @@ class SessionHandler implements \SessionHandlerInterface
      */
     public function register()
     {
-         return session_set_save_handler($this, true);
+        return session_set_save_handler($this, true);
     }
 
     /**
      * Open a session for writing. Triggered by session_start().
      *
-     * @param string $savePath    Session save path.
+     * @param string $savePath Session save path.
      * @param string $sessionName Session name.
      *
      * @return bool Whether or not the operation succeeded.
@@ -114,9 +118,10 @@ class SessionHandler implements \SessionHandlerInterface
         $id = session_id();
         // Make sure the session is unlocked and the expiration time is updated,
         // even if the write did not occur
-        if ($this->openSessionId !== $id || !$this->sessionWritten) {
+        if ($this->openSessionId !== $id || !$this->sessionWritten)
+        {
             $result = $this->connection->write($this->formatId($id), '', false);
-            $this->sessionWritten = (bool) $result;
+            $this->sessionWritten = (bool)$result;
         }
 
         return $this->sessionWritten;
@@ -140,9 +145,11 @@ class SessionHandler implements \SessionHandlerInterface
         $item = $this->connection->read($this->formatId($id));
 
         // Return the data if it is not expired. If it is expired, remove it
-        if (isset($item['expires']) && isset($item['data'])) {
+        if (isset($item['expires']) && isset($item['data']))
+        {
             $this->dataRead = $item['data'];
-            if ($item['expires'] <= time()) {
+            if ($item['expires'] <= time())
+            {
                 $this->dataRead = '';
                 $this->destroy($id);
             }
@@ -154,7 +161,7 @@ class SessionHandler implements \SessionHandlerInterface
     /**
      * Write a session to DynamoDB.
      *
-     * @param string $id   Session ID.
+     * @param string $id Session ID.
      * @param string $data Serialized session data to write.
      *
      * @return bool Whether or not the operation succeeded.

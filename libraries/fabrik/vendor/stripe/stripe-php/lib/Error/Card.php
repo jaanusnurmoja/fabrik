@@ -12,7 +12,8 @@ class Card extends Base
         $httpBody,
         $jsonBody,
         $httpHeaders = null
-    ) {
+    )
+    {
         parent::__construct($message, $httpStatus, $httpBody, $jsonBody, $httpHeaders);
         $this->stripeParam = $stripeParam;
 

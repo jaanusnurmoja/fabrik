@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Comprehend;
 
 use Aws\AwsClient;
@@ -86,4 +87,6 @@ use Aws\AwsClient;
  * @method \Aws\Result stopSentimentDetectionJob(array $args = [])
  * @method \GuzzleHttp\Promise\Promise stopSentimentDetectionJobAsync(array $args = [])
  */
-class ComprehendClient extends AwsClient {}
+class ComprehendClient extends AwsClient
+{
+}

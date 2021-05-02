@@ -42,7 +42,8 @@ class Complaint
     {
         $complaint = new self($data['address']);
 
-        if (isset($data['created_at'])) {
+        if (isset($data['created_at']))
+        {
             $complaint->setCreatedAt(new \DateTime($data['created_at']));
         }
 

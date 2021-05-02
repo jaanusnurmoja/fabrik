@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\MediaTailor;
 
 use Aws\AwsClient;
@@ -14,4 +15,6 @@ use Aws\AwsClient;
  * @method \Aws\Result putPlaybackConfiguration(array $args = [])
  * @method \GuzzleHttp\Promise\Promise putPlaybackConfigurationAsync(array $args = [])
  */
-class MediaTailorClient extends AwsClient {}
+class MediaTailorClient extends AwsClient
+{
+}

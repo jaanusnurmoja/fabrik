@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CodeCommit;
 
 use Aws\AwsClient;
@@ -85,4 +86,6 @@ use Aws\AwsClient;
  * @method \Aws\Result updateRepositoryName(array $args = [])
  * @method \GuzzleHttp\Promise\Promise updateRepositoryNameAsync(array $args = [])
  */
-class CodeCommitClient extends AwsClient {}
+class CodeCommitClient extends AwsClient
+{
+}

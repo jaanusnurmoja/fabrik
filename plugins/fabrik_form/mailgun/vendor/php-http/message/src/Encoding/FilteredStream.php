@@ -52,16 +52,18 @@ abstract class FilteredStream implements StreamInterface
 
     /**
      * @param StreamInterface $stream
-     * @param mixed|null      $readFilterOptions
-     * @param mixed|null      $writeFilterOptions deprecated since 1.5, will be removed in 2.0
+     * @param mixed|null $readFilterOptions
+     * @param mixed|null $writeFilterOptions deprecated since 1.5, will be removed in 2.0
      */
     public function __construct(StreamInterface $stream, $readFilterOptions = null, $writeFilterOptions = null)
     {
         $this->readFilterCallback = Filter\fun($this->readFilter(), $readFilterOptions);
         $this->writeFilterCallback = Filter\fun($this->writeFilter(), $writeFilterOptions);
 
-        if (null !== $writeFilterOptions) {
-            @trigger_error('The $writeFilterOptions argument is deprecated since version 1.5 and will be removed in 2.0.', E_USER_DEPRECATED);
+        if (null !== $writeFilterOptions)
+        {
+            @trigger_error('The $writeFilterOptions argument is deprecated since version 1.5 and will be removed in 2.0.',
+                E_USER_DEPRECATED);
         }
 
         $this->stream = $stream;
@@ -72,14 +74,16 @@ abstract class FilteredStream implements StreamInterface
      */
     public function read($length)
     {
-        if (strlen($this->buffer) >= $length) {
+        if (strlen($this->buffer) >= $length)
+        {
             $read = substr($this->buffer, 0, $length);
             $this->buffer = substr($this->buffer, $length);
 
             return $read;
         }
 
-        if ($this->stream->eof()) {
+        if ($this->stream->eof())
+        {
             $buffer = $this->buffer;
             $this->buffer = '';
 
@@ -90,7 +94,7 @@ abstract class FilteredStream implements StreamInterface
         $this->buffer = '';
         $this->fill();
 
-        return $read.$this->read($length - strlen($read));
+        return $read . $this->read($length - strlen($read));
     }
 
     /**
@@ -113,7 +117,8 @@ abstract class FilteredStream implements StreamInterface
         $readFilterCallback = $this->readFilterCallback;
         $this->buffer .= $readFilterCallback($this->stream->read(self::BUFFER_SIZE));
 
-        if ($this->stream->eof()) {
+        if ($this->stream->eof())
+        {
             $this->buffer .= $readFilterCallback();
         }
     }
@@ -125,10 +130,12 @@ abstract class FilteredStream implements StreamInterface
     {
         $buffer = '';
 
-        while (!$this->eof()) {
+        while (!$this->eof())
+        {
             $buf = $this->read(self::BUFFER_SIZE);
             // Using a loose equality here to match on '' and false.
-            if ($buf == null) {
+            if ($buf == null)
+            {
                 break;
             }
 
@@ -163,7 +170,8 @@ abstract class FilteredStream implements StreamInterface
      */
     public function getReadFilter()
     {
-        @trigger_error('The '.__CLASS__.'::'.__METHOD__.' method is deprecated since version 1.5 and will be removed in 2.0.', E_USER_DEPRECATED);
+        @trigger_error('The ' . __CLASS__ . '::' . __METHOD__ . ' method is deprecated since version 1.5 and will be removed in 2.0.',
+            E_USER_DEPRECATED);
 
         return $this->readFilter();
     }
@@ -184,7 +192,8 @@ abstract class FilteredStream implements StreamInterface
      */
     public function getWriteFilter()
     {
-        @trigger_error('The '.__CLASS__.'::'.__METHOD__.' method is deprecated since version 1.5 and will be removed in 2.0.', E_USER_DEPRECATED);
+        @trigger_error('The ' . __CLASS__ . '::' . __METHOD__ . ' method is deprecated since version 1.5 and will be removed in 2.0.',
+            E_USER_DEPRECATED);
 
         return $this->writeFilter();
     }

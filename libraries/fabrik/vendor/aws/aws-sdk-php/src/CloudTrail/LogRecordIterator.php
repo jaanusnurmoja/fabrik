@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\CloudTrail;
 
 use Aws\S3\S3Client;
@@ -32,9 +33,9 @@ class LogRecordIterator implements \OuterIterator
     private $recordIndex;
 
     /**
-     * @param S3Client         $s3Client
+     * @param S3Client $s3Client
      * @param CloudTrailClient $cloudTrailClient
-     * @param array            $options
+     * @param array $options
      *
      * @return LogRecordIterator
      */
@@ -42,7 +43,8 @@ class LogRecordIterator implements \OuterIterator
         S3Client $s3Client,
         CloudTrailClient $cloudTrailClient,
         array $options = []
-    ) {
+    )
+    {
         $logFileIterator = LogFileIterator::forTrail(
             $s3Client,
             $cloudTrailClient,
@@ -54,8 +56,8 @@ class LogRecordIterator implements \OuterIterator
 
     /**
      * @param S3Client $s3Client
-     * @param string   $s3BucketName
-     * @param array    $options
+     * @param string $s3BucketName
+     * @param array $options
      *
      * @return LogRecordIterator
      */
@@ -63,7 +65,8 @@ class LogRecordIterator implements \OuterIterator
         S3Client $s3Client,
         $s3BucketName,
         array $options = []
-    ) {
+    )
+    {
         $logFileReader = new LogFileReader($s3Client);
         $iter = new LogFileIterator($s3Client, $s3BucketName, $options);
 
@@ -72,8 +75,8 @@ class LogRecordIterator implements \OuterIterator
 
     /**
      * @param S3Client $s3Client
-     * @param string   $s3BucketName
-     * @param string   $s3ObjectKey
+     * @param string $s3BucketName
+     * @param string $s3ObjectKey
      *
      * @return LogRecordIterator
      */
@@ -81,27 +84,31 @@ class LogRecordIterator implements \OuterIterator
         S3Client $s3Client,
         $s3BucketName,
         $s3ObjectKey
-    ) {
+    )
+    {
         $logFileReader = new LogFileReader($s3Client);
-        $logFileIterator = new \ArrayIterator([[
-            'Bucket' => $s3BucketName,
-            'Key'    => $s3ObjectKey,
-        ]]);
+        $logFileIterator = new \ArrayIterator([
+            [
+                'Bucket' => $s3BucketName,
+                'Key'    => $s3ObjectKey,
+            ]
+        ]);
 
         return new self($logFileReader, $logFileIterator);
     }
 
     /**
      * @param LogFileReader $logFileReader
-     * @param \Iterator     $logFileIterator
+     * @param \Iterator $logFileIterator
      */
     public function __construct(
         LogFileReader $logFileReader,
         \Iterator $logFileIterator
-    ) {
+    )
+    {
         $this->logFileReader = $logFileReader;
         $this->logFileIterator = $logFileIterator;
-        $this->records = array();
+        $this->records = [];
         $this->recordIndex = 0;
     }
 
@@ -121,19 +128,22 @@ class LogRecordIterator implements \OuterIterator
 
         // If all the records have been exhausted, get more records from the
         // next log file.
-        while (!$this->valid()) {
+        while (!$this->valid())
+        {
             $this->logFileIterator->next();
             $success = $this->loadRecordsFromCurrentLogFile();
-            if (!$success) {
+            if (!$success)
+            {
                 // The objects iterator is exhausted as well, so stop trying
                 break;
-           }
+            }
         }
     }
 
     public function key()
     {
-        if ($logFile = $this->logFileIterator->current()) {
+        if ($logFile = $this->logFileIterator->current())
+        {
             return $logFile['Key'] . '.' . $this->recordIndex;
         }
 
@@ -172,16 +182,17 @@ class LogRecordIterator implements \OuterIterator
     private function loadRecordsFromCurrentLogFile()
     {
         $this->recordIndex = 0;
-        $this->records = array();
+        $this->records = [];
 
         $logFile = $this->logFileIterator->current();
-        if ($logFile && isset($logFile['Bucket']) && isset($logFile['Key'])) {
+        if ($logFile && isset($logFile['Bucket']) && isset($logFile['Key']))
+        {
             $this->records = $this->logFileReader->read(
                 $logFile['Bucket'],
                 $logFile['Key']
             );
         }
 
-        return (bool) $logFile;
+        return (bool)$logFile;
     }
 }

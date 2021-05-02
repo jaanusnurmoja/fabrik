@@ -1,8 +1,10 @@
 <?php
-$d             = $displayData;
+$d = $displayData;
 
 ?>
 
-<div id="<?php echo $d->id; ?>" class="fabrikinput fabrikElementReadOnly">
-	<?php echo $d->value;?>
+<div id="<?php
+echo $d->id; ?>" class="fabrikinput fabrikElementReadOnly">
+    <?php
+    echo $d->value; ?>
 </div>

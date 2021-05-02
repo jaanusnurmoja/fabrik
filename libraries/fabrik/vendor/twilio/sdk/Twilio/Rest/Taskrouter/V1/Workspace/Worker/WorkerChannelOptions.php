@@ -12,61 +12,70 @@ namespace Twilio\Rest\Taskrouter\V1\Workspace\Worker;
 use Twilio\Options;
 use Twilio\Values;
 
-abstract class WorkerChannelOptions {
+abstract class WorkerChannelOptions
+{
     /**
      * @param integer $capacity The total number of Tasks worker should handle for
      *                          this TaskChannel type.
      * @param boolean $available Toggle the availability of the WorkerChannel.
      * @return UpdateWorkerChannelOptions Options builder
      */
-    public static function update($capacity = Values::NONE, $available = Values::NONE) {
+    public static function update($capacity = Values::NONE, $available = Values::NONE)
+    {
         return new UpdateWorkerChannelOptions($capacity, $available);
     }
 }
 
-class UpdateWorkerChannelOptions extends Options {
+class UpdateWorkerChannelOptions extends Options
+{
     /**
      * @param integer $capacity The total number of Tasks worker should handle for
      *                          this TaskChannel type.
      * @param boolean $available Toggle the availability of the WorkerChannel.
      */
-    public function __construct($capacity = Values::NONE, $available = Values::NONE) {
+    public function __construct($capacity = Values::NONE, $available = Values::NONE)
+    {
         $this->options['capacity'] = $capacity;
         $this->options['available'] = $available;
     }
 
     /**
      * The total number of Tasks worker should handle for this TaskChannel type. TaskRouter will only create reservations for Tasks of this TaskChannel type up to the capacity configured. If the capacity is 0, no new reservations will be created
-     * 
+     *
      * @param integer $capacity The total number of Tasks worker should handle for
      *                          this TaskChannel type.
      * @return $this Fluent Builder
      */
-    public function setCapacity($capacity) {
+    public function setCapacity($capacity)
+    {
         $this->options['capacity'] = $capacity;
         return $this;
     }
 
     /**
      * Toggle the availability of the WorkerChannel. Set this to 'False' to make worker unavailable to receive any new Tasks of this TaskChannel type.
-     * 
+     *
      * @param boolean $available Toggle the availability of the WorkerChannel.
      * @return $this Fluent Builder
      */
-    public function setAvailable($available) {
+    public function setAvailable($available)
+    {
         $this->options['available'] = $available;
         return $this;
     }
 
     /**
      * Provide a friendly representation
-     * 
+     *
      * @return string Machine friendly representation
      */
-    public function __toString() {
-        $options = array();
-        foreach ($this->options as $key => $value) {
-            if ($value != Values::NONE) {
+    public function __toString()
+    {
+        $options = [];
+        foreach ($this->options as $key => $value)
+        {
+            if ($value != Values::NONE)
+            {
                 $options[] = "$key=$value";
             }
         }

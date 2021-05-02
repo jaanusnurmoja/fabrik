@@ -5,21 +5,21 @@ env:
   - PREFER_LOWEST=""
 
 php:
-    - 5.4
-    - 5.5
-    - 5.6
-    - 7.0
-    - hhvm
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
+  - hhvm
 
 matrix:
   allow_failures:
     - php: hhvm
   fast_finish: true
-  
+
 before_script:
-    - composer dump-autoload
-    - composer self-update
-    - composer update --prefer-source $PREFER_LOWEST
+  - composer dump-autoload
+  - composer self-update
+  - composer update --prefer-source $PREFER_LOWEST
 
 script: bin/phpunit
 

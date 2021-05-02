@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Crypto;
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
@@ -44,7 +45,8 @@ class AesEncryptingStream implements AesStreamInterface
         StreamInterface $plainText,
         $key,
         CipherMethod $cipherMethod
-    ) {
+    )
+    {
         $this->stream = $plainText;
         $this->key = $key;
         $this->cipherMethod = clone $cipherMethod;
@@ -69,7 +71,8 @@ class AesEncryptingStream implements AesStreamInterface
     {
         $plainTextSize = $this->stream->getSize();
 
-        if ($this->cipherMethod->requiresPadding() && $plainTextSize !== null) {
+        if ($this->cipherMethod->requiresPadding() && $plainTextSize !== null)
+        {
             // PKCS7 padding requires that between 1 and self::BLOCK_SIZE be
             // added to the plaintext to make it an even number of blocks.
             $padding = self::BLOCK_SIZE - $plainTextSize % self::BLOCK_SIZE;
@@ -86,7 +89,8 @@ class AesEncryptingStream implements AesStreamInterface
 
     public function read($length)
     {
-        if ($length > strlen($this->buffer)) {
+        if ($length > strlen($this->buffer))
+        {
             $this->buffer .= $this->encryptBlock(
                 self::BLOCK_SIZE * ceil(($length - strlen($this->buffer)) / self::BLOCK_SIZE)
             );
@@ -100,38 +104,46 @@ class AesEncryptingStream implements AesStreamInterface
 
     public function seek($offset, $whence = SEEK_SET)
     {
-        if ($whence === SEEK_CUR) {
+        if ($whence === SEEK_CUR)
+        {
             $offset = $this->tell() + $offset;
             $whence = SEEK_SET;
         }
 
-        if ($whence === SEEK_SET) {
+        if ($whence === SEEK_SET)
+        {
             $this->buffer = '';
             $wholeBlockOffset
-                = (int) ($offset / self::BLOCK_SIZE) * self::BLOCK_SIZE;
+                = (int)($offset / self::BLOCK_SIZE) * self::BLOCK_SIZE;
             $this->stream->seek($wholeBlockOffset);
             $this->cipherMethod->seek($wholeBlockOffset);
             $this->read($offset - $wholeBlockOffset);
-        } else {
+        }
+        else
+        {
             throw new LogicException('Unrecognized whence.');
         }
     }
 
     private function encryptBlock($length)
     {
-        if ($this->stream->eof()) {
+        if ($this->stream->eof())
+        {
             return '';
         }
 
         $plainText = '';
-        do {
+        do
+        {
             $plainText .= $this->stream->read($length - strlen($plainText));
         } while (strlen($plainText) < $length && !$this->stream->eof());
 
         $options = OPENSSL_RAW_DATA;
-        if (!$this->stream->eof()
+        if (
+            !$this->stream->eof()
             || $this->stream->getSize() !== $this->stream->tell()
-        ) {
+        )
+        {
             $options |= OPENSSL_ZERO_PADDING;
         }
 

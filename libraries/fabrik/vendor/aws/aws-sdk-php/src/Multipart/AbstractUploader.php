@@ -1,4 +1,5 @@
 <?php
+
 namespace Aws\Multipart;
 
 use Aws\AwsClientInterface as Client;
@@ -13,8 +14,8 @@ abstract class AbstractUploader extends AbstractUploadManager
 
     /**
      * @param Client $client
-     * @param mixed  $source
-     * @param array  $config
+     * @param mixed $source
+     * @param array $config
      */
     public function __construct(Client $client, $source, array $config = [])
     {
@@ -46,11 +47,14 @@ abstract class AbstractUploader extends AbstractUploadManager
         $seekable = $this->source->isSeekable()
             && $this->source->getMetadata('wrapper_type') === 'plainfile';
 
-        for ($partNumber = 1; $this->isEof($seekable); $partNumber++) {
+        for ($partNumber = 1; $this->isEof($seekable); $partNumber++)
+        {
             // If we haven't already uploaded this part, yield a new part.
-            if (!$this->state->hasPartBeenUploaded($partNumber)) {
+            if (!$this->state->hasPartBeenUploaded($partNumber))
+            {
                 $partStartPos = $this->source->tell();
-                if (!($data = $this->createPart($seekable, $partNumber))) {
+                if (!($data = $this->createPart($seekable, $partNumber)))
+                {
                     break;
                 }
                 $command = $this->client->getCommand(
@@ -59,18 +63,22 @@ abstract class AbstractUploader extends AbstractUploadManager
                 );
                 $command->getHandlerList()->appendSign($resultHandler, 'mup');
                 yield $command;
-                if ($this->source->tell() > $partStartPos) {
+                if ($this->source->tell() > $partStartPos)
+                {
                     continue;
                 }
             }
 
             // Advance the source's offset if not already advanced.
-            if ($seekable) {
+            if ($seekable)
+            {
                 $this->source->seek(min(
                     $this->source->tell() + $this->state->getPartSize(),
                     $this->source->getSize()
                 ));
-            } else {
+            }
+            else
+            {
                 $this->source->read($this->state->getPartSize());
             }
         }
@@ -81,7 +89,7 @@ abstract class AbstractUploader extends AbstractUploadManager
      * source starting from the current offset up to the part size.
      *
      * @param bool $seekable
-     * @param int  $number
+     * @param int $number
      *
      * @return array|null
      */
@@ -114,13 +122,15 @@ abstract class AbstractUploader extends AbstractUploadManager
     private function determineSource($source)
     {
         // Use the contents of a file as the data source.
-        if (is_string($source)) {
+        if (is_string($source))
+        {
             $source = Psr7\try_fopen($source, 'r');
         }
 
         // Create a source stream.
         $stream = Psr7\stream_for($source);
-        if (!$stream->isReadable()) {
+        if (!$stream->isReadable())
+        {
             throw new IAE('Source stream must be readable.');
         }
 

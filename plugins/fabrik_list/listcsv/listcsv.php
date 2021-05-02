@@ -21,261 +21,260 @@ require_once COM_FABRIK_FRONTEND . '/models/plugin-list.php';
  * @subpackage  Fabrik.list.listcsv
  * @since       3.0
  */
-
 class PlgFabrik_ListListcsv extends PlgFabrik_List
 {
-	/*
-	 * for use by user code
-	 */
-	public $userClass = null;
+    /*
+     * for use by user code
+     */
+    public $userClass = null;
 
-	/*
-	 * for use by user code
-	 */
-	public $userData = null;
+    /*
+     * for use by user code
+     */
+    public $userData = null;
 
-	/**
-	 * determine if the table plugin is a button and can be activated only when rows are selected
-	 *
-	 * @return bool
-	 */
+    /**
+     * determine if the table plugin is a button and can be activated only when rows are selected
+     *
+     * @return bool
+     */
 
-	public function canSelectRows()
-	{
-		return false;
-	}
+    public function canSelectRows()
+    {
+        return false;
+    }
 
-	/**
-	 * Prep the button if needed
-	 *
-	 * @param   array  &$args  Arguments
-	 *
-	 * @return  bool;
-	 */
+    /**
+     * Prep the button if needed
+     *
+     * @param array  &$args Arguments
+     *
+     * @return  bool;
+     */
 
-	public function button(&$args)
-	{
-		parent::button($args);
+    public function button(&$args)
+    {
+        parent::button($args);
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Called when we import a csv row
-	 *
-	 * @return boolean
-	 */
+    /**
+     * Called when we import a csv row
+     *
+     * @return boolean
+     */
 
-	public function onImportCSVRow()
-	{
-		$params = $this->getParams();
-		$filter = JFilterInput::getInstance();
-		$file = $params->get('listcsv_import_php_file');
-		$file = $filter->clean($file, 'CMD');
+    public function onImportCSVRow()
+    {
+        $params = $this->getParams();
+        $filter = JFilterInput::getInstance();
+        $file = $params->get('listcsv_import_php_file');
+        $file = $filter->clean($file, 'CMD');
 
-		if ($file != -1 && $file != '')
-		{
+        if ($file != -1 && $file != '')
+        {
 
-			require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
-		}
+            require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
+        }
 
-		$code = trim($params->get('listcsv_import_php_code', ''));
+        $code = trim($params->get('listcsv_import_php_code', ''));
 
-		if (!empty($code))
-		{
-			$ret = @eval($code);
-			FabrikWorker::logEval($ret, 'Caught exception on eval in onImportCSVRow : %s');
+        if (!empty($code))
+        {
+            $ret = @eval($code);
+            FabrikWorker::logEval($ret, 'Caught exception on eval in onImportCSVRow : %s');
 
-			if ($ret === false)
-			{
-				return false;
-			}
-		}
+            if ($ret === false)
+            {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Called after we import a csv row
-	 *
-	 * @return boolean
-	 */
+    /**
+     * Called after we import a csv row
+     *
+     * @return boolean
+     */
 
-	public function onAfterImportCSVRow($args)
-	{
-		$params = $this->getParams();
-		$filter = JFilterInput::getInstance();
-		$file = $params->get('listcsv_after_import_php_file');
-		$file = $filter->clean($file, 'CMD');
+    public function onAfterImportCSVRow($args)
+    {
+        $params = $this->getParams();
+        $filter = JFilterInput::getInstance();
+        $file = $params->get('listcsv_after_import_php_file');
+        $file = $filter->clean($file, 'CMD');
 
-		if ($file != -1 && $file != '')
-		{
+        if ($file != -1 && $file != '')
+        {
 
-			require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
-		}
+            require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
+        }
 
-		$code = trim($params->get('listcsv_after_import_php_code', ''));
+        $code = trim($params->get('listcsv_after_import_php_code', ''));
 
-		if (!empty($code))
-		{
-			$ret = @eval($code);
-			FabrikWorker::logEval($ret, 'Caught exception on eval in onAfterImportCSVRow : %s');
+        if (!empty($code))
+        {
+            $ret = @eval($code);
+            FabrikWorker::logEval($ret, 'Caught exception on eval in onAfterImportCSVRow : %s');
 
-			if ($ret === false)
-			{
-				return false;
-			}
-		}
+            if ($ret === false)
+            {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Called when import is complete
-	 *
-	 * @return boolean
-	 */
+    /**
+     * Called when import is complete
+     *
+     * @return boolean
+     */
 
-	public function onCompleteImportCSV()
-	{
-		$params = $this->getParams();
-		$filter = JFilterInput::getInstance();
-		$file = $params->get('listcsv_import_complete_php_file');
-		$file = $filter->clean($file, 'CMD');
+    public function onCompleteImportCSV()
+    {
+        $params = $this->getParams();
+        $filter = JFilterInput::getInstance();
+        $file = $params->get('listcsv_import_complete_php_file');
+        $file = $filter->clean($file, 'CMD');
 
-		if ($file != -1 && $file != '')
-		{
+        if ($file != -1 && $file != '')
+        {
 
-			require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
-		}
+            require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
+        }
 
-		$code = trim($params->get('listcsv_import_complete_php_code', ''));
+        $code = trim($params->get('listcsv_import_complete_php_code', ''));
 
-		if (!empty($code))
-		{
-			$ret = @eval($code);
-			FabrikWorker::logEval($ret, 'Caught exception on eval in onCompleteImportCSV : %s');
+        if (!empty($code))
+        {
+            $ret = @eval($code);
+            FabrikWorker::logEval($ret, 'Caught exception on eval in onCompleteImportCSV : %s');
 
-			if ($ret === false)
-			{
-				return false;
-			}
-		}
+            if ($ret === false)
+            {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Called before import is started
-	 *
-	 * @return boolean
-	 */
+    /**
+     * Called before import is started
+     *
+     * @return boolean
+     */
 
-	public function onStartImportCSV()
-	{
-		$params = $this->getParams();
-		$filter = JFilterInput::getInstance();
-		$file = $params->get('listcsv_import_start_php_file');
-		$file = $filter->clean($file, 'CMD');
+    public function onStartImportCSV()
+    {
+        $params = $this->getParams();
+        $filter = JFilterInput::getInstance();
+        $file = $params->get('listcsv_import_start_php_file');
+        $file = $filter->clean($file, 'CMD');
 
-		if ($file != -1 && $file != '')
-		{
+        if ($file != -1 && $file != '')
+        {
 
-			require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
-		}
+            require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
+        }
 
-		$code = trim($params->get('listcsv_import_start_php_code', ''));
+        $code = trim($params->get('listcsv_import_start_php_code', ''));
 
-		if (!empty($code))
-		{
-			$ret = @eval($code);
-			FabrikWorker::logEval($ret, 'Caught exception on eval in onStartImportCSV : %s');
+        if (!empty($code))
+        {
+            $ret = @eval($code);
+            FabrikWorker::logEval($ret, 'Caught exception on eval in onStartImportCSV : %s');
 
-			if ($ret === false)
-			{
-				return false;
-			}
-		}
+            if ($ret === false)
+            {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Called when we import a csv row
-	 *
-	 * As PHP doesn't support pass by reference for func_get_args, can't pass heading array in
-	 * as an arg, so plugin must modify $listModel->cavExportRow
-	 *
-	 * @return boolean
-	 */
+    /**
+     * Called when we import a csv row
+     *
+     * As PHP doesn't support pass by reference for func_get_args, can't pass heading array in
+     * as an arg, so plugin must modify $listModel->cavExportRow
+     *
+     * @return boolean
+     */
 
-	public function onExportCSVRow()
-	{
-		$listModel = $this->getModel();
-		$params = $this->getParams();
-		$filter = JFilterInput::getInstance();
-		$file = $params->get('listcsv_export_php_file');
-		$file = $filter->clean($file, 'CMD');
+    public function onExportCSVRow()
+    {
+        $listModel = $this->getModel();
+        $params = $this->getParams();
+        $filter = JFilterInput::getInstance();
+        $file = $params->get('listcsv_export_php_file');
+        $file = $filter->clean($file, 'CMD');
 
-		if ($file != -1 && $file != '')
-		{
-			require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
-		}
+        if ($file != -1 && $file != '')
+        {
+            require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
+        }
 
-		$code = trim($params->get('listcsv_export_php_code', ''));
+        $code = trim($params->get('listcsv_export_php_code', ''));
 
-		if (!empty($code))
-		{
-			$ret = @eval($code);
-			FabrikWorker::logEval($ret, 'Caught exception on eval in onExportCSVRow : %s');
+        if (!empty($code))
+        {
+            $ret = @eval($code);
+            FabrikWorker::logEval($ret, 'Caught exception on eval in onExportCSVRow : %s');
 
-			if ($ret === false)
-			{
-				return false;
-			}
-		}
+            if ($ret === false)
+            {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Called when we export the csv headings
-	 *
-	 * As PHP doesn't support pass by reference for func_get_args, can't pass heading array in
-	 * as an arg, so plugin musr modify $listModel->cavExportHeadings
-	 *
-	 * @param  array  $args  row data
-	 *
-	 * @return boolean
-	 */
+    /**
+     * Called when we export the csv headings
+     *
+     * As PHP doesn't support pass by reference for func_get_args, can't pass heading array in
+     * as an arg, so plugin musr modify $listModel->cavExportHeadings
+     *
+     * @param array $args row data
+     *
+     * @return boolean
+     */
 
-	public function onExportCSVHeadings()
-	{
-		$listModel = $this->getModel();
-		$params = $this->getParams();
-		$filter = JFilterInput::getInstance();
-		$file = $params->get('listcsv_export_headings_php_file');
-		$file = $filter->clean($file, 'CMD');
+    public function onExportCSVHeadings()
+    {
+        $listModel = $this->getModel();
+        $params = $this->getParams();
+        $filter = JFilterInput::getInstance();
+        $file = $params->get('listcsv_export_headings_php_file');
+        $file = $filter->clean($file, 'CMD');
 
-		if ($file != -1 && $file != '')
-		{
-			require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
-		}
+        if ($file != -1 && $file != '')
+        {
+            require JPATH_ROOT . '/plugins/fabrik_list/listcsv/scripts/' . $file;
+        }
 
-		$code = trim($params->get('listcsv_export_headings_php_code', ''));
+        $code = trim($params->get('listcsv_export_headings_php_code', ''));
 
-		if (!empty($code))
-		{
-			$ret = @eval($code);
-			FabrikWorker::logEval($ret, 'Caught exception on eval in onExportCSVHeadings : %s');
+        if (!empty($code))
+        {
+            $ret = @eval($code);
+            FabrikWorker::logEval($ret, 'Caught exception on eval in onExportCSVHeadings : %s');
 
-			if ($ret === false)
-			{
-				return false;
-			}
-		}
+            if ($ret === false)
+            {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Http\Client\Curl;
 
 use Http\Client\Exception;
@@ -68,14 +69,15 @@ class PromiseCore
      * Create shared core.
      *
      * @param RequestInterface $request HTTP request
-     * @param resource         $handle  cURL handle
-     * @param ResponseBuilder  $responseBuilder
+     * @param resource $handle cURL handle
+     * @param ResponseBuilder $responseBuilder
      */
     public function __construct(
         RequestInterface $request,
         $handle,
         ResponseBuilder $responseBuilder
-    ) {
+    )
+    {
         assert('is_resource($handle)');
         assert('get_resource_type($handle) === "curl"');
 
@@ -92,11 +94,15 @@ class PromiseCore
      */
     public function addOnFulfilled(callable $callback)
     {
-        if ($this->getState() === Promise::PENDING) {
+        if ($this->getState() === Promise::PENDING)
+        {
             $this->onFulfilled[] = $callback;
-        } elseif ($this->getState() === Promise::FULFILLED) {
+        }
+        elseif ($this->getState() === Promise::FULFILLED)
+        {
             $response = call_user_func($callback, $this->responseBuilder->getResponse());
-            if ($response instanceof ResponseInterface) {
+            if ($response instanceof ResponseInterface)
+            {
                 $this->responseBuilder->setResponse($response);
             }
         }
@@ -109,9 +115,12 @@ class PromiseCore
      */
     public function addOnRejected(callable $callback)
     {
-        if ($this->getState() === Promise::PENDING) {
+        if ($this->getState() === Promise::PENDING)
+        {
             $this->onRejected[] = $callback;
-        } elseif ($this->getState() === Promise::REJECTED) {
+        }
+        elseif ($this->getState() === Promise::REJECTED)
+        {
             $this->exception = call_user_func($callback, $this->exception);
         }
     }
@@ -168,7 +177,8 @@ class PromiseCore
      */
     public function getException()
     {
-        if (null === $this->exception) {
+        if (null === $this->exception)
+        {
             throw new \LogicException('Promise is not rejected');
         }
 
@@ -182,21 +192,26 @@ class PromiseCore
     {
         $this->state = Promise::FULFILLED;
         $response = $this->responseBuilder->getResponse();
-        try {
+        try
+        {
             $response->getBody()->seek(0);
-        } catch (\RuntimeException $e) {
+        }
+        catch (\RuntimeException $e)
+        {
             $exception = new Exception\TransferException($e->getMessage(), $e->getCode(), $e);
             $this->reject($exception);
 
             return;
         }
 
-        while (count($this->onFulfilled) > 0) {
+        while (count($this->onFulfilled) > 0)
+        {
             $callback = array_shift($this->onFulfilled);
             $response = call_user_func($callback, $response);
         }
 
-        if ($response instanceof ResponseInterface) {
+        if ($response instanceof ResponseInterface)
+        {
             $this->responseBuilder->setResponse($response);
         }
     }
@@ -211,12 +226,16 @@ class PromiseCore
         $this->exception = $exception;
         $this->state = Promise::REJECTED;
 
-        while (count($this->onRejected) > 0) {
+        while (count($this->onRejected) > 0)
+        {
             $callback = array_shift($this->onRejected);
-            try {
+            try
+            {
                 $exception = call_user_func($callback, $this->exception);
                 $this->exception = $exception;
-            } catch (Exception $exception) {
+            }
+            catch (Exception $exception)
+            {
                 $this->exception = $exception;
             }
         }
